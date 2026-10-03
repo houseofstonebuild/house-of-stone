@@ -1,0 +1,225 @@
+
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500&display=swap');
+  html { color-scheme:dark; background:#080808; }
+  body { margin:0; background:#080808; }
+  .cursor-interaction { cursor:pointer; }
+  :focus-visible { outline:2px solid #e4dac9; outline-offset:5px; }
+  .hos-skip { position:absolute; z-index:10; top:8px; left:16px; background:#111; color:#fff; padding:12px; transform:translateY(-150%); }
+  .hos-skip:focus { transform:none; }
+  .hos-no-script { color:#fff; padding:24px; font-family:Arial,sans-serif; }
+  #hos-concept { --hos-bg:#080808; --hos-surface:#111110; --hos-fg:#ffffff; --hos-muted:#b5b5b0; --hos-line:#32332e; color:var(--hos-fg); background:var(--hos-bg); color-scheme:dark; width:100%; overflow:hidden; font-family:Manrope,'Helvetica Neue',Arial,sans-serif; font-size:13px; font-weight:400; line-height:1.7; }
+  #hos-concept *, #hos-concept *::before, #hos-concept *::after { box-sizing:border-box; }
+  #hos-concept [hidden] { display:none!important; }
+  #hos-concept button { border:0; background:none; color:inherit; font:inherit; padding:0; }
+  #hos-concept h1, #hos-concept h2, #hos-concept p { margin:0; }
+  #hos-concept h1, #hos-concept h2, #hos-concept h3 { color:#ffffff!important; -webkit-text-fill-color:#ffffff; font-family:Manrope,'Helvetica Neue',Arial,sans-serif; font-weight:300; }
+  #hos-concept h1 { font-size:clamp(32px,4.7vw,50px); line-height:1.2; letter-spacing:-.035em; }
+  #hos-concept h2 { font-size:clamp(25px,3vw,32px); line-height:1.3; letter-spacing:-.025em; }
+  #hos-concept p { color:var(--hos-muted); max-width:450px; line-height:1.8; }
+  #hos-concept .hos-header { position:relative; z-index:3; display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:16px; padding:18px 96px; border-bottom:1px solid var(--hos-line); }
+  #hos-concept .hos-wordmark { font-family:Manrope,'Helvetica Neue',Arial,sans-serif; font-size:16px; line-height:1.3; letter-spacing:.2em; font-weight:300; color:#ffffff; }
+  #hos-concept .hos-header .hos-brand { display:flex; flex-direction:column; align-items:center; justify-self:center; gap:8px; font-size:15px; letter-spacing:.18em; }
+  #hos-concept .hos-brand-name { display:block; white-space:nowrap; padding-left:.18em; }
+  #hos-concept .hos-brand-symbol { display:block; position:relative; width:24px; height:38px; }
+  #hos-concept .hos-brand-mark { display:block; position:absolute; inset:0; width:100%; height:100%; object-fit:contain; filter:invert(1); }
+  #hos-concept .hos-menu-toggle { display:flex; align-items:center; gap:10px; justify-self:start; min-height:30px; }
+  #hos-concept .hos-menu-toggle svg { width:19px; height:19px; }
+  #hos-concept .hos-menu-icon { display:block; width:19px; height:9px; border-top:1px solid currentColor; border-bottom:1px solid currentColor; }
+  #hos-concept .hos-enquire { justify-self:end; border-bottom:1px solid #b8afa1; padding:2px 0; }
+  #hos-concept .hos-enquire span { margin-left:8px; }
+  #hos-concept .hos-menu { padding:28px 44px 44px; background:var(--hos-surface); border-bottom:1px solid var(--hos-line); }
+  #hos-concept .hos-menu-label, #hos-concept .hos-eyebrow { font-size:11px; letter-spacing:.16em; font-weight:400; color:#c7bdaf; }
+  #hos-concept .hos-menu-links { margin-top:20px; max-width:640px; }
+  #hos-concept .hos-menu-links button { display:flex; justify-content:space-between; align-items:center; width:100%; border-bottom:1px solid var(--hos-line); padding:14px 0; text-align:left; font-weight:300; font-size:25px; }
+  #hos-concept .hos-menu-links span { font-family:Arial,Helvetica,sans-serif; font-size:11px; color:var(--hos-muted); }
+  #hos-concept .hos-hero { position:relative; min-height:570px; isolation:isolate; display:flex; align-items:center; }
+  #hos-concept .hos-hero-image { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:65% center; z-index:-3; }
+  #hos-concept .hos-hero-shade { position:absolute; inset:0; z-index:-2; background:linear-gradient(90deg,rgba(0,0,0,.18) 0%,transparent 70%),linear-gradient(0deg,rgba(0,0,0,.65),transparent 24%); }
+  #hos-concept .hos-hero-copy { position:relative; z-index:1; padding:70px 6.3% 85px; max-width:60%; animation:hos-reveal .9s ease-out both; }
+  #hos-concept .hos-hero-copy h1 { margin:27px 0 23px; }
+  #hos-concept .hos-hero-copy p { color:#d4cec3; font-size:13px; }
+  #hos-concept .hos-text-link { display:inline-flex; align-items:center; gap:27px; min-height:38px; border-bottom:1px solid #9b9285; padding:5px 0; font-size:13px; transition:border-color .25s,color .25s; }
+  #hos-concept .hos-text-link:hover { color:#fffaf0; border-color:#fffaf0; }
+  #hos-concept .hos-hero-copy .hos-text-link { margin-top:28px; }
+  #hos-concept .hos-hero-bottom { position:absolute; bottom:25px; left:6.3%; right:6.3%; display:flex; justify-content:space-between; gap:16px; color:#c4bbaa; font-size:11px; letter-spacing:.12em; }
+  #hos-concept .hos-intro { display:grid; grid-template-columns:1fr 2fr; gap:30px; padding:65px 6.3%; border-bottom:1px solid var(--hos-line); }
+  #hos-concept .hos-intro .hos-eyebrow { padding-top:8px; }
+  #hos-concept .hos-intro p { margin-top:20px; }
+  #hos-concept .hos-feature { display:grid; grid-template-columns:1.2fr 1fr; gap:55px; align-items:center; padding:66px 6.3%; }
+  #hos-concept .hos-feature-image { position:relative; height:340px; overflow:hidden; background:var(--hos-surface); }
+  #hos-concept .hos-feature-image img { width:100%; height:100%; object-fit:cover; object-position:50% center; }
+  #hos-concept .hos-image-label { position:absolute; bottom:18px; left:20px; z-index:1; color:#ffffff; background:rgba(0,0,0,.78); padding:4px 7px; font-size:11px; letter-spacing:.08em; }
+  #hos-concept .hos-feature-copy h2 { margin:23px 0; }
+  #hos-concept .hos-feature-copy .hos-text-link { margin-top:24px; }
+  #hos-concept .hos-invitation { display:flex; align-items:center; justify-content:space-between; gap:32px; padding:55px 6.3%; background:radial-gradient(ellipse at 65% 0%,#26221d 0%,#11100e 40%,#090909 80%); border-top:1px solid var(--hos-line); }
+  #hos-concept .hos-invitation h2 { margin-top:20px; }
+  #hos-concept .hos-page-heading { padding:56px 6.3% 44px; }
+  #hos-concept .hos-page-heading h1 { margin:22px 0; }
+  #hos-concept .hos-page-heading .hos-text-link { margin-top:25px; }
+  #hos-concept .hos-collection-feature { position:relative; min-height:330px; margin:0 6.3% 38px; display:flex; align-items:center; padding:40px; isolation:isolate; background:#14120f; }
+  #hos-concept .hos-collection-feature img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:70% center; z-index:-3; }
+  #hos-concept .hos-collection-feature::after { content:''; position:absolute; inset:0; z-index:-2; background:linear-gradient(90deg,rgba(0,0,0,.8),rgba(0,0,0,.2)); }
+  #hos-concept .hos-collection-feature h2 { margin:18px 0 22px; }
+  #hos-concept .hos-collection-feature p { max-width:260px; }
+  #hos-concept .hos-artist-index { padding:0 6.3% 52px; }
+  #hos-concept .hos-artist-row { display:grid; grid-template-columns:38px 1fr auto; align-items:center; width:100%; gap:18px; padding:24px 0; border-bottom:1px solid var(--hos-line); text-align:left; }
+  #hos-concept .hos-artist-row .hos-artist-number { color:#9f9688; font-size:11px; }
+  #hos-concept .hos-artist-row .hos-artist-name { font-family:Georgia,'Times New Roman',serif; font-size:27px; }
+  #hos-concept .hos-artist-row small { display:block; margin-top:4px; font-family:Arial,Helvetica,sans-serif; font-size:11px; color:var(--hos-muted); }
+  #hos-concept .hos-artist-row .hos-artist-action { font-size:12px; color:#c3b8a5; }
+  #hos-concept .hos-artist-profile { display:grid; grid-template-columns:1fr 1fr; gap:45px; align-items:center; padding:0 6.3% 40px; }
+  #hos-concept .hos-portrait-placeholder { display:flex; align-items:center; justify-content:center; min-height:320px; background:radial-gradient(ellipse at 50% 20%,#363129,#171614 55%,#0c0c0c 85%); color:#c4baa8; text-align:center; font-size:11px; letter-spacing:.12em; }
+  #hos-concept .hos-artist-profile h2 { margin:20px 0; }
+  #hos-concept .hos-artist-profile .hos-text-link { margin-top:25px; }
+  #hos-concept .hos-profile-details { margin:0 6.3% 45px; padding-top:20px; border-top:1px solid var(--hos-line); display:flex; flex-wrap:wrap; gap:10px 30px; font-size:12px; color:var(--hos-muted); }
+  #hos-concept .hos-work-layout { display:grid; grid-template-columns:1.25fr 1fr; align-items:start; }
+  #hos-concept .hos-work-photo { position:relative; min-height:560px; }
+  #hos-concept .hos-work-photo img { position:absolute; width:100%; height:100%; object-fit:contain; object-position:center; }
+  #hos-concept .hos-work-details { padding:44px 36px 50px; }
+  #hos-concept .hos-back { color:var(--hos-muted); margin-bottom:42px; font-size:12px; }
+  #hos-concept .hos-work-details h1 { font-size:36px; margin:20px 0 30px; }
+  #hos-concept .hos-work-specs { border-top:1px solid var(--hos-line); margin-bottom:27px; }
+  #hos-concept .hos-work-specs div { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px 12px; border-bottom:1px solid var(--hos-line); padding:13px 0; font-size:12px; }
+  #hos-concept .hos-work-specs div span:first-child { color:var(--hos-muted); }
+  #hos-concept .hos-work-details .hos-text-link { margin-top:27px; }
+  #hos-concept .hos-process-image { height:360px; overflow:hidden; margin:0 6.3%; }
+  #hos-concept .hos-process-image img { width:100%; height:100%; object-fit:cover; }
+  #hos-concept .hos-process-steps { display:grid; grid-template-columns:repeat(3,1fr); gap:25px; padding:36px 6.3% 55px; }
+  #hos-concept .hos-process-steps span { font-size:11px; letter-spacing:.09em; color:var(--hos-muted); }
+  #hos-concept .hos-process-steps h2 { margin-top:13px; font-size:26px; }
+  #hos-concept .hos-house-statement { padding:35px 6.3% 65px; display:flex; flex-wrap:wrap; gap:25px; color:#bfb29b; font-size:12px; letter-spacing:.12em; }
+  #hos-concept .hos-inquiry { padding:40px 6.3% 55px; background:radial-gradient(ellipse at 85% 0%,#25211c,#11100e 45%,#080808); }
+  #hos-concept .hos-inquiry-top { display:flex; justify-content:space-between; gap:20px; align-items:center; margin-bottom:35px; }
+  #hos-concept .hos-close { min-height:40px; font-size:12px; }
+  #hos-concept .hos-close span { margin-left:10px; font-size:24px; }
+  #hos-concept .hos-inquiry h1 { font-size:clamp(30px,4vw,40px); margin-bottom:12px; }
+  #hos-concept .hos-form-note { font-size:12px; color:#c9bfae; margin-top:16px; }
+  #hos-concept .hos-form-note:empty { display:none; }
+  #hos-concept .hos-honeypot { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+  #hos-concept #hos-inquiry-send { margin-left:36px; }
+  #hos-concept button:disabled { cursor:wait; opacity:.55; }
+  #hos-concept #hos-inquiry-success .hos-text-link { margin-top:28px; }
+  #hos-concept #hos-form-privacy { text-decoration:underline; text-underline-offset:4px; }
+  #hos-concept .hos-privacy-copy { padding:0 6.3% 65px; max-width:800px; }
+  #hos-concept .hos-privacy-copy h2 { margin:28px 0 14px; font-size:23px; }
+  #hos-concept .hos-privacy-copy p { max-width:660px; }
+  #hos-concept .hos-privacy-choice { display:flex; gap:14px; align-items:center; margin:25px 0 12px; }
+  #hos-concept .hos-privacy-choice input { width:18px; height:18px; margin:0; flex-shrink:0; }
+  #hos-concept .hos-privacy-link { color:var(--hos-muted); font-size:11px; }
+  #hos-concept .hos-more-works { padding:15px 6.3% 50px; }
+  #hos-concept .hos-work-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:26px; margin-top:25px; }
+  #hos-concept .hos-work-card { display:block; text-align:left; min-width:0; }
+  #hos-concept .hos-work-card img { display:block; width:100%; aspect-ratio:4/3; object-fit:cover; }
+  #hos-concept .hos-work-card h3 { margin:14px 0 5px; font-size:16px; font-weight:400; }
+  #hos-concept .hos-work-card p { font-size:12px; }
+  #hos-concept .hos-chapter-copy .hos-work-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+  #hos-concept .hos-review-details { max-width:660px; margin:30px 0; }
+  #hos-concept .hos-review-details>div { display:grid; grid-template-columns:80px minmax(0,1fr); gap:18px; padding:15px 0; border-bottom:1px solid var(--hos-line); }
+  #hos-concept .hos-review-details dt { color:var(--hos-muted); }
+  #hos-concept .hos-review-details dd { margin:0; white-space:pre-wrap; overflow-wrap:anywhere; }
+  #hos-concept form { margin-top:32px; max-width:660px; }
+  #hos-concept .hos-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  #hos-concept label { display:block; margin-bottom:24px; color:#cec4b4; font-size:12px; }
+  #hos-concept input, #hos-concept textarea, #hos-concept select { display:block; width:100%; margin-top:8px; color:#eee9df; border:1px solid #595147; border-radius:0; padding:12px 14px; background:#141311; font:inherit; font-size:16px; line-height:1.6; }
+  #hos-concept textarea { resize:vertical; }
+  #hos-concept input::placeholder, #hos-concept textarea::placeholder { color:#a49b8e; }
+  #hos-concept .hos-footer { display:flex; justify-content:space-between; flex-wrap:wrap; gap:22px; padding:31px 6.3%; border-top:1px solid var(--hos-line); align-items:center; }
+  #hos-concept .hos-footer .hos-wordmark { font-size:13px; }
+  #hos-concept .hos-home-artists { padding:15px 6.3% 60px; }
+  #hos-concept .hos-section-title { display:flex; align-items:end; justify-content:space-between; gap:24px; margin-bottom:28px; }
+  #hos-concept .hos-section-title h2 { margin-top:16px; }
+  #hos-concept .hos-portrait-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:25px; }
+  #hos-concept .hos-portrait-card { display:block; text-align:left; min-width:0; }
+  #hos-concept .hos-portrait-card img { display:block; width:100%; aspect-ratio:4/5; object-fit:cover; }
+  #hos-concept .hos-portrait-card h3 { font-size:16px; font-weight:400; letter-spacing:-.01em; line-height:1.5; margin:15px 0 4px; }
+  #hos-concept .hos-portrait-card p { font-size:11px; color:#b7b8af; line-height:1.7; }
+  #hos-concept .hos-all-artists { margin:0 6.3% 55px; row-gap:35px; }
+  #hos-concept .hos-origin { display:grid; grid-template-columns:0.8fr 1.2fr; align-items:center; background:#0e0e0d; }
+  #hos-concept .hos-origin-media { position:relative; order:2; min-width:0; }
+  #hos-concept .hos-origin-media img { display:block; width:100%; height:auto; aspect-ratio:3/2; object-fit:cover; }
+  #hos-concept .hos-origin-copy { order:1; padding:35px 15.75%; }
+  #hos-concept .hos-origin h2 { margin:20px 0; }
+  #hos-concept .hos-origin .hos-image-label { bottom:15px; left:auto; right:20px; background:rgba(8,8,8,.75); padding:5px 8px; }
+  #hos-concept .hos-collection-chapters { padding:0 6.3% 55px; }
+  #hos-concept .hos-collection-chapter { display:grid; grid-template-columns:1fr 1.2fr; gap:45px; align-items:center; padding:35px 0; border-top:1px solid var(--hos-line); }
+  #hos-concept .hos-chapter-portrait { display:flex; align-items:center; gap:16px; margin-bottom:26px; }
+  #hos-concept .hos-chapter-portrait img { width:72px; height:90px; object-fit:cover; }
+  #hos-concept .hos-chapter-portrait .hos-chapter-name { display:block; text-align:left; font-size:19px; font-weight:300; margin-bottom:5px; }
+  #hos-concept .hos-chapter-portrait small { font-size:11px; color:var(--hos-muted); }
+  #hos-concept .hos-chapter-copy h2 { margin-bottom:15px; }
+  #hos-concept .hos-chapter-copy .hos-text-link { margin-top:20px; }
+  #hos-concept .hos-chapter-photo { display:block; width:100%; }
+  #hos-concept .hos-chapter-photo img { display:block; width:100%; height:auto; aspect-ratio:4/3; object-fit:cover; }
+  #hos-concept .hos-collection-chapter:nth-child(even) .hos-chapter-copy { order:2; }
+  #hos-concept .hos-artist-portrait img { display:block; width:100%; aspect-ratio:4/5; object-fit:cover; }
+  #hos-concept .hos-house-image { max-width:720px; height:auto; margin:0 auto 50px; }
+  #hos-concept .hos-house-image img { display:block; height:auto; }
+  #hos-concept .hos-footer span { color:var(--hos-muted); font-size:11px; }
+  @keyframes hos-reveal { from {opacity:0;transform:translateY(12px)} to {opacity:1;transform:translateY(0)} }
+  @media (prefers-reduced-motion:reduce) { #hos-concept *, #hos-concept *::before, #hos-concept *::after { animation:none!important; transition:none!important; } }
+  @media (max-width:650px) {
+    #hos-concept .hos-header { padding:20px; gap:8px; }
+    #hos-concept .hos-wordmark { font-size:13px; letter-spacing:.1em; }
+    #hos-concept .hos-header .hos-brand { gap:7px; font-size:12px; letter-spacing:.12em; }
+    #hos-concept .hos-brand-name { padding-left:.12em; }
+    #hos-concept .hos-brand-symbol { width:20px; height:32px; }
+    #hos-concept .hos-menu-toggle > span:not(.hos-menu-icon) { display:none; }
+    #hos-concept .hos-menu-toggle { min-width:30px; }
+    #hos-concept .hos-enquire { font-size:12px; margin-right:0; }
+    #hos-concept .hos-enquire span { display:none; }
+    #hos-concept .hos-hero { min-height:600px; align-items:flex-end; }
+    #hos-concept .hos-hero-image { height:410px; object-position:78% center; }
+    #hos-concept .hos-hero-shade { background:linear-gradient(0deg,#080808 0%,#080808 25%,rgba(8,8,8,.4) 55%,transparent 80%); }
+    #hos-concept .hos-hero-copy { padding:280px 24px 78px; max-width:100%; }
+    #hos-concept .hos-hero-copy h1 { font-size:36px; margin:18px 0; }
+    #hos-concept .hos-hero-copy p { font-size:13px; }
+    #hos-concept .hos-hero-copy .hos-text-link { margin-top:18px; }
+    #hos-concept .hos-hero-bottom { left:24px; right:24px; font-size:11px; gap:15px; }
+    #hos-concept .hos-intro { grid-template-columns:1fr; gap:25px; padding:40px 24px; }
+    #hos-concept .hos-feature { grid-template-columns:1fr; gap:35px; padding:35px 24px 45px; }
+    #hos-concept .hos-feature-image { height:290px; }
+    #hos-concept .hos-invitation { flex-direction:column; align-items:flex-start; padding:40px 24px; }
+    #hos-concept .hos-page-heading { padding:40px 24px 35px; }
+    #hos-concept .hos-page-heading h1 { font-size:35px; }
+    #hos-concept .hos-collection-feature { margin:0 24px 30px; padding:25px; min-height:360px; align-items:flex-end; }
+    #hos-concept .hos-collection-feature img { object-position:80% center; opacity:.68; }
+    #hos-concept .hos-artist-index { padding:0 24px 40px; }
+    #hos-concept .hos-artist-row { gap:10px; grid-template-columns:25px 1fr auto; padding:20px 0; }
+    #hos-concept .hos-artist-row .hos-artist-name { font-size:24px; }
+    #hos-concept .hos-artist-row .hos-artist-action { font-size:12px; }
+    #hos-concept .hos-artist-profile { grid-template-columns:1fr; padding:0 24px 35px; gap:30px; }
+    #hos-concept .hos-profile-details { margin:0 24px 35px; }
+    #hos-concept .hos-work-layout { grid-template-columns:1fr; }
+    #hos-concept .hos-work-photo { min-height:360px; }
+    #hos-concept .hos-work-details { padding:30px 24px 40px; }
+    #hos-concept .hos-back { margin-bottom:25px; }
+    #hos-concept .hos-process-image { height:260px; margin:0 24px; }
+    #hos-concept .hos-process-steps { grid-template-columns:1fr; gap:22px; padding:28px 24px 40px; }
+    #hos-concept .hos-house-statement { padding:20px 24px 50px; }
+    #hos-concept .hos-menu { padding:25px 24px; }
+    #hos-concept .hos-inquiry { padding:30px 24px 40px; }
+    #hos-concept .hos-inquiry-top { align-items:flex-start; }
+    #hos-concept .hos-inquiry-top .hos-eyebrow { max-width:180px; }
+    #hos-concept .hos-form-grid { grid-template-columns:1fr; gap:0; }
+    #hos-concept .hos-work-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+    #hos-concept .hos-more-works { padding:10px 24px 40px; }
+    #hos-concept .hos-privacy-copy { padding:0 24px 45px; }
+    #hos-concept .hos-footer { padding:27px 24px; }
+    #hos-concept .hos-home-artists { padding:5px 24px 45px; }
+    #hos-concept .hos-section-title { align-items:flex-start; flex-direction:column; gap:15px; }
+    #hos-concept .hos-portrait-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; row-gap:24px; }
+    #hos-concept .hos-portrait-card h3 { font-size:14px; }
+    #hos-concept .hos-portrait-grid[data-artist-grid="home"] .hos-portrait-card:last-child { display:none; }
+    #hos-concept .hos-all-artists { margin:0 24px 40px; }
+    #hos-concept .hos-origin { grid-template-columns:1fr; }
+    #hos-concept .hos-origin-media { order:0; }
+    #hos-concept .hos-origin-copy { padding:30px 24px 35px; }
+    #hos-concept .hos-house-image { margin:0 24px 40px; }
+    #hos-concept .hos-collection-chapters { padding:0 24px 40px; }
+    #hos-concept .hos-collection-chapter { grid-template-columns:1fr; gap:22px; padding:30px 0; }
+    #hos-concept .hos-collection-chapter:nth-child(even) .hos-chapter-copy { order:0; }
+    #hos-concept .hos-chapter-photo img { height:auto; aspect-ratio:4/3; }
+  }
+  @media (pointer:coarse) { #hos-concept button { min-height:44px; } }
+.hos-preview-bar {position:fixed;bottom:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:center;gap:24px;padding:14px 20px;background:#d8cbb3;color:#111;font:12px/1.5 Manrope,Arial,sans-serif;box-shadow:0 -2px 20px #0006;flex-wrap:wrap;}
+.hos-preview-bar a {color:#111;text-underline-offset:4px;}

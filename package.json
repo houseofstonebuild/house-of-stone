@@ -1,0 +1,16 @@
+{
+  "name": "house-of-stone",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24.15.0 <25" },
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "start": "node --env-file-if-exists=.env server.mjs",
+    "test": "node --test test/*.test.mjs",
+    "check": "node scripts/check.mjs",
+    "backup": "node --env-file-if-exists=.env scripts/backup.mjs",
+    "retry-notification": "node --env-file-if-exists=.env scripts/retry-notification.mjs",
+    "remove-enquiry": "node --env-file-if-exists=.env scripts/remove-enquiry.mjs"
+  }
+}

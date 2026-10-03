@@ -1,0 +1,12 @@
+import { DatabaseSync, backup } from 'node:sqlite';
+import { mkdirSync, existsSync, chmodSync, cpSync } from 'node:fs';
+import { resolve } from 'node:path';
+const dataDir = resolve(process.env.DATA_DIR || 'data');
+const source = resolve(dataDir,'house-of-stone.sqlite');
+if (!existsSync(source)) throw new Error('The enquiry database does not exist yet. Start the website first.');
+mkdirSync(resolve(dataDir,'backups'),{recursive:true,mode:0o700});
+const destination = resolve(dataDir,'backups','house-of-stone-' + new Date().toISOString().replace(/[:.]/g,'-') + '.sqlite');
+const db = new DatabaseSync(source);
+await backup(db,destination); db.close(); chmodSync(destination,0o600);
+if (existsSync(resolve(dataDir,'media'))) cpSync(resolve(dataDir,'media'), destination + '-media', {recursive:true});
+console.log('Backup saved: ' + destination);

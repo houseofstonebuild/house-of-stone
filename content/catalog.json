@@ -1,0 +1,138 @@
+{
+  "site": {
+    "name": "House of Stone",
+    "description": "A contemporary art house for Zimbabwean stone sculpture. Discover the artists, explore the collection, and enquire about a work.",
+    "location": "Zimbabwe / New York",
+    "featuredWorkId": "folded-light",
+    "heroAlt": "Stone sculpture in an architectural black gallery, illuminated by warm overhead light"
+  },
+  "assets": {
+    "tariro": "/assets/tariro.jpg",
+    "kuda": "/assets/kuda.jpg",
+    "ruvimbo": "/assets/ruvimbo.jpg",
+    "farai": "/assets/farai.jpg",
+    "tendai": "/assets/tendai.jpg",
+    "fold": "/assets/fold.jpg",
+    "together": "/assets/together.jpg",
+    "bird": "/assets/bird.jpg",
+    "balance": "/assets/balance.jpg",
+    "process": "/assets/process.jpg",
+    "balancing-rocks": "/assets/balancing-rocks.jpg",
+    "logo": "/assets/logo.png",
+    "hero": "/assets/hero.jpg"
+  },
+  "artists": [
+    {
+      "id": "tariro",
+      "slug": "tariro-mavhunga",
+      "name": "Tariro Mavhunga",
+      "portrait": "tariro",
+      "practice": "Gesture and light.",
+      "style": "Organic abstraction",
+      "description": "A sculptural practice exploring the relationship between quiet gestures and architectural space.",
+      "story": "Pale stone is shaped into soft folds. The work moves between the weight of the material and the suggestion of something lighter."
+    },
+    {
+      "id": "kuda",
+      "slug": "kudakwashe-nyamudeza",
+      "name": "Kudakwashe Nyamudeza",
+      "portrait": "kuda",
+      "practice": "The shape of absence.",
+      "style": "Negative space",
+      "description": "A sculptural practice centered on open forms, polished edges and the space they hold.",
+      "story": "The hollow is treated as carefully as the stone around it. Broad grounded forms taper toward a fine edge, balancing mass and movement."
+    },
+    {
+      "id": "ruvimbo",
+      "slug": "ruvimbo-chikore",
+      "name": "Ruvimbo Chikore",
+      "portrait": "ruvimbo",
+      "practice": "Forms in conversation.",
+      "style": "Figurative abstraction",
+      "description": "A practice exploring the relationship between paired figures, touch and shared space.",
+      "story": "Distinct curves lean toward each other. The stone remains tactile and expressive, with polished surfaces meeting natural texture."
+    },
+    {
+      "id": "farai",
+      "slug": "farai-munetsi",
+      "name": "Farai Munetsi",
+      "portrait": "farai",
+      "practice": "A gesture of movement.",
+      "style": "Nature and movement",
+      "description": "A sculptural practice translating the movement of birds into restrained, abstract form.",
+      "story": "Line and balance guide the form. A long curve and a small shift of weight suggest motion without describing every detail."
+    },
+    {
+      "id": "tendai",
+      "slug": "tendai-nyakudya",
+      "name": "Tendai Nyakudya",
+      "portrait": "tendai",
+      "practice": "Mass and proportion.",
+      "style": "Architectural form",
+      "description": "A practice exploring stacked forms, opposing surfaces and architectural rhythm.",
+      "story": "Simple masses are arranged with precision. A polished face meets a rougher edge, and each proportion changes the balance of the whole."
+    }
+  ],
+  "works": [
+    {
+      "id": "folded-light",
+      "slug": "folded-light",
+      "artistId": "tariro",
+      "title": "Folded Light",
+      "image": "fold",
+      "dimensions": "46 × 23 × 18 cm",
+      "material": "Ivory limestone",
+      "acquisitionMethod": "On enquiry",
+      "description": "An abstract ribbon, its folded planes opening to the light.",
+      "objectPosition": "50% center"
+    },
+    {
+      "id": "continuum",
+      "slug": "continuum",
+      "artistId": "kuda",
+      "title": "Continuum",
+      "image": "hero",
+      "dimensions": "65 × 30 × 22 cm",
+      "material": "Dark springstone",
+      "acquisitionMethod": "On enquiry",
+      "description": "A flowing open form. A dark surface revealed through warm illumination.",
+      "objectPosition": "75% center"
+    },
+    {
+      "id": "together",
+      "slug": "together",
+      "artistId": "ruvimbo",
+      "title": "Together",
+      "image": "together",
+      "dimensions": "52 × 28 × 20 cm",
+      "material": "Green serpentine",
+      "acquisitionMethod": "On enquiry",
+      "description": "Two connected forms, held in a single gesture of green stone.",
+      "objectPosition": "50% center"
+    },
+    {
+      "id": "quiet-flight",
+      "slug": "quiet-flight",
+      "artistId": "farai",
+      "title": "Quiet Flight",
+      "image": "bird",
+      "dimensions": "40 × 18 × 14 cm",
+      "material": "Brown serpentine",
+      "acquisitionMethod": "On enquiry",
+      "description": "An abstract bird in warm amber stone, poised between rest and movement.",
+      "objectPosition": "50% center"
+    },
+    {
+      "id": "equilibrium",
+      "slug": "equilibrium",
+      "artistId": "tendai",
+      "title": "Equilibrium",
+      "image": "balance",
+      "dimensions": "48 × 26 × 22 cm",
+      "material": "Charcoal springstone",
+      "acquisitionMethod": "On enquiry",
+      "description": "A grounded architectural form, balancing stacked planes and contrasting textures.",
+      "objectPosition": "50% center"
+    }
+  ]
+}

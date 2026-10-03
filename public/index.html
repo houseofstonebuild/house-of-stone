@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{TITLE}}</title>
+  <meta name="description" content="{{DESCRIPTION}}">
+  <meta name="robots" content="{{ROBOTS}}">
+  <meta name="theme-color" content="#080808">
+  <link rel="canonical" href="{{URL}}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="House of Stone">
+  <meta property="og:title" content="{{TITLE}}">
+  <meta property="og:description" content="{{DESCRIPTION}}">
+  <meta property="og:url" content="{{URL}}">
+  <meta property="og:image" content="{{IMAGE}}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{TITLE}}">
+  <meta name="twitter:description" content="{{DESCRIPTION}}">
+  <meta name="twitter:image" content="{{IMAGE}}">
+  <link rel="icon" href="/assets/favicon.png" type="image/png">
+  <link rel="preload" href="/assets/hero.jpg" as="image">
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+<a class="hos-skip" href="#hos-main">Skip to content</a>
+<div id="hos-concept">
+  <header class="hos-header">
+    <button class="hos-menu-toggle cursor-interaction" type="button" aria-label="Menu" aria-controls="hos-menu" aria-expanded="false"><span class="hos-menu-icon" aria-hidden="true"></span><span>Menu</span></button>
+    <button class="hos-wordmark hos-brand cursor-interaction" type="button" data-view="home" aria-label="House of Stone home"><span class="hos-brand-symbol" aria-hidden="true"><img id="hos-brand-mark" class="hos-brand-mark" src="/assets/logo.png" data-asset="logo" alt=""></span><span class="hos-brand-name">HOUSE OF STONE</span></button>
+    <button class="hos-enquire cursor-interaction" type="button" data-inquiry="General interest">Enquire <span aria-hidden="true">↗</span></button>
+  </header>
+  <nav id="hos-menu" class="hos-menu" aria-label="Main navigation" hidden>
+    <div class="hos-menu-label">THE HOUSE</div>
+    <div class="hos-menu-links">
+      <button type="button" data-view="collection" class="cursor-interaction">The collection <span>01</span></button>
+      <button type="button" data-view="artists" class="cursor-interaction">The artists <span>02</span></button>
+      <button type="button" data-view="making" class="cursor-interaction">The making <span>03</span></button>
+      <button type="button" data-view="designers" class="cursor-interaction">For designers <span>04</span></button>
+      <button type="button" data-view="house" class="cursor-interaction">The house <span>05</span></button>
+    </div>
+  </nav>
+  <main id="hos-main">
+    <section class="hos-view" data-page="home">
+      <div class="hos-hero">
+        <img class="hos-hero-image" src="/assets/hero.jpg" data-asset="hero" fetchpriority="high" decoding="async" alt="Stone sculpture in an architectural black gallery, illuminated by warm overhead light">
+        <div class="hos-hero-shade"></div>
+        <div class="hos-hero-copy">
+          <div class="hos-eyebrow">ZIMBABWEAN STONE SCULPTURE</div>
+          <h1>Sculpture,<br>in a new light.</h1>
+          <p>A contemporary art house.<br>Stone. Artists. Extraordinary form.</p>
+          <button class="hos-text-link cursor-interaction" type="button" data-view="collection">Discover the collection <span aria-hidden="true">↗</span></button>
+        </div>
+        <div class="hos-hero-bottom"><span>ZIMBABWE / NEW YORK</span><span>FOUNDING COLLECTION</span></div>
+      </div>
+      <section class="hos-intro">
+        <div class="hos-eyebrow">THE HOUSE OF STONE</div>
+        <div><h2>Origin in the stone.<br>Expression in the hand.</h2><p>A place for Zimbabwean sculpture, its makers, and the spaces their work will inhabit.</p></div>
+      </section>
+      <section class="hos-feature">
+        <div class="hos-feature-image"><img data-asset="fold" alt="Ivory stone ribbon sculpture in a sunlit architectural interior"></div>
+        <div class="hos-feature-copy"><div class="hos-eyebrow">SELECTED WORK / TARIRO MAVHUNGA</div><h2>Folded light.</h2><p>A quiet gesture in pale stone. A surface shaped by light, shadow and space.</p><button class="hos-text-link cursor-interaction" type="button" data-work="0">Discover this work <span aria-hidden="true">↗</span></button></div>
+      </section>
+      <section class="hos-home-artists"><div class="hos-section-title"><div><div class="hos-eyebrow">THE ARTISTS</div><h2>The hand behind the form.</h2></div><button type="button" data-view="artists" class="hos-text-link cursor-interaction">Meet the artists <span aria-hidden="true">↗</span></button></div><div class="hos-portrait-grid" data-artist-grid="home"></div></section>
+      <section class="hos-origin"><div class="hos-origin-media"><img data-asset="balancing-rocks" alt="Balancing granite rock formations under a pale blue sky"></div><div class="hos-origin-copy"><div class="hos-eyebrow">FORM &amp; PLACE</div><h2>A sense of place.</h2><button type="button" data-view="making" class="hos-text-link cursor-interaction">Discover the making <span aria-hidden="true">↗</span></button></div></section>
+      <section class="hos-invitation"><div><div class="hos-eyebrow">FOR COLLECTORS &amp; DESIGNERS</div><h2>A work. A space.<br>A conversation.</h2></div><button class="hos-text-link cursor-interaction" type="button" data-inquiry="Collection interest">Begin an enquiry <span aria-hidden="true">↗</span></button></section>
+    </section>
+    <section class="hos-view" data-page="collection" hidden>
+      <div class="hos-page-heading"><div class="hos-eyebrow">COLLECTION 001</div><h1>The founding<br>collection.</h1><p>Organized by artist. Discovered one practice at a time.</p></div>
+      <div class="hos-collection-chapters" id="hos-collection-chapters"></div>
+    </section>
+    <section class="hos-view" data-page="artists" hidden>
+      <div class="hos-page-heading"><div class="hos-eyebrow">THE ARTISTS</div><h1>Behind<br>the form.</h1><p>Five distinct practices, connected by stone and an instinct for form.</p></div>
+      <div class="hos-portrait-grid hos-all-artists" data-artist-grid="all"></div>
+    </section>
+    <section class="hos-view" data-page="artist" hidden>
+      <div class="hos-page-heading"><div class="hos-eyebrow">THE ARTIST</div><h1 id="hos-artist-title">Tariro Mavhunga</h1><p id="hos-artist-description"></p></div>
+      <div class="hos-artist-profile"><div class="hos-artist-portrait"><img id="hos-artist-image" alt="Portrait of Tariro Mavhunga"></div><div><div class="hos-eyebrow">THE PRACTICE</div><h2 id="hos-artist-practice">Gesture and light.</h2><p id="hos-artist-story"></p><button id="hos-artist-work-link" type="button" class="hos-text-link cursor-interaction" data-work="0">Explore selected work <span aria-hidden="true">↗</span></button></div></div>
+      <div id="hos-artist-works" class="hos-more-works"></div>
+    </section>
+    <section class="hos-view" data-page="work" hidden>
+      <div class="hos-work-layout"><div class="hos-work-photo"><img id="hos-work-image" data-asset="fold" alt="Folded Light, an ivory stone sculpture"></div><div class="hos-work-details"><button class="hos-back cursor-interaction" type="button" data-view="collection">← Collection</button><div id="hos-work-artist" class="hos-eyebrow">TARIRO MAVHUNGA</div><h1 id="hos-work-title">Folded Light</h1><div class="hos-work-specs"><div><span>Dimensions</span><span id="hos-work-dimensions">46 × 23 × 18 cm</span></div><div><span>Stone</span><span id="hos-work-material">Ivory limestone</span></div><div><span>Acquisition method</span><span id="hos-work-acquisition">On enquiry</span></div></div><p id="hos-work-description"></p><button id="hos-work-inquiry" class="hos-text-link cursor-interaction" type="button" data-inquiry="Folded Light">Enquire about this work <span aria-hidden="true">↗</span></button></div></div>
+    </section>
+    <section class="hos-view" data-page="making" hidden>
+      <div class="hos-page-heading"><div class="hos-eyebrow">THE MAKING</div><h1>From stone<br>to sculpture.</h1><p>A dialogue between material, instinct and the hand. Each surface shaped with intention.</p></div>
+      <div class="hos-process-image"><img data-asset="process" alt="A sculptor's hands shaping rough green stone"></div>
+      <div class="hos-process-steps"><div><span>01 / MATERIAL</span><h2>The stone.</h2></div><div><span>02 / PRACTICE</span><h2>The hand.</h2></div><div><span>03 / EXPRESSION</span><h2>The form.</h2></div></div>
+    </section>
+    <section class="hos-view" data-page="designers" hidden>
+      <div class="hos-page-heading"><div class="hos-eyebrow">FOR DESIGNERS &amp; ARCHITECTS</div><h1>Considered<br>for your space.</h1><p>A conversation about sculpture, scale and the project you have in mind.</p><button class="hos-text-link cursor-interaction" type="button" data-inquiry="Designer project">Discuss your project <span aria-hidden="true">↗</span></button></div>
+      <div class="hos-collection-feature"><img data-asset="fold" alt="Ivory sculpture in a warm architectural room"><div><div class="hos-eyebrow">A SCULPTURAL PRESENCE</div><h2>Form meets<br>architecture.</h2><p>Consider the balance of a work within a room, from intimate objects to sculptural focal points.</p></div></div>
+    </section>
+    <section class="hos-view" data-page="house" hidden>
+      <div class="hos-page-heading"><div class="hos-eyebrow">HOUSE OF STONE</div><h1>Zimbabwean origin.<br>A wider horizon.</h1><p>A Zimbabwean contemporary art house conceived by Bradley and Milton, connecting sculpture, its makers, and new audiences.</p><button class="hos-text-link cursor-interaction" type="button" data-inquiry="About the house">Get in touch <span aria-hidden="true">↗</span></button></div>
+      <div class="hos-house-statement"><span>SCULPTURE FIRST.</span><span>THE ARTIST, ALWAYS.</span></div>
+      <div class="hos-process-image hos-house-image"><img data-asset="balancing-rocks" alt="Balancing granite rock formations in Zimbabwe"></div>
+    </section>
+    <section class="hos-view" data-page="privacy" hidden>
+      <div class="hos-page-heading"><div class="hos-eyebrow">HOUSE OF STONE</div><h1>Privacy.</h1></div>
+      <div class="hos-privacy-copy">
+        <h2>Your enquiry.</h2><p>When you send an enquiry, House of Stone receives your name, email address, interest, and message so we can respond. Enquiries are kept in a private inbox. If email notifications are enabled, they are also delivered through our email provider, Resend. Your details are used for this conversation and are not added to a marketing list.</p>
+        <h2>Understanding interest.</h2><p>We measure page visits, collection clicks, work views, and enquiries using a random identifier for your browser session. Activity records contain artwork identifiers and campaign information, rather than the contents of your enquiry. We do not store your IP address in activity records. Activity records are removed after one year.</p>
+        <label class="hos-privacy-choice"><input id="hos-analytics-preference" type="checkbox"><span>Allow activity measurement for this browser</span></label>
+        <p id="hos-privacy-status" role="status" aria-live="polite"></p>
+        <h2>Other services.</h2><p>The Manrope typeface is loaded from Google Fonts. Your browser preference is stored on your device. Do Not Track and Global Privacy Control signals turn activity measurement off.</p>
+        <h2>Questions or removal.</h2><p>Send an enquiry if you want to ask about your information or request that an earlier enquiry be removed.</p>
+        <button type="button" class="hos-text-link cursor-interaction" data-inquiry="General interest">Contact the house <span aria-hidden="true">↗</span></button>
+      </div>
+    </section>
+  </main>
+  <section id="hos-inquiry" class="hos-inquiry" aria-labelledby="hos-inquiry-title" hidden>
+    <div class="hos-inquiry-top"><div class="hos-eyebrow">A CONVERSATION WITH THE HOUSE</div><button id="hos-inquiry-close" type="button" class="hos-close cursor-interaction" aria-label="Close enquiry">Close <span aria-hidden="true">×</span></button></div>
+    <h1 id="hos-inquiry-title">Begin an enquiry.</h1>
+    <p id="hos-inquiry-context">General interest</p>
+    <form id="hos-inquiry-form">
+      <div class="hos-form-grid"><label>Your name<input name="name" type="text" autocomplete="name" maxlength="120" placeholder="Name" required></label><label>Email address<input name="email" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required></label></div>
+      <label>Your interest<select name="interest"><option>Collecting a work</option><option>Sourcing for a project</option><option>Following the launch</option><option>Learning about the artists</option></select></label>
+      <label>A few words, if you wish<textarea name="message" rows="3" maxlength="5000" placeholder="The work or space you have in mind"></textarea></label>
+      <div class="hos-honeypot" aria-hidden="true"><label>Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+      <p class="hos-form-note">We use your details to respond to this enquiry. <button type="button" id="hos-form-privacy" class="cursor-interaction">Privacy</button></p>
+      <button class="hos-text-link cursor-interaction" type="submit">Review enquiry <span aria-hidden="true">↗</span></button>
+    </form>
+    <div id="hos-inquiry-review" hidden>
+      <dl class="hos-review-details"><div><dt>Name</dt><dd id="hos-review-name"></dd></div><div><dt>Email</dt><dd id="hos-review-email"></dd></div><div><dt>Interest</dt><dd id="hos-review-interest"></dd></div><div id="hos-review-message-row"><dt>Message</dt><dd id="hos-review-message"></dd></div></dl>
+      <button id="hos-inquiry-edit" class="hos-text-link cursor-interaction" type="button">Edit enquiry <span aria-hidden="true">↗</span></button>
+      <button id="hos-inquiry-send" class="hos-text-link cursor-interaction" type="button">Send enquiry <span aria-hidden="true">↗</span></button>
+    </div>
+    <div id="hos-inquiry-success" hidden>
+      <p>Thank you for your interest. Your enquiry has reached the house.</p>
+      <p class="hos-form-note">Your reference: <span id="hos-inquiry-reference"></span></p>
+      <button id="hos-inquiry-continue" class="hos-text-link cursor-interaction" type="button">Return to the collection <span aria-hidden="true">↗</span></button>
+    </div>
+    <p id="hos-form-status" class="hos-form-note" role="status" aria-live="polite"></p>
+  </section>
+  <footer class="hos-footer"><button type="button" data-view="home" class="hos-wordmark cursor-interaction">HOUSE OF STONE</button><span id="hos-location">Zimbabwe / New York</span><span>Stone. Artists. Extraordinary form.</span><button type="button" data-view="privacy" class="hos-privacy-link cursor-interaction">Privacy</button></footer>
+</div>
+<noscript><p class="hos-no-script">Enable JavaScript to explore the collection and contact House of Stone.</p></noscript>
+</body>
+</html>

@@ -1,0 +1,11 @@
+import { DatabaseSync } from 'node:sqlite';
+import { resolve } from 'node:path';
+const id=process.argv[2];
+if(!/^[0-9a-f-]{36}$/i.test(id||'')) throw new Error('Provide the exact enquiry reference shown in the private inbox.');
+if(!process.env.RESEND_API_KEY||!process.env.INQUIRY_EMAIL_FROM||!process.env.INQUIRY_EMAIL_TO) throw new Error('Complete the email settings before queuing a notification.');
+const db=new DatabaseSync(resolve(process.env.DATA_DIR||'data','house-of-stone.sqlite'));
+const row=db.prepare('SELECT notification FROM inquiries WHERE id=?').get(id);
+if(!row) throw new Error('This enquiry was not found.');
+if(row.notification==='sent') throw new Error('The notification was already accepted. It was left unchanged.');
+db.prepare("UPDATE inquiries SET notification='pending',notification_attempts=0,notification_next_at=? WHERE id=?").run(new Date().toISOString(),id);db.close();
+console.log('Notification queued. The running website will attempt it within one minute.');

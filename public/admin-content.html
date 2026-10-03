@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Collection editor | House of Stone</title><meta name="robots" content="noindex,nofollow">
+  <link rel="icon" href="/assets/favicon.png"><link rel="stylesheet" href="/admin.css"><link rel="stylesheet" href="/admin-content.css">
+  <script type="module" src="/admin-content.js"></script>
+</head>
+<body>
+  <header><a href="/">HOUSE OF STONE</a><nav aria-label="Private tools"><a href="/admin">Inbox &amp; demand</a><a href="/admin/content" aria-current="page">Collection editor</a></nav></header>
+  <main>
+    <div class="title-row"><div><p class="eyebrow">BRADLEY &amp; MILTON</p><h1>The collection, in your hands.</h1></div></div>
+    <p class="note">Add artists and sculptures, replace photos, and prepare your next collection. Visitors see changes after you publish.</p>
+    <div class="editor-toolbar"><p id="state">Loading the collection…</p><div class="controls"><button type="button" id="save" disabled>Save draft</button><button type="button" id="preview" disabled>Preview draft ↗</button><button type="button" id="publish" class="primary" disabled>Publish changes</button></div></div>
+    <p id="status" role="status" aria-live="polite"></p>
+    <div id="conflict" hidden><p>Your edits are kept in this window. Download them before reloading if you want to keep a copy.</p><button type="button" id="download">Download my edits</button><button type="button" id="reload">Reload latest collection</button></div>
+    <div class="editor-layout">
+      <aside><div class="section-row"><h2>Sculptures</h2><button id="add-work" type="button" disabled>Add sculpture</button></div><div id="work-list" class="record-list"></div><div class="section-row"><h2>Artists</h2><button id="add-artist" type="button" disabled>Add artist</button></div><div id="artist-list" class="record-list"></div><button id="site" type="button" disabled>Homepage &amp; site details</button></aside>
+      <section class="detail"><form id="editor"><fieldset id="fields" disabled><p class="note">Choose a sculpture or artist to edit.</p></fieldset></form></section>
+    </div>
+    <section><h2>Published versions</h2><p class="note">Restoring brings an earlier version into your draft. Preview it, then publish when ready.</p><div id="history"></div></section>
+  </main>
+</body>
+</html>

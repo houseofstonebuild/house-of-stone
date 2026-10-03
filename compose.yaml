@@ -1,0 +1,22 @@
+services:
+  website:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 8000
+      DATA_DIR: /app/data
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set a private inbox password}
+      SITE_URL: ${SITE_URL:?Set the public HTTPS website address}
+      ENABLE_INDEXING: ${ENABLE_INDEXING:-false}
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      INQUIRY_EMAIL_FROM: ${INQUIRY_EMAIL_FROM:-}
+      INQUIRY_EMAIL_TO: ${INQUIRY_EMAIL_TO:-}
+    volumes:
+      - enquiries:/app/data
+volumes:
+  enquiries:
