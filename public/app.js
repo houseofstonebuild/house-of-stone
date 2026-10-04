@@ -44,6 +44,7 @@ const menu = $('#hos-menu'), menuToggle = $('.hos-menu-toggle'), main = $('#hos-
 const inquiry = $('#hos-inquiry'), form = $('#hos-inquiry-form'), review = $('#hos-inquiry-review'), success = $('#hos-inquiry-success');
 const status = $('#hos-form-status'), title = $('#hos-inquiry-title'), sendButton = $('#hos-inquiry-send');
 function setMenu(open) {
+  if (open && !menu.open) document.body.style.setProperty('--hos-scrollbar', `${Math.max(0, window.innerWidth - document.documentElement.clientWidth) || 0}px`);
   menu.hidden = !open;
   if (open && !menu.open) menu.showModal();
   if (!open && menu.open) menu.close();

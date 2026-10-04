@@ -1,15 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500&display=swap');
 :root {color-scheme:dark;background:#080808;--hos-header-height:86px;--hos-footer-height:56px;--hos-gutter:clamp(22px,6vw,120px);}
-html {width:100%;scroll-padding-top:calc(var(--hos-header-height) + 20px);scrollbar-gutter:stable;}
+html {width:100%;scroll-padding-top:calc(var(--hos-header-height) + 20px);}
 body {margin:0;background:#080808;}
-body.hos-menu-open {overflow:hidden;}
+body.hos-menu-open {overflow:hidden;padding-right:var(--hos-scrollbar,0px);}
+body.hos-menu-open #hos-concept .hos-header,body.hos-menu-open #hos-concept .hos-footer {right:var(--hos-scrollbar,0px);}
 .cursor-interaction {cursor:pointer;}
 :focus-visible {outline:1px solid #e4dac9;outline-offset:5px;}
 .hos-skip {position:fixed;z-index:100;top:8px;left:16px;background:#111;color:#fff;padding:12px;transform:translateY(-150%);}
 .hos-skip:focus {transform:none;}
 .hos-no-script {color:#fff;padding:24px;font-family:Arial,sans-serif;}
 #hos-concept {--hos-bg:#080808;--hos-surface:#111110;--hos-fg:#fff;--hos-muted:#b5b5b0;--hos-line:rgba(255,255,255,.14);color:var(--hos-fg);background:var(--hos-bg);width:100%;max-width:none;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;padding-top:calc(var(--hos-header-height) + env(safe-area-inset-top));padding-bottom:calc(var(--hos-footer-height) + env(safe-area-inset-bottom));font-family:Manrope,'Helvetica Neue',Arial,sans-serif;font-size:12px;font-weight:400;line-height:1.8;}
-#hos-concept *,#hos-concept *::before,#hos-concept *::after {box-sizing:border-box;}
+#hos-concept,#hos-concept *,#hos-concept *::before,#hos-concept *::after {box-sizing:border-box;}
 #hos-concept [hidden] {display:none!important;}
 #hos-concept button {border:0;background:none;color:inherit;font:inherit;padding:0;}
 #hos-concept h1,#hos-concept h2,#hos-concept p {margin:0;}

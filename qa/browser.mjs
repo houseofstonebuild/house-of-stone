@@ -36,14 +36,16 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
           await ready(page,path);
           await page.evaluate(async()=>{
             const visible=[...document.querySelectorAll('#hos-concept img')].filter(img=>img.getClientRects().length);
-            await Promise.all(visible.map(async img=>{img.loading='eager';await img.decode();}));
+            visible.forEach(img=>{img.loading='eager';});
+            await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
           });
+          await page.waitForFunction(()=>[...document.querySelectorAll('#hos-concept img')].filter(img=>img.getClientRects().length).every(img=>img.complete&&img.naturalWidth>0));
           const layout=await page.evaluate(()=>{
             const rect=s=>{const r=document.querySelector(s).getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,height:r.height};};
             return {viewport:innerWidth,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,root:rect('#hos-concept'),header:rect('.hos-header'),footer:rect('.hos-footer'),main:rect('#hos-main'),images:[...document.querySelectorAll('#hos-concept img')].filter(img=>img.getClientRects().length).map(img=>({src:img.currentSrc,naturalWidth:img.naturalWidth,fit:getComputedStyle(img).objectFit}))};
           });
           assert(layout.scrollWidth<=layout.clientWidth+1,`Horizontal overflow ${JSON.stringify(layout)}`);
-          assert(Math.abs(layout.root.left)<1&&Math.abs(layout.root.right-layout.clientWidth)<2,'Root does not fill the page width');
+          assert(Math.abs(layout.root.left)<1&&Math.abs(layout.root.right-layout.clientWidth)<2,`Root does not fill the page width ${JSON.stringify(layout)}`);
           assert(Math.abs(layout.header.top)<1,'Header not anchored');
           assert(Math.abs(layout.footer.bottom-height)<2,'Footer not anchored');
           assert(layout.main.top>=layout.header.bottom-1,'Header covers content');
@@ -52,7 +54,7 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
           const bottom=await page.evaluate(()=>({headerTop:document.querySelector('.hos-header').getBoundingClientRect().top,footerBottom:document.querySelector('.hos-footer').getBoundingClientRect().bottom,mainBottom:document.querySelector('#hos-main').getBoundingClientRect().bottom,footerTop:document.querySelector('.hos-footer').getBoundingClientRect().top}));
           assert(Math.abs(bottom.headerTop)<1&&Math.abs(bottom.footerBottom-height)<2,'Chrome does not stay fixed while scrolling');
           assert(bottom.mainBottom<=bottom.footerTop+2,'Footer covers the last content');
-          if((width===1440&&['/','/collection','/designers','/collectors','/house','/artists/tariro-mavhunga'].includes(path))||(width===390&&['/','/designers','/works/folded-light'].includes(path))) {
+          if(width===1440||width===390) {
             await page.evaluate(()=>scrollTo(0,0));
             await page.screenshot({path:new URL(`${engineName}-${width}-${path==='/'?'home':path.slice(1).replaceAll('/','-')}.jpg`,output).pathname,type:'jpeg',quality:85,scale:'css',fullPage:true});
           }
@@ -69,6 +71,12 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
       if(width===1440)await page.screenshot({path:new URL(`${engineName}-drawer.jpg`,output).pathname,type:'jpeg',quality:85,scale:'css'});
       await page.keyboard.press('Escape');
       assert(await page.locator('#hos-menu').isHidden(),'Escape did not close menu');
+      await page.locator('.hos-menu-toggle').click();
+      await page.mouse.click(width-8,height/2);
+      assert(await page.locator('#hos-menu').isHidden(),'Backdrop did not close menu');
+      await page.locator('.hos-menu-toggle').click();
+      await page.locator('#hos-menu-close').click();
+      assert(await page.locator('#hos-menu').isHidden(),'Close button did not close menu');
     }
     for(const view of ['collection','artists','making','designers','collectors','house']) {
       await page.locator('.hos-menu-toggle').click();
@@ -101,6 +109,7 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
     await visitor.locator('[name="message"]').fill('Please tell me about Folded Light.');
     await visitor.locator('#hos-inquiry-form button[type="submit"]').click();
     assert(await visitor.locator('#hos-review-message').textContent()==='Please tell me about Folded Light.');
+    await visitor.screenshot({path:new URL(`${engineName}-inquiry-review.jpg`,output).pathname,type:'jpeg',quality:85,scale:'css',fullPage:true});
     await visitor.locator('#hos-inquiry-edit').click();
     assert(await visitor.locator('[name="message"]').inputValue()==='Please tell me about Folded Light.');
     await visitor.locator('#hos-inquiry-form button[type="submit"]').click();
@@ -112,6 +121,7 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
     assert(app.db.prepare('SELECT count(*) AS n FROM inquiries').get().n===1);
     await visitor.locator('#hos-inquiry-send').click();
     await visitor.locator('#hos-inquiry-success').waitFor();
+    await visitor.screenshot({path:new URL(`${engineName}-inquiry-success.jpg`,output).pathname,type:'jpeg',quality:85,scale:'css',fullPage:true});
     assert(app.db.prepare('SELECT count(*) AS n FROM inquiries').get().n===1,'Retry duplicated enquiry');
     const entry=(await adminGet('/api/admin/inquiries'))[0];
     assert.equal(entry.work_id,'folded-light');assert.equal(entry.source,'qa');
