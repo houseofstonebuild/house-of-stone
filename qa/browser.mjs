@@ -71,13 +71,13 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
           const bottom=await page.evaluate(()=>({headerTop:document.querySelector('.hos-header').getBoundingClientRect().top,footerBottom:document.querySelector('.hos-footer').getBoundingClientRect().bottom,mainBottom:document.querySelector('#hos-main').getBoundingClientRect().bottom,footerTop:document.querySelector('.hos-footer').getBoundingClientRect().top}));
           assert(Math.abs(bottom.headerTop)<1&&Math.abs(bottom.footerBottom-height)<2,'Chrome does not stay fixed while scrolling');
           assert(bottom.mainBottom<=bottom.footerTop+2,'Footer covers the last content');
-          if(width===1440||width===390||(width===2048&&path==='/')) {
+          if(width===1440||width===390||([844,2048,3440].includes(width)&&path==='/')) {
             await page.evaluate(async()=>{
               const frame=()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
               for(let y=0;y<document.documentElement.scrollHeight;y+=Math.max(200,innerHeight-160)){scrollTo(0,y);await frame();}
               scrollTo(0,0);await frame();
             });
-            await page.screenshot({path:new URL(`${engineName}-${width}-${path==='/'?'home':path.slice(1).replaceAll('/','-')}.jpg`,output).pathname,type:'jpeg',quality:85,scale:'css',fullPage:true});
+            await page.screenshot({path:new URL(`${engineName}-${width}-${path==='/'?'home':path.slice(1).replaceAll('/','-')}.jpg`,output).pathname,type:'jpeg',quality:85,scale:'css',fullPage:![844,3440].includes(width)});
           }
           checked++;
         } catch(error) {errors.push(`${width}x${height} ${path}: ${error.message}`);}
@@ -187,6 +187,26 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
     await editor.locator('#history button').last().click();await editor.locator('#status').filter({hasText:'Earlier version restored'}).waitFor();
     await editor.locator('#publish').click();await editor.locator('#status').filter({hasText:'Collection published.'}).waitFor();
     assert.equal((await (await fetch(base+'/content.json')).json()).artists[0].biography,publishedBefore);
+    // Several sculptures beneath one artist must form usable tiles at each breakpoint.
+    for(let i=2;i<=4;i++) {
+      await editor.locator('#add-work').click();
+      await editor.locator('#field-title').fill('Browser QA sculpture '+i);
+      await editor.locator('#field-artistId').selectOption('tariro');
+      await editor.locator('#field-dimensions').fill('40 × 20 × 15 cm');
+      await editor.locator('#field-material').fill('Springstone');
+      await editor.locator('#field-description').fill('A sculpture added through the collection editor.');
+      await editor.locator('.photo-editor summary').click();await editor.locator('.photo-grid button[title="fold"]').click();
+    }
+    await editor.locator('#publish').click();await editor.locator('#status').filter({hasText:'Collection published.'}).waitFor();
+    for(const [width,columns] of [[1440,3],[768,2],[390,1]]) {
+      await page.setViewportSize({width,height:900});await ready(page,'/collection');
+      const grid=page.locator('#hos-collection-chapters .hos-work-grid').first();
+      assert.equal(await grid.locator('.hos-work-card').count(),4);
+      assert.equal(await grid.evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length),columns);
+      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1),'Multiple sculpture tiles overflow the screen');
+    }
+    await page.locator('#hos-collection-chapters .hos-work-card .hos-text-link').nth(3).click();
+    assert.equal(await page.locator('#hos-work-title').textContent(),'Browser QA sculpture 4');
     await editor.goto(base+'/admin');await editor.locator('#inbox .enquiry').first().waitFor();
     assert((await editor.locator('#inbox').textContent()).includes('Browser QA collector'));
     await owner.close();await context.close();

@@ -42,7 +42,7 @@ body.hos-menu-open #hos-concept .hos-header,body.hos-menu-open #hos-concept .hos
 #hos-concept .hos-close {display:flex;align-items:center;gap:12px;min-height:44px;font-size:13px;}
 #hos-concept .hos-close span {font-size:22px;font-weight:300;}
 #hos-concept .hos-hero {position:relative;isolation:isolate;width:100%;height:calc(100svh - var(--hos-header-height) - var(--hos-footer-height) - env(safe-area-inset-top) - env(safe-area-inset-bottom));background:#191712;}
-#hos-concept .hos-hero-image {width:100%;height:100%;max-height:none;object-fit:cover;object-position:50% 48%;}
+#hos-concept .hos-hero-image {width:100%;height:100%;max-height:none;object-fit:cover;object-position:50% 40%;}
 #hos-concept .hos-hero-shade {position:absolute;inset:0;pointer-events:none;background:linear-gradient(0deg,rgba(0,0,0,.7),rgba(0,0,0,.14) 40%,transparent 70%);}
 #hos-concept .hos-hero-copy {position:absolute;inset:auto var(--hos-gutter) 0;display:flex;flex-direction:column;align-items:center;text-align:center;padding:32px 0 42px;}
 #hos-concept .hos-hero-copy h1 {font-size:clamp(34px,3.3vw,50px);line-height:1.25;letter-spacing:-.02em;text-shadow:0 1px 14px rgba(0,0,0,.22);}
@@ -143,7 +143,7 @@ body.hos-menu-open #hos-concept .hos-header,body.hos-menu-open #hos-concept .hos
 #hos-concept button:disabled {cursor:wait;opacity:.55;}
 #hos-concept #hos-inquiry-success .hos-text-link {margin-top:26px;}
 #hos-concept #hos-form-privacy {text-decoration:underline;text-underline-offset:4px;}
-#hos-concept .hos-privacy-copy {padding:0 var(--hos-gutter) 48px;max-width:940px;}
+#hos-concept .hos-privacy-copy {width:calc(100% - var(--hos-gutter) - var(--hos-gutter));max-width:var(--hos-content-width);margin:0 auto;padding-bottom:48px;}
 #hos-concept .hos-privacy-copy h2 {margin:28px 0 16px;font-size:26px;}
 #hos-concept .hos-privacy-choice {display:flex;gap:14px;align-items:center;margin:26px 0 14px;}
 #hos-concept .hos-privacy-choice input {width:18px;height:18px;margin:0;flex-shrink:0;}
