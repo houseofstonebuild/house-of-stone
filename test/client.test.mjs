@@ -10,10 +10,15 @@ import { createApp } from '../server.mjs';
 // A small DOM adapter exercises the actual client script and real HTTP server.
 // It verifies interaction state and network contracts, not browser layout.
 class Element {
-  constructor() { this.hidden=false;this.disabled=false;this.dataset={};this.style={};this.children=[];this.listeners={};this.value='';this.textContent='';this.classList={contains:()=>false}; }
+  constructor() { this.hidden=false;this.disabled=false;this.dataset={};this.style={};this.children=[];this.listeners={};this.value='';this.textContent='';this.classList={contains:()=>false,toggle(){},add(){}}; }
   addEventListener(name,listener) { (this.listeners[name] ??= []).push(listener); }
   async dispatch(name,extra={}) { const event={target:this,preventDefault(){},...extra};await Promise.all((this.listeners[name]||[]).map(listener=>listener(event))); }
   setAttribute(name,value) { this[name]=String(value); }
+  getAttribute(name) { return this[name]; }
+  removeAttribute(name) { delete this[name]; }
+  showModal() { this.open=true; }
+  close() { this.open=false; }
+  querySelectorAll() { return []; }
   append(...children) { this.children.push(...children); }
   prepend(...children) { this.children.unshift(...children); }
   replaceChildren(...children) { this.children=children; }
@@ -31,7 +36,7 @@ async function clientFixture(t, {privacy=false,loseConfirmation=false,preview=fa
   const selectors=new Map([...html.matchAll(/\bid="([^"]+)"/g)].map(m=>['#'+m[1],new Element()]));
   const root=selectors.get('#hos-concept');
   const get=selector=>{if(!selectors.has(selector)) selectors.set(selector,new Element());return selectors.get(selector);};
-  const pages=['home','collection','artists','artist','work','making','designers','house','privacy'].map(page=>{const node=get(`[data-page="${page}"]`);node.dataset.page=page;return node;});
+  const pages=['home','collection','artists','artist','work','making','designers','collectors','house','privacy'].map(page=>{const node=get(`[data-page="${page}"]`);node.dataset.page=page;return node;});
   root.querySelector=get;root.querySelectorAll=selector=>selector==='[data-page]'?pages:[];
   const form=get('#hos-inquiry-form');form.elements={};
   for(const field of ['name','email','interest','message','website'])form.elements[field]=new Element();

@@ -17,4 +17,13 @@ for(const match of app.matchAll(/\$\(['"]#([\w-]+)['"]\)/g)) assert(ids.includes
 assert.equal([...html.matchAll(/data-asset="logo"/g)].length,1);
 assert(!/design concept|AI generated|placeholder/i.test(html.replace(/<[^>]*>/g,'')),'Unexpected visitor-facing development copy');
 assert(!/[\u2013\u2014]/.test(html),'Unexpected dash typography');
+const media = JSON.parse(readFileSync(resolve(root,'public/media-manifest.json'),'utf8'));
+for (const [source, info] of Object.entries(media)) {
+  assert(existsSync(resolve(root,'public','.'+source)),`Missing master ${source}`);
+  assert(info.width > 1000 && info.height > 900,`Small master ${source}`);
+  for (const candidate of info.srcset.split(', ')) {
+    const [path,width]=candidate.split(' ');assert.match(width,/^\d+w$/);
+    assert(readFileSync(resolve(root,'public','.'+path)).length > 100,`Empty or missing image ${path}`);
+  }
+}
 console.log(`Content checks passed: ${catalog.artists.length} artists, ${catalog.works.length} works, ${Object.keys(catalog.assets).length} images, and all referenced form elements.`);

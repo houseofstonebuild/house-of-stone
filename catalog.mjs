@@ -40,7 +40,7 @@ export function validateCatalog(input, { publicDir, mediaDir, publish = false, p
     const record = identity(item, artists), required = publish && !record.archived;
     artists.push({ ...record, name: field(item.name, 'the artist name', 120, true), portrait: photo(item.portrait, 'the artist portrait', required),
       practice: field(item.practice, 'the practice', 200), style: field(item.style, 'the style', 120),
-      description: field(item.description, 'the artist introduction', 2000, required), story: field(item.story, 'the artist story', 5000) });
+      description: field(item.description, 'the artist introduction', 2000, required), biography: field(item.biography, 'the artist biography', 5000), story: field(item.story, 'the artist story', 5000) });
   }
   const artistMap = new Map(artists.map(a => [a.id, a])), works = [];
   for (const item of input.works) {

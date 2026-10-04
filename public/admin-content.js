@@ -53,10 +53,10 @@ function photo(record,key,label) {
   const current = element('div',undefined,'photo-current'), img = element('img');
   img.alt = label; img.hidden = !draft.assets[record[key]]; if (!img.hidden) img.src = draft.assets[record[key]];
   const wrapper = element('label','Upload a new photo'), input = element('input'); input.type='file'; input.accept='image/jpeg,image/png,image/webp';
-  wrapper.append(input,element('span','JPEG, PNG or WebP · up to 8 MB','note')); current.append(img,wrapper); section.append(current);
+  wrapper.append(input,element('span','JPEG, PNG or WebP · up to 32 MB. Original resolution is preserved. Use a sharp, well-lit image with the entire work visible.','note')); current.append(img,wrapper); section.append(current);
   input.addEventListener('change',()=>operation(async()=>{
     const file = input.files[0]; if (!file) return;
-    if (file.size > 8*1024*1024 || !['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('Choose a JPEG, PNG or WebP image under 8 MB.');
+    if (file.size > 32*1024*1024 || !['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('Choose a JPEG, PNG or WebP image under 32 MB.');
     message('Uploading photo…');
     const data = await new Promise((resolve,reject)=>{ const reader=new FileReader(); reader.onload=()=>resolve(reader.result.split(',')[1]); reader.onerror=()=>reject(new Error('The photo could not be read.')); reader.readAsDataURL(file); });
     const uploaded = await api('media',{data,type:file.type}); draft.assets[uploaded.key] = uploaded.url; record[key] = uploaded.key; edited(); message('Photo uploaded. Save the draft or publish when ready.');
@@ -110,7 +110,7 @@ function render() {
   } else if(selection.kind==='artist') {
     field(grid,record,'name','Artist name',{required:true,max:120});field(grid,record,'slug','Page address',{max:100});
     field(grid,record,'style','Style',{max:120});field(grid,record,'practice','Practice or short phrase',{max:200});
-    field(grid,record,'description','Introduction',{wide:true,multiline:true,max:2000});field(grid,record,'story','Artist story',{wide:true,multiline:true,max:5000});
+    field(grid,record,'description','Introduction',{wide:true,multiline:true,max:2000});field(grid,record,'biography','Brief biography',{wide:true,multiline:true,max:5000});field(grid,record,'story','The artistic practice',{wide:true,multiline:true,max:5000});
     photo(record,'portrait','Artist portrait');archive(record,'Archive this artist · hide their profile and sculptures');
   } else {
     field(grid,record,'featuredWorkId','Featured sculpture',{wide:true,options:[{value:'',label:'Choose a sculpture'},...draft.works.filter(w=>!w.archived&&!draft.artists.find(a=>a.id===w.artistId)?.archived).map(w=>({value:w.id,label:w.title}))]});

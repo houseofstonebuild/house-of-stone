@@ -1,0 +1,72 @@
+{
+  "/assets/hero.jpg": {
+    "width": 1672,
+    "height": 941,
+    "srcset": "/assets/responsive/hero-640.webp 640w, /assets/responsive/hero-960.webp 960w, /assets/hero.jpg 1672w"
+  },
+  "/assets/fold.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/fold-640.webp 640w, /assets/responsive/fold-960.webp 960w, /assets/fold.jpg 1448w"
+  },
+  "/assets/together.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/together-640.webp 640w, /assets/responsive/together-960.webp 960w, /assets/together.jpg 1448w"
+  },
+  "/assets/bird.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/bird-640.webp 640w, /assets/responsive/bird-960.webp 960w, /assets/bird.jpg 1448w"
+  },
+  "/assets/balance.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/balance-640.webp 640w, /assets/responsive/balance-960.webp 960w, /assets/balance.jpg 1448w"
+  },
+  "/assets/process.jpg": {
+    "width": 1672,
+    "height": 941,
+    "srcset": "/assets/responsive/process-640.webp 640w, /assets/responsive/process-960.webp 960w, /assets/process.jpg 1672w"
+  },
+  "/assets/balancing-rocks.jpg": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/responsive/balancing-rocks-640.webp 640w, /assets/responsive/balancing-rocks-960.webp 960w, /assets/balancing-rocks.jpg 1536w"
+  },
+  "/assets/tariro.jpg": {
+    "width": 1122,
+    "height": 1402,
+    "srcset": "/assets/responsive/tariro-640.webp 640w, /assets/responsive/tariro-960.webp 960w, /assets/tariro.jpg 1122w"
+  },
+  "/assets/kuda.jpg": {
+    "width": 1122,
+    "height": 1402,
+    "srcset": "/assets/responsive/kuda-640.webp 640w, /assets/responsive/kuda-960.webp 960w, /assets/kuda.jpg 1122w"
+  },
+  "/assets/ruvimbo.jpg": {
+    "width": 1122,
+    "height": 1402,
+    "srcset": "/assets/responsive/ruvimbo-640.webp 640w, /assets/responsive/ruvimbo-960.webp 960w, /assets/ruvimbo.jpg 1122w"
+  },
+  "/assets/farai.jpg": {
+    "width": 1122,
+    "height": 1402,
+    "srcset": "/assets/responsive/farai-640.webp 640w, /assets/responsive/farai-960.webp 960w, /assets/farai.jpg 1122w"
+  },
+  "/assets/tendai.jpg": {
+    "width": 1122,
+    "height": 1402,
+    "srcset": "/assets/responsive/tendai-640.webp 640w, /assets/responsive/tendai-960.webp 960w, /assets/tendai.jpg 1122w"
+  },
+  "/assets/designer-apartment.jpg": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/responsive/designer-apartment-640.webp 640w, /assets/responsive/designer-apartment-960.webp 960w, /assets/designer-apartment.jpg 1536w"
+  },
+  "/assets/collector-gallery.jpg": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/responsive/collector-gallery-640.webp 640w, /assets/responsive/collector-gallery-960.webp 960w, /assets/collector-gallery.jpg 1536w"
+  }
+}

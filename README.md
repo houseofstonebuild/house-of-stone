@@ -4,7 +4,9 @@ The approved black website and Taper logo, with a private collection editor, enq
 
 ## What is finished
 
-- The approved gallery design, small centered Taper mark, white headings, and responsive layout.
+- A full-width responsive gallery with fixed header and footer, a modal side drawer, smaller thin typography, and the centered Taper mark.
+- Complete image framing throughout, restored original images, responsive high-quality WebP delivery, and original-resolution uploads.
+- Designer and collector interior editorials, artist biographies, and a fuller account of the House and its founders.
 - A review and send enquiry flow with a real server, persistent storage, receipt reference, error handling, and safe retries.
 - A password protected inbox at `/admin`, with enquiry and activity CSV exports.
 - A demand dashboard for website sessions, collection clicks, work views, enquiry starts, submitted enquiries, campaign sources, and interest in individual works.
@@ -84,7 +86,7 @@ The server uses the enquiry reference as the notification idempotency key. Resen
 
 ## Update sculptures and artists
 
-Sign in to `/admin/content`. Select a sculpture or artist, or choose **Add sculpture** or **Add artist**. Upload a JPEG, PNG, or WebP photo under 8 MB, or choose an existing image. There are no price fields. Sculpture details include title, artist, dimensions, stone type, how the stone was acquired, and a description.
+Sign in to `/admin/content`. Select a sculpture or artist, or choose **Add sculpture** or **Add artist**. Upload a JPEG, PNG, or WebP photo under 32 MB, or choose an existing image. There are no price fields. Sculpture details include title, artist, dimensions, stone type, how the stone was acquired, and a description.
 
 Use the up/down controls to change the order. **Homepage & site details** controls the featured sculpture and hero photo. Adding several works under one artist automatically shows them on the collection and artist pages. Archiving hides a record from visitors while preserving its identifier and demand history. Archiving an artist also hides their sculptures.
 
@@ -147,7 +149,17 @@ npm test
 
 The automated tests exercise the real HTTP server and SQLite database, including persistence, privacy signals, idempotent submissions, rejected requests, access control, exports, campaign attribution, simulated email failures, draft isolation, publication, concurrency, image uploads, archiving, version restoration, and backups. Small DOM adapters run the actual visitor and editor scripts through their key interaction and network states.
 
-The checks do not substitute for a visual browser pass. No browser executable was available in the build environment. Before the public launch, verify the site in Safari and Chrome at desktop and phone widths, and confirm the email provider with your real settings. The Docker image was prepared but not built in this environment.
+The Browser QA workflow runs Chromium, Firefox and WebKit against a fresh isolated server. It covers 18 public routes at eight sizes from 320 × 568 to 2560 × 1440, portrait and landscape, drawer layout and keyboard behavior, complete image decoding, real enquiries, lost confirmations and safe retries, privacy choices, session measurement, and actual owner editing. Screenshots and a JSON report are saved as a private seven-day workflow artifact. See the workflow result for the exact revision tested.
+
+To run those browser checks locally, install the optional QA dependencies and browser binaries:
+
+```sh
+npm install --prefix qa
+npx --prefix qa playwright install chromium firefox webkit
+node qa/browser.mjs
+```
+
+This tests browser engines, rather than every physical device. Confirm optional email delivery with your real provider settings before launch. The Docker image was prepared but not built in this environment.
 
 ## Primary implementation references
 
@@ -156,3 +168,13 @@ The checks do not substitute for a visual browser pass. No browser executable wa
 - [Resend Send Email API](https://resend.com/docs/api-reference/emails/send-email)
 
 The website uses Node.js 24's built-in SQLite module. The package targets Node.js 24.15 or newer within the 24 series, and the Dockerfile pins 24.19.0.
+
+## Update an existing local installation
+
+Stop the running server with Control-C. Copy the updated source files into your existing `house-of-stone-launch` folder, keeping your existing `.env` file and `data` folder. Those contain your login, collection edits, photos and enquiries. The update ZIP does not contain either of them. Run `npm start` again and hard-refresh the browser. Do not delete the database to apply a design update.
+
+## Photography for launch
+
+The included images now use the largest recovered originals, rather than the small files in the first package. The smallest master is 1122 pixels wide; hero and making images are 1672 pixels wide. These are not native 4K photographs. Responsive WebP versions never enlarge them, and no CSS image frame crops them. The new interior images were created with the built-in image-generation tool using the approved sculptures as references; they show a refined New York apartment and a private home gallery.
+
+For final photography, aim for 3840 pixels or more across a full-width hero or interior, and 2400 pixels or more across sculpture and portrait images. Keep the entire sculpture inside the photo with breathing room around the tip and base. Upload the highest-quality useful JPEG, PNG or WebP under 32 MB. Uploads retain the exact original bytes and resolution; the website cannot recover detail absent from a source photograph. Replace the sample artist biographies with approved factual biographies when the actual artists join the collection.

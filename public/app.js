@@ -37,16 +37,31 @@ function el(tag, className, text) {
   if (text !== undefined) element.textContent = text;
   return element;
 }
-let catalog, artists, works, assets;
+let catalog, artists, works, assets, media = {}, editorial = {};
 let activePage = 'home', activeArtist, activeWork;
-let inquiryContext = {}, submissionId = '', inquiryStarted = false, submitting = false, lastInquiryButton;
+let inquiryContext = {}, submissionId = '', inquiryStarted = false, submitting = false, lastInquiryButton, inquiryScroll = 0;
 const menu = $('#hos-menu'), menuToggle = $('.hos-menu-toggle'), main = $('#hos-main');
 const inquiry = $('#hos-inquiry'), form = $('#hos-inquiry-form'), review = $('#hos-inquiry-review'), success = $('#hos-inquiry-success');
 const status = $('#hos-form-status'), title = $('#hos-inquiry-title'), sendButton = $('#hos-inquiry-send');
-function setMenu(open) { menu.hidden = !open; menuToggle.setAttribute('aria-expanded', String(open)); }
+function setMenu(open) {
+  menu.hidden = !open;
+  if (open && !menu.open) menu.showModal();
+  if (!open && menu.open) menu.close();
+  document.body.classList.toggle('hos-menu-open', open);
+  menuToggle.setAttribute('aria-expanded', String(open));
+}
 function statusMessage(text, error = false) { status.textContent = text; status.setAttribute('role', error ? 'alert' : 'status'); }
-function image(key, alt, lazy = true) {
-  const img = el('img'); img.src = assets[key]; img.alt = alt; img.decoding = 'async';
+function applyImage(img, source, sizes = '(max-width: 650px) 100vw, 55vw') {
+  img.src = source; img.decoding = 'async';
+  const info = media[source];
+  img.removeAttribute('srcset'); img.removeAttribute('width'); img.removeAttribute('height');
+  if (info) {
+    img.width = info.width; img.height = info.height;
+    img.srcset = info.srcset; img.sizes = sizes;
+  }
+}
+function image(key, alt, lazy = true, sizes) {
+  const img = el('img'); applyImage(img, assets[key], sizes); img.alt = alt;
   if (lazy) img.loading = 'lazy';
   return img;
 }
@@ -58,8 +73,7 @@ function link(text, data) {
 }
 function workCard(work) {
   const button = el('button', 'hos-work-card cursor-interaction'); button.type = 'button'; button.dataset.work = work.id;
-  const img = image(work.image, `${work.title}, a stone sculpture by ${artists.find(a => a.id === work.artistId).name}`);
-  img.style.objectPosition = work.objectPosition || '50% center';
+  const img = image(work.image, `${work.title}, a stone sculpture by ${artists.find(a => a.id === work.artistId).name}`, true, '(max-width: 650px) 44vw, 29vw');
   button.append(img, el('h3', '', work.title), el('p', '', work.material));
   return button;
 }
@@ -69,12 +83,14 @@ function renderArtist(artist) {
   $('#hos-artist-description').textContent = artist.description;
   $('#hos-artist-practice').textContent = artist.practice;
   $('#hos-artist-story').textContent = artist.story;
-  $('#hos-artist-image').src = assets[artist.portrait]; $('#hos-artist-image').alt = `Portrait of ${artist.name}`;
+  const biography = artist.biography || editorial.biographies?.[artist.id];
+  $('#hos-artist-biography').textContent = typeof biography === 'object' ? (biography.name === artist.name ? biography.text : artist.description) : biography || artist.description;
+  applyImage($('#hos-artist-image'), assets[artist.portrait]); $('#hos-artist-image').alt = `Portrait of ${artist.name}`;
   const selected = works.filter(w => w.artistId === artist.id);
   $('#hos-artist-work-link').hidden = selected.length === 0;
   if (selected.length) $('#hos-artist-work-link').dataset.work = selected[0].id;
   const more = $('#hos-artist-works'); more.replaceChildren();
-  if (selected.length > 1) {
+  if (selected.length) {
     const grid = el('div', 'hos-work-grid'); selected.forEach(w => grid.append(workCard(w)));
     more.append(el('div', 'hos-eyebrow', 'WORKS BY THE ARTIST'), grid);
   }
@@ -89,21 +105,24 @@ function renderWork(work) {
   $('#hos-work-description').textContent = work.description;
   const button = $('#hos-work-inquiry');
   button.dataset.inquiry = `${work.title} by ${activeArtist.name}`; button.dataset.inquiryWork = work.id;
-  const img = $('#hos-work-image'); img.src = assets[work.image]; img.alt = `${work.title}, a stone sculpture by ${activeArtist.name}`;
-  img.style.objectPosition = work.objectPosition || '50% center';
+  const img = $('#hos-work-image'); applyImage(img, assets[work.image]); img.alt = `${work.title}, a stone sculpture by ${activeArtist.name}`;
 }
 function route(path, shouldFocus = true) {
   let page = path === '/' ? 'home' : path.slice(1);
   let item;
   if (path.startsWith('/artists/')) { item = artists.find(a => a.slug === path.split('/')[2]); if (item) { renderArtist(item); page = 'artist'; } }
   if (path.startsWith('/works/')) { item = works.find(w => w.slug === path.split('/')[2]); if (item) { renderWork(item); page = 'work'; } }
-  if (!$(`[data-page="${page.replace(/[^a-z]/g, '')}"]`) || !['home','collection','artists','artist','work','making','designers','house','privacy'].includes(page)) page = 'home';
+  if (!$(`[data-page="${page.replace(/[^a-z]/g, '')}"]`) || !['home','collection','artists','artist','work','making','designers','collectors','house','privacy'].includes(page)) page = 'home';
   activePage = page;
   root.querySelectorAll('[data-page]').forEach(view => { view.hidden = view.dataset.page !== page; });
   main.hidden = false; inquiry.hidden = true; setMenu(false);
-  const labels = {home:'Zimbabwean stone sculpture',collection:'The collection',artists:'The artists',making:'The making',designers:'For designers',house:'The house',privacy:'Privacy'};
+  const labels = {home:'Zimbabwean stone sculpture',collection:'The collection',artists:'The artists',making:'The making',designers:'For designers',collectors:'For collectors',house:'The house',privacy:'Privacy'};
   document.title = `${item?.title || item?.name || labels[page] || 'House of Stone'} | House of Stone`;
-  const canonical = document.querySelector('link[rel="canonical"]'); if (canonical) canonical.href = location.origin + path;
+  const canonical = document.querySelector('link[rel="canonical"]'); if (canonical) canonical.href = location.origin + (previewMode ? '/admin/preview' : '') + path;
+  const description = item?.description || catalog.site.description;
+  const photo = location.origin + (assets[item?.image || item?.portrait || 'hero'] || assets.hero);
+  for (const [selector, value] of [['meta[name="description"]',description],['meta[property="og:title"]',document.title],['meta[name="twitter:title"]',document.title],['meta[property="og:description"]',description],['meta[name="twitter:description"]',description],['meta[property="og:url"]',canonical?.href],['meta[property="og:image"]',photo],['meta[name="twitter:image"]',photo]]) document.querySelector(selector)?.setAttribute('content',value);
+  menu.querySelectorAll('[data-view]').forEach(button => { if (button.dataset.view === page) button.setAttribute('aria-current','page'); else button.removeAttribute('aria-current'); });
   if (shouldFocus) {
     window.scrollTo({ top:0, behavior:'instant' });
     const heading = $(`[data-page="${page}"] h1`); heading?.setAttribute('tabindex','-1'); heading?.focus({preventScroll:true});
@@ -118,6 +137,7 @@ function openInquiry(topic, trigger) {
   if (previewMode) return;
   if (submitting) return;
   lastInquiryButton = trigger;
+  inquiryScroll = window.scrollY || 0;
   inquiryContext = { topic, workId: trigger?.dataset.inquiryWork || '', artistId: trigger?.dataset.inquiryArtist || '' };
   submissionId = uuid(); inquiryStarted = false;
   form.reset(); form.hidden = false; review.hidden = true; success.hidden = true;
@@ -130,6 +150,7 @@ function openInquiry(topic, trigger) {
 function closeInquiry() {
   if (submitting) return;
   main.hidden = false; inquiry.hidden = true;
+  window.scrollTo({top:inquiryScroll,behavior:'instant'});
   if (lastInquiryButton && !lastInquiryButton.closest('[hidden]')) lastInquiryButton.focus({preventScroll:true});
 }
 function preferenceUI() {
@@ -142,10 +163,17 @@ $('#hos-analytics-preference').addEventListener('change', event => {
   preferenceUI();
 });
 menuToggle.addEventListener('click', () => setMenu(menu.hidden));
+$('#hos-menu-close').addEventListener('click', () => { setMenu(false); menuToggle.focus({preventScroll:true}); });
+menu.addEventListener('cancel', event => { event.preventDefault(); setMenu(false); menuToggle.focus({preventScroll:true}); });
+menu.addEventListener('click', event => {
+  if (event.target !== menu) return;
+  const bounds = menu.getBoundingClientRect();
+  if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) { setMenu(false); menuToggle.focus({preventScroll:true}); }
+});
 $('#hos-inquiry-close').addEventListener('click', closeInquiry);
 $('#hos-form-privacy').addEventListener('click', () => { if (!submitting) navigate('/privacy'); });
 $('#hos-inquiry-continue').addEventListener('click', () => navigate('/collection'));
-root.addEventListener('keydown', event => { if (event.key === 'Escape') { if (!inquiry.hidden) closeInquiry(); else { setMenu(false); menuToggle.focus({preventScroll:true}); } } });
+root.addEventListener('keydown', event => { if (event.key === 'Escape') { if (!menu.hidden) { event.preventDefault(); setMenu(false); menuToggle.focus({preventScroll:true}); } else if (!inquiry.hidden) closeInquiry(); } });
 root.addEventListener('click', event => {
   if (!catalog || submitting) return;
   const view = event.target.closest('[data-view]');
@@ -191,16 +219,19 @@ sendButton.addEventListener('click', async () => {
 window.addEventListener('popstate', () => { if (catalog) route(routePath()); });
 
 async function start() {
-  const response = await fetch(previewMode ? '/api/admin/preview-content' : '/content.json'); if (!response.ok) throw new Error('The collection could not load. Please refresh the page.');
+  const [response,mediaResponse,editorialResponse] = await Promise.all([fetch(previewMode ? '/api/admin/preview-content' : '/content.json'),fetch('/media-manifest.json').catch(()=>({ok:false})),fetch('/editorial.json').catch(()=>({ok:false}))]); if (!response.ok) throw new Error('The collection could not load. Please refresh the page.');
+  if (mediaResponse.ok) media = await mediaResponse.json();
+  if (editorialResponse.ok) editorial = await editorialResponse.json();
   catalog = await response.json(); ({artists,works,assets} = catalog);
   $('#hos-location').textContent = catalog.site.location;
-  root.querySelectorAll('[data-asset]').forEach(img => { img.src = assets[img.dataset.asset]; img.decoding = 'async'; if (!img.classList.contains('hos-hero-image') && !img.classList.contains('hos-brand-mark')) img.loading = 'lazy'; });
+  root.querySelectorAll('[data-asset]').forEach(img => { applyImage(img,assets[img.dataset.asset],img.classList.contains('hos-hero-image') ? '100vw' : undefined); if (!img.classList.contains('hos-hero-image') && !img.classList.contains('hos-brand-mark')) img.loading = 'lazy'; });
+  root.querySelectorAll('.hos-editorial-image img').forEach(img => applyImage(img,img.getAttribute('src'),'90vw'));
   $('.hos-hero-image').alt = catalog.site.heroAlt;
   root.querySelectorAll('[data-artist-grid]').forEach(grid => {
     const selected = grid.dataset.artistGrid === 'home' ? artists.slice(0,3) : artists;
     selected.forEach(artist => {
       const card = el('button','hos-portrait-card cursor-interaction'); card.type = 'button'; card.dataset.artist = artist.id;
-      card.append(image(artist.portrait, 'Portrait of ' + artist.name), el('h3','',artist.name), el('p','',artist.style)); grid.append(card);
+      card.append(image(artist.portrait, 'Portrait of ' + artist.name,true,'(max-width: 900px) 44vw, 29vw'), el('h3','',artist.name), el('p','',artist.style)); grid.append(card);
     });
   });
   $('[data-page="artists"] .hos-page-heading p').textContent = `${artists.length === 5 ? 'Five' : artists.length} distinct practices, connected by stone and an instinct for form.`;
@@ -210,28 +241,29 @@ async function start() {
     const work = selected[0], chapter = el('section','hos-collection-chapter'), copy = el('div','hos-chapter-copy');
     const portrait = el('div','hos-chapter-portrait'), identity = el('div');
     const name = el('button','hos-chapter-name cursor-interaction',artist.name); name.type = 'button'; name.dataset.artist = artist.id;
-    identity.append(name, el('small','',artist.style)); portrait.append(image(artist.portrait,'Portrait of ' + artist.name),identity);
+    identity.append(name, el('small','',artist.style)); portrait.append(image(artist.portrait,'Portrait of ' + artist.name,true,'60px'),identity);
     copy.append(portrait,el('h2','',work.title),el('p','',work.description),link('Explore this work',{work:work.id}));
     if (selected.length > 1) { const grid = el('div','hos-work-grid'); selected.slice(1).forEach(w => grid.append(workCard(w))); copy.append(grid); }
     const photo = el('button','hos-chapter-photo cursor-interaction'); photo.type = 'button'; photo.dataset.work = work.id;
     photo.setAttribute('aria-label', `Explore ${work.title} by ${artist.name}`);
-    const img = image(work.image,`${work.title}, a stone sculpture by ${artist.name}`); img.style.objectPosition = work.objectPosition || '50% center'; photo.append(img);
+    const img = image(work.image,`${work.title}, a stone sculpture by ${artist.name}`); photo.append(img);
     chapter.append(copy,photo); chapters.append(chapter);
   });
   const featured = works.find(w => w.id === catalog.site.featuredWorkId) || works[0];
   if (featured) {
     const artist = artists.find(a => a.id === featured.artistId);
-    $('.hos-feature-image img').src = assets[featured.image]; $('.hos-feature-image img').alt = `${featured.title}, a stone sculpture by ${artist.name}`;
+    applyImage($('.hos-feature-image img'),assets[featured.image]); $('.hos-feature-image img').alt = `${featured.title}, a stone sculpture by ${artist.name}`;
     $('.hos-feature-copy .hos-eyebrow').textContent = 'SELECTED WORK / ' + artist.name.toUpperCase();
     $('.hos-feature-copy h2').textContent = featured.title + '.'; $('.hos-feature-copy p').textContent = featured.description;
     $('.hos-feature-copy [data-work]').dataset.work = featured.id;
   }
   if (previewMode) {
+    document.body.classList.add('hos-preview');
     const banner = el('div','hos-preview-bar'); banner.append(el('span','','Draft preview · Enquiries and measurement are paused.'));
     const back = el('a','','Return to editor'); back.href = '/admin/content'; banner.append(back); document.body.prepend(banner);
     root.querySelectorAll('[data-inquiry]').forEach(button=>{ button.disabled=true; });
   }
-  preferenceUI(); route(routePath(), false);
+  preferenceUI(); route(routePath(), false); root.dataset.ready = 'true';
 }
 start().catch(error => {
   const notice = el('p','hos-form-note',error.message || 'The collection could not load. Please refresh the page.'); notice.setAttribute('role','alert'); $('.hos-hero-copy').append(notice);

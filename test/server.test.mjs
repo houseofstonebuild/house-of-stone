@@ -70,9 +70,11 @@ test('funnel counts distinct sessions, records campaign attribution, and rate li
 });
 test('artist and work links, metadata, sitemap and health are ready for hosting',async t=>{
   const f=await fixture(t);
-  for(const path of ['/','/collection','/artists/tariro-mavhunga','/works/folded-light','/privacy']) {const r=await fetch(f.base+path);assert.equal(r.status,200);const html=await r.text();assert(!html.includes('{{TITLE}}'));assert(html.includes('name="robots" content="noindex,nofollow"'));assert(r.headers.get('content-security-policy').includes("connect-src 'self'"));}
+  for(const path of ['/','/collection','/artists','/making','/designers','/collectors','/house','/artists/tariro-mavhunga','/works/folded-light','/privacy']) {const r=await fetch(f.base+path);assert.equal(r.status,200);const html=await r.text();assert(!html.includes('{{TITLE}}'));assert(html.includes('name="robots" content="noindex,nofollow"'));assert(r.headers.get('content-security-policy').includes("connect-src 'self'"));}
   const html=await (await fetch(f.base+'/works/folded-light')).text();assert(html.includes('Folded Light | House of Stone'));
   assert((await (await fetch(f.base+'/sitemap.xml')).text()).includes('/works/folded-light'));
+  assert((await (await fetch(f.base+'/sitemap.xml')).text()).includes('/collectors'));
+  for (const path of ['/media-manifest.json','/editorial.json']) {const response=await fetch(f.base+path);assert.equal(response.status,200);assert(response.headers.get('content-type').includes('application/json'));assert(Object.keys(await response.json()).length);}
   assert((await (await fetch(f.base+'/robots.txt')).text()).includes('Disallow: /'));
   assert.equal((await fetch(f.base+'/health')).status,200);assert.equal((await fetch(f.base+'/missing')).status,404);
 });

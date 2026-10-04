@@ -1,0 +1,28 @@
+name: Browser QA
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  browsers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - run: npm install --prefix qa --no-audit --no-fund
+      - run: npx --prefix qa playwright install --with-deps chromium firefox webkit
+      - run: node qa/browser.mjs
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: browser-qa
+          path: test-results/browser/
+          retention-days: 7

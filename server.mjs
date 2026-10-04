@@ -10,7 +10,7 @@ const ROOT = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = resolve(ROOT, 'public');
 const INTERESTS = ['Collecting a work', 'Sourcing for a project', 'Following the launch', 'Learning about the artists'];
 const EVENTS = new Set(['page_view', 'explore_click', 'artist_view', 'work_view', 'inquiry_opened', 'inquiry_started']);
-const PAGES = new Set(['home', 'collection', 'artists', 'artist', 'work', 'making', 'designers', 'house', 'privacy']);
+const PAGES = new Set(['home', 'collection', 'artists', 'artist', 'work', 'making', 'designers', 'collectors', 'house', 'privacy']);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const esc = text => String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sha = value => createHash('sha256').update(value).digest();
@@ -218,7 +218,7 @@ export function createApp(options = {}) {
     return { days, funnel, works, sources, inquiries: db.prepare('SELECT count(*) AS n FROM inquiries WHERE created_at>=?').get(since).n, emailConfigured, indexing, definition: 'Sessions are browser visits, not verified people. One session can skip steps. Bots and repeat visitors can affect counts.' };
   }
   function pageMeta(path, content = catalog) {
-    const labels = { '/':'Zimbabwean stone sculpture', '/collection':'The collection', '/artists':'The artists', '/making':'The making', '/designers':'For designers', '/house':'The house', '/privacy':'Privacy' };
+    const labels = { '/':'Zimbabwean stone sculpture', '/collection':'The collection', '/artists':'The artists', '/making':'The making', '/designers':'For designers', '/collectors':'For collectors', '/house':'The house', '/privacy':'Privacy' };
     if (labels[path]) return { title: `${labels[path]} | House of Stone`, description: content.site.description, image: content.assets.hero };
     const work = content.works.find(w => `/works/${w.slug}` === path);
     if (work) return { title: `${work.title} | House of Stone`, description: work.description, image: content.assets[work.image] || content.assets.hero };
@@ -286,10 +286,10 @@ export function createApp(options = {}) {
       }
       if (req.method === 'POST' && path === '/api/admin/media') {
         requireSameOrigin(req); rateLimit('uploads:' + clientHash(req), 40, 60000);
-        const input = await body(req, 11300000);
-        if (typeof input.data !== 'string' || input.data.length > 11200000 || !/^[A-Za-z0-9+/]+={0,2}$/.test(input.data)) throw new HttpError(400, 'Choose a JPEG, PNG or WebP image.');
+        const input = await body(req, 45000000);
+        if (typeof input.data !== 'string' || input.data.length > 44750000 || !/^[A-Za-z0-9+/]+={0,2}$/.test(input.data)) throw new HttpError(400, 'Choose a JPEG, PNG or WebP image.');
         const bytes = Buffer.from(input.data,'base64');
-        if (bytes.length > 8 * 1024 * 1024) throw new HttpError(413, 'Choose an image under 8 MB.');
+        if (bytes.length > 32 * 1024 * 1024) throw new HttpError(413, 'Choose an image under 32 MB.');
         let extension, mime;
         if (bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) { extension = 'jpg'; mime = 'image/jpeg'; }
         if (bytes.length > 8 && bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) { extension = 'png'; mime = 'image/png'; }
@@ -359,7 +359,7 @@ export function createApp(options = {}) {
       }
       if (req.method === 'GET' && path === '/robots.txt') return send(res, 200, `User-agent: *\nDisallow: ${indexing ? '/admin\nDisallow: /api/' : '/'}\n${siteURL ? `Sitemap: ${siteURL.origin}/sitemap.xml\n` : ''}`, 'text/plain; charset=utf-8');
       if (req.method === 'GET' && path === '/sitemap.xml') {
-        const paths = ['/', '/collection', '/artists', '/making', '/designers', '/house', ...catalog.artists.map(a => '/artists/' + a.slug), ...catalog.works.map(w => '/works/' + w.slug)];
+        const paths = ['/', '/collection', '/artists', '/making', '/designers', '/collectors', '/house', ...catalog.artists.map(a => '/artists/' + a.slug), ...catalog.works.map(w => '/works/' + w.slug)];
         return send(res, 200, `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${paths.map(p => `<url><loc>${esc(origin(req) + p)}</loc></url>`).join('')}</urlset>`, 'application/xml; charset=utf-8');
       }
       if (!['GET', 'HEAD'].includes(req.method)) { res.setHeader('Allow', 'GET, HEAD'); throw new HttpError(405, 'Method not allowed.'); }
@@ -367,17 +367,17 @@ export function createApp(options = {}) {
       const pagePath = preview ? path.slice('/admin/preview'.length) || '/' : path;
       const meta = pageMeta(pagePath, preview ? publicCatalog(collectionState().draft) : catalog);
       if (meta) {
-        const replacements = { TITLE: meta.title, DESCRIPTION: meta.description, URL: origin(req) + pagePath, IMAGE: origin(req) + meta.image, ROBOTS: indexing && !preview ? 'index,follow' : 'noindex,nofollow' };
+        const replacements = { TITLE: meta.title, DESCRIPTION: meta.description, URL: origin(req) + path, IMAGE: origin(req) + meta.image, ROBOTS: indexing && !preview ? 'index,follow' : 'noindex,nofollow' };
         const html = template.replace(/\{\{(TITLE|DESCRIPTION|URL|IMAGE|ROBOTS)\}\}/g, (_, key) => esc(replacements[key]));
         res.setHeader('X-Robots-Tag', replacements.ROBOTS);
         return send(res, 200, req.method === 'HEAD' ? '' : html, 'text/html; charset=utf-8');
       }
       const filePath = resolve(PUBLIC, path === '/admin' ? 'admin.html' : path === '/admin/content' ? 'admin-content.html' : '.' + path);
       if (!filePath.startsWith(PUBLIC + '/') || !existsSync(filePath)) throw new HttpError(404, 'This page could not be found.');
-      const types = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.webp':'image/webp', '.png':'image/png', '.ico':'image/x-icon' };
+      const types = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.json':'application/json; charset=utf-8', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.webp':'image/webp', '.png':'image/png', '.ico':'image/x-icon' };
       const type = types[extname(filePath)];
       if (!type) throw new HttpError(404, 'This file could not be found.');
-      res.writeHead(200, { 'Content-Type': type, 'Cache-Control': path.startsWith('/admin') ? 'no-store' : ['.js','.css','.html'].includes(extname(filePath)) ? 'public, max-age=0, must-revalidate' : 'public, max-age=3600' });
+      res.writeHead(200, { 'Content-Type': type, 'Cache-Control': path.startsWith('/admin') ? 'no-store' : ['.js','.css','.html','.json'].includes(extname(filePath)) ? 'public, max-age=0, must-revalidate' : 'public, max-age=3600' });
       res.end(req.method === 'HEAD' ? '' : readFileSync(filePath));
     } catch (error) {
       if (!res.headersSent) send(res, error.status ?? 500, { error: error.status ? error.message : 'We could not complete that request. Please try again.' });

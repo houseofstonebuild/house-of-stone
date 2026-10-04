@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>{{TITLE}}</title>
   <meta name="description" content="{{DESCRIPTION}}">
   <meta name="robots" content="{{ROBOTS}}">
@@ -19,7 +19,6 @@
   <meta name="twitter:description" content="{{DESCRIPTION}}">
   <meta name="twitter:image" content="{{IMAGE}}">
   <link rel="icon" href="/assets/favicon.png" type="image/png">
-  <link rel="preload" href="/assets/hero.jpg" as="image">
   <link rel="stylesheet" href="/styles.css">
   <script type="module" src="/app.js"></script>
 </head>
@@ -31,16 +30,19 @@
     <button class="hos-wordmark hos-brand cursor-interaction" type="button" data-view="home" aria-label="House of Stone home"><span class="hos-brand-symbol" aria-hidden="true"><img id="hos-brand-mark" class="hos-brand-mark" src="/assets/logo.png" data-asset="logo" alt=""></span><span class="hos-brand-name">HOUSE OF STONE</span></button>
     <button class="hos-enquire cursor-interaction" type="button" data-inquiry="General interest">Enquire <span aria-hidden="true">↗</span></button>
   </header>
-  <nav id="hos-menu" class="hos-menu" aria-label="Main navigation" hidden>
-    <div class="hos-menu-label">THE HOUSE</div>
+  <dialog id="hos-menu" class="hos-menu" aria-label="House navigation" hidden>
+    <div class="hos-menu-top"><div class="hos-menu-label">THE HOUSE</div><button id="hos-menu-close" class="hos-close cursor-interaction" type="button" aria-label="Close menu">Close <span aria-hidden="true">×</span></button></div>
+    <nav aria-label="Main navigation">
     <div class="hos-menu-links">
       <button type="button" data-view="collection" class="cursor-interaction">The collection <span>01</span></button>
       <button type="button" data-view="artists" class="cursor-interaction">The artists <span>02</span></button>
       <button type="button" data-view="making" class="cursor-interaction">The making <span>03</span></button>
       <button type="button" data-view="designers" class="cursor-interaction">For designers <span>04</span></button>
-      <button type="button" data-view="house" class="cursor-interaction">The house <span>05</span></button>
+      <button type="button" data-view="collectors" class="cursor-interaction">For collectors <span>05</span></button>
+      <button type="button" data-view="house" class="cursor-interaction">The house <span>06</span></button>
     </div>
-  </nav>
+    </nav><p class="hos-menu-note">Zimbabwe / New York<br>Stone. Artists. Extraordinary form.</p>
+  </dialog>
   <main id="hos-main">
     <section class="hos-view" data-page="home">
       <div class="hos-hero">
@@ -76,7 +78,7 @@
     </section>
     <section class="hos-view" data-page="artist" hidden>
       <div class="hos-page-heading"><div class="hos-eyebrow">THE ARTIST</div><h1 id="hos-artist-title">Tariro Mavhunga</h1><p id="hos-artist-description"></p></div>
-      <div class="hos-artist-profile"><div class="hos-artist-portrait"><img id="hos-artist-image" alt="Portrait of Tariro Mavhunga"></div><div><div class="hos-eyebrow">THE PRACTICE</div><h2 id="hos-artist-practice">Gesture and light.</h2><p id="hos-artist-story"></p><button id="hos-artist-work-link" type="button" class="hos-text-link cursor-interaction" data-work="0">Explore selected work <span aria-hidden="true">↗</span></button></div></div>
+      <div class="hos-artist-profile"><div class="hos-artist-portrait"><img id="hos-artist-image" alt="Portrait of Tariro Mavhunga"></div><div><div class="hos-biography"><div class="hos-eyebrow">BIOGRAPHY</div><p id="hos-artist-biography"></p></div><div class="hos-eyebrow">THE PRACTICE</div><h2 id="hos-artist-practice">Gesture and light.</h2><p id="hos-artist-story"></p><button id="hos-artist-work-link" type="button" class="hos-text-link cursor-interaction" data-work="0">Explore selected work <span aria-hidden="true">↗</span></button></div></div>
       <div id="hos-artist-works" class="hos-more-works"></div>
     </section>
     <section class="hos-view" data-page="work" hidden>
@@ -85,14 +87,26 @@
     <section class="hos-view" data-page="making" hidden>
       <div class="hos-page-heading"><div class="hos-eyebrow">THE MAKING</div><h1>From stone<br>to sculpture.</h1><p>A dialogue between material, instinct and the hand. Each surface shaped with intention.</p></div>
       <div class="hos-process-image"><img data-asset="process" alt="A sculptor's hands shaping rough green stone"></div>
-      <div class="hos-process-steps"><div><span>01 / MATERIAL</span><h2>The stone.</h2></div><div><span>02 / PRACTICE</span><h2>The hand.</h2></div><div><span>03 / EXPRESSION</span><h2>The form.</h2></div></div>
+      <div class="hos-process-steps"><div><span>01 / MATERIAL</span><h2>The stone.</h2><p>Colour, grain and natural character give each work its starting point. The material invites a form rather than simply receiving one.</p></div><div><span>02 / PRACTICE</span><h2>The hand.</h2><p>Carving moves from broad decisions to patient refinements. A curve, a hollow and a change in texture reveal the artist's individual approach.</p></div><div><span>03 / EXPRESSION</span><h2>The form.</h2><p>Polished and natural surfaces meet in the finished work. Light brings their differences into focus, and the stone takes on a presence of its own.</p></div></div>
     </section>
     <section class="hos-view" data-page="designers" hidden>
       <div class="hos-page-heading"><div class="hos-eyebrow">FOR DESIGNERS &amp; ARCHITECTS</div><h1>Considered<br>for your space.</h1><p>A conversation about sculpture, scale and the project you have in mind.</p><button class="hos-text-link cursor-interaction" type="button" data-inquiry="Designer project">Discuss your project <span aria-hidden="true">↗</span></button></div>
-      <div class="hos-collection-feature"><img data-asset="fold" alt="Ivory sculpture in a warm architectural room"><div><div class="hos-eyebrow">A SCULPTURAL PRESENCE</div><h2>Form meets<br>architecture.</h2><p>Consider the balance of a work within a room, from intimate objects to sculptural focal points.</p></div></div>
+      <figure class="hos-editorial-image"><img src="/assets/designer-apartment.jpg" alt="Complete stone sculptures displayed in a refined New York apartment with warm natural materials and Manhattan views" loading="lazy" decoding="async"><figcaption><span>SCULPTURE IN THE CITY</span><span>A NEW YORK INTERIOR</span></figcaption></figure>
+      <div class="hos-editorial-story"><div><div class="hos-eyebrow">FORM MEETS ARCHITECTURE</div><h2>A room, transformed<br>by one considered work.</h2></div><div><p>Stone introduces a different rhythm into an interior. Its weight grounds a room; its surface catches the changing light. A single work can bring focus to a living space, an entrance or a quiet corner.</p><p>We invite interior designers and architects to explore the collection with the setting in mind. Share your brief, dimensions and reference images, and we can begin a thoughtful conversation about the works that speak to your project.</p><button class="hos-text-link cursor-interaction" type="button" data-view="collection">Explore the works <span aria-hidden="true">↗</span></button></div></div>
+      <div class="hos-service-grid"><div><div class="hos-eyebrow">01 / SCALE</div><h2>The right proportion.</h2><p>Consider the height of a console, the depth of a niche and the space around a plinth. Dimensions begin the conversation.</p></div><div><div class="hos-eyebrow">02 / MATERIAL</div><h2>A material dialogue.</h2><p>Pale stone, green serpentine and dark springstone each bring a distinct tone to wood, plaster, metal and natural light.</p></div><div><div class="hos-eyebrow">03 / PLACEMENT</div><h2>Room to breathe.</h2><p>A sculpture needs space to be seen from more than one angle. Consider sightlines, lighting and the experience of moving through the room.</p></div></div>
+      <section class="hos-invitation"><div><div class="hos-eyebrow">YOUR NEXT PROJECT</div><h2>Start with the space.</h2></div><button class="hos-text-link cursor-interaction" type="button" data-inquiry="Designer project">Discuss your project <span aria-hidden="true">↗</span></button></section>
+    </section>
+    <section class="hos-view" data-page="collectors" hidden>
+      <div class="hos-page-heading"><div class="hos-eyebrow">FOR COLLECTORS</div><h1>A collection,<br>with a point of view.</h1><p>Distinctive work. A personal connection. Sculpture that becomes part of the way you live.</p><button class="hos-text-link cursor-interaction" type="button" data-inquiry="Collector interest">Begin a conversation <span aria-hidden="true">↗</span></button></div>
+      <figure class="hos-editorial-image"><img src="/assets/collector-gallery.jpg" alt="A private home gallery with fully visible Zimbabwean stone sculptures on individual plinths, warm gallery lighting and a leather bench" loading="lazy" decoding="async"><figcaption><span>A PERSONAL COLLECTION</span><span>THE PRIVATE GALLERY</span></figcaption></figure>
+      <div class="hos-editorial-story"><div><div class="hos-eyebrow">LIVING WITH SCULPTURE</div><h2>Collected slowly.<br>Experienced every day.</h2></div><div><p>A collection can begin with one work: a form you return to, a material that holds your attention, an artist whose practice resonates. In a home gallery or a living room, sculpture rewards a closer look.</p><p>Explore the artists, take time with the works and ask questions. We want the conversation to begin with what draws you to a piece, whether you are discovering stone sculpture for the first time or considering a new direction for an established collection.</p><button class="hos-text-link cursor-interaction" type="button" data-view="artists">Discover the artists <span aria-hidden="true">↗</span></button></div></div>
+      <div class="hos-service-grid"><div><div class="hos-eyebrow">01 / DISCOVER</div><h2>Follow your eye.</h2><p>Explore different practices and the relationship between form, texture and stone. Let a work make its first impression.</p></div><div><div class="hos-eyebrow">02 / UNDERSTAND</div><h2>Know the work.</h2><p>Read about the artist, the material and the dimensions. Ask us about the details that matter to you before making a decision.</p></div><div><div class="hos-eyebrow">03 / ENQUIRE</div><h2>A personal exchange.</h2><p>Each acquisition begins with a conversation. Enquire about a particular sculpture or tell us where your interest is taking you.</p></div></div>
+      <section class="hos-invitation"><div><div class="hos-eyebrow">THE FOUNDING COLLECTION</div><h2>Find the work<br>you return to.</h2></div><button class="hos-text-link cursor-interaction" type="button" data-view="collection">Discover the collection <span aria-hidden="true">↗</span></button></section>
     </section>
     <section class="hos-view" data-page="house" hidden>
       <div class="hos-page-heading"><div class="hos-eyebrow">HOUSE OF STONE</div><h1>Zimbabwean origin.<br>A wider horizon.</h1><p>A Zimbabwean contemporary art house conceived by Bradley and Milton, connecting sculpture, its makers, and new audiences.</p><button class="hos-text-link cursor-interaction" type="button" data-inquiry="About the house">Get in touch <span aria-hidden="true">↗</span></button></div>
+      <div class="hos-editorial-story"><div><div class="hos-eyebrow">OUR VISION</div><h2>A considered home<br>for Zimbabwean sculpture.</h2></div><div><p>We believe Zimbabwean stone sculpture deserves to be encountered with the attention given to any great work of art: through its form, its material and the individual practice of its maker.</p><p>House of Stone brings those elements into focus. Our vision is to connect artists in Zimbabwe with collectors and designers who value expressive form, patient craftsmanship and work that carries a sense of place into a contemporary setting.</p></div></div>
+      <div class="hos-editorial-story"><div><div class="hos-eyebrow">BRADLEY &amp; MILTON</div><h2>Two founders.<br>A shared perspective.</h2></div><div><p>House of Stone is the work of Bradley and Milton, brought together by a shared interest in Zimbabwean artistry and how it can be presented to a wider audience.</p><p>From Zimbabwe to New York, we are building an art house around a simple idea: let the work speak, make space for the artist, and bring care to the experience of discovery. The collection is the beginning of that conversation.</p><button class="hos-text-link cursor-interaction" type="button" data-inquiry="About the house">Speak with the house <span aria-hidden="true">↗</span></button></div></div>
       <div class="hos-house-statement"><span>SCULPTURE FIRST.</span><span>THE ARTIST, ALWAYS.</span></div>
       <div class="hos-process-image hos-house-image"><img data-asset="balancing-rocks" alt="Balancing granite rock formations in Zimbabwe"></div>
     </section>

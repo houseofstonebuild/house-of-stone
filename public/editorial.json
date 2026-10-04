@@ -1,0 +1,24 @@
+{
+  "biographies": {
+    "tariro": {
+      "name": "Tariro Mavhunga",
+      "text": "Tariro Mavhunga is a Zimbabwean sculptor whose work explores the quiet movement of folded forms. Her practice developed through carving by hand and observing the way light falls across a surface. Working in pale stone, she brings a sense of softness and restraint to a material defined by its weight."
+    },
+    "kuda": {
+      "name": "Kudakwashe Nyamudeza",
+      "text": "Kudakwashe Nyamudeza is a Zimbabwean stone sculptor drawn to the relationship between solid form and open space. His studio practice centres on patient carving, balancing polished planes with the natural character of the stone. His sculptures invite the viewer to move around them and experience the changing outline of a hollow."
+    },
+    "ruvimbo": {
+      "name": "Ruvimbo Chikore",
+      "text": "Ruvimbo Chikore is a Zimbabwean sculptor working at the meeting point of figure and abstraction. She explores closeness, connection and the way two forms can hold a shared space. Her approach follows the stone's natural grain, combining expressive curves with surfaces that retain a tactile sense of the material."
+    },
+    "farai": {
+      "name": "Farai Munetsi",
+      "text": "Farai Munetsi is a Zimbabwean sculptor whose practice is informed by the rhythms of the natural world. Birds, movement and the balance of a resting form provide starting points for his carving. In warm-toned stone, he reduces these observations to a few deliberate lines and a distinctive sculptural presence."
+    },
+    "tendai": {
+      "name": "Tendai Nyakudya",
+      "text": "Tendai Nyakudya is a Zimbabwean sculptor with an interest in mass, proportion and architectural form. His work brings together stacked volumes, measured openings and contrasting surfaces. He approaches each piece as a study in balance, allowing the weight and texture of the stone to remain central to its expression."
+    }
+  }
+}
