@@ -53,13 +53,14 @@ function setMenu(open) {
 }
 function statusMessage(text, error = false) { status.textContent = text; status.setAttribute('role', error ? 'alert' : 'status'); }
 function applyImage(img, source, sizes = '(max-width: 650px) 100vw, 55vw') {
-  img.src = source; img.decoding = 'async';
+  img.decoding = 'async';
   const info = media[source];
   img.removeAttribute('srcset'); img.removeAttribute('width'); img.removeAttribute('height');
   if (info) {
     img.width = info.width; img.height = info.height;
-    img.srcset = info.srcset; img.sizes = sizes;
+    img.sizes = sizes; img.srcset = info.srcset;
   }
+  img.src = source;
 }
 function image(key, alt, lazy = true, sizes) {
   const img = el('img'); applyImage(img, assets[key], sizes); img.alt = alt;
@@ -193,11 +194,11 @@ form.addEventListener('submit', event => {
   event.preventDefault(); if (!form.reportValidity()) return;
   ['name','email','interest','message'].forEach(field => { $('#hos-review-' + field).textContent = form.elements[field].value.trim(); });
   $('#hos-review-message-row').hidden = !form.elements.message.value.trim();
-  form.hidden = true; review.hidden = false; title.textContent = 'Review your enquiry.'; statusMessage(''); sendButton.focus({preventScroll:true});
+  form.hidden = true; review.hidden = false; title.textContent = 'Review your enquiry.'; statusMessage(''); window.scrollTo({top:0,behavior:'instant'}); sendButton.focus({preventScroll:true});
 });
 $('#hos-inquiry-edit').addEventListener('click', () => {
   if (submitting) return;
-  submissionId = uuid(); form.hidden = false; review.hidden = true; title.textContent = 'Begin an enquiry.'; statusMessage(''); form.elements.name.focus({preventScroll:true});
+  submissionId = uuid(); form.hidden = false; review.hidden = true; title.textContent = 'Begin an enquiry.'; statusMessage(''); window.scrollTo({top:0,behavior:'instant'}); form.elements.name.focus({preventScroll:true});
 });
 sendButton.addEventListener('click', async () => {
   if (previewMode) return;
@@ -212,7 +213,7 @@ sendButton.addEventListener('click', async () => {
     if (!response.ok || !data.ok || !data.reference) throw new Error(data.error || 'We could not send your enquiry. Please try again.');
     review.hidden = true; success.hidden = false; title.textContent = 'Enquiry received.';
     $('#hos-inquiry-reference').textContent = data.reference; statusMessage(''); form.reset();
-    $('#hos-inquiry-continue').focus({preventScroll:true});
+    window.scrollTo({top:0,behavior:'instant'}); $('#hos-inquiry-continue').focus({preventScroll:true});
   } catch (error) {
     statusMessage(error.name === 'TimeoutError' || error.name === 'TypeError' ? 'We could not confirm receipt. Your details are still here. Please try again.' : error.message, true);
   } finally { submitting = false; sendButton.disabled = false; $('#hos-inquiry-edit').disabled = false; $('#hos-inquiry-close').disabled = false; }

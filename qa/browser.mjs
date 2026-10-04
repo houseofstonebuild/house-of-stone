@@ -40,6 +40,11 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
             await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
           });
           await page.waitForFunction(()=>[...document.querySelectorAll('#hos-concept img')].filter(img=>img.getClientRects().length).every(img=>img.complete&&img.naturalWidth>0));
+          const decodeErrors=await page.evaluate(async()=>{
+            const results=await Promise.all([...document.querySelectorAll('#hos-concept img')].filter(img=>img.getClientRects().length).map(async img=>{try{await img.decode();return null;}catch(error){return {src:img.currentSrc,error:error.message};}}));
+            return results.filter(Boolean);
+          });
+          assert.equal(decodeErrors.length,0,`Images could not decode: ${JSON.stringify(decodeErrors)}`);
           const layout=await page.evaluate(()=>{
             const rect=s=>{const r=document.querySelector(s).getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,height:r.height};};
             return {viewport:innerWidth,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,root:rect('#hos-concept'),header:rect('.hos-header'),footer:rect('.hos-footer'),main:rect('#hos-main'),images:[...document.querySelectorAll('#hos-concept img')].filter(img=>img.getClientRects().length).map(img=>({src:img.currentSrc,naturalWidth:img.naturalWidth,fit:getComputedStyle(img).objectFit}))};
@@ -55,7 +60,11 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
           assert(Math.abs(bottom.headerTop)<1&&Math.abs(bottom.footerBottom-height)<2,'Chrome does not stay fixed while scrolling');
           assert(bottom.mainBottom<=bottom.footerTop+2,'Footer covers the last content');
           if(width===1440||width===390) {
-            await page.evaluate(()=>scrollTo(0,0));
+            await page.evaluate(async()=>{
+              const frame=()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+              for(let y=0;y<document.documentElement.scrollHeight;y+=Math.max(200,innerHeight-160)){scrollTo(0,y);await frame();}
+              scrollTo(0,0);await frame();
+            });
             await page.screenshot({path:new URL(`${engineName}-${width}-${path==='/'?'home':path.slice(1).replaceAll('/','-')}.jpg`,output).pathname,type:'jpeg',quality:85,scale:'css',fullPage:true});
           }
           checked++;
@@ -121,6 +130,7 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
     assert(app.db.prepare('SELECT count(*) AS n FROM inquiries').get().n===1);
     await visitor.locator('#hos-inquiry-send').click();
     await visitor.locator('#hos-inquiry-success').waitFor();
+    await visitor.waitForFunction(()=>scrollY===0&&document.querySelector('.hos-header').getBoundingClientRect().top===0&&document.querySelector('.hos-footer').getBoundingClientRect().bottom===innerHeight);
     await visitor.screenshot({path:new URL(`${engineName}-inquiry-success.jpg`,output).pathname,type:'jpeg',quality:85,scale:'css',fullPage:true});
     assert(app.db.prepare('SELECT count(*) AS n FROM inquiries').get().n===1,'Retry duplicated enquiry');
     const entry=(await adminGet('/api/admin/inquiries'))[0];
