@@ -4,7 +4,7 @@ import { resolve, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID, createHmac, createHash, timingSafeEqual } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
-import { validateCatalog, publicCatalog } from './catalog.mjs';
+import { validateCatalog, homepageImage, publicCatalog } from './catalog.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = resolve(ROOT, 'public');
@@ -219,7 +219,7 @@ export function createApp(options = {}) {
   }
   function pageMeta(path, content = catalog) {
     const labels = { '/':'Zimbabwean stone sculpture', '/collection':'The collection', '/artists':'The artists', '/making':'The making', '/designers':'For designers', '/collectors':'For collectors', '/house':'The house', '/privacy':'Privacy' };
-    if (labels[path]) return { title: `${labels[path]} | House of Stone`, description: content.site.description, image: content.assets.hero };
+    if (labels[path]) return { title: `${labels[path]} | House of Stone`, description: content.site.description, image: homepageImage(content) };
     const work = content.works.find(w => `/works/${w.slug}` === path);
     if (work) return { title: `${work.title} | House of Stone`, description: work.description, image: content.assets[work.image] || content.assets.hero };
     const artist = content.artists.find(a => `/artists/${a.slug}` === path);

@@ -4,7 +4,8 @@
     "description": "A contemporary art house for Zimbabwean stone sculpture. Discover the artists, explore the collection, and enquire about a work.",
     "location": "Zimbabwe / New York",
     "featuredWorkId": "folded-light",
-    "heroAlt": "Stone sculpture in an architectural black gallery, illuminated by warm overhead light"
+    "heroAlt": "Stone sculptures in a New York apartment overlooking Manhattan",
+    "heroImage": "designer-apartment"
   },
   "assets": {
     "tariro": "/assets/tariro.jpg",
@@ -19,7 +20,8 @@
     "process": "/assets/process.jpg",
     "balancing-rocks": "/assets/balancing-rocks.jpg",
     "logo": "/assets/logo.png",
-    "hero": "/assets/hero.jpg"
+    "hero": "/assets/hero.jpg",
+    "designer-apartment": "/assets/designer-apartment.jpg"
   },
   "artists": [
     {

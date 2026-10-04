@@ -51,7 +51,7 @@ export function validateCatalog(input, { publicDir, mediaDir, publish = false, p
     if (!/^(\d{1,2}|100)% (center|top|bottom)$/.test(objectPosition)) fail('Invalid image position.');
     works.push({ ...record, artistId, title: field(item.title, 'the sculpture title', 160, true), image: photo(item.image, 'the sculpture photo', required),
       dimensions: field(item.dimensions, 'the dimensions', 120, required), material: field(item.material, 'the stone type', 120, required),
-      acquisitionMethod: field(item.acquisitionMethod, 'the stone source', 1000), description: field(item.description, 'the sculpture description', 3000, required), objectPosition });
+      yearMade: field(item.yearMade, 'the year made', 80), acquisitionMethod: field(item.acquisitionMethod, 'the stone source', 1000), description: field(item.description, 'the sculpture description', 3000, required), objectPosition });
   }
   if (previous) {
     for (const key of ['artists', 'works']) for (const item of previous[key]) {
@@ -60,14 +60,16 @@ export function validateCatalog(input, { publicDir, mediaDir, publish = false, p
   }
   const site = { name: 'House of Stone', description: field(input.site.description, 'the website description', 400, true),
     location: field(input.site.location, 'the location', 120), featuredWorkId: field(input.site.featuredWorkId, 'the featured sculpture', 80),
-    heroAlt: field(input.site.heroAlt, 'the hero image description', 300, true) };
+    heroImage: photo(input.site.heroImage, 'the homepage hero', false), heroAlt: field(input.site.heroAlt, 'the hero image description', 300, true) };
   const available = works.filter(w => !w.archived && !artistMap.get(w.artistId).archived);
-  if (publish && (!available.length || !available.some(w => w.id === site.featuredWorkId))) fail('Choose a visible sculpture to feature on the homepage before publishing.');
+  if (publish && !available.length) fail('Keep at least one visible sculpture in the collection before publishing.');
+  if (!available.some(w => w.id === site.featuredWorkId)) site.featuredWorkId = available[0]?.id || '';
   return { site, assets, artists, works };
 }
 export function publicCatalog(catalog) {
   const artists = catalog.artists.filter(a => !a.archived), ids = new Set(artists.map(a => a.id));
   const works = catalog.works.filter(w => !w.archived && ids.has(w.artistId));
-  const keys = new Set(['hero','logo','process','balancing-rocks',...artists.map(a => a.portrait),...works.map(w => w.image)]);
+  const keys = new Set(['hero','logo','process','balancing-rocks',catalog.site.heroImage,...artists.map(a => a.portrait),...works.map(w => w.image)]);
   return { site: catalog.site, assets: Object.fromEntries(Object.entries(catalog.assets).filter(([key]) => keys.has(key))), artists, works };
 }
+export function homepageImage(catalog) { return catalog.assets[catalog.site.heroImage] || '/assets/designer-apartment.jpg'; }

@@ -40,14 +40,30 @@ function el(tag, className, text) {
 let catalog, artists, works, assets, media = {}, editorial = {};
 let activePage = 'home', activeArtist, activeWork;
 let inquiryContext = {}, submissionId = '', inquiryStarted = false, submitting = false, lastInquiryButton, inquiryScroll = 0;
+const motionPreference = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+const heroSource = () => assets[catalog.site.heroImage] || '/assets/designer-apartment.jpg';
+const heroDescription = () => catalog.site.heroImage ? catalog.site.heroAlt : 'Stone sculptures in a New York apartment overlooking Manhattan';
+let pageAnimation;
+function animateSurface(element, distance = 8, duration = 260) {
+  if (motionPreference?.matches || !element?.animate) return;
+  return element.animate([{opacity:.65,transform:`translateY(${distance}px)`},{opacity:1,transform:'translateY(0)'}],{duration,easing:'cubic-bezier(.2,.65,.3,1)'});
+}
+motionPreference?.addEventListener('change', event => { if (event.matches) root.getAnimations?.({subtree:true}).forEach(animation => animation.cancel()); });
+const revealObserver = 'IntersectionObserver' in window ? new window.IntersectionObserver(entries => {
+  for (const entry of entries) if (entry.isIntersecting) {
+    revealObserver.unobserve(entry.target);
+    if (!entry.target.dataset.revealed) { entry.target.dataset.revealed = 'true'; animateSurface(entry.target,10,420); }
+  }
+},{threshold:.08,rootMargin:'0px 0px -24px 0px'}) : null;
+function observeReveals(view) { view?.querySelectorAll('[data-reveal]').forEach(element => { if (!element.dataset.revealed) revealObserver?.observe(element); }); }
 const menu = $('#hos-menu'), menuToggle = $('.hos-menu-toggle'), main = $('#hos-main');
 const inquiry = $('#hos-inquiry'), form = $('#hos-inquiry-form'), review = $('#hos-inquiry-review'), success = $('#hos-inquiry-success');
 const status = $('#hos-form-status'), title = $('#hos-inquiry-title'), sendButton = $('#hos-inquiry-send');
 function setMenu(open) {
   if (open && !menu.open) document.body.style.setProperty('--hos-scrollbar', `${Math.max(0, window.innerWidth - document.documentElement.clientWidth) || 0}px`);
   menu.hidden = !open;
-  if (open && !menu.open) menu.showModal();
-  if (!open && menu.open) menu.close();
+  if (open && !menu.open) { menu.showModal(); if (!motionPreference?.matches) menu.animate?.([{opacity:.8,transform:'translateX(-18px)'},{opacity:1,transform:'translateX(0)'}],{duration:220,easing:'cubic-bezier(.2,.65,.3,1)'}); }
+  if (!open && menu.open) { menu.getAnimations?.().forEach(animation => animation.cancel()); menu.close(); }
   document.body.classList.toggle('hos-menu-open', open);
   menuToggle.setAttribute('aria-expanded', String(open));
 }
@@ -74,36 +90,52 @@ function link(text, data) {
   return button;
 }
 function workCard(work) {
-  const button = el('button', 'hos-work-card cursor-interaction'); button.type = 'button'; button.dataset.work = work.id;
-  const img = image(work.image, `${work.title}, a stone sculpture by ${artists.find(a => a.id === work.artistId).name}`, true, '(max-width: 650px) 44vw, 29vw');
-  button.append(img, el('h3', '', work.title), el('p', '', work.material));
-  return button;
+  const card = el('article', 'hos-work-card');
+  const photo = el('button','hos-work-card-photo cursor-interaction'); photo.type = 'button'; photo.dataset.work = work.id;
+  photo.setAttribute('aria-label', `View ${work.title} by ${artists.find(a => a.id === work.artistId).name}`);
+  photo.append(image(work.image, `${work.title}, a stone sculpture by ${artists.find(a => a.id === work.artistId).name}`,true,'(max-width: 700px) 90vw, 420px'));
+  const copy = el('div','hos-work-card-copy');
+  copy.append(el('h3','',work.title),el('p','hos-card-specs',`${work.material} · ${work.dimensions}`),el('p','hos-card-description',work.description),link('View sculpture',{work:work.id}));
+  card.append(photo,copy);return card;
+}
+function artistBiography(artist) {
+  const value = artist.biography || editorial.biographies?.[artist.id];
+  return typeof value === 'object' ? (value.name === artist.name ? value.text : artist.description) : value || artist.description;
+}
+function workGrid(selected) { const grid=el('div','hos-work-grid');grid.dataset.count=String(selected.length);grid.dataset.reveal='';selected.forEach(work=>grid.append(workCard(work)));return grid; }
+function artistChapter(artist, selected) {
+  const chapter=el('section','hos-artist-chapter'),intro=el('div','hos-artist-intro');intro.dataset.reveal='';
+  const portrait=el('button','hos-artist-intro-photo cursor-interaction');portrait.type='button';portrait.dataset.artist=artist.id;portrait.setAttribute('aria-label',`Read about ${artist.name}`);
+  portrait.append(image(artist.portrait,'Portrait of '+artist.name,true,'(max-width: 700px) 90vw, 420px'));
+  const copy=el('div','hos-artist-intro-copy');copy.append(el('div','hos-eyebrow','THE ARTIST'),el('h2','',artist.name),el('p','hos-artist-style',artist.style),el('p','',artistBiography(artist)),link('About the artist',{artist:artist.id}));
+  intro.append(portrait,copy);chapter.append(intro,workGrid(selected));return chapter;
 }
 function renderArtist(artist) {
   activeArtist = artist;
   $('#hos-artist-title').textContent = artist.name;
   $('#hos-artist-description').textContent = artist.description;
-  $('#hos-artist-practice').textContent = artist.practice;
+  $('#hos-artist-practice').textContent = 'Practice';
   $('#hos-artist-story').textContent = artist.story;
-  const biography = artist.biography || editorial.biographies?.[artist.id];
-  $('#hos-artist-biography').textContent = typeof biography === 'object' ? (biography.name === artist.name ? biography.text : artist.description) : biography || artist.description;
+  $('#hos-artist-practice-section').hidden = !artist.story;
+  $('#hos-artist-biography').textContent = artistBiography(artist);
   applyImage($('#hos-artist-image'), assets[artist.portrait]); $('#hos-artist-image').alt = `Portrait of ${artist.name}`;
   const selected = works.filter(w => w.artistId === artist.id);
   $('#hos-artist-work-link').hidden = selected.length === 0;
   if (selected.length) $('#hos-artist-work-link').dataset.work = selected[0].id;
   const more = $('#hos-artist-works'); more.replaceChildren();
   if (selected.length) {
-    const grid = el('div', 'hos-work-grid'); selected.forEach(w => grid.append(workCard(w)));
-    more.append(el('div', 'hos-eyebrow', 'WORKS BY THE ARTIST'), grid);
+    more.append(el('h2', '', 'Works by ' + artist.name), workGrid(selected));
   }
 }
 function renderWork(work) {
   activeWork = work; activeArtist = artists.find(a => a.id === work.artistId);
   $('#hos-work-title').textContent = work.title;
   $('#hos-work-artist').textContent = activeArtist.name.toUpperCase();
+  $('#hos-work-artist').dataset.artist = activeArtist.id;
+  $('#hos-work-year').textContent = work.yearMade || 'Available on enquiry';
   $('#hos-work-dimensions').textContent = work.dimensions;
   $('#hos-work-material').textContent = work.material;
-  $('#hos-work-acquisition').textContent = work.acquisitionMethod || 'On enquiry';
+  $('#hos-work-acquisition').textContent = !work.acquisitionMethod || work.acquisitionMethod === 'On enquiry' ? 'Available on enquiry' : work.acquisitionMethod;
   $('#hos-work-description').textContent = work.description;
   const button = $('#hos-work-inquiry');
   button.dataset.inquiry = `${work.title} by ${activeArtist.name}`; button.dataset.inquiryWork = work.id;
@@ -116,19 +148,22 @@ function route(path, shouldFocus = true) {
   if (path.startsWith('/works/')) { item = works.find(w => w.slug === path.split('/')[2]); if (item) { renderWork(item); page = 'work'; } }
   if (!$(`[data-page="${page.replace(/[^a-z]/g, '')}"]`) || !['home','collection','artists','artist','work','making','designers','collectors','house','privacy'].includes(page)) page = 'home';
   activePage = page;
+  pageAnimation?.cancel();
   root.querySelectorAll('[data-page]').forEach(view => { view.hidden = view.dataset.page !== page; });
   main.hidden = false; inquiry.hidden = true; setMenu(false);
   const labels = {home:'Zimbabwean stone sculpture',collection:'The collection',artists:'The artists',making:'The making',designers:'For designers',collectors:'For collectors',house:'The house',privacy:'Privacy'};
   document.title = `${item?.title || item?.name || labels[page] || 'House of Stone'} | House of Stone`;
   const canonical = document.querySelector('link[rel="canonical"]'); if (canonical) canonical.href = location.origin + (previewMode ? '/admin/preview' : '') + path;
   const description = item?.description || catalog.site.description;
-  const photo = location.origin + (assets[item?.image || item?.portrait || 'hero'] || assets.hero);
+  const photo = location.origin + (assets[item?.image || item?.portrait] || heroSource());
   for (const [selector, value] of [['meta[name="description"]',description],['meta[property="og:title"]',document.title],['meta[name="twitter:title"]',document.title],['meta[property="og:description"]',description],['meta[name="twitter:description"]',description],['meta[property="og:url"]',canonical?.href],['meta[property="og:image"]',photo],['meta[name="twitter:image"]',photo]]) document.querySelector(selector)?.setAttribute('content',value);
   menu.querySelectorAll('[data-view]').forEach(button => { if (button.dataset.view === page) button.setAttribute('aria-current','page'); else button.removeAttribute('aria-current'); });
   if (shouldFocus) {
     window.scrollTo({ top:0, behavior:'instant' });
     const heading = $(`[data-page="${page}"] h1`); heading?.setAttribute('tabindex','-1'); heading?.focus({preventScroll:true});
+    pageAnimation = animateSurface($(`[data-page="${page}"]`));
   }
+  observeReveals($(`[data-page="${page}"]`));
   const details = page === 'work' ? { workId:activeWork.id, artistId:activeArtist.id } : page === 'artist' ? { artistId:activeArtist.id } : {};
   track('page_view', details);
   if (page === 'work') track('work_view', details);
@@ -143,10 +178,11 @@ function openInquiry(topic, trigger) {
   inquiryContext = { topic, workId: trigger?.dataset.inquiryWork || '', artistId: trigger?.dataset.inquiryArtist || '' };
   submissionId = uuid(); inquiryStarted = false;
   form.reset(); form.hidden = false; review.hidden = true; success.hidden = true;
-  title.textContent = 'Begin an enquiry.'; statusMessage(''); $('#hos-inquiry-context').textContent = topic;
+  title.textContent = 'Your enquiry'; statusMessage(''); $('#hos-inquiry-context').textContent = topic;
   if (topic === 'Designer project') form.elements.interest.value = 'Sourcing for a project';
   main.hidden = true; inquiry.hidden = false; setMenu(false);
   window.scrollTo({top:0,behavior:'instant'}); form.elements.name.focus({preventScroll:true});
+  pageAnimation?.cancel();pageAnimation=animateSurface(inquiry);
   track('inquiry_opened', { workId:inquiryContext.workId, artistId:inquiryContext.artistId });
 }
 function closeInquiry() {
@@ -198,7 +234,7 @@ form.addEventListener('submit', event => {
 });
 $('#hos-inquiry-edit').addEventListener('click', () => {
   if (submitting) return;
-  submissionId = uuid(); form.hidden = false; review.hidden = true; title.textContent = 'Begin an enquiry.'; statusMessage(''); window.scrollTo({top:0,behavior:'instant'}); form.elements.name.focus({preventScroll:true});
+  submissionId = uuid(); form.hidden = false; review.hidden = true; title.textContent = 'Your enquiry'; statusMessage(''); window.scrollTo({top:0,behavior:'instant'}); form.elements.name.focus({preventScroll:true});
 });
 sendButton.addEventListener('click', async () => {
   if (previewMode) return;
@@ -226,38 +262,18 @@ async function start() {
   if (editorialResponse.ok) editorial = await editorialResponse.json();
   catalog = await response.json(); ({artists,works,assets} = catalog);
   $('#hos-location').textContent = catalog.site.location;
-  root.querySelectorAll('[data-asset]').forEach(img => { applyImage(img,assets[img.dataset.asset],img.classList.contains('hos-hero-image') ? '100vw' : undefined); if (!img.classList.contains('hos-hero-image') && !img.classList.contains('hos-brand-mark')) img.loading = 'lazy'; });
-  root.querySelectorAll('.hos-editorial-image img').forEach(img => applyImage(img,img.getAttribute('src'),'90vw'));
-  $('.hos-hero-image').alt = catalog.site.heroAlt;
+  root.querySelectorAll('[data-asset]').forEach(img => { applyImage(img,assets[img.dataset.asset]); if (!img.classList.contains('hos-brand-mark')) img.loading = 'lazy'; });
+  applyImage($('.hos-hero-image'),heroSource(),'100vw');$('.hos-hero-image').alt=heroDescription();
+  root.querySelectorAll('.hos-editorial-image img,.hos-summary-photo img[src]').forEach(img=>applyImage(img,img.getAttribute('src'),'90vw'));
   root.querySelectorAll('[data-artist-grid]').forEach(grid => {
-    const selected = grid.dataset.artistGrid === 'home' ? artists.slice(0,3) : artists;
-    selected.forEach(artist => {
-      const card = el('button','hos-portrait-card cursor-interaction'); card.type = 'button'; card.dataset.artist = artist.id;
-      card.append(image(artist.portrait, 'Portrait of ' + artist.name,true,'(max-width: 900px) 44vw, 29vw'), el('h3','',artist.name), el('p','',artist.style)); grid.append(card);
+    artists.forEach(artist => {
+      const card=el('button','hos-portrait-card cursor-interaction');card.type='button';card.dataset.artist=artist.id;card.dataset.reveal='';
+      card.append(image(artist.portrait,'Portrait of '+artist.name,true,'(max-width: 700px) 90vw, 29vw'),el('h3','',artist.name),el('p','',artist.style));grid.append(card);
     });
   });
-  $('[data-page="artists"] .hos-page-heading p').textContent = `${artists.length === 5 ? 'Five' : artists.length} distinct practices, connected by stone and an instinct for form.`;
-  const chapters = $('#hos-collection-chapters');
-  artists.forEach(artist => {
-    const selected = works.filter(w => w.artistId === artist.id); if (!selected.length) return;
-    const work = selected[0], chapter = el('section','hos-collection-chapter'), copy = el('div','hos-chapter-copy');
-    const portrait = el('div','hos-chapter-portrait'), identity = el('div');
-    const name = el('button','hos-chapter-name cursor-interaction',artist.name); name.type = 'button'; name.dataset.artist = artist.id;
-    identity.append(name, el('small','',artist.style)); portrait.append(image(artist.portrait,'Portrait of ' + artist.name,true,'60px'),identity);
-    copy.append(portrait,el('h2','',work.title),el('p','',work.description),link('Explore this work',{work:work.id}));
-    if (selected.length > 1) { const grid = el('div','hos-work-grid'); selected.slice(1).forEach(w => grid.append(workCard(w))); copy.append(grid); }
-    const photo = el('button','hos-chapter-photo cursor-interaction'); photo.type = 'button'; photo.dataset.work = work.id;
-    photo.setAttribute('aria-label', `Explore ${work.title} by ${artist.name}`);
-    const img = image(work.image,`${work.title}, a stone sculpture by ${artist.name}`); photo.append(img);
-    chapter.append(copy,photo); chapters.append(chapter);
-  });
-  const featured = works.find(w => w.id === catalog.site.featuredWorkId) || works[0];
-  if (featured) {
-    const artist = artists.find(a => a.id === featured.artistId);
-    applyImage($('.hos-feature-image img'),assets[featured.image]); $('.hos-feature-image img').alt = `${featured.title}, a stone sculpture by ${artist.name}`;
-    $('.hos-feature-copy .hos-eyebrow').textContent = 'SELECTED WORK / ' + artist.name.toUpperCase();
-    $('.hos-feature-copy h2').textContent = featured.title + '.'; $('.hos-feature-copy p').textContent = featured.description;
-    $('.hos-feature-copy [data-work]').dataset.work = featured.id;
+  for (const target of ['#hos-home-chapters','#hos-collection-chapters']) {
+    const chapters=$(target);chapters.replaceChildren();
+    artists.forEach(artist=>{const selected=works.filter(work=>work.artistId===artist.id);if(selected.length)chapters.append(artistChapter(artist,selected));});
   }
   if (previewMode) {
     document.body.classList.add('hos-preview');

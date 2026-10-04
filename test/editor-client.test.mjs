@@ -45,17 +45,17 @@ test('actual editor saves drafts, previews privately, and publishes an added scu
   await f.input('title','Soft Light');await f.click('save');let state=await f.state();assert.equal(state.draft.works[0].title,'Soft Light');assert.equal(state.unpublished,true);
   await f.click('preview');assert.equal(f.tabs[0].location.href,'/admin/preview');
   await f.click('add-work');await f.input('title','New Form');assert.equal(f.get('#field-slug').value,'new-form');
-  await f.input('dimensions','30 × 20 × 15 cm');await f.input('material','Springstone');await f.input('description','A quiet curved form.');
+  await f.input('dimensions','30 × 20 × 15 cm');await f.input('material','Springstone');await f.input('yearMade','2026');await f.input('description','A quiet curved form.');
   const photo=tree(f.get('#fields')).find(item=>item.tagName==='button'&&item.attributes['aria-label']==='fold');assert(photo);await photo.click();
   await f.click('publish');state=await f.state();assert.equal(state.unpublished,false);assert.equal(state.draft.works.length,6);
-  const live=await (await fetch(f.base+'/content.json')).json();assert.equal(live.works.at(-1).title,'New Form');assert.equal(live.works.at(-1).image,'fold');
+  const live=await (await fetch(f.base+'/content.json')).json();assert.equal(live.works.at(-1).title,'New Form');assert.equal(live.works.at(-1).image,'fold');assert.equal(live.works.at(-1).yearMade,'2026');
 });
 test('actual editor uploads photos, edits the hero and retains unsaved edits on a conflict',async t=>{
   const f=await fixture(t),bytes=readFileSync(new URL('../public/assets/fold.jpg',import.meta.url));
   let upload=tree(f.get('#fields')).find(item=>item.tagName==='input'&&item.type==='file');upload.files=[{type:'image/jpeg',size:bytes.length,bytes}];await upload.dispatch('change');await f.flush();
   assert(f.get('#status').textContent.includes('Photo uploaded'));
   await f.click('save');assert.match((await f.state()).draft.works[0].image,/^upload_/);
-  await f.click('site');const photo=tree(f.get('#fields')).find(item=>item.tagName==='button'&&item.attributes['aria-label']==='balance');await photo.click();await f.click('save');assert.equal((await f.state()).draft.assets.hero,'/assets/balance.jpg');
+  await f.click('site');const photo=tree(f.get('#fields')).find(item=>item.tagName==='button'&&item.attributes['aria-label']==='balance');await photo.click();await f.click('save');const updated=await f.state();assert.equal(updated.draft.site.heroImage,'balance');assert.equal(updated.draft.assets.hero,'/assets/hero.jpg');
   await f.input('location','Harare / New York');
   const external=await f.state();external.draft.site.location='Harare';
   await fetch(f.base+'/api/admin/content',{method:'POST',headers:{Authorization:f.auth,'Content-Type':'application/json',Origin:f.base},body:JSON.stringify({revision:external.revision,catalog:external.draft})});

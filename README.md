@@ -4,14 +4,16 @@ The approved black website and Taper logo, with a private collection editor, enq
 
 ## What is finished
 
-- A full-width responsive gallery with fixed header and footer, a modal side drawer, smaller thin typography, and the centered Taper mark.
-- Complete image framing throughout, restored original images, responsive high-quality WebP delivery, and original-resolution uploads.
+- A full-width apartment hero, fixed header and footer, a modal side drawer, readable 16-pixel body typography, and the centered Taper mark.
+- Artist-led collection chapters, aligned biographies, and sculpture cards with specifications, descriptions and detail links. The homepage also introduces designers, collectors, the making and the House.
+- Complete sculpture, portrait and editorial image framing, responsive high-quality WebP delivery, and original-resolution uploads. The homepage hero fills the viewport with a responsive crop.
+- Short, interruptible page and drawer animations, subtle scroll reveals, and reduced-motion support.
 - Designer and collector interior editorials, artist biographies, and a fuller account of the House and its founders.
 - A review and send enquiry flow with a real server, persistent storage, receipt reference, error handling, and safe retries.
 - A password protected inbox at `/admin`, with enquiry and activity CSV exports.
 - A demand dashboard for website sessions, collection clicks, work views, enquiry starts, submitted enquiries, campaign sources, and interest in individual works.
 - Shareable artist and artwork addresses, page metadata, social previews, favicon, sitemap, and robots settings.
-- A private editor at `/admin/content` for artists, sculptures, photos, ordering, archiving, and the homepage featured work. Save drafts, preview, publish, and restore earlier published versions.
+- A private editor at `/admin/content` for artists, sculptures, photos, ordering, archiving, and the homepage image. Save drafts, preview, publish, and restore earlier published versions.
 - Privacy preferences, browser privacy signal handling, input limits, spam traps, request limits, and restricted access to private files.
 - Optional email notifications with a durable retry queue. Enquiries reach the private inbox even when email is not configured or a notification fails.
 - Docker packaging, Railway configuration, a GitHub checks workflow, persistent storage, and backup commands covering both the catalogue and uploaded photos.
@@ -86,11 +88,11 @@ The server uses the enquiry reference as the notification idempotency key. Resen
 
 ## Update sculptures and artists
 
-Sign in to `/admin/content`. Select a sculpture or artist, or choose **Add sculpture** or **Add artist**. Upload a JPEG, PNG, or WebP photo under 32 MB, or choose an existing image. There are no price fields. Sculpture details include title, artist, dimensions, stone type, how the stone was acquired, and a description.
+Sign in to `/admin/content`. Select a sculpture or artist, or choose **Add sculpture** or **Add artist**. Upload a JPEG, PNG, or WebP photo under 32 MB, or choose an existing image. There are no price fields. Sculpture details include title, artist, dimensions, stone type, optional year made, how the stone was acquired, and a description. Dates and sourcing details that have not been provided display as available on enquiry.
 
-Use the up/down controls to change the order. **Homepage & site details** controls the featured sculpture and hero photo. Adding several works under one artist automatically shows them on the collection and artist pages. Archiving hides a record from visitors while preserving its identifier and demand history. Archiving an artist also hides their sculptures.
+Use the up/down controls to change the order. **Homepage & site details** controls the hero photo, location and sharing description. The hero image is independent of sculpture photos. Adding several works under one artist automatically shows them below that artist on the homepage, collection and artist pages. Archiving hides a record from visitors while preserving its identifier and demand history. Archiving an artist also hides their sculptures.
 
-Save your draft before leaving. Preview opens the saved draft in a private window with enquiries and demand measurement paused. Publish checks for missing photos, artist references, required sculpture details, duplicate addresses, and a visible featured sculpture. If another window saved changes first, the editor keeps your edits and asks you to reload rather than overwriting the newer version. Download your edits before reloading to retain a copy.
+Save your draft before leaving. Preview opens the saved draft in a private window with enquiries and demand measurement paused. Publish checks for missing photos, artist references, required sculpture details, duplicate addresses, and at least one visible sculpture. If another window saved changes first, the editor keeps your edits and asks you to reload rather than overwriting the newer version. Download your edits before reloading to retain a copy.
 
 Published versions can be restored into a draft and then published again. Restore also retains newer records as archived, keeping their identifiers. There is one shared `admin` account for both founders in this version, with no separate user permissions or per-person audit trail.
 
@@ -149,7 +151,7 @@ npm test
 
 The automated tests exercise the real HTTP server and SQLite database, including persistence, privacy signals, idempotent submissions, rejected requests, access control, exports, campaign attribution, simulated email failures, draft isolation, publication, concurrency, image uploads, archiving, version restoration, and backups. Small DOM adapters run the actual visitor and editor scripts through their key interaction and network states.
 
-The Browser QA workflow runs Chromium, Firefox and WebKit against a fresh isolated server. It covers 18 public routes at eight sizes from 320 × 568 to 2560 × 1440, portrait and landscape, drawer layout and keyboard behavior, complete image decoding, real enquiries, lost confirmations and safe retries, privacy choices, session measurement, and actual owner editing. Screenshots and a JSON report are saved as a private seven-day workflow artifact. See the workflow result for the exact revision tested.
+The Browser QA workflow runs Chromium, Firefox and WebKit against a fresh isolated server. It covers 18 public routes at eleven sizes from 320 × 568 to 3840 × 2160, including 2048-pixel monitor scaling and 3440-pixel ultrawide layouts, portrait and landscape, drawer layout and keyboard behavior, complete image decoding, real enquiries, lost confirmations and safe retries, privacy choices, session measurement, and actual owner editing, animation interruption and reduced-motion support. Screenshots and a JSON report are saved as a private seven-day workflow artifact. See the workflow result for the exact revision tested.
 
 To run those browser checks locally, install the optional QA dependencies and browser binaries:
 
@@ -166,6 +168,7 @@ This tests browser engines, rather than every physical device. Confirm optional 
 - [Node.js 24.19 SQLite API](https://nodejs.org/download/release/v24.19.0/docs/api/sqlite.html)
 - [Node.js HTTP server API](https://nodejs.org/api/http.html)
 - [Resend Send Email API](https://resend.com/docs/api-reference/emails/send-email)
+- [Agrippa Tirigu: Sculpting the stone](https://www.zimsculptures.com/sculpting-the-stone/) (background for the general process description)
 
 The website uses Node.js 24's built-in SQLite module. The package targets Node.js 24.15 or newer within the 24 series, and the Dockerfile pins 24.19.0.
 
@@ -175,6 +178,6 @@ Stop the running server with Control-C. Copy the updated source files into your 
 
 ## Photography for launch
 
-The included images now use the largest recovered originals, rather than the small files in the first package. The smallest master is 1122 pixels wide; hero and making images are 1672 pixels wide. These are not native 4K photographs. Responsive WebP versions never enlarge them, and no CSS image frame crops them. The new interior images were created with the built-in image-generation tool using the approved sculptures as references; they show a refined New York apartment and a private home gallery.
+The included images now use the largest recovered originals, rather than the small files in the first package. The smallest master is 1122 pixels wide; the apartment hero is 1536 pixels wide and the making image is 1672 pixels wide. These are not native 4K photographs. Responsive WebP versions never enlarge them. Sculpture, portrait and editorial images remain complete; only the homepage hero uses a viewport-filling crop. The new interior images were created with the built-in image-generation tool using the approved sculptures as references; they show a refined New York apartment and a private home gallery.
 
 For final photography, aim for 3840 pixels or more across a full-width hero or interior, and 2400 pixels or more across sculpture and portrait images. Keep the entire sculpture inside the photo with breathing room around the tip and base. Upload the highest-quality useful JPEG, PNG or WebP under 32 MB. Uploads retain the exact original bytes and resolution; the website cannot recover detail absent from a source photograph. Replace the sample artist biographies with approved factual biographies when the actual artists join the collection.

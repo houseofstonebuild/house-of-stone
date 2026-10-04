@@ -21,7 +21,11 @@ async function api(path, data) {
   if (!response.ok) { if (response.status === 409) $('#conflict').hidden = false; throw new Error(result.error || 'Please try again.'); }
   return result;
 }
-function accept(result) { state = result; draft = structuredClone(result.draft); dirty = false; $('#conflict').hidden = true; }
+function accept(result) {
+  state = result; draft = structuredClone(result.draft);
+  if (!draft.site.heroImage) { draft.assets['designer-apartment'] ||= '/assets/designer-apartment.jpg'; draft.site.heroImage = 'designer-apartment'; draft.site.heroAlt = 'Stone sculptures in a New York apartment overlooking Manhattan'; }
+  dirty = false; $('#conflict').hidden = true;
+}
 async function save() {
   if (!dirty) return;
   accept(await api('content',{revision:state.revision,catalog:draft}));
@@ -103,23 +107,19 @@ function render() {
     field(grid,record,'artistId','Artist',{required:true,options:draft.artists.map(a=>({value:a.id,label:a.name+(a.archived?' · Archived':'')}))});
     field(grid,record,'slug','Page address',{max:100}); field(grid,record,'dimensions','Dimensions · height × width × depth',{max:120});
     field(grid,record,'material','Stone type',{max:120});
-    field(grid,record,'objectPosition','Photo alignment',{options:[...new Set(['50% center','25% center','75% center','50% top','50% bottom',record.objectPosition])].filter(Boolean).map(value=>({value,label:value==='50% center'?'Centered':value}))});
+    field(grid,record,'yearMade','Year made (optional)',{max:80});
     field(grid,record,'acquisitionMethod','How the artist acquired the stone',{wide:true,multiline:true,max:1000});
     field(grid,record,'description','About the sculpture',{wide:true,multiline:true,max:3000});
     photo(record,'image','Sculpture photo'); archive(record,'Archive this sculpture · hide it from the website');
   } else if(selection.kind==='artist') {
     field(grid,record,'name','Artist name',{required:true,max:120});field(grid,record,'slug','Page address',{max:100});
-    field(grid,record,'style','Style',{max:120});field(grid,record,'practice','Practice or short phrase',{max:200});
+    field(grid,record,'style','Style',{max:120});
     field(grid,record,'description','Introduction',{wide:true,multiline:true,max:2000});field(grid,record,'biography','Brief biography',{wide:true,multiline:true,max:5000});field(grid,record,'story','The artistic practice',{wide:true,multiline:true,max:5000});
     photo(record,'portrait','Artist portrait');archive(record,'Archive this artist · hide their profile and sculptures');
   } else {
-    field(grid,record,'featuredWorkId','Featured sculpture',{wide:true,options:[{value:'',label:'Choose a sculpture'},...draft.works.filter(w=>!w.archived&&!draft.artists.find(a=>a.id===w.artistId)?.archived).map(w=>({value:w.id,label:w.title}))]});
     field(grid,record,'location','Location',{wide:true,max:120});field(grid,record,'description','Website description for search and sharing',{wide:true,multiline:true,max:400});
     field(grid,record,'heroAlt','Hero photo description for screen readers',{wide:true,max:300});
-    const hero={};
-    Object.defineProperty(hero,'image',{get:()=> 'hero',set:value=>{draft.assets.hero=draft.assets[value];}});
-    // The hero has a fixed asset key because the approved layout uses it in several places.
-    photo(hero,'image','Homepage hero photo');
+    photo(record,'heroImage','Homepage hero photo');
   }
   renderHistory();
 }

@@ -76,12 +76,24 @@ test('archiving preserves records and history, and restoring creates a draft wit
   assert.equal((await (await f.get('/content.json',false)).json()).artists.length,4);
   await f.post('publish',{revision:restored.revision});assert.equal((await (await f.get('/content.json',false)).json()).artists.length,5);
 });
-test('invalid addresses, external images, orphaned works and empty featured selections cannot be published',async t=>{
+test('invalid addresses, external images, orphaned works and empty collections cannot be published',async t=>{
   const f=await fixture(t),state=await f.state();
   for(const mutate of [c=>c.works[0].artistId='missing',c=>c.works[0].slug='../../private',c=>c.works[1].slug=c.works[0].slug,c=>c.assets.fold='https://external.example/photo.jpg',c=>c.artists[0]=null,c=>c.works[0].objectPosition='javascript:bad']) {
     const changed=structuredClone(state.draft);mutate(changed);assert.equal((await f.post('content',{revision:state.revision,catalog:changed})).status,400);
   }
-  state.draft.works[0].archived=true;const saved=await f.save(state.draft,state.revision);assert.equal((await f.post('publish',{revision:saved.revision})).status,400);
+  state.draft.works[0].archived=true;let saved=await f.save(state.draft,state.revision);assert.equal((await f.post('publish',{revision:saved.revision})).status,200);
+  saved=await f.state();saved.draft.works.forEach(work=>{work.archived=true;});saved=await f.save(saved.draft,saved.revision);assert.equal((await f.post('publish',{revision:saved.revision})).status,400);
+});
+test('older catalogues keep their sculpture photos and content while the new homepage uses the apartment',async t=>{
+  const f=await fixture(t),state=await f.state();
+  delete state.draft.site.heroImage;delete state.draft.assets['designer-apartment'];
+  state.draft.artists[0].biography='A biography already saved by the owner.';
+  const saved=await f.save(state.draft,state.revision);assert.equal((await f.post('publish',{revision:saved.revision})).status,200);
+  await f.restart();
+  const live=await (await f.get('/content.json',false)).json();
+  assert.equal(live.artists[0].biography,'A biography already saved by the owner.');
+  assert.equal(live.assets[live.works.find(work=>work.image==='hero').image],'/assets/hero.jpg');
+  assert.match(await (await f.get('/',false)).text(),/property="og:image" content="[^"]*\/assets\/designer-apartment.jpg"/);
 });
 test('database backup includes content versions and uploaded media',async t=>{
   const f=await fixture(t),bytes=readFileSync(new URL('../public/assets/fold.jpg',import.meta.url));
