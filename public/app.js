@@ -103,7 +103,42 @@ function artistBiography(artist) {
   return typeof value === 'object' ? (value.name === artist.name ? value.text : artist.description) : value || artist.description;
 }
 function workGrid(selected) { const grid=el('div','hos-work-grid');grid.dataset.count=String(selected.length);grid.dataset.reveal='';selected.forEach(work=>grid.append(workCard(work)));return grid; }
+function chapterMedia(artist, work) {
+  const entry = editorial.chapters?.[artist.id];
+  // Stop using the editorial set when an owner replaces either subject's photo.
+  if (!entry || entry.artistName !== artist.name || entry.workId !== work.id || entry.workTitle !== work.title || entry.portraitSource !== assets[artist.portrait] || entry.workSource !== assets[work.image]) return null;
+  return entry;
+}
+function editorialImage(source, alt, sizes) {
+  const img = el('img'); applyImage(img, source, sizes); img.alt = alt; img.loading = 'lazy'; return img;
+}
+function sculptureSettings(artist, work, entry) {
+  const grid = el('div', 'hos-sculpture-settings'); grid.dataset.reveal = '';
+  for (const [setting, label, space] of [['apartment','For designers','an apartment'],['gallery','For collectors','a private gallery'],['office','For corporate offices','a corporate office']]) {
+    const tile = el('article', 'hos-setting-tile');
+    const photo = el('button', 'hos-setting-photo cursor-interaction'); photo.type = 'button'; photo.dataset.work = work.id;
+    photo.setAttribute('aria-label', `View ${work.title} by ${artist.name} in ${space}`);
+    photo.append(editorialImage(entry.settings[setting], `${work.title} by ${artist.name} in ${space}`, '(max-width: 700px) 90vw, (max-width: 1800px) 28vw, 480px'));
+    tile.append(photo, el('h3', '', label), link('View sculpture', {work:work.id})); grid.append(tile);
+  }
+  return grid;
+}
 function artistChapter(artist, selected) {
+  const featured = selected.find(work => chapterMedia(artist, work));
+  if (featured) {
+    const entry = chapterMedia(artist, featured), chapter = el('section', 'hos-artist-chapter hos-editorial-chapter');
+    const campaign = el('div', 'hos-artist-campaign'); campaign.dataset.reveal = '';
+    campaign.append(editorialImage(entry.landscape, `${artist.name} beside ${featured.title} in the studio`, '(max-width: 1800px) 90vw, 1560px'));
+    const details = el('div', 'hos-chapter-details'); details.dataset.reveal = '';
+    const artistCopy = el('div', 'hos-chapter-artist');
+    artistCopy.append(el('h2','',artist.name),el('p','',artist.description === entry.descriptionSource ? entry.shortDescription : artist.description),link('About the artist',{artist:artist.id}));
+    const workCopy = el('div', 'hos-chapter-work');
+    workCopy.append(el('h3','',featured.title),el('p','',featured.material),el('p','',featured.dimensions));
+    details.append(artistCopy,workCopy); chapter.append(campaign,details,sculptureSettings(artist,featured,entry));
+    const additional = selected.filter(work => work.id !== featured.id);
+    if (additional.length) { const more = el('div','hos-chapter-additional');more.append(el('h3','','More works by '+artist.name),workGrid(additional));chapter.append(more); }
+    return chapter;
+  }
   const chapter=el('section','hos-artist-chapter'),intro=el('div','hos-artist-intro');intro.dataset.reveal='';
   const portrait=el('button','hos-artist-intro-photo cursor-interaction');portrait.type='button';portrait.dataset.artist=artist.id;portrait.setAttribute('aria-label',`Read about ${artist.name}`);
   portrait.append(image(artist.portrait,'Portrait of '+artist.name,true,'(max-width: 700px) 90vw, 420px'));
@@ -148,6 +183,7 @@ function route(path, shouldFocus = true) {
   if (path.startsWith('/works/')) { item = works.find(w => w.slug === path.split('/')[2]); if (item) { renderWork(item); page = 'work'; } }
   if (!$(`[data-page="${page.replace(/[^a-z]/g, '')}"]`) || !['home','collection','artists','artist','work','making','designers','collectors','house','privacy'].includes(page)) page = 'home';
   activePage = page;
+  $('#hos-page-navigation').hidden = page === 'home';
   pageAnimation?.cancel();
   root.querySelectorAll('[data-page]').forEach(view => { view.hidden = view.dataset.page !== page; });
   main.hidden = false; inquiry.hidden = true; setMenu(false);
@@ -169,7 +205,18 @@ function route(path, shouldFocus = true) {
   if (page === 'work') track('work_view', details);
   if (page === 'artist') track('artist_view', details);
 }
-function navigate(path) { history.pushState({}, '', (previewMode ? '/admin/preview' : '') + path); route(path); }
+function rememberScroll() {
+  history.replaceState?.({...history.state,hosNavigation:{...history.state?.hosNavigation,path:routePath(),scrollY:window.scrollY || 0}},'');
+}
+function navigate(path) {
+  if (path === routePath()) { route(path); return; }
+  rememberScroll();
+  history.pushState({hosNavigation:{path,previous:routePath(),scrollY:0}}, '', (previewMode ? '/admin/preview' : '') + path); route(path);
+}
+function navigateBack() {
+  if (history.state?.hosNavigation?.previous && history.back) { history.back(); return; }
+  navigate(activePage === 'work' ? '/collection' : activePage === 'artist' ? '/artists' : '/');
+}
 function openInquiry(topic, trigger) {
   if (previewMode) return;
   if (submitting) return;
@@ -214,6 +261,7 @@ $('#hos-inquiry-continue').addEventListener('click', () => navigate('/collection
 root.addEventListener('keydown', event => { if (event.key === 'Escape') { if (!menu.hidden) { event.preventDefault(); setMenu(false); menuToggle.focus({preventScroll:true}); } else if (!inquiry.hidden) closeInquiry(); } });
 root.addEventListener('click', event => {
   if (!catalog || submitting) return;
+  if (event.target.closest('[data-back]')) { navigateBack(); return; }
   const view = event.target.closest('[data-view]');
   if (view) {
     if (view.dataset.view === 'collection') track('explore_click');
@@ -254,7 +302,15 @@ sendButton.addEventListener('click', async () => {
     statusMessage(error.name === 'TimeoutError' || error.name === 'TypeError' ? 'We could not confirm receipt. Your details are still here. Please try again.' : error.message, true);
   } finally { submitting = false; sendButton.disabled = false; $('#hos-inquiry-edit').disabled = false; $('#hos-inquiry-close').disabled = false; }
 });
-window.addEventListener('popstate', () => { if (catalog) route(routePath()); });
+window.addEventListener('popstate', () => {
+  if (!catalog || submitting) return;
+  route(routePath(), false);
+  const restore = () => {
+    window.scrollTo({top:history.state?.hosNavigation?.scrollY || 0,behavior:'instant'});
+    const heading = $(`[data-page="${activePage}"] h1`);heading?.setAttribute('tabindex','-1');heading?.focus({preventScroll:true});
+  };
+  if (window.requestAnimationFrame) window.requestAnimationFrame(restore); else restore();
+});
 
 async function start() {
   const [response,mediaResponse,editorialResponse] = await Promise.all([fetch(previewMode ? '/api/admin/preview-content' : '/content.json'),fetch('/media-manifest.json').catch(()=>({ok:false})),fetch('/editorial.json').catch(()=>({ok:false}))]); if (!response.ok) throw new Error('The collection could not load. Please refresh the page.');
@@ -262,6 +318,7 @@ async function start() {
   if (editorialResponse.ok) editorial = await editorialResponse.json();
   catalog = await response.json(); ({artists,works,assets} = catalog);
   $('#hos-location').textContent = catalog.site.location;
+  $('.hos-founding-heading p').textContent = `${artists.length} artists. Selected works.`;
   root.querySelectorAll('[data-asset]').forEach(img => { applyImage(img,assets[img.dataset.asset]); if (!img.classList.contains('hos-brand-mark')) img.loading = 'lazy'; });
   applyImage($('.hos-hero-image'),heroSource(),'100vw');$('.hos-hero-image').alt=heroDescription();
   root.querySelectorAll('.hos-editorial-image img,.hos-summary-photo img[src]').forEach(img=>applyImage(img,img.getAttribute('src'),'90vw'));
@@ -281,6 +338,8 @@ async function start() {
     const back = el('a','','Return to editor'); back.href = '/admin/content'; banner.append(back); document.body.prepend(banner);
     root.querySelectorAll('[data-inquiry]').forEach(button=>{ button.disabled=true; });
   }
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  rememberScroll();
   preferenceUI(); route(routePath(), false); root.dataset.ready = 'true';
 }
 start().catch(error => {

@@ -20,5 +20,82 @@
       "name": "Tendai Nyakudya",
       "text": "Tendai Nyakudya is a Zimbabwean sculptor with an interest in mass, proportion and architectural form. His work brings together stacked volumes, measured openings and contrasting surfaces. He approaches each piece as a study in balance, allowing the weight and texture of the stone to remain central to its expression."
     }
+  },
+  "chapters": {
+    "tariro": {
+      "artistName": "Tariro Mavhunga",
+      "workId": "folded-light",
+      "workTitle": "Folded Light",
+      "portraitSource": "/assets/tariro.jpg",
+      "workSource": "/assets/fold.jpg",
+      "descriptionSource": "A sculptural practice exploring the relationship between quiet gestures and architectural space.",
+      "shortDescription": "Tariro works in pale stone, carving folded forms with soft curves and defined edges.",
+      "landscape": "/assets/tariro-studio.jpg",
+      "settings": {
+        "apartment": "/assets/folded-light-apartment.jpg",
+        "gallery": "/assets/folded-light-gallery.jpg",
+        "office": "/assets/folded-light-office.jpg"
+      }
+    },
+    "kuda": {
+      "artistName": "Kudakwashe Nyamudeza",
+      "workId": "continuum",
+      "workTitle": "Continuum",
+      "portraitSource": "/assets/kuda.jpg",
+      "workSource": "/assets/hero.jpg",
+      "descriptionSource": "A sculptural practice centered on open forms, polished edges and the space they hold.",
+      "shortDescription": "Kudakwashe carves open forms in dark stone, balancing polished edges with natural texture.",
+      "landscape": "/assets/kuda-studio.jpg",
+      "settings": {
+        "apartment": "/assets/continuum-apartment.jpg",
+        "gallery": "/assets/continuum-gallery.jpg",
+        "office": "/assets/continuum-office.jpg"
+      }
+    },
+    "ruvimbo": {
+      "artistName": "Ruvimbo Chikore",
+      "workId": "together",
+      "workTitle": "Together",
+      "portraitSource": "/assets/ruvimbo.jpg",
+      "workSource": "/assets/together.jpg",
+      "descriptionSource": "A practice exploring the relationship between paired figures, touch and shared space.",
+      "shortDescription": "Ruvimbo shapes connected figures, following the grain and colour of green serpentine.",
+      "landscape": "/assets/ruvimbo-studio.jpg",
+      "settings": {
+        "apartment": "/assets/together-apartment.jpg",
+        "gallery": "/assets/together-gallery.jpg",
+        "office": "/assets/together-office.jpg"
+      }
+    },
+    "farai": {
+      "artistName": "Farai Munetsi",
+      "workId": "quiet-flight",
+      "workTitle": "Quiet Flight",
+      "portraitSource": "/assets/farai.jpg",
+      "workSource": "/assets/bird.jpg",
+      "descriptionSource": "A sculptural practice translating the movement of birds into restrained, abstract form.",
+      "shortDescription": "Farai draws on birds and movement, reducing each form to a few deliberate curves.",
+      "landscape": "/assets/farai-studio.jpg",
+      "settings": {
+        "apartment": "/assets/quiet-flight-apartment.jpg",
+        "gallery": "/assets/quiet-flight-gallery.jpg",
+        "office": "/assets/quiet-flight-office.jpg"
+      }
+    },
+    "tendai": {
+      "artistName": "Tendai Nyakudya",
+      "workId": "equilibrium",
+      "workTitle": "Equilibrium",
+      "portraitSource": "/assets/tendai.jpg",
+      "workSource": "/assets/balance.jpg",
+      "descriptionSource": "A practice exploring stacked forms, opposing surfaces and architectural rhythm.",
+      "shortDescription": "Tendai works with stacked volumes and measured openings, focusing on proportion and balance.",
+      "landscape": "/assets/tendai-studio.jpg",
+      "settings": {
+        "apartment": "/assets/equilibrium-apartment.jpg",
+        "gallery": "/assets/equilibrium-gallery.jpg",
+        "office": "/assets/equilibrium-office.jpg"
+      }
+    }
   }
 }

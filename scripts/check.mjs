@@ -18,6 +18,16 @@ assert.equal([...html.matchAll(/data-asset="logo"/g)].length,1);
 assert(!/design concept|AI generated|placeholder/i.test(html.replace(/<[^>]*>/g,'')),'Unexpected visitor-facing development copy');
 assert(!/[\u2013\u2014]/.test(html),'Unexpected dash typography');
 const media = JSON.parse(readFileSync(resolve(root,'public/media-manifest.json'),'utf8'));
+const editorial = JSON.parse(readFileSync(resolve(root,'public/editorial.json'),'utf8'));
+for (const [artistId, chapter] of Object.entries(editorial.chapters || {})) {
+  const artist = catalog.artists.find(artist=>artist.id===artistId), work = catalog.works.find(work=>work.id===chapter.workId);
+  assert(artist && work && work.artistId===artistId,`Unknown editorial artist or work ${artistId}`);
+  assert.equal(chapter.artistName,artist.name);assert.equal(chapter.workTitle,work.title);
+  assert.equal(chapter.portraitSource,catalog.assets[artist.portrait]);assert.equal(chapter.workSource,catalog.assets[work.image]);
+  for (const source of [chapter.landscape,...['apartment','gallery','office'].map(setting=>chapter.settings[setting])]) {
+    assert.match(source,/^\/assets\/[a-zA-Z0-9_.-]+$/);assert(media[source],`Missing responsive editorial photo ${source}`);
+  }
+}
 for (const [source, info] of Object.entries(media)) {
   assert(existsSync(resolve(root,'public','.'+source)),`Missing master ${source}`);
   assert(info.width > 1000 && info.height > 900,`Small master ${source}`);

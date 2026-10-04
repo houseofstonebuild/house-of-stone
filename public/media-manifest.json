@@ -68,5 +68,105 @@
     "width": 1536,
     "height": 1024,
     "srcset": "/assets/responsive/collector-gallery-640.webp 640w, /assets/responsive/collector-gallery-960.webp 960w, /assets/collector-gallery.jpg 1536w"
+  },
+  "/assets/tariro-studio.jpg": {
+    "width": 1672,
+    "height": 941,
+    "srcset": "/assets/responsive/tariro-studio-640.webp 640w, /assets/responsive/tariro-studio-960.webp 960w, /assets/tariro-studio.jpg 1672w"
+  },
+  "/assets/folded-light-apartment.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/folded-light-apartment-640.webp 640w, /assets/responsive/folded-light-apartment-960.webp 960w, /assets/folded-light-apartment.jpg 1448w"
+  },
+  "/assets/folded-light-gallery.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/folded-light-gallery-640.webp 640w, /assets/responsive/folded-light-gallery-960.webp 960w, /assets/folded-light-gallery.jpg 1448w"
+  },
+  "/assets/folded-light-office.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/folded-light-office-640.webp 640w, /assets/responsive/folded-light-office-960.webp 960w, /assets/folded-light-office.jpg 1448w"
+  },
+  "/assets/kuda-studio.jpg": {
+    "width": 1672,
+    "height": 941,
+    "srcset": "/assets/responsive/kuda-studio-640.webp 640w, /assets/responsive/kuda-studio-960.webp 960w, /assets/kuda-studio.jpg 1672w"
+  },
+  "/assets/continuum-apartment.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/continuum-apartment-640.webp 640w, /assets/responsive/continuum-apartment-960.webp 960w, /assets/continuum-apartment.jpg 1448w"
+  },
+  "/assets/continuum-gallery.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/continuum-gallery-640.webp 640w, /assets/responsive/continuum-gallery-960.webp 960w, /assets/continuum-gallery.jpg 1448w"
+  },
+  "/assets/continuum-office.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/continuum-office-640.webp 640w, /assets/responsive/continuum-office-960.webp 960w, /assets/continuum-office.jpg 1448w"
+  },
+  "/assets/ruvimbo-studio.jpg": {
+    "width": 1672,
+    "height": 941,
+    "srcset": "/assets/responsive/ruvimbo-studio-640.webp 640w, /assets/responsive/ruvimbo-studio-960.webp 960w, /assets/ruvimbo-studio.jpg 1672w"
+  },
+  "/assets/together-apartment.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/together-apartment-640.webp 640w, /assets/responsive/together-apartment-960.webp 960w, /assets/together-apartment.jpg 1448w"
+  },
+  "/assets/together-gallery.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/together-gallery-640.webp 640w, /assets/responsive/together-gallery-960.webp 960w, /assets/together-gallery.jpg 1448w"
+  },
+  "/assets/together-office.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/together-office-640.webp 640w, /assets/responsive/together-office-960.webp 960w, /assets/together-office.jpg 1448w"
+  },
+  "/assets/farai-studio.jpg": {
+    "width": 1672,
+    "height": 941,
+    "srcset": "/assets/responsive/farai-studio-640.webp 640w, /assets/responsive/farai-studio-960.webp 960w, /assets/farai-studio.jpg 1672w"
+  },
+  "/assets/quiet-flight-apartment.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/quiet-flight-apartment-640.webp 640w, /assets/responsive/quiet-flight-apartment-960.webp 960w, /assets/quiet-flight-apartment.jpg 1448w"
+  },
+  "/assets/quiet-flight-gallery.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/quiet-flight-gallery-640.webp 640w, /assets/responsive/quiet-flight-gallery-960.webp 960w, /assets/quiet-flight-gallery.jpg 1448w"
+  },
+  "/assets/quiet-flight-office.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/quiet-flight-office-640.webp 640w, /assets/responsive/quiet-flight-office-960.webp 960w, /assets/quiet-flight-office.jpg 1448w"
+  },
+  "/assets/tendai-studio.jpg": {
+    "width": 1672,
+    "height": 941,
+    "srcset": "/assets/responsive/tendai-studio-640.webp 640w, /assets/responsive/tendai-studio-960.webp 960w, /assets/tendai-studio.jpg 1672w"
+  },
+  "/assets/equilibrium-apartment.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/equilibrium-apartment-640.webp 640w, /assets/responsive/equilibrium-apartment-960.webp 960w, /assets/equilibrium-apartment.jpg 1448w"
+  },
+  "/assets/equilibrium-gallery.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/equilibrium-gallery-640.webp 640w, /assets/responsive/equilibrium-gallery-960.webp 960w, /assets/equilibrium-gallery.jpg 1448w"
+  },
+  "/assets/equilibrium-office.jpg": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "/assets/responsive/equilibrium-office-640.webp 640w, /assets/responsive/equilibrium-office-960.webp 960w, /assets/equilibrium-office.jpg 1448w"
   }
 }

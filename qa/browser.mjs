@@ -61,7 +61,11 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
             assert(Math.abs(layout.hero.left)<1&&Math.abs(layout.hero.right-layout.clientWidth)<2,'Hero has side gaps');
             assert(Math.abs(layout.hero.top-layout.header.bottom)<2&&Math.abs(layout.hero.bottom-layout.footer.top)<2,'Hero does not fill the visible screen');
             assert.equal(await page.locator('#hos-home-chapters .hos-artist-chapter').count(),catalog.artists.length);
-            assert.equal(await page.locator('#hos-home-chapters .hos-work-card').count(),catalog.works.length);
+            assert.equal(await page.locator('#hos-home-chapters .hos-artist-campaign').count(),catalog.artists.length);
+            assert.equal(await page.locator('#hos-home-chapters .hos-setting-tile').count(),catalog.artists.length*3);
+            assert.equal(await page.locator('.hos-hero-copy h1 span').last().evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');
+            assert.equal(await page.locator('#hos-home-collection-title').evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');
+            assert(await page.locator('#hos-page-navigation').isHidden(),'Home should not show Back');
           }
           if(path.startsWith('/artists/')) {
             const profile=await page.evaluate(()=>({image:document.querySelector('.hos-artist-portrait').getBoundingClientRect(),copy:document.querySelector('.hos-artist-copy').getBoundingClientRect()}));
@@ -108,16 +112,37 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
     }
     await page.locator('.hos-header [data-view="home"]').click();
     await page.locator('.hos-hero-copy [data-view="collection"]').click();
-    await page.locator('[data-page="collection"] .hos-work-card-photo').first().click();
+    await page.locator('[data-page="collection"] .hos-setting-photo').first().click();
     assert(new URL(page.url()).pathname==='/works/folded-light');
     await page.goBack();assert(new URL(page.url()).pathname==='/collection');
     await page.goForward();assert(await page.locator('#hos-work-title').textContent()==='Folded Light');
+    // Every setting for an artist opens the same work. Back restores the chapter.
+    await page.setViewportSize({width:1440,height:900});
+    for(const [artistIndex,artist] of catalog.artists.entries()) {
+      const work=catalog.works.find(work=>work.artistId===artist.id);
+      for(let setting=0;setting<3;setting++) {
+        await ready(page);
+        const tile=page.locator('#hos-home-chapters .hos-artist-chapter').nth(artistIndex).locator('.hos-setting-photo').nth(setting);
+        await tile.scrollIntoViewIfNeeded();
+        const scroll=await page.evaluate(()=>scrollY);
+        await tile.click();assert.equal(new URL(page.url()).pathname,'/works/'+work.slug);
+        assert(await page.locator('#hos-page-navigation').isVisible());
+        await page.locator('#hos-page-navigation [data-back]').click();
+        await page.waitForURL(base+'/');
+        await page.waitForFunction(y=>Math.abs(scrollY-y)<3,scroll);
+      }
+      await page.locator('#hos-home-chapters .hos-artist-chapter').nth(artistIndex).getByRole('button',{name:'About the artist'}).click();
+      assert.equal(new URL(page.url()).pathname,'/artists/'+artist.slug);
+      await page.locator('#hos-page-navigation [data-back]').click();await page.waitForURL(base+'/');
+    }
+    await ready(page,'/works/folded-light');await page.locator('#hos-page-navigation [data-back]').click();await page.waitForURL(base+'/collection');
+    await ready(page,'/artists/tariro-mavhunga');await page.locator('#hos-page-navigation [data-back]').click();await page.waitForURL(base+'/artists');
     // A separate tracked browser session exercises real form submissions and attribution.
     const tracked=await browser.newContext({viewport:{width:390,height:844}});
     const visitor=await tracked.newPage();
     await ready(visitor,'/','?utm_source=qa&utm_medium=browser&utm_campaign=launch');
     await visitor.locator('.hos-hero-copy [data-view="collection"]').click();
-    await visitor.locator('[data-page="collection"] .hos-work-card-photo').first().click();
+    await visitor.locator('[data-page="collection"] .hos-setting-photo').first().click();
     await visitor.reload();await visitor.locator('#hos-concept[data-ready="true"]').waitFor();
     await visitor.locator('#hos-work-inquiry').click();
     await visitor.locator('#hos-inquiry-form button[type="submit"]').click();
@@ -201,11 +226,11 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
     for(const [width,columns] of [[1440,3],[768,2],[390,1]]) {
       await page.setViewportSize({width,height:900});await ready(page,'/collection');
       const grid=page.locator('#hos-collection-chapters .hos-work-grid').first();
-      assert.equal(await grid.locator('.hos-work-card').count(),4);
+      assert.equal(await grid.locator('.hos-work-card').count(),3);
       assert.equal(await grid.evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length),columns);
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1),'Multiple sculpture tiles overflow the screen');
     }
-    await page.locator('#hos-collection-chapters .hos-work-card .hos-text-link').nth(3).click();
+    await page.locator('#hos-collection-chapters .hos-work-card .hos-text-link').nth(2).click();
     assert.equal(await page.locator('#hos-work-title').textContent(),'Browser QA sculpture 4');
     await editor.goto(base+'/admin');await editor.locator('#inbox .enquiry').first().waitFor();
     assert((await editor.locator('#inbox').textContent()).includes('Browser QA collector'));

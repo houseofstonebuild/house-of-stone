@@ -46,7 +46,7 @@ body.hos-menu-open #hos-concept .hos-header,body.hos-menu-open #hos-concept .hos
 #hos-concept .hos-hero-shade {position:absolute;inset:0;pointer-events:none;background:linear-gradient(0deg,rgba(0,0,0,.7),rgba(0,0,0,.14) 40%,transparent 70%);}
 #hos-concept .hos-hero-copy {position:absolute;inset:auto var(--hos-gutter) 0;display:flex;flex-direction:column;align-items:center;text-align:center;padding:32px 0 42px;}
 #hos-concept .hos-hero-copy h1 {font-size:clamp(34px,3.3vw,50px);line-height:1.25;letter-spacing:-.02em;text-shadow:0 1px 14px rgba(0,0,0,.22);}
-#hos-concept .hos-hero-copy h1 span {display:block;}
+#hos-concept .hos-hero-copy h1 span {display:block;color:#fff;}
 #hos-concept .hos-hero-copy h1 span+span {margin-top:12px;font-size:clamp(18px,1.7vw,24px);font-weight:400;letter-spacing:.015em;}
 #hos-concept .hos-text-link {display:inline-flex;align-items:center;justify-content:space-between;gap:22px;min-height:44px;border-bottom:1px solid rgba(213,203,185,.45);padding:7px 0;font-size:14px;line-height:1.5;transition:border-color .18s ease,color .18s ease;}
 #hos-concept .hos-text-link span {transition:transform .18s ease;}
@@ -56,8 +56,32 @@ body.hos-menu-open #hos-concept .hos-header,body.hos-menu-open #hos-concept .hos
 #hos-concept .hos-section-title {display:flex;align-items:center;justify-content:space-between;gap:28px;margin-bottom:28px;}
 #hos-concept .hos-section-title h2 {margin-top:14px;}
 #hos-concept .hos-section-title p {margin-top:12px;}
-#hos-concept .hos-home-collection {padding-top:56px;padding-bottom:30px;}
+#hos-concept .hos-home-mission {padding:55px var(--hos-gutter) 42px;text-align:center;}
+#hos-concept .hos-home-mission p {max-width:670px;margin:0 auto;font-size:18px;line-height:1.75;}
+#hos-concept .hos-founding-heading {text-align:center;padding-bottom:30px;}
+#hos-concept .hos-founding-heading h2 {color:#fff;font-size:clamp(26px,2.2vw,34px);}
+#hos-concept .hos-founding-heading p {margin:10px auto 0;font-size:15px;}
+#hos-concept .hos-home-collection {padding-top:0;padding-bottom:30px;}
 #hos-concept .hos-artist-chapter {padding:46px 0 48px;border-top:1px solid var(--hos-line);}
+#hos-concept .hos-editorial-chapter {padding:0;margin-bottom:46px;border-top:0;background:#0d0d0c;}
+#hos-concept .hos-artist-campaign img {width:100%;height:auto;object-fit:contain;}
+#hos-concept .hos-chapter-details {display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:48px;padding:28px 32px 30px;}
+#hos-concept .hos-chapter-details h2,#hos-concept .hos-chapter-details h3 {font-size:clamp(24px,2vw,30px);line-height:1.35;margin:0;}
+#hos-concept .hos-chapter-artist p {max-width:480px;font-size:16px;margin:12px 0;}
+#hos-concept .hos-chapter-work p {font-size:16px;}
+#hos-concept .hos-chapter-work p:first-of-type {margin-top:12px;}
+#hos-concept .hos-sculpture-settings {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;padding:0 32px 32px;}
+#hos-concept .hos-setting-tile {min-width:0;}
+#hos-concept .hos-setting-photo {display:block;width:100%;}
+#hos-concept .hos-setting-photo img {width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;transition:filter .2s ease;}
+#hos-concept .hos-setting-photo:hover img {filter:brightness(1.06);}
+#hos-concept .hos-setting-tile h3 {font-size:18px;font-weight:400;line-height:1.5;margin:14px 0 3px;}
+#hos-concept .hos-chapter-additional {padding:12px 32px 32px;border-top:1px solid var(--hos-line);}
+#hos-concept .hos-chapter-additional>h3 {font-size:23px;}
+#hos-concept .hos-page-navigation {width:calc(100% - var(--hos-gutter) - var(--hos-gutter));max-width:var(--hos-content-width);margin:0 auto;padding-top:20px;}
+#hos-concept .hos-page-navigation .hos-back {display:inline-flex;align-items:center;gap:12px;margin:0;}
+#hos-concept .hos-page-navigation:not([hidden])~.hos-view .hos-page-heading {padding-top:20px;}
+#hos-concept .hos-page-navigation:not([hidden])~.hos-view .hos-work-layout {padding-top:20px;}
 #hos-concept .hos-artist-intro {display:grid;grid-template-columns:minmax(260px,420px) minmax(0,1fr);align-items:start;gap:clamp(32px,5vw,80px);margin-bottom:32px;}
 #hos-concept .hos-artist-intro-photo {display:block;width:100%;}
 #hos-concept .hos-artist-intro-photo img {width:100%;height:auto;}
@@ -186,8 +210,19 @@ body.hos-preview .hos-header {top:var(--hos-preview-height)!important;}
   #hos-concept .hos-hero-copy h1 {font-size:32px;}
   #hos-concept .hos-hero-copy h1 span+span {font-size:18px;}
   #hos-concept .hos-section-title {align-items:start;flex-direction:column;gap:18px;}
-  #hos-concept .hos-home-collection {padding-top:38px;}
+  #hos-concept .hos-home-mission {padding:35px 24px 30px;}
+  #hos-concept .hos-home-mission p {font-size:16px;}
+  #hos-concept .hos-founding-heading {padding-bottom:24px;}
+  #hos-concept .hos-home-collection {padding-top:0;}
   #hos-concept .hos-artist-chapter {padding:30px 0 34px;}
+  #hos-concept .hos-editorial-chapter {padding:0;margin-bottom:34px;}
+  #hos-concept .hos-chapter-details {grid-template-columns:1fr;gap:24px;padding:22px 20px 27px;}
+  #hos-concept .hos-chapter-details h2,#hos-concept .hos-chapter-details h3 {font-size:24px;}
+  #hos-concept .hos-chapter-work {border-top:1px solid var(--hos-line);padding-top:21px;}
+  #hos-concept .hos-chapter-work p {font-size:15px;}
+  #hos-concept .hos-sculpture-settings {grid-template-columns:1fr;gap:28px;padding:0 20px 27px;}
+  #hos-concept .hos-chapter-additional {padding:8px 20px 27px;}
+  #hos-concept .hos-page-navigation {padding-top:12px;}
   #hos-concept .hos-artist-intro,#hos-concept .hos-work-grid[data-count="1"] .hos-work-card,#hos-concept .hos-artist-profile,#hos-concept .hos-work-layout,#hos-concept .hos-editorial-story,#hos-concept .hos-home-making,#hos-concept .hos-home-house {grid-template-columns:1fr;gap:26px;}
   #hos-concept .hos-artist-intro-photo {max-width:420px;}
   #hos-concept .hos-artist-intro-copy h2 {font-size:29px;}
