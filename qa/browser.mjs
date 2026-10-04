@@ -47,7 +47,7 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
           assert.equal(decodeErrors.length,0,`Images could not decode: ${JSON.stringify(decodeErrors)}`);
           const layout=await page.evaluate(()=>{
             const rect=s=>{const r=document.querySelector(s).getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,height:r.height};};
-            return {viewport:innerWidth,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,root:rect('#hos-concept'),header:rect('.hos-header'),footer:rect('.hos-footer'),main:rect('#hos-main'),images:[...document.querySelectorAll('#hos-concept img')].filter(img=>img.getClientRects().length).map(img=>({src:img.currentSrc,naturalWidth:img.naturalWidth,fit:getComputedStyle(img).objectFit}))};
+            return {viewport:innerWidth,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,root:rect('#hos-concept'),header:rect('.hos-header'),footer:rect('.hos-footer'),main:rect('#hos-main'),hero:rect('.hos-hero-image'),images:[...document.querySelectorAll('#hos-concept img')].filter(img=>img.getClientRects().length).map(img=>({src:img.currentSrc,naturalWidth:img.naturalWidth,fit:getComputedStyle(img).objectFit}))};
           });
           assert(layout.scrollWidth<=layout.clientWidth+1,`Horizontal overflow ${JSON.stringify(layout)}`);
           assert(Math.abs(layout.root.left)<1&&Math.abs(layout.root.right-layout.clientWidth)<2,`Root does not fill the page width ${JSON.stringify(layout)}`);
@@ -55,6 +55,7 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
           assert(Math.abs(layout.footer.bottom-height)<2,'Footer not anchored');
           assert(layout.main.top>=layout.header.bottom-1,'Header covers content');
           assert(layout.images.every(i=>i.naturalWidth>0&&i.fit==='contain'),'Broken or cropped image');
+          if(path==='/')assert(layout.hero.height<=layout.footer.top-layout.header.bottom+2,'Hero image extends behind the fixed footer');
           await page.evaluate(()=>scrollTo(0,document.documentElement.scrollHeight));
           const bottom=await page.evaluate(()=>({headerTop:document.querySelector('.hos-header').getBoundingClientRect().top,footerBottom:document.querySelector('.hos-footer').getBoundingClientRect().bottom,mainBottom:document.querySelector('#hos-main').getBoundingClientRect().bottom,footerTop:document.querySelector('.hos-footer').getBoundingClientRect().top}));
           assert(Math.abs(bottom.headerTop)<1&&Math.abs(bottom.footerBottom-height)<2,'Chrome does not stay fixed while scrolling');

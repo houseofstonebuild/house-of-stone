@@ -41,7 +41,7 @@ body.hos-menu-open #hos-concept .hos-header,body.hos-menu-open #hos-concept .hos
 #hos-concept .hos-close {display:flex;align-items:center;gap:12px;min-height:44px;font-size:11px;}
 #hos-concept .hos-close span {font-size:22px;font-weight:300;}
 #hos-concept .hos-hero {position:relative;isolation:isolate;background:#080808;}
-#hos-concept .hos-hero-image {width:100%;height:auto;}
+#hos-concept .hos-hero-image {width:100%;height:auto;max-height:calc(100svh - var(--hos-header-height) - var(--hos-footer-height) - env(safe-area-inset-top) - env(safe-area-inset-bottom));}
 #hos-concept .hos-hero-shade {position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.14),transparent 60%);}
 #hos-concept .hos-hero-copy {position:absolute;inset:0 auto 0 var(--hos-gutter);display:flex;flex-direction:column;justify-content:center;align-items:flex-start;width:38%;padding:40px 0 64px;animation:hos-reveal .65s ease-out both;}
 #hos-concept .hos-hero-copy h1 {margin:22px 0 18px;}
