@@ -86,7 +86,9 @@ function image(key, alt, lazy = true, sizes) {
 function link(text, data) {
   const button = el('button', 'hos-text-link cursor-interaction', text);
   button.type = 'button'; Object.assign(button.dataset, data);
-  const arrow = el('span', '', '↗'); arrow.setAttribute('aria-hidden', 'true'); button.append(arrow);
+  const arrow = el('span', 'hos-link-arrow'); arrow.setAttribute('aria-hidden', 'true');
+  arrow.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M6 18 18 6M6 6h12v12"/></svg>';
+  button.append(arrow);
   return button;
 }
 function workCard(work) {
