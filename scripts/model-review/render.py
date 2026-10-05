@@ -1,5 +1,5 @@
 """Offline OpenGL turntable/reference QA. Uses Mesa/EGL; not needed at runtime."""
-import ctypes as C, json, math, argparse
+import ctypes as C, json, math, argparse, re
 from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -22,13 +22,15 @@ class Renderer:
         self.call('glEnable',None,[C.c_uint],0x0B71)
         self.call('glViewport',None,[C.c_int]*4,0,0,w,h)
         vs='''#version 120
-attribute vec3 pos;attribute vec3 normal;attribute vec2 uv;uniform mat3 rotation;uniform float aspect;varying vec3 nn;varying vec3 sourceN;varying vec3 sourceP;varying vec2 tex;
-void main(){vec3 p=rotation*(pos-vec3(0.,1.525,0.));gl_Position=vec4(p.x/(1.78*aspect),p.y/1.78,-p.z*.22,1.);nn=rotation*normal;sourceN=normal;sourceP=pos;tex=uv;}'''
+attribute vec3 pos;attribute vec3 normal;attribute vec2 uv;uniform mat3 rotation;uniform float aspect;varying vec3 nn;varying vec3 sourceN;varying vec3 sourceP;varying vec3 viewP;varying vec2 tex;
+void main(){vec3 p=rotation*(pos-vec3(0.,1.525,0.));gl_Position=vec4(p.x/(1.78*aspect),p.y/1.78,-p.z*.22,1.);nn=rotation*normal;sourceN=normal;sourceP=pos;viewP=p-vec3(0.,0.,6.8);tex=uv;}'''
+        # Review the exact same surface shader as the deployed viewer.
+        surface=re.search(r'String.raw`(.*?)`;', (ROOT/'public/stone-surface.js').read_text(),re.S).group(1)
         fs='''#version 120
-uniform sampler2D stone;uniform vec4 swatch;uniform vec3 sourceOffset;varying vec3 nn;varying vec3 sourceN;varying vec3 sourceP;varying vec2 tex;
-vec2 turn(vec2 f,vec2 cell){float t=floor(fract(sin(dot(cell,vec2(127.1,311.7)))*43758.5453)*4.);if(t<1.)return f;if(t<2.)return vec2(1.-f.y,f.x);if(t<3.)return 1.-f;return vec2(f.y,1.-f.x);}
-vec3 sampleStone(vec2 p){vec2 f=fract(p),g=fract(p+.5),edge=min(f,1.-f);float weight=smoothstep(0.,.15,min(edge.x,edge.y));return mix(texture2D(stone,swatch.xy+turn(g,floor(p+.5))*swatch.zw).rgb,texture2D(stone,swatch.xy+turn(f,floor(p))*swatch.zw).rgb,weight);}
-void main(){vec3 n=normalize(nn),sn=normalize(sourceN),p=sourceP-sourceOffset;vec3 w=pow(abs(sn),vec3(4.));w/=dot(w,vec3(1.));vec3 extra=sampleStone(p.yz*.85+vec2(.17,.31))*w.x+sampleStone(p.xz*.85+vec2(.37,.11))*w.y+sampleStone(p.xy*.85+vec2(.23,.47))*w.z;vec3 c=mix(extra,texture2D(stone,tex).rgb,smoothstep(.08,.62,sn.z));c*=.86+.14*max(dot(n,normalize(vec3(-.35,.55,1.))),0.);gl_FragColor=vec4(c,1.);}'''
+uniform sampler2D map;uniform vec4 stoneSwatch;uniform float stonePolish;uniform vec3 sourceOffset;varying vec3 nn;varying vec3 sourceN;varying vec3 sourceP;varying vec3 viewP;varying vec2 tex;
+'''+surface+'''
+vec3 toSRGB(vec3 c){return mix(12.92*c,1.055*pow(max(c,vec3(0.)),vec3(1./2.4))-.055,step(vec3(.0031308),c));}
+void main(){vec3 c=polishedStone(texture2D(map,tex).rgb,sourceP-sourceOffset,sourceN,nn,viewP,stonePolish);gl_FragColor=vec4(toSRGB(c),1.);}'''
         shaders=[]
         for kind,source in [(0x8B31,vs),(0x8B30,fs)]:
             s=self.call('glCreateShader',C.c_uint,[C.c_uint],kind);p=C.c_char_p(source.encode())
@@ -45,15 +47,16 @@ void main(){vec3 n=normalize(nn),sn=normalize(sourceN),p=sourceP-sourceOffset;ve
         for param,val in [(0x2801,0x2601),(0x2800,0x2601),(0x2802,0x812F),(0x2803,0x812F)]:self.call('glTexParameteri',None,[C.c_uint,C.c_uint,C.c_int],0x0DE1,param,val)
     def call(self,name,ret,args,*values):
         f=getattr(self.G,name);f.restype=ret;f.argtypes=args;return f(*values)
-    def load(self,data,image,swatch):
+    def load(self,data,image,swatch,polish=1):
         self.data=data
         for name,key,size in [('pos','vertices',3),('normal','normals',3),('uv','uv',2)]:
             a=np.ascontiguousarray(data[key],dtype='f4');data[key]=a
             self.call('glVertexAttribPointer',None,[C.c_uint,C.c_int,C.c_uint,C.c_ubyte,C.c_int,C.c_void_p],self.functions[name],size,0x1406,0,0,a.ctypes.data)
         im=np.ascontiguousarray(np.asarray(Image.open(image).convert('RGB')));self.call('glPixelStorei',None,[C.c_uint,C.c_int],0x0CF5,1)
-        loc=self.call('glGetUniformLocation',C.c_int,[C.c_uint,C.c_char_p],self.program,b'swatch');self.call('glUniform4f',None,[C.c_int]+[C.c_float]*4,loc,swatch[0]/im.shape[1],swatch[1]/im.shape[0],swatch[2]/im.shape[1],swatch[3]/im.shape[0])
+        loc=self.call('glGetUniformLocation',C.c_int,[C.c_uint,C.c_char_p],self.program,b'stoneSwatch');self.call('glUniform4f',None,[C.c_int]+[C.c_float]*4,loc,swatch[0]/im.shape[1],swatch[1]/im.shape[0],swatch[2]/im.shape[1],swatch[3]/im.shape[0])
+        loc=self.call('glGetUniformLocation',C.c_int,[C.c_uint,C.c_char_p],self.program,b'stonePolish');self.call('glUniform1f',None,[C.c_int,C.c_float],loc,polish)
         loc=self.call('glGetUniformLocation',C.c_int,[C.c_uint,C.c_char_p],self.program,b'sourceOffset');low=data['vertices'].min(axis=0);self.call('glUniform3f',None,[C.c_int]+[C.c_float]*3,loc,*low)
-        self.call('glTexImage2D',None,[C.c_uint,C.c_int,C.c_int,C.c_int,C.c_int,C.c_int,C.c_uint,C.c_uint,C.c_void_p],0x0DE1,0,0x1907,im.shape[1],im.shape[0],0,0x1907,0x1401,im.ctypes.data)
+        self.call('glTexImage2D',None,[C.c_uint,C.c_int,C.c_int,C.c_int,C.c_int,C.c_int,C.c_uint,C.c_uint,C.c_void_p],0x0DE1,0,0x8C41,im.shape[1],im.shape[0],0,0x1907,0x1401,im.ctypes.data)
         data['indices']=np.ascontiguousarray(data['indices'],dtype='u4')
     def render(self,angle=0,pitch=0):
         a=math.radians(angle);b=math.radians(pitch)
@@ -68,7 +71,7 @@ if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('folder',type=Path);p.add_argument('--animation',action='store_true');args=p.parse_args()
     r=Renderer();boards=[];font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',22)
     for id,ref in REFERENCES.items():
-        data=dict(np.load(args.folder/(id+'.npz')));r.load(data,ROOT/'public/assets'/ref['image'],ref['swatch'])
+        data=dict(np.load(args.folder/(id+'.npz')));r.load(data,ROOT/'public/assets'/ref['image'],ref['swatch'],ref.get('polish',1))
         front=r.render();front.save(args.folder/(id+'-front.png'));oblique=r.render(40);oblique.save(args.folder/(id+'-angle.png'))
         corners=[r.render(a) for a in [0,45,90,135,180,225,270,315]]
         turns=Image.new('RGB',(640*4,880*2),(11,11,10))

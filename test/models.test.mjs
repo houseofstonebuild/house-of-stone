@@ -18,6 +18,7 @@ test('all five textured GLB files load as finite volumes with reference openings
     assert(readFileSync(new URL('../public'+definition.source,import.meta.url)).length>400000);
     assert.equal(definition.referenceSurface,true);assert.equal(definition.stoneGrain,false);
     assert(definition.stoneSwatch.every(Number.isFinite));
+    assert(Number.isFinite(definition.stonePolish)&&definition.stonePolish>0&&definition.stonePolish<=1);
     // Real image decoding and shader compilation are covered by browser QA.
     const loader=new GLTFLoader().register(()=>({name:'NODE_TEXTURE_FIXTURE',loadTexture(){return Promise.resolve(new Texture());}}));
     const gltf=await loader.parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');
@@ -25,6 +26,13 @@ test('all five textured GLB files load as finite volumes with reference openings
     assert(size.x>.5&&size.y>2&&size.z>.25,`${id} should have real depth`);
     gltf.scene.traverse(node=>{if(node.isMesh){for(const attr of [node.geometry.attributes.position,node.geometry.attributes.normal])assert([...attr.array].every(Number.isFinite));}});
     loaded.set(id,gltf.scene);
+  }
+  // Overall depth alone can hide a thin, twisted sheet. Probe the actual
+  // ribbon cross sections at the broad body and base from both directions.
+  for(const y of [.5,1.6,1.9]) {
+    const front=new Raycaster(new Vector3(0,y,10),new Vector3(0,0,-1)).intersectObject(loaded.get('folded-light'),true)[0];
+    const back=new Raycaster(new Vector3(0,y,-10),new Vector3(0,0,1)).intersectObject(loaded.get('folded-light'),true)[0];
+    assert(front&&back&&front.point.z-back.point.z>.65,'Folded Light must have full, rounded cross sections');
   }
   for(const [id,x,y] of [['continuum',0,1.34],['together',.13,1.82],['together',-.06,.70]]) {
     const ray=new Raycaster(new Vector3(x,y,10),new Vector3(0,0,-1));

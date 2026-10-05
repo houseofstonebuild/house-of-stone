@@ -1,5 +1,6 @@
 import * as THREE from './vendor/three.module.min.js';
 import {GLTFLoader} from './vendor/GLTFLoader.js';
+import {stoneSurfaceGLSL} from './stone-surface.js';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const stoneNoise=`
@@ -22,33 +23,29 @@ function grain(material) {
   material.customProgramCacheKey=()=> 'house-of-stone-grain-v1';
 }
 
-// The mineral colours and highlights come from the master image. A restrained
-// normal-based light response adds volume while preserving those stone colours.
-function referenceSurface(material,extent,swatch) {
+// Preserve the source stone colours with smooth, view-dependent reflections
+// across the whole mesh, including its sides, openings and reverse surfaces.
+function referenceSurface(material,extent,swatch,polish) {
   if(!material.isMeshBasicMaterial)return;
   material.toneMapped=false;
   material.onBeforeCompile=shader=>{
-    shader.uniforms.referenceExtent={value:extent};shader.uniforms.stoneSwatch={value:new THREE.Vector4(...swatch)};
+    shader.uniforms.referenceExtent={value:extent};shader.uniforms.stoneSwatch={value:new THREE.Vector4(...swatch)};shader.uniforms.stonePolish={value:polish};
     shader.vertexShader=shader.vertexShader.replace('#include <common>',`#include <common>
-      uniform vec3 referenceExtent;varying vec3 vReferenceNormal;varying vec3 vSourceNormal;varying vec3 vSourcePosition;
+      uniform vec3 referenceExtent;varying vec3 vReferenceNormal;varying vec3 vSourceNormal;varying vec3 vSourcePosition;varying vec3 vReferenceViewPosition;
     `).replace('#include <begin_vertex>',`#include <begin_vertex>
       vReferenceNormal=normalize(normalMatrix*normal);vSourceNormal=normalize(normal/referenceExtent);vSourcePosition=position*referenceExtent;
+    `).replace('#include <project_vertex>',`#include <project_vertex>
+      vReferenceViewPosition=mvPosition.xyz;
     `);
     shader.fragmentShader=shader.fragmentShader.replace('#include <common>',`#include <common>
-      uniform vec4 stoneSwatch;varying vec3 vReferenceNormal;varying vec3 vSourceNormal;varying vec3 vSourcePosition;
+      uniform vec4 stoneSwatch;uniform float stonePolish;varying vec3 vReferenceNormal;varying vec3 vSourceNormal;varying vec3 vSourcePosition;varying vec3 vReferenceViewPosition;
     `).replace('#include <map_pars_fragment>',`#include <map_pars_fragment>
-      vec2 stoneTurn(vec2 f,vec2 cell){float t=floor(fract(sin(dot(cell,vec2(127.1,311.7)))*43758.5453)*4.);if(t<1.)return f;if(t<2.)return vec2(1.-f.y,f.x);if(t<3.)return 1.-f;return vec2(f.y,1.-f.x);}
-      vec3 stoneSample(vec2 p){vec2 f=fract(p),g=fract(p+.5),edge=min(f,1.-f);float weight=smoothstep(0.,.15,min(edge.x,edge.y));vec3 a=texture2D(map,stoneSwatch.xy+stoneTurn(f,floor(p))*stoneSwatch.zw).rgb;vec3 b=texture2D(map,stoneSwatch.xy+stoneTurn(g,floor(p+.5))*stoneSwatch.zw).rgb;return mix(b,a,weight);}
+      ${stoneSurfaceGLSL}
     `).replace('#include <color_fragment>',`#include <color_fragment>
-      vec3 sourceNormal=normalize(vSourceNormal),weights=pow(abs(sourceNormal),vec3(4.));weights/=max(dot(weights,vec3(1.)),.001);
-      vec3 stone=stoneSample(vSourcePosition.yz*.85+vec2(.17,.31))*weights.x
-        +stoneSample(vSourcePosition.xz*.85+vec2(.37,.11))*weights.y
-        +stoneSample(vSourcePosition.xy*.85+vec2(.23,.47))*weights.z;
-      diffuseColor.rgb=mix(stone,diffuseColor.rgb,smoothstep(.08,.62,sourceNormal.z));
-      diffuseColor.rgb*=.86+.14*max(dot(normalize(vReferenceNormal),normalize(vec3(-.35,.55,1.))),0.);
+      diffuseColor.rgb=polishedStone(diffuseColor.rgb,vSourcePosition,vSourceNormal,vReferenceNormal,vReferenceViewPosition,stonePolish);
     `);
   };
-  material.customProgramCacheKey=()=> 'house-of-stone-reference-surface-v2';
+  material.customProgramCacheKey=()=> 'house-of-stone-polished-surface-v3';
 }
 
 export function initializeViewer({root,models,works,onInteraction}) {
@@ -117,7 +114,7 @@ export function initializeViewer({root,models,works,onInteraction}) {
       const scale=3.05/Math.max(size.y,size.x*.95,size.z*.95);group.scale.multiplyScalar(scale);
       group.position.set(-center.x*scale,-box.min.y*scale+.12,-center.z*scale);
       if(entry.stoneGrain)group.traverse(node=>{if(node.isMesh)for(const material of Array.isArray(node.material)?node.material:[node.material])grain(material);});
-      if(entry.referenceSurface)group.traverse(node=>{if(node.isMesh)for(const material of Array.isArray(node.material)?node.material:[node.material])referenceSurface(material,node.scale.clone(),entry.stoneSwatch);});
+      if(entry.referenceSurface)group.traverse(node=>{if(node.isMesh)for(const material of Array.isArray(node.material)?node.material:[node.material])referenceSurface(material,node.scale.clone(),entry.stoneSwatch,entry.stonePolish ?? 1);});
       const pose=new THREE.Group();pose.rotation.y=entry.referenceYaw||0;pose.add(group);
       const turntable=new THREE.Group();turntable.add(pose);return turntable;
     }).catch(error=>{scenes.delete(id);throw error;});

@@ -54,9 +54,11 @@ def make_field(id,ref,mask,step=5):
         depth=52+100*np.exp(-((y-697)/270)**2)
         center=32*np.exp(-((x-694)/124)**2-((y-677)/260)**2)
     elif id=='folded-light':
-        # The ribbon rolls in depth instead of remaining a thick flat panel.
-        center=55*np.sin((y-90)/165)+(x-555)*(.58*np.sin((y-95)/142))
-        depth=23+12*np.exp(-((y-853)/140)**2)
+        # Rounded cross sections track the ribbon's local width. A gently
+        # turning centreline retains the folds without a wafer-thin reverse.
+        radius=np.maximum(inside,0).max(axis=0)[None,:]
+        depth=np.broadcast_to(np.clip(radius*.90+8,32,160),x.shape)
+        center=35*np.sin((y-90)/165)+(x-555)*(.28*np.sin((y-95)/142))
     elif id=='continuum':
         center=(x-1240)*.30*np.sin((y-140)/175)
         depth=68+40*np.exp(-((y-640)/200)**2)
@@ -171,6 +173,6 @@ if __name__=='__main__':
         path=ROOT/'public/models.json';manifest=json.loads(path.read_text())
         for id in report:
             ref=REFERENCES[id];w,h=Image.open(ROOT/'public/assets'/ref['image']).size;s=ref['swatch']
-            manifest[id].update(stoneGrain=False,referenceSurface=True,referenceYaw=.3,stoneSwatch=[s[0]/w,s[1]/h,s[2]/w,s[3]/h])
+            manifest[id].update(stoneGrain=False,referenceSurface=True,referenceYaw=.3,stoneSwatch=[s[0]/w,s[1]/h,s[2]/w,s[3]/h],stonePolish=ref.get('polish',1))
         path.write_text(json.dumps(manifest,indent=2)+'\n')
     if args.review:(args.review/'geometry-checks.json').write_text(json.dumps(report,indent=2)+'\n')

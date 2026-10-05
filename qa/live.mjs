@@ -10,7 +10,7 @@ const models=JSON.parse(readFileSync(new URL('../public/models.json',import.meta
 const catalog=JSON.parse(readFileSync(new URL('../content/catalog.json',import.meta.url),'utf8'));
 const output=new URL('../test-results/live/',import.meta.url);mkdirSync(output,{recursive:true});
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
-const files=['/models.json','/sculpture-viewer.js',...Object.values(models).map(m=>m.file)];
+const files=['/models.json','/sculpture-viewer.js','/stone-surface.js',...Object.values(models).map(m=>m.file)];
 const expected=new Map(files.map(path=>[path,hash(readFileSync(new URL('../public'+path,import.meta.url)))]));
 let deployed=false,lastError;
 for(let attempt=0;attempt<48;attempt++) {
@@ -44,6 +44,16 @@ try {
     await stage.screenshot({path:new URL(id+'-desktop.jpg',output).pathname,type:'jpeg',quality:94});
     await page.getByRole('button',{name:'Rotate right',exact:true}).click();await page.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelRotation)>-.1);
     await page.getByRole('button',{name:'Zoom in',exact:true}).click();await page.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelZoom)>1);
+    await page.getByRole('button',{name:'Reset',exact:true}).click();await page.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelRotation)===-.3);
+    for(let turn=1;turn<=13;turn++) {
+      await page.getByRole('button',{name:'Rotate right',exact:true}).click();
+      if(turn===7||turn===13) {
+        await page.waitForFunction(expected=>Math.abs(Number(document.querySelector('#hos-model-stage').dataset.modelRotation)-expected)<.001,-.3+turn*.24);
+        await stage.screenshot({path:new URL(id+`${turn===7?'-side':'-back'}-desktop.jpg`,output).pathname,type:'jpeg',quality:94});
+      }
+    }
+    await page.setViewportSize({width:390,height:844});
+    await stage.screenshot({path:new URL(id+'-back-mobile.jpg',output).pathname,type:'jpeg',quality:94});
     await page.getByRole('button',{name:'Reset',exact:true}).click();await page.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelRotation)===-.3);
     await page.setViewportSize({width:390,height:844});await stage.screenshot({path:new URL(id+'-mobile.jpg',output).pathname,type:'jpeg',quality:94});
     await page.keyboard.press('Escape');assert(!await page.locator('body').evaluate(el=>el.classList.contains('hos-model-open')));

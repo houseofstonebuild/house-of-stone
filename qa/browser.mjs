@@ -290,6 +290,16 @@ for(const [engineName,engine] of engines) {
         await modelPage.getByRole('button',{name:'Zoom in',exact:true}).click();await modelPage.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelZoom)>1);
         await modelPage.getByRole('button',{name:'Reset',exact:true}).click();await modelPage.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelZoom)===1&&Number(document.querySelector('#hos-model-stage').dataset.modelRotation)===-.3);
         await modal.screenshot({path:new URL(`${engineName}-model-${catalog.works.find(w=>w.artistId===artist.id).id}-front.jpg`,output).pathname,type:'jpeg',quality:94,scale:'css'});
+        // Inspect the polished side and reverse, not only the source-photo pose.
+        for(let turn=1;turn<=13;turn++) {
+          await modelPage.getByRole('button',{name:'Rotate right',exact:true}).click();
+          if(turn===7||turn===13) {
+            await modelPage.waitForFunction(expected=>Math.abs(Number(document.querySelector('#hos-model-stage').dataset.modelRotation)-expected)<.001,-.3+turn*.24);
+            await modal.screenshot({path:new URL(`${engineName}-model-${catalog.works.find(w=>w.artistId===artist.id).id}-${turn===7?'side':'back'}.jpg`,output).pathname,type:'jpeg',quality:94,scale:'css'});
+          }
+        }
+        await modelPage.getByRole('button',{name:'Reset',exact:true}).click();
+        await modelPage.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelRotation)===-.3);
         const canvas=modal.locator('.hos-3d-canvas'),bounds=await canvas.boundingBox();
         await modelPage.mouse.move(bounds.x+bounds.width/2,bounds.y+bounds.height/2);await modelPage.mouse.down();await modelPage.mouse.move(bounds.x+bounds.width/2+90,bounds.y+bounds.height/2+25,{steps:5});await modelPage.mouse.up();
         await modelPage.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelRotation)>.2);
