@@ -19,6 +19,8 @@ jobs:
           package-manager-cache: false
       - run: npm run check
       - run: npm test
+      - name: Check root-owned storage with an unprivileged application user
+        run: sudo "$(command -v node)" --test test/storage.test.mjs
   container:
     runs-on: ubuntu-latest
     timeout-minutes: 10

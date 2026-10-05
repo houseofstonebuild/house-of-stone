@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { readFileSync, writeFileSync, existsSync, mkdirSync, chmodSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, chmodSync, accessSync, constants } from 'node:fs';
 import { resolve, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID, createHmac, createHash, timingSafeEqual } from 'node:crypto';
@@ -29,7 +29,13 @@ export function createApp(options = {}) {
   const dataDir = resolve(options.dataDir ?? env.DATA_DIR ?? resolve(ROOT, 'data'));
   if (dataDir === PUBLIC || dataDir.startsWith(PUBLIC + '/')) throw new Error('DATA_DIR must be outside the public website files.');
   mkdirSync(dataDir, { recursive: true, mode: 0o700 });
-  chmodSync(dataDir, 0o700);
+  // Hosts may allow writes to a mounted directory without allowing its mode to change.
+  try { chmodSync(dataDir, 0o700); }
+  catch (error) { if (!['EPERM', 'EACCES'].includes(error.code)) throw error; }
+  try { accessSync(dataDir, constants.W_OK | constants.X_OK); }
+  catch (cause) {
+    throw new Error('DATA_DIR is not writable. On Railway, mount the service volume at /app/data, set RAILWAY_RUN_UID=0, and deploy the variable change.', { cause });
+  }
   const db = new DatabaseSync(resolve(dataDir, 'house-of-stone.sqlite'), { timeout: 5000 });
   chmodSync(resolve(dataDir, 'house-of-stone.sqlite'), 0o600);
   db.exec(`

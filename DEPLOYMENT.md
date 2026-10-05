@@ -31,6 +31,8 @@ Code and content stay separate. The database and uploaded photos live on a persi
 6. Enable GitHub autodeploy and **Wait for CI** in the Railway service settings. The included workflow runs the content checks and tests on pushes to `main`. Wait for CI prevents a failed workflow from triggering a deployment.
 7. Open the public site, `/admin`, and `/admin/content`. Use username `admin` and your private password. Make a small draft edit, preview it, publish it, then redeploy the same code and confirm the edit and uploaded photo remain present. Send a test enquiry and verify the saved receipt and inbox record.
 
+Storage startup respects host-managed mount permissions when the data directory is writable. Database files remain private, and the existing database stays at the same path. If startup reports `DATA_DIR is not writable`, confirm the volume is mounted at `/app/data` and that `RAILWAY_RUN_UID=0` is saved and deployed on this service. Keep the existing volume attached.
+
 The repository, hosting service, volume, and domain are not created by downloading this package. They must be connected in the respective accounts. Once GitHub access is confirmed here, continue with this exact repository rather than starting a second copy of the site.
 
 ## Future edits requested here
