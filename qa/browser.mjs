@@ -27,6 +27,12 @@ for(const [engineName,engine] of engines) {
     browser=await engine.launch(engineName==='chromium'?{args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}:engineName==='firefox'?{firefoxUserPrefs:{'webgl.force-enabled':true,'webgl.disabled':false}}:{});
     const context=await browser.newContext({deviceScaleFactor:2,reducedMotion:'reduce'});
     await context.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
+    // Keep the route/layout matrix independent of software-GPU resource pressure.
+    // The dedicated contexts below exercise every real mesh and its controls.
+    await context.addInitScript(()=>{
+      const original=HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext=function(type,...args){return type==='webgl2'?null:original.call(this,type,...args);};
+    });
     const page=await context.newPage();
     page.on('pageerror',error=>pageErrors.push(error.message));
     page.on('response',r=>{if(r.url().startsWith(base)&&r.status()>=400)failedResponses.push({url:r.url(),status:r.status()});});
