@@ -55,7 +55,11 @@ export function initializeViewer({root,models,works,onInteraction}) {
   const dialog=root.querySelector('#hos-model-dialog'),dialogHost=root.querySelector('#hos-model-stage');
   const dialogTitle=root.querySelector('#hos-model-title'),dialogStatus=root.querySelector('#hos-model-status');
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)'),hosts=[...root.querySelectorAll('[data-model-stage]')];
-  const scenes=new Map(),loader=new GLTFLoader();
+  const scenes=new Map(),manager=new THREE.LoadingManager();
+  // Native image loading keeps local JPEGs reliable across Safari navigations.
+  // GLTFLoader still configures the UV orientation, samplers and colour space.
+  manager.addHandler(/(?:^|\/)assets\/[^/]+\.jpg$/i,new THREE.TextureLoader(manager));
+  const loader=new GLTFLoader(manager);
   let renderer,scene,camera,sculpture,active,pending=0,unavailable=false,contextLost=false,trigger,dialogWork,interactionCounted=false;
   let yaw=-.3,pitch=0,zoom=1,lastView='',loadingHost,activationGeneration=0,dialogCleaned=true;
   const pointers=new Map();let pinchDistance=0;
@@ -107,7 +111,7 @@ export function initializeViewer({root,models,works,onInteraction}) {
   function model(id) {
     if(scenes.has(id))return scenes.get(id);
     const entry=models[id];
-    const request=loader.loadAsync(entry.file).then(gltf=>{
+    const request=loader.loadAsync(new URL(entry.file,location.href).href).then(gltf=>{
       const group=gltf.scene,box=new THREE.Box3().setFromObject(group),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
       if(!Number.isFinite(size.length())||size.y<=0)throw new Error('Invalid model bounds');
       const scale=3.05/Math.max(size.y,size.x*.95,size.z*.95);group.scale.multiplyScalar(scale);

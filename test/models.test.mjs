@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {GLTFLoader} from '../public/vendor/GLTFLoader.js';
-import {Box3,Vector3,Raycaster,Texture} from '../public/vendor/three.module.min.js';
+import {Box3,Vector3,Raycaster,Texture,LoaderUtils} from '../public/vendor/three.module.min.js';
 import {createApp} from '../server.mjs';
 const definitions=JSON.parse(readFileSync(new URL('../public/models.json',import.meta.url),'utf8'));
 test('all five textured GLB files load as finite volumes with reference openings and a dished recess',async()=>{
@@ -14,7 +14,8 @@ test('all five textured GLB files load as finite volumes with reference openings
     const bytes=readFileSync(new URL('../public'+definition.file,import.meta.url));
     const jsonLength=bytes.readUInt32LE(12),doc=JSON.parse(bytes.subarray(20,20+jsonLength).toString());
     assert.deepEqual(doc.extensionsRequired,['KHR_mesh_quantization']);
-    assert.equal(new URL(doc.images[0].uri,'https://house.test'+definition.file).pathname,definition.source);assert(readFileSync(new URL('../public'+definition.source,import.meta.url)).length>400000);
+    for(const path of ['/models/','https://house.test/models/'])assert.equal(new URL(LoaderUtils.resolveURL(doc.images[0].uri,path),'https://house.test').pathname,definition.source);
+    assert(readFileSync(new URL('../public'+definition.source,import.meta.url)).length>400000);
     assert.equal(definition.referenceSurface,true);assert.equal(definition.stoneGrain,false);
     assert(definition.stoneSwatch.every(Number.isFinite));
     // Real image decoding and shader compilation are covered by browser QA.
