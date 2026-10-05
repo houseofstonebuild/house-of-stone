@@ -78,7 +78,7 @@ test('client navigates to a work and sends its reviewed enquiry to the private i
   f.form.elements.name.value='Client visitor';f.form.elements.email.value='client@example.test';f.form.elements.message.value='Please tell me more.';
   await f.form.dispatch('input');await f.form.dispatch('submit');assert.equal(f.form.hidden,true);assert.equal(f.get('#hos-inquiry-review').hidden,false);
   await f.get('#hos-inquiry-send').dispatch('click');await f.flush();
-  assert.equal(f.get('#hos-inquiry-success').hidden,false);assert.equal(f.get('#hos-inquiry-title').textContent,'Enquiry received.');
+  assert.equal(f.get('#hos-inquiry-success').hidden,false);assert.equal(f.get('#hos-inquiry-title').textContent,'Inquiry received.');
   const inquiry=f.db.prepare('SELECT * FROM inquiries').get();assert.equal(inquiry.work_id,'folded-light');assert.equal(inquiry.source,'designers');assert.equal(inquiry.name,'Client visitor');
   for(const name of ['page_view','explore_click','work_view','inquiry_opened','inquiry_started','inquiry_submitted'])assert(f.db.prepare('SELECT count(*) AS n FROM events WHERE name=?').get(name).n>0,name+' missing');
 });

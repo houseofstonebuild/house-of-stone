@@ -136,7 +136,7 @@ export function createApp(options = {}) {
     let size = 0; const chunks = [];
     for await (const chunk of req) {
       size += chunk.length;
-      if (size > limit) throw new HttpError(413, limit === 20000 ? 'This enquiry is too long. Please shorten your message.' : 'This upload is too large.');
+      if (size > limit) throw new HttpError(413, limit === 20000 ? 'This inquiry is too long. Please shorten your message.' : 'This upload is too large.');
       chunks.push(chunk);
     }
     try { const parsed = JSON.parse(Buffer.concat(chunks).toString()); if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') throw new Error(); return parsed; }
@@ -145,7 +145,7 @@ export function createApp(options = {}) {
   function text(value, max, required = false) {
     if (typeof value !== 'string') { if (required) throw new HttpError(400, 'Please complete the required fields.'); return ''; }
     const clean = value.trim().replace(/\u0000/g, '');
-    if (clean.length > max || (required && !clean)) throw new HttpError(400, 'Please check the length of your enquiry fields.');
+    if (clean.length > max || (required && !clean)) throw new HttpError(400, 'Please check the length of your inquiry fields.');
     return clean;
   }
   function attribution(input) {
@@ -173,7 +173,7 @@ export function createApp(options = {}) {
     if (!INTERESTS.includes(input.interest)) throw new HttpError(400, 'Please choose your interest.');
     const message = text(input.message, 5000);
     const work = workMap.get(input.workId), artist = artistMap.get(input.artistId);
-    if (input.workId && !work || input.artistId && !artist) throw new HttpError(400, 'This work is no longer listed. Please begin a general enquiry.');
+    if (input.workId && !work || input.artistId && !artist) throw new HttpError(400, 'This work is no longer listed. Please begin a general inquiry.');
     const allowedTopics = new Set(['General interest', 'Collection interest', 'Designer project', 'About the house']);
     const topic = work ? `${work.title} by ${artistMap.get(work.artistId).name}` : artist ? `Work by ${artist.name}` : allowedTopics.has(input.topic) ? input.topic : 'General interest';
     const a = attribution(input.attribution);
@@ -192,7 +192,7 @@ export function createApp(options = {}) {
             method: 'POST', signal: AbortSignal.timeout(10000),
             headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json', 'Idempotency-Key': `hos-${row.id}` },
             body: JSON.stringify({ from: env.INQUIRY_EMAIL_FROM, to: env.INQUIRY_EMAIL_TO.split(',').map(v => v.trim()).filter(Boolean), reply_to: row.email,
-              subject: `House of Stone enquiry: ${row.topic}`,
+              subject: `House of Stone inquiry: ${row.topic}`,
               text: `Reference: ${row.id}\nReceived: ${row.created_at}\nName: ${row.name}\nEmail: ${row.email}\nInterest: ${row.interest}\nTopic: ${row.topic}\n\n${row.message}\n\nInbox: ${siteURL?.origin ?? ''}/admin` })
           });
           if (!response.ok) throw new Error('Notification request failed.');
@@ -327,7 +327,7 @@ export function createApp(options = {}) {
         const data = inquiryData(input);
         const previous = db.prepare('SELECT id,fingerprint FROM inquiries WHERE submission_id=?').get(input.submissionId);
         if (previous) {
-          if (previous.fingerprint !== data.fingerprint) throw new HttpError(409, 'This enquiry changed. Please reopen the form and try again.');
+          if (previous.fingerprint !== data.fingerprint) throw new HttpError(409, 'This inquiry changed. Please reopen the form and try again.');
           return send(res, 200, { ok: true, reference: previous.id });
         }
         rateLimit('inquiries:' + clientHash(req), 5, 3600000);

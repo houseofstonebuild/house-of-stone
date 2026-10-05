@@ -115,7 +115,11 @@ function editorialImage(source, alt, sizes) {
   const img = el('img'); applyImage(img, source, sizes); img.alt = alt; img.loading = 'lazy'; return img;
 }
 function sculptureSettings(artist, work, entry) {
-  const grid = el('div', 'hos-sculpture-settings'); grid.dataset.reveal = '';
+  const carousel = el('div', 'hos-settings-carousel'); carousel.dataset.reveal = '';
+  carousel.setAttribute('role', 'group'); carousel.setAttribute('aria-label', `${work.title} in different spaces`);
+  const grid = el('div', 'hos-sculpture-settings'); grid.tabIndex = 0;
+  grid.id = `hos-settings-${uuid()}`;
+  grid.setAttribute('aria-label', 'Sculpture settings');
   for (const [setting, label, space] of [['apartment','For designers','an apartment'],['gallery','For collectors','a private gallery'],['office','For corporate offices','a corporate office']]) {
     const tile = el('article', 'hos-setting-tile');
     const photo = el('button', 'hos-setting-photo cursor-interaction'); photo.type = 'button'; photo.dataset.work = work.id;
@@ -123,7 +127,40 @@ function sculptureSettings(artist, work, entry) {
     photo.append(editorialImage(entry.settings[setting], `${work.title} by ${artist.name} in ${space}`, '(max-width: 700px) 90vw, (max-width: 1800px) 28vw, 480px'));
     tile.append(photo, el('h3', '', label), link('View sculpture', {work:work.id})); grid.append(tile);
   }
-  return grid;
+  const tiles = [...grid.children], controls = el('div', 'hos-carousel-controls');
+  const previous = el('button', 'hos-carousel-previous cursor-interaction');
+  const next = el('button', 'hos-carousel-next cursor-interaction');
+  for (const [button, label, path] of [[previous,'Previous setting','M15 6 9 12l6 6'],[next,'Next setting','m9 6 6 6-6 6']]) {
+    button.type = 'button'; button.setAttribute('aria-label', label); button.setAttribute('aria-controls', grid.id);
+    button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="${path}"/></svg>`;
+  }
+  let index = 0;
+  const counter = el('span', 'hos-carousel-position', '1 / 3');
+  counter.setAttribute('role', 'status'); counter.setAttribute('aria-live', 'polite'); counter.setAttribute('aria-atomic', 'true');
+  previous.disabled = true;
+  const offset = i => tiles[i].offsetLeft - tiles[0].offsetLeft;
+  function sync() {
+    if (!grid.clientWidth) return;
+    index = tiles.reduce((closest, tile, i) => Math.abs(offset(i) - grid.scrollLeft) < Math.abs(offset(closest) - grid.scrollLeft) ? i : closest, 0);
+    const position = `${index + 1} / ${tiles.length}`;
+    if (counter.textContent !== position) counter.textContent = position;
+    previous.disabled = index === 0; next.disabled = index === tiles.length - 1;
+  }
+  function move(target) {
+    const clamped = Math.max(0, Math.min(tiles.length - 1, target));
+    grid.scrollTo({left: offset(clamped), behavior: motionPreference?.matches ? 'instant' : 'smooth'});
+  }
+  previous.addEventListener('click', () => move(index - 1)); next.addEventListener('click', () => move(index + 1));
+  grid.addEventListener('scroll', sync, {passive:true});
+  grid.addEventListener('keydown', event => {
+    if (event.target !== grid || grid.scrollWidth <= grid.clientWidth) return;
+    if (['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) {
+      event.preventDefault(); move(event.key === 'Home' ? 0 : event.key === 'End' ? tiles.length - 1 : index + (event.key === 'ArrowRight' ? 1 : -1));
+    }
+  });
+  if ('ResizeObserver' in window) new window.ResizeObserver(sync).observe(grid);
+  controls.append(previous, counter, next); carousel.append(grid, controls);
+  return carousel;
 }
 function artistChapter(artist, selected) {
   const featured = selected.find(work => chapterMedia(artist, work));
@@ -135,7 +172,11 @@ function artistChapter(artist, selected) {
     const artistCopy = el('div', 'hos-chapter-artist');
     artistCopy.append(el('h2','',artist.name),el('p','',artist.description === entry.descriptionSource ? entry.shortDescription : artist.description),link('About the artist',{artist:artist.id}));
     const workCopy = el('div', 'hos-chapter-work');
-    workCopy.append(el('h3','',featured.title),el('p','',featured.material),el('p','',featured.dimensions));
+    const workHeading = el('div', 'hos-chapter-work-heading');
+    workHeading.append(el('div','hos-eyebrow','SELECTED WORK'),el('h3','',featured.title));
+    const specs = el('div', 'hos-chapter-work-specs');
+    specs.append(el('p','',featured.material),el('p','',featured.dimensions));
+    workCopy.append(workHeading, specs);
     details.append(artistCopy,workCopy); chapter.append(campaign,details,sculptureSettings(artist,featured,entry));
     const additional = selected.filter(work => work.id !== featured.id);
     if (additional.length) { const more = el('div','hos-chapter-additional');more.append(el('h3','','More works by '+artist.name),workGrid(additional));chapter.append(more); }
@@ -169,10 +210,10 @@ function renderWork(work) {
   $('#hos-work-title').textContent = work.title;
   $('#hos-work-artist').textContent = activeArtist.name.toUpperCase();
   $('#hos-work-artist').dataset.artist = activeArtist.id;
-  $('#hos-work-year').textContent = work.yearMade || 'Available on enquiry';
+  $('#hos-work-year').textContent = work.yearMade || 'Available on inquiry';
   $('#hos-work-dimensions').textContent = work.dimensions;
   $('#hos-work-material').textContent = work.material;
-  $('#hos-work-acquisition').textContent = !work.acquisitionMethod || work.acquisitionMethod === 'On enquiry' ? 'Available on enquiry' : work.acquisitionMethod;
+  $('#hos-work-acquisition').textContent = !work.acquisitionMethod || /^On (?:enquiry|inquiry)$/i.test(work.acquisitionMethod) ? 'Available on inquiry' : work.acquisitionMethod;
   $('#hos-work-description').textContent = work.description;
   const button = $('#hos-work-inquiry');
   button.dataset.inquiry = `${work.title} by ${activeArtist.name}`; button.dataset.inquiryWork = work.id;
@@ -227,7 +268,7 @@ function openInquiry(topic, trigger) {
   inquiryContext = { topic, workId: trigger?.dataset.inquiryWork || '', artistId: trigger?.dataset.inquiryArtist || '' };
   submissionId = uuid(); inquiryStarted = false;
   form.reset(); form.hidden = false; review.hidden = true; success.hidden = true;
-  title.textContent = 'Your enquiry'; statusMessage(''); $('#hos-inquiry-context').textContent = topic;
+  title.textContent = 'Your inquiry'; statusMessage(''); $('#hos-inquiry-context').textContent = topic;
   if (topic === 'Designer project') form.elements.interest.value = 'Sourcing for a project';
   main.hidden = true; inquiry.hidden = false; setMenu(false);
   window.scrollTo({top:0,behavior:'instant'}); form.elements.name.focus({preventScroll:true});
@@ -280,24 +321,24 @@ form.addEventListener('submit', event => {
   event.preventDefault(); if (!form.reportValidity()) return;
   ['name','email','interest','message'].forEach(field => { $('#hos-review-' + field).textContent = form.elements[field].value.trim(); });
   $('#hos-review-message-row').hidden = !form.elements.message.value.trim();
-  form.hidden = true; review.hidden = false; title.textContent = 'Review your enquiry.'; statusMessage(''); window.scrollTo({top:0,behavior:'instant'}); sendButton.focus({preventScroll:true});
+  form.hidden = true; review.hidden = false; title.textContent = 'Review your inquiry.'; statusMessage(''); window.scrollTo({top:0,behavior:'instant'}); sendButton.focus({preventScroll:true});
 });
 $('#hos-inquiry-edit').addEventListener('click', () => {
   if (submitting) return;
-  submissionId = uuid(); form.hidden = false; review.hidden = true; title.textContent = 'Your enquiry'; statusMessage(''); window.scrollTo({top:0,behavior:'instant'}); form.elements.name.focus({preventScroll:true});
+  submissionId = uuid(); form.hidden = false; review.hidden = true; title.textContent = 'Your inquiry'; statusMessage(''); window.scrollTo({top:0,behavior:'instant'}); form.elements.name.focus({preventScroll:true});
 });
 sendButton.addEventListener('click', async () => {
   if (previewMode) return;
   if (submitting) return;
   submitting = true; sendButton.disabled = true; $('#hos-inquiry-edit').disabled = true; $('#hos-inquiry-close').disabled = true;
-  statusMessage('Sending your enquiry…');
+  statusMessage('Sending your inquiry…');
   const payload = { submissionId, ...inquiryContext, page:activePage, sessionId:session(), attribution };
   for (const field of ['name','email','interest','message','website']) payload[field] = form.elements[field].value.trim();
   try {
     const response = await fetch('/api/inquiries', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(15000)});
     const data = await response.json();
-    if (!response.ok || !data.ok || !data.reference) throw new Error(data.error || 'We could not send your enquiry. Please try again.');
-    review.hidden = true; success.hidden = false; title.textContent = 'Enquiry received.';
+    if (!response.ok || !data.ok || !data.reference) throw new Error(data.error || 'We could not send your inquiry. Please try again.');
+    review.hidden = true; success.hidden = false; title.textContent = 'Inquiry received.';
     $('#hos-inquiry-reference').textContent = data.reference; statusMessage(''); form.reset();
     window.scrollTo({top:0,behavior:'instant'}); $('#hos-inquiry-continue').focus({preventScroll:true});
   } catch (error) {
@@ -319,6 +360,8 @@ async function start() {
   if (mediaResponse.ok) media = await mediaResponse.json();
   if (editorialResponse.ok) editorial = await editorialResponse.json();
   catalog = await response.json(); ({artists,works,assets} = catalog);
+  catalog.site.description = catalog.site.description.replace(/\benquir/gi, word => word[0] === 'E' ? 'Inquir' : 'inquir');
+  $('#hos-copyright').textContent = `© ${new Date().getFullYear()} House of Stone`;
   $('#hos-location').textContent = catalog.site.location;
   $('.hos-founding-heading p').textContent = `${artists.length} artists. Selected works.`;
   root.querySelectorAll('[data-asset]').forEach(img => { applyImage(img,assets[img.dataset.asset]); if (!img.classList.contains('hos-brand-mark')) img.loading = 'lazy'; });
@@ -336,7 +379,7 @@ async function start() {
   }
   if (previewMode) {
     document.body.classList.add('hos-preview');
-    const banner = el('div','hos-preview-bar'); banner.append(el('span','','Draft preview · Enquiries and measurement are paused.'));
+    const banner = el('div','hos-preview-bar'); banner.append(el('span','','Draft preview · Inquiries and measurement are paused.'));
     const back = el('a','','Return to editor'); back.href = '/admin/content'; banner.append(back); document.body.prepend(banner);
     root.querySelectorAll('[data-inquiry]').forEach(button=>{ button.disabled=true; });
   }

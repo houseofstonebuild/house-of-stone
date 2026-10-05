@@ -37,12 +37,12 @@ th:not(:first-child),td:not(:first-child) {text-align:right;font-variant-numeric
 .funnel-fill {height:100%;background:#bdb09a;}
 .funnel-value {text-align:right;font-variant-numeric:tabular-nums;}
 .funnel-value small {display:block;color:#a9a195;font-size:11px;}
-.enquiry {padding:24px 0;border-bottom:1px solid #33312c;}
-.enquiry-head {display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;}
-.enquiry-head p,.meta {font-size:12px;color:#b9b0a3;}
-.enquiry .topic {margin:12px 0 5px;color:#e6d9c3;}
-.enquiry .message {white-space:pre-wrap;overflow-wrap:anywhere;max-width:850px;margin:12px 0;}
-.enquiry a {overflow-wrap:anywhere;}
+.inquiry {padding:24px 0;border-bottom:1px solid #33312c;}
+.inquiry-head {display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.inquiry-head p,.meta {font-size:12px;color:#b9b0a3;}
+.inquiry .topic {margin:12px 0 5px;color:#e6d9c3;}
+.inquiry .message {white-space:pre-wrap;overflow-wrap:anywhere;max-width:850px;margin:12px 0;}
+.inquiry a {overflow-wrap:anywhere;}
 .meta {margin-top:13px;display:flex;gap:12px 24px;flex-wrap:wrap;}
 .exports {display:flex;gap:25px;flex-wrap:wrap;}
 .empty {color:#b4afa4;padding:18px 0;}

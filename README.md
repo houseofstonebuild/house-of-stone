@@ -4,7 +4,7 @@ The approved black website and Taper logo, with a private collection editor, enq
 
 ## What is finished
 
-- A full-width apartment hero, fixed header and footer, a modal side drawer, readable 16-pixel body typography, and the centered Taper mark.
+- A full-width apartment hero, fixed header, normal-flow footer with site navigation, a modal side drawer, readable 15–16-pixel body typography, and the centered Taper mark.
 - Artist-led collection chapters, aligned biographies, and sculpture cards with specifications, descriptions and detail links. The homepage also introduces designers, collectors, the making and the House.
 - Complete sculpture, portrait and editorial image framing, responsive high-quality WebP delivery, and original-resolution uploads. The homepage hero fills the viewport with a responsive crop.
 - Short, interruptible page and drawer animations, subtle scroll reveals, and reduced-motion support.

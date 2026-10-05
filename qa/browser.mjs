@@ -48,18 +48,19 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
           const layout=await page.evaluate(()=>{
             const rect=s=>{const r=document.querySelector(s).getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,height:r.height};};
             const visible=selector=>[...document.querySelectorAll(selector)].filter(el=>el.getClientRects().length);
-            return {viewport:innerWidth,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,root:rect('#hos-concept'),header:rect('.hos-header'),footer:rect('.hos-footer'),main:rect('#hos-main'),hero:rect('.hos-hero-image'),images:visible('#hos-concept img').map(img=>({src:img.currentSrc,naturalWidth:img.naturalWidth,fit:getComputedStyle(img).objectFit,hero:img.classList.contains('hos-hero-image')})),text:visible('#hos-main p').filter(el=>!el.classList.contains('hos-artist-style')&&!el.classList.contains('hos-card-specs')).map(el=>({size:parseFloat(getComputedStyle(el).fontSize),text:el.textContent.slice(0,60)}))};
+            return {viewport:innerWidth,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,root:rect('#hos-concept'),header:rect('.hos-header'),footer:rect('.hos-footer'),footerPosition:getComputedStyle(document.querySelector('.hos-footer')).position,main:rect('#hos-main'),hero:rect('.hos-hero-image'),images:visible('#hos-concept img').map(img=>({src:img.currentSrc,naturalWidth:img.naturalWidth,fit:getComputedStyle(img).objectFit,hero:img.classList.contains('hos-hero-image')})),text:visible('#hos-main p').filter(el=>!el.classList.contains('hos-artist-style')&&!el.classList.contains('hos-card-specs')).map(el=>({size:parseFloat(getComputedStyle(el).fontSize),text:el.textContent.slice(0,60)}))};
           });
           assert(layout.scrollWidth<=layout.clientWidth+1,`Horizontal overflow ${JSON.stringify(layout)}`);
           assert(Math.abs(layout.root.left)<1&&Math.abs(layout.root.right-layout.clientWidth)<2,`Root does not fill the page width ${JSON.stringify(layout)}`);
           assert(Math.abs(layout.header.top)<1,'Header not anchored');
-          assert(Math.abs(layout.footer.bottom-height)<2,'Footer not anchored');
+          assert.equal(layout.footerPosition,'static','Footer must remain in normal page flow');
+          assert(layout.footer.top>=layout.main.bottom-1,'Footer overlaps the page');
           assert(layout.main.top>=layout.header.bottom-1,'Header covers content');
           assert(layout.images.every(i=>i.naturalWidth>0&&i.fit===(i.hero?'cover':'contain')),'Broken image or wrong framing');
           assert(layout.text.every(t=>t.size>=15),`Reading text is too small: ${JSON.stringify(layout.text.filter(t=>t.size<15))}`);
           if(path==='/') {
             assert(Math.abs(layout.hero.left)<1&&Math.abs(layout.hero.right-layout.clientWidth)<2,'Hero has side gaps');
-            assert(Math.abs(layout.hero.top-layout.header.bottom)<2&&Math.abs(layout.hero.bottom-layout.footer.top)<2,'Hero does not fill the visible screen');
+            assert(Math.abs(layout.hero.top-layout.header.bottom)<2&&Math.abs(layout.hero.bottom-height)<2,'Hero does not fill the visible screen');
             assert.equal(await page.locator('#hos-home-chapters .hos-artist-chapter').count(),catalog.artists.length);
             assert.equal(await page.locator('#hos-home-chapters .hos-artist-campaign').count(),catalog.artists.length);
             assert.equal(await page.locator('#hos-home-chapters .hos-setting-tile').count(),catalog.artists.length*3);
@@ -73,7 +74,8 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
           }
           await page.evaluate(()=>scrollTo(0,document.documentElement.scrollHeight));
           const bottom=await page.evaluate(()=>({headerTop:document.querySelector('.hos-header').getBoundingClientRect().top,footerBottom:document.querySelector('.hos-footer').getBoundingClientRect().bottom,mainBottom:document.querySelector('#hos-main').getBoundingClientRect().bottom,footerTop:document.querySelector('.hos-footer').getBoundingClientRect().top}));
-          assert(Math.abs(bottom.headerTop)<1&&Math.abs(bottom.footerBottom-height)<2,'Chrome does not stay fixed while scrolling');
+          assert(Math.abs(bottom.headerTop)<1,'Header does not stay fixed while scrolling');
+          assert(Math.abs(bottom.footerBottom-height)<2,'Footer does not finish at the end of the page');
           assert(bottom.mainBottom<=bottom.footerTop+2,'Footer covers the last content');
           if(width===1440||width===390||([844,2048,3440].includes(width)&&path==='/')) {
             await page.evaluate(async()=>{
@@ -118,6 +120,10 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
     await page.goForward();assert(await page.locator('#hos-work-title').textContent()==='Folded Light');
     // Every setting for an artist opens the same work. Back restores the chapter.
     await page.setViewportSize({width:1440,height:900});
+    await ready(page);
+    const hierarchy=await page.locator('#hos-home-chapters .hos-artist-chapter').first().evaluate(chapter=>({artist:chapter.querySelector('.hos-chapter-artist').getBoundingClientRect().bottom,work:chapter.querySelector('.hos-chapter-work').getBoundingClientRect().top}));
+    assert(hierarchy.work>hierarchy.artist,'Artist and sculpture should have separate rows');
+    assert(await page.locator('#hos-home-chapters .hos-carousel-controls').first().isHidden(),'Desktop should show three tiles without carousel controls');
     for(const [artistIndex,artist] of catalog.artists.entries()) {
       const work=catalog.works.find(work=>work.artistId===artist.id);
       for(let setting=0;setting<3;setting++) {
@@ -137,6 +143,40 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
     }
     await ready(page,'/works/folded-light');await page.locator('#hos-page-navigation [data-back]').click();await page.waitForURL(base+'/collection');
     await ready(page,'/artists/tariro-mavhunga');await page.locator('#hos-page-navigation [data-back]').click();await page.waitForURL(base+'/artists');
+    // The mobile settings stay in a single swipeable row; controls and keyboard
+    // navigation must agree with native scroll, including restored Back state.
+    await page.setViewportSize({width:390,height:844});
+    await ready(page);
+    for(const [artistIndex,artist] of catalog.artists.entries()) {
+      const chapter=page.locator('#hos-home-chapters .hos-artist-chapter').nth(artistIndex);
+      const track=chapter.locator('.hos-sculpture-settings'),counter=chapter.locator('.hos-carousel-position');
+      const dimensions=await track.evaluate(el=>({width:el.clientWidth,scroll:el.scrollWidth,tops:[...el.children].map(tile=>tile.getBoundingClientRect().top)}));
+      assert(dimensions.scroll>dimensions.width&&dimensions.tops.every(y=>Math.abs(y-dimensions.tops[0])<1),'Mobile settings should form a horizontal carousel');
+      assert(await chapter.getByRole('button',{name:'Previous setting'}).isDisabled());
+      await chapter.getByRole('button',{name:'Next setting'}).click();
+      await counter.filter({hasText:'2 / 3'}).waitFor();
+      await track.focus();await page.keyboard.press('End');await counter.filter({hasText:'3 / 3'}).waitFor();
+      assert(await chapter.getByRole('button',{name:'Next setting'}).isDisabled());
+      await track.evaluate(el=>el.scrollTo({left:0,behavior:'instant'}));await counter.filter({hasText:'1 / 3'}).waitFor();
+      await track.focus();await page.keyboard.press('ArrowRight');await counter.filter({hasText:'2 / 3'}).waitFor();
+      const work=catalog.works.find(work=>work.artistId===artist.id);
+      await chapter.locator('.hos-setting-tile').nth(1).getByRole('button',{name:'View sculpture',exact:true}).click();
+      assert.equal(new URL(page.url()).pathname,'/works/'+work.slug);
+      await page.locator('#hos-page-navigation [data-back]').click();await page.waitForURL(base+'/');
+      await counter.filter({hasText:'2 / 3'}).waitFor();
+    }
+    await ready(page);await page.locator('#hos-home-chapters .hos-artist-chapter').first().screenshot({path:new URL(`${engineName}-mobile-chapter.jpg`,output).pathname,type:'jpeg',quality:90,scale:'css'});
+    await page.setViewportSize({width:1440,height:900});await ready(page);
+    await page.locator('#hos-home-chapters .hos-artist-chapter').first().screenshot({path:new URL(`${engineName}-desktop-chapter.jpg`,output).pathname,type:'jpeg',quality:90,scale:'css'});
+    await page.locator('.hos-footer').screenshot({path:new URL(`${engineName}-footer.jpg`,output).pathname,type:'jpeg',quality:90,scale:'css'});
+    for(const view of ['collection','artists','making','designers','collectors','house','privacy']) {
+      await page.locator(`.hos-footer [data-view="${view}"]`).click();assert.equal(new URL(page.url()).pathname,'/'+view);
+    }
+    await page.locator('.hos-footer [data-inquiry="Corporate project"]').click();
+    assert(await page.locator('#hos-inquiry-form').isVisible());
+    assert.equal(await page.locator('#hos-inquiry-context').textContent(),'Corporate project');
+    await page.locator('#hos-inquiry-close').click();
+    assert(!/\benquir/i.test(await page.locator('#hos-concept').innerText()),'Visitor copy should use American English');
     // A separate tracked browser session exercises real form submissions and attribution.
     const tracked=await browser.newContext({viewport:{width:390,height:844}});
     const visitor=await tracked.newPage();
@@ -167,7 +207,8 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
     assert(app.db.prepare('SELECT count(*) AS n FROM inquiries').get().n===1);
     await visitor.locator('#hos-inquiry-send').click();
     await visitor.locator('#hos-inquiry-success').waitFor();
-    await visitor.waitForFunction(()=>scrollY===0&&document.querySelector('.hos-header').getBoundingClientRect().top===0&&document.querySelector('.hos-footer').getBoundingClientRect().bottom===innerHeight);
+    await visitor.waitForFunction(()=>scrollY===0&&document.querySelector('.hos-header').getBoundingClientRect().top===0);
+    assert.equal(await visitor.locator('#hos-inquiry-title').textContent(),'Inquiry received.');
     await visitor.screenshot({path:new URL(`${engineName}-inquiry-success.jpg`,output).pathname,type:'jpeg',quality:85,scale:'css',fullPage:true});
     assert(app.db.prepare('SELECT count(*) AS n FROM inquiries').get().n===1,'Retry duplicated enquiry');
     const entry=(await adminGet('/api/admin/inquiries'))[0];
@@ -232,7 +273,7 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
     }
     await page.locator('#hos-collection-chapters .hos-work-card .hos-text-link').nth(2).click();
     assert.equal(await page.locator('#hos-work-title').textContent(),'Browser QA sculpture 4');
-    await editor.goto(base+'/admin');await editor.locator('#inbox .enquiry').first().waitFor();
+    await editor.goto(base+'/admin');await editor.locator('#inbox .inquiry').first().waitFor();
     assert((await editor.locator('#inbox').textContent()).includes('Browser QA collector'));
     await owner.close();await context.close();
     // Motion remains interruptible; reduced-motion visitors keep content visible.
