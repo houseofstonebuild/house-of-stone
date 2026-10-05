@@ -23,9 +23,10 @@ for(const [engineName,engine] of engines) {
   const auth={Authorization:'Basic '+Buffer.from('admin:'+password).toString('base64')};
   const adminGet=async path=>(await fetch(base+path,{headers:auth})).json();
   async function ready(page,path='/',search='') {await page.goto(base+path+search);await page.locator('#hos-concept[data-ready="true"]').waitFor();await page.emulateMedia({reducedMotion:'reduce'});}
+  const launchOptions=engineName==='chromium'?{args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}:engineName==='firefox'?{firefoxUserPrefs:{'webgl.force-enabled':true,'webgl.disabled':false}}:{};
   try {
-    browser=await engine.launch(engineName==='chromium'?{args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}:engineName==='firefox'?{firefoxUserPrefs:{'webgl.force-enabled':true,'webgl.disabled':false}}:{});
-    const context=await browser.newContext({deviceScaleFactor:2,reducedMotion:'reduce'});
+    browser=await engine.launch(launchOptions);
+    let context=await browser.newContext({deviceScaleFactor:2,reducedMotion:'reduce'});
     await context.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
     // Keep the route/layout matrix independent of software-GPU resource pressure.
     // The dedicated contexts below exercise every real mesh and its controls.
@@ -33,7 +34,7 @@ for(const [engineName,engine] of engines) {
       const original=HTMLCanvasElement.prototype.getContext;
       HTMLCanvasElement.prototype.getContext=function(type,...args){return type==='webgl2'?null:original.call(this,type,...args);};
     });
-    const page=await context.newPage();
+    let page=await context.newPage();
     page.on('pageerror',error=>pageErrors.push(error.message));
     page.on('response',r=>{if(r.url().startsWith(base)&&r.status()>=400)failedResponses.push({url:r.url(),status:r.status()});});
     let checked=0;
@@ -116,6 +117,15 @@ for(const [engineName,engine] of engines) {
       await page.locator('#hos-menu-close').click();
       assert(await page.locator('#hos-menu').isHidden(),'Close button did not close menu');
     }
+    // Release the decoded ultra-wide screenshots and compositor surfaces before
+    // interaction checks; every large viewport and its menu was checked above.
+    await browser.close();browser=await engine.launch(launchOptions);
+    context=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:2,reducedMotion:'reduce'});
+    await context.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
+    page=await context.newPage();
+    page.on('pageerror',error=>pageErrors.push(error.message));
+    page.on('response',r=>{if(r.url().startsWith(base)&&r.status()>=400)failedResponses.push({url:r.url(),status:r.status()});});
+    await ready(page);
     for(const view of ['collection','artists','making','designers','collectors','house']) {
       await page.locator('.hos-menu-toggle').click();
       await page.locator(`#hos-menu [data-view="${view}"]`).click();
