@@ -1,0 +1,27 @@
+name: Live website verification
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - run: npm install --prefix qa --no-audit --no-fund
+      - run: npx --prefix qa playwright install --with-deps chromium
+      - run: node qa/live.mjs
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: live-website-verification
+          path: test-results/live/
+          retention-days: 7

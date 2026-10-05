@@ -14,7 +14,7 @@ test('all five textured GLB files load as finite volumes with reference openings
     const bytes=readFileSync(new URL('../public'+definition.file,import.meta.url));
     const jsonLength=bytes.readUInt32LE(12),doc=JSON.parse(bytes.subarray(20,20+jsonLength).toString());
     assert.deepEqual(doc.extensionsRequired,['KHR_mesh_quantization']);
-    assert.equal(doc.images[0].uri,definition.source);assert(readFileSync(new URL('../public'+definition.source,import.meta.url)).length>400000);
+    assert.equal(new URL(doc.images[0].uri,'https://house.test'+definition.file).pathname,definition.source);assert(readFileSync(new URL('../public'+definition.source,import.meta.url)).length>400000);
     assert.equal(definition.referenceSurface,true);assert.equal(definition.stoneGrain,false);
     assert(definition.stoneSwatch.every(Number.isFinite));
     // Real image decoding and shader compilation are covered by browser QA.

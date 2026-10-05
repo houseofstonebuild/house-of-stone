@@ -216,7 +216,7 @@ export function initializeViewer({root,models,works,onInteraction}) {
   reduced.addEventListener('change',()=>{lastView='';if(active&&active!==dialogHost)statusFor(active).textContent=reduced.matches?'Explore the form in 3D':'Scroll to rotate';refresh();});
   addEventListener('scroll',refresh,{passive:true});addEventListener('resize',refresh,{passive:true});document.addEventListener('visibilitychange',refresh);
   new ResizeObserver(refresh).observe(dialogHost);
-  const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(!unavailable&&entry.isIntersecting&&models[entry.target.dataset.modelId])void model(entry.target.dataset.modelId).catch(()=>{});refresh();},{rootMargin:'200px',threshold:[0,.1,.5,1]});hosts.forEach(host=>observer.observe(host));
+  const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(!unavailable&&entry.isIntersecting&&models[entry.target.dataset.modelId]&&makeRenderer())void model(entry.target.dataset.modelId).catch(()=>{});refresh();},{rootMargin:'200px',threshold:[0,.1,.5,1]});hosts.forEach(host=>observer.observe(host));
   refresh();
   return {refresh,close,open(work,button,poster){
     dialogWork=work;trigger=button;yaw=-.3;pitch=0;zoom=1;interactionCounted=false;pointers.clear();
