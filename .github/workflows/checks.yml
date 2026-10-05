@@ -19,3 +19,27 @@ jobs:
           package-manager-cache: false
       - run: npm run check
       - run: npm test
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Build deployment image
+        run: docker build --tag house-of-stone:ci .
+      - name: Check production startup with persistent storage
+        run: |
+          docker run --detach --name house-of-stone-ci --user 0 \
+            --publish 127.0.0.1:18000:8000 \
+            --mount type=volume,source=house-of-stone-ci-data,target=/app/data \
+            --env ADMIN_PASSWORD=ci-only-password-not-for-production \
+            --env SITE_URL=https://house-of-stone.example.test \
+            house-of-stone:ci
+          curl --fail --retry 10 --retry-delay 1 --retry-connrefused \
+            --max-time 5 --retry-max-time 30 http://127.0.0.1:18000/health
+      - name: Stop test container
+        if: always()
+        run: |
+          docker logs house-of-stone-ci || true
+          docker rm --force house-of-stone-ci || true

@@ -161,7 +161,7 @@ npx --prefix qa playwright install chromium firefox webkit
 node qa/browser.mjs
 ```
 
-This tests browser engines, rather than every physical device. Confirm optional email delivery with your real provider settings before launch. The Docker image was prepared but not built in this environment.
+This tests browser engines, rather than every physical device. Confirm optional email delivery with your real provider settings before launch. The Website checks workflow also builds the Docker image and checks production startup with a mounted data volume. Railway storage is attached through its service volume settings; the Dockerfile does not declare a Docker volume.
 
 ## Primary implementation references
 
