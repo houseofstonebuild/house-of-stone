@@ -74,7 +74,7 @@ for(const [engineName,engine] of engines) {
             assert.equal(await page.locator('#hos-home-chapters .hos-setting-tile').count(),catalog.artists.length*3);
             assert.equal(await page.locator('#hos-home-chapters .hos-setting-action [data-work]').count(),catalog.artists.length);
             assert.equal(await page.locator('#hos-home-chapters .hos-setting-tile .hos-text-link').count(),0);
-            if(width<=700)assert((await page.locator('#hos-home-chapters .hos-artist-campaign').first().boundingBox()).height>=390,'Mobile artist campaign should have a large crop');
+            if(width<=700)assert((await page.locator('#hos-home-chapters .hos-artist-campaign').first().boundingBox()).height>=Math.min(390,width),'Mobile artist campaign should have a large crop');
             assert.equal(await page.locator('.hos-hero-copy h1 span').last().evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');
             assert.equal(await page.locator('#hos-home-collection-title').evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');
             assert(await page.locator('#hos-page-navigation').isHidden(),'Home should not show Back');

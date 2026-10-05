@@ -257,7 +257,7 @@ body.hos-preview .hos-header {top:var(--hos-preview-height)!important;}
   #hos-concept .hos-home-collection {padding-top:0;}
   #hos-concept .hos-artist-chapter {padding:30px 0 34px;}
   #hos-concept .hos-editorial-chapter {padding:0;margin-bottom:34px;}
-  #hos-concept .hos-artist-campaign {width:100%;min-width:0;aspect-ratio:1;min-height:390px;max-height:620px;overflow:hidden;}
+  #hos-concept .hos-artist-campaign {width:100%;min-width:0;aspect-ratio:1;min-height:clamp(320px,100vw,390px);max-height:620px;overflow:hidden;}
   #hos-concept .hos-artist-campaign img {height:100%;width:100%;object-fit:cover;}
   #hos-concept .hos-chapter-details {padding:22px 20px 20px;}
   #hos-concept .hos-chapter-details h2 {font-size:22px;}
