@@ -28,7 +28,7 @@ export function initializeViewer({root,models,works,onInteraction}) {
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)'),hosts=[...root.querySelectorAll('[data-model-stage]')];
   const scenes=new Map(),loader=new GLTFLoader();
   let renderer,scene,camera,sculpture,active,pending=0,unavailable=false,contextLost=false,trigger,dialogWork,interactionCounted=false;
-  let yaw=-.3,pitch=0,zoom=1,lastView='',loadingHost,activationGeneration=0;
+  let yaw=-.3,pitch=0,zoom=1,lastView='',loadingHost,activationGeneration=0,dialogCleaned=true;
   const pointers=new Map();let pinchDistance=0;
   const controls=[...dialog.querySelectorAll('[data-model-control]')];
   const statusFor=host=>host===dialogHost?dialogStatus:host.parentElement.querySelector('.hos-3d-hint');
@@ -168,10 +168,14 @@ export function initializeViewer({root,models,works,onInteraction}) {
     if(action==='in')zoom=clamp(zoom*1.16,.65,1.8);if(action==='out')zoom=clamp(zoom/1.16,.65,1.8);if(action==='reset'){yaw=-.3;pitch=0;zoom=1;}
     interacted();refresh();
   }
-  function close() {
-    if(!dialog.open)return;saveFrame();dialog.close();
+  function finishClose() {
+    if(dialog.open||dialogCleaned)return;
+    dialogCleaned=true;activationGeneration++;document.body.classList.remove('hos-model-open');pointers.clear();loadingHost=null;active=null;renderer?.domElement.remove();trigger?.focus({preventScroll:true});refresh();
   }
-  dialog.addEventListener('close',()=>{activationGeneration++;document.body.classList.remove('hos-model-open');pointers.clear();loadingHost=null;active=null;renderer?.domElement.remove();trigger?.focus({preventScroll:true});refresh();});
+  function close() {
+    if(!dialog.open)return;saveFrame();dialog.close();finishClose();
+  }
+  dialog.addEventListener('close',finishClose);
   dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
   dialog.addEventListener('click',event=>{if(event.target!==dialog)return;const b=dialog.getBoundingClientRect();if(event.clientX<b.left||event.clientX>b.right||event.clientY<b.top||event.clientY>b.bottom)close();});
   root.querySelector('#hos-model-close').addEventListener('click',close);
@@ -187,6 +191,6 @@ export function initializeViewer({root,models,works,onInteraction}) {
     dialogHost.querySelector('.hos-3d-poster').src=poster;dialogHost.querySelector('.hos-3d-poster').hidden=false;
     controls.forEach(button=>button.disabled=true);dialogStatus.textContent='Loading 3D view…';
     document.body.style.setProperty('--hos-scrollbar',`${Math.max(0,innerWidth-document.documentElement.clientWidth)}px`);document.body.classList.add('hos-model-open');
-    dialog.showModal();root.querySelector('#hos-model-close').focus({preventScroll:true});refresh();
+    dialogCleaned=false;dialog.showModal();root.querySelector('#hos-model-close').focus({preventScroll:true});refresh();
   }};
 }
