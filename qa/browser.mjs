@@ -271,6 +271,7 @@ for(const [engineName,engine] of engines) {
       if(webglReady){
         assert.equal(state,'ready');await stage.waitFor({state:'visible'});await modelPage.waitForFunction(element=>Number(element.dataset.modelTriangles)>500,await stage.elementHandle());
         assert(Number(await stage.getAttribute('data-model-triangles'))>500,'Model has no rendered volume');
+        assert(Number(await stage.getAttribute('data-model-texture-width'))>=1000,'The sculpture must decode its high-resolution stone texture');
         const scroll=await modelPage.evaluate(()=>scrollY),before=Number(await stage.getAttribute('data-model-rotation'));
         await modelPage.evaluate(()=>scrollBy(0,100));await modelPage.waitForFunction(({element,before})=>Math.abs(Number(element.dataset.modelRotation)-before)>.1,{element:await stage.elementHandle(),before});
         await modelPage.evaluate(y=>scrollTo(0,y),scroll);await modelPage.waitForFunction(({element,before})=>Math.abs(Number(element.dataset.modelRotation)-before)<.02,{element:await stage.elementHandle(),before});
@@ -288,9 +289,11 @@ for(const [engineName,engine] of engines) {
         await modelPage.getByRole('button',{name:'Rotate right',exact:true}).click();await modelPage.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelRotation)>-.1);
         await modelPage.getByRole('button',{name:'Zoom in',exact:true}).click();await modelPage.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelZoom)>1);
         await modelPage.getByRole('button',{name:'Reset',exact:true}).click();await modelPage.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelZoom)===1&&Number(document.querySelector('#hos-model-stage').dataset.modelRotation)===-.3);
+        await modal.screenshot({path:new URL(`${engineName}-model-${catalog.works.find(w=>w.artistId===artist.id).id}-front.jpg`,output).pathname,type:'jpeg',quality:94,scale:'css'});
         const canvas=modal.locator('.hos-3d-canvas'),bounds=await canvas.boundingBox();
         await modelPage.mouse.move(bounds.x+bounds.width/2,bounds.y+bounds.height/2);await modelPage.mouse.down();await modelPage.mouse.move(bounds.x+bounds.width/2+90,bounds.y+bounds.height/2+25,{steps:5});await modelPage.mouse.up();
         await modelPage.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelRotation)>.2);
+        await modal.screenshot({path:new URL(`${engineName}-model-${catalog.works.find(w=>w.artistId===artist.id).id}-turned.jpg`,output).pathname,type:'jpeg',quality:94,scale:'css'});
         await canvas.focus();await modelPage.keyboard.press('Home');await modelPage.keyboard.press('ArrowUp');await modelPage.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelPitch)>0);
       }
       await modelPage.keyboard.press('Escape');assert(await modelPage.locator('#hos-model-dialog').isHidden());assert(!await modelPage.locator('body').evaluate(el=>el.classList.contains('hos-model-open')));

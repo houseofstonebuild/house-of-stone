@@ -5,23 +5,32 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {GLTFLoader} from '../public/vendor/GLTFLoader.js';
-import {Box3,Vector3,Raycaster} from '../public/vendor/three.module.min.js';
+import {Box3,Vector3,Raycaster,Texture} from '../public/vendor/three.module.min.js';
 import {createApp} from '../server.mjs';
 const definitions=JSON.parse(readFileSync(new URL('../public/models.json',import.meta.url),'utf8'));
-test('all five GLB files load as finite volumes and preserve the sculptural openings',async()=>{
+test('all five textured GLB files load as finite volumes with reference openings and a dished recess',async()=>{
   const loaded=new Map();
   for(const [id,definition] of Object.entries(definitions)) {
     const bytes=readFileSync(new URL('../public'+definition.file,import.meta.url));
-    const gltf=await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');
+    const jsonLength=bytes.readUInt32LE(12),doc=JSON.parse(bytes.subarray(20,20+jsonLength).toString());
+    assert.deepEqual(doc.extensionsRequired,['KHR_mesh_quantization']);
+    assert.equal(doc.images[0].uri,definition.source);assert(readFileSync(new URL('../public'+definition.source,import.meta.url)).length>400000);
+    assert.equal(definition.referenceSurface,true);assert.equal(definition.stoneGrain,false);
+    assert(definition.stoneSwatch.every(Number.isFinite));
+    // Real image decoding and shader compilation are covered by browser QA.
+    const loader=new GLTFLoader().register(()=>({name:'NODE_TEXTURE_FIXTURE',loadTexture(){return Promise.resolve(new Texture());}}));
+    const gltf=await loader.parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');
     gltf.scene.updateMatrixWorld(true);const size=new Box3().setFromObject(gltf.scene).getSize(new Vector3());
     assert(size.x>.5&&size.y>2&&size.z>.25,`${id} should have real depth`);
     gltf.scene.traverse(node=>{if(node.isMesh){for(const attr of [node.geometry.attributes.position,node.geometry.attributes.normal])assert([...attr.array].every(Number.isFinite));}});
     loaded.set(id,gltf.scene);
   }
-  for(const [id,x,y] of [['continuum',0,-.1],['equilibrium',.02,-.01],['together',0,.03]]) {
+  for(const [id,x,y] of [['continuum',0,1.34],['together',.13,1.82],['together',-.06,.70]]) {
     const ray=new Raycaster(new Vector3(x,y,10),new Vector3(0,0,-1));
     assert.equal(ray.intersectObject(loaded.get(id),true).length,0,`${id} must retain its opening through the stone`);
   }
+  const recess=new Raycaster(new Vector3(.13,1.53,10),new Vector3(0,0,-1));
+  assert(recess.intersectObject(loaded.get('equilibrium'),true).length>0,'The bowl-shaped recess must retain a solid back');
 });
 test('model delivery negotiates compression, supports HEAD, and counts private 3D sessions',async t=>{
   const password=randomUUID(),dataDir=mkdtempSync(join(tmpdir(),'hos-models-')),app=createApp({dataDir,env:{ADMIN_PASSWORD:password},backgroundNotifications:false});

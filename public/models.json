@@ -3,30 +3,70 @@
     "title": "Folded Light",
     "source": "/assets/fold.jpg",
     "file": "/models/folded-light.glb",
-    "stoneGrain": true
+    "stoneGrain": false,
+    "referenceSurface": true,
+    "referenceYaw": 0.3,
+    "stoneSwatch": [
+      0.34392265193370164,
+      0.31123388581952116,
+      0.04696132596685083,
+      0.09023941068139964
+    ]
   },
   "continuum": {
     "title": "Continuum",
     "source": "/assets/hero.jpg",
     "file": "/models/continuum.glb",
-    "stoneGrain": true
+    "stoneGrain": false,
+    "referenceSurface": true,
+    "referenceYaw": 0.3,
+    "stoneSwatch": [
+      0.7948564593301436,
+      0.620616365568544,
+      0.039473684210526314,
+      0.12327311370882041
+    ]
   },
   "together": {
     "title": "Together",
     "source": "/assets/together.jpg",
     "file": "/models/together.glb",
-    "stoneGrain": true
+    "stoneGrain": false,
+    "referenceSurface": true,
+    "referenceYaw": 0.3,
+    "stoneSwatch": [
+      0.5870165745856354,
+      0.26703499079189685,
+      0.04488950276243094,
+      0.08287292817679558
+    ]
   },
   "quiet-flight": {
     "title": "Quiet Flight",
     "source": "/assets/bird.jpg",
     "file": "/models/quiet-flight.glb",
-    "stoneGrain": true
+    "stoneGrain": false,
+    "referenceSurface": true,
+    "referenceYaw": 0.3,
+    "stoneSwatch": [
+      0.47375690607734805,
+      0.5027624309392266,
+      0.057320441988950276,
+      0.0856353591160221
+    ]
   },
   "equilibrium": {
     "title": "Equilibrium",
     "source": "/assets/balance.jpg",
     "file": "/models/equilibrium.glb",
-    "stoneGrain": true
+    "stoneGrain": false,
+    "referenceSurface": true,
+    "referenceYaw": 0.3,
+    "stoneSwatch": [
+      0.5732044198895028,
+      0.6482504604051565,
+      0.08287292817679558,
+      0.0865561694290976
+    ]
   }
 }

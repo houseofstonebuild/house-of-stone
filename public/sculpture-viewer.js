@@ -22,6 +22,35 @@ function grain(material) {
   material.customProgramCacheKey=()=> 'house-of-stone-grain-v1';
 }
 
+// The mineral colours and highlights come from the master image. A restrained
+// normal-based light response adds volume while preserving those stone colours.
+function referenceSurface(material,extent,swatch) {
+  if(!material.isMeshBasicMaterial)return;
+  material.toneMapped=false;
+  material.onBeforeCompile=shader=>{
+    shader.uniforms.referenceExtent={value:extent};shader.uniforms.stoneSwatch={value:new THREE.Vector4(...swatch)};
+    shader.vertexShader=shader.vertexShader.replace('#include <common>',`#include <common>
+      uniform vec3 referenceExtent;varying vec3 vReferenceNormal;varying vec3 vSourceNormal;varying vec3 vSourcePosition;
+    `).replace('#include <begin_vertex>',`#include <begin_vertex>
+      vReferenceNormal=normalize(normalMatrix*normal);vSourceNormal=normalize(normal/referenceExtent);vSourcePosition=position*referenceExtent;
+    `);
+    shader.fragmentShader=shader.fragmentShader.replace('#include <common>',`#include <common>
+      uniform vec4 stoneSwatch;varying vec3 vReferenceNormal;varying vec3 vSourceNormal;varying vec3 vSourcePosition;
+    `).replace('#include <map_pars_fragment>',`#include <map_pars_fragment>
+      vec2 stoneTurn(vec2 f,vec2 cell){float t=floor(fract(sin(dot(cell,vec2(127.1,311.7)))*43758.5453)*4.);if(t<1.)return f;if(t<2.)return vec2(1.-f.y,f.x);if(t<3.)return 1.-f;return vec2(f.y,1.-f.x);}
+      vec3 stoneSample(vec2 p){vec2 f=fract(p),g=fract(p+.5),edge=min(f,1.-f);float weight=smoothstep(0.,.15,min(edge.x,edge.y));vec3 a=texture2D(map,stoneSwatch.xy+stoneTurn(f,floor(p))*stoneSwatch.zw).rgb;vec3 b=texture2D(map,stoneSwatch.xy+stoneTurn(g,floor(p+.5))*stoneSwatch.zw).rgb;return mix(b,a,weight);}
+    `).replace('#include <color_fragment>',`#include <color_fragment>
+      vec3 sourceNormal=normalize(vSourceNormal),weights=pow(abs(sourceNormal),vec3(4.));weights/=max(dot(weights,vec3(1.)),.001);
+      vec3 stone=stoneSample(vSourcePosition.yz*.85+vec2(.17,.31))*weights.x
+        +stoneSample(vSourcePosition.xz*.85+vec2(.37,.11))*weights.y
+        +stoneSample(vSourcePosition.xy*.85+vec2(.23,.47))*weights.z;
+      diffuseColor.rgb=mix(stone,diffuseColor.rgb,smoothstep(.08,.62,sourceNormal.z));
+      diffuseColor.rgb*=.86+.14*max(dot(normalize(vReferenceNormal),normalize(vec3(-.35,.55,1.))),0.);
+    `);
+  };
+  material.customProgramCacheKey=()=> 'house-of-stone-reference-surface-v2';
+}
+
 export function initializeViewer({root,models,works,onInteraction}) {
   const dialog=root.querySelector('#hos-model-dialog'),dialogHost=root.querySelector('#hos-model-stage');
   const dialogTitle=root.querySelector('#hos-model-title'),dialogStatus=root.querySelector('#hos-model-status');
@@ -84,7 +113,9 @@ export function initializeViewer({root,models,works,onInteraction}) {
       const scale=3.05/Math.max(size.y,size.x*.95,size.z*.95);group.scale.multiplyScalar(scale);
       group.position.set(-center.x*scale,-box.min.y*scale+.12,-center.z*scale);
       if(entry.stoneGrain)group.traverse(node=>{if(node.isMesh)for(const material of Array.isArray(node.material)?node.material:[node.material])grain(material);});
-      const turntable=new THREE.Group();turntable.add(group);return turntable;
+      if(entry.referenceSurface)group.traverse(node=>{if(node.isMesh)for(const material of Array.isArray(node.material)?node.material:[node.material])referenceSurface(material,node.scale.clone(),entry.stoneSwatch);});
+      const pose=new THREE.Group();pose.rotation.y=entry.referenceYaw||0;pose.add(group);
+      const turntable=new THREE.Group();turntable.add(pose);return turntable;
     }).catch(error=>{scenes.delete(id);throw error;});
     scenes.set(id,request);return request;
   }
@@ -142,8 +173,10 @@ export function initializeViewer({root,models,works,onInteraction}) {
     renderer.setPixelRatio(Math.min(devicePixelRatio||1,2,2048/Math.max(rect.width,rect.height)));renderer.setSize(rect.width,rect.height,false);
     camera.aspect=rect.width/rect.height;
     const distance=Math.max(6.8,3.8/camera.aspect)/(host===dialogHost?zoom:1),elevation=host===dialogHost?pitch:0;
-    camera.position.set(0,2.35+Math.sin(elevation)*distance,Math.cos(elevation)*distance);camera.lookAt(0,1.62,0);camera.updateProjectionMatrix();
+    camera.position.set(0,1.62+Math.sin(elevation)*distance,Math.cos(elevation)*distance);camera.lookAt(0,1.62,0);camera.updateProjectionMatrix();
     sculpture.rotation.set(0,rotation,0);renderer.render(scene,camera);
+    const textureWidths=[];sculpture.traverse(node=>{if(node.isMesh)for(const material of Array.isArray(node.material)?node.material:[node.material])if(material.map?.image)textureWidths.push(material.map.image.width);});
+    host.dataset.modelTextureWidth=String(textureWidths.length?Math.min(...textureWidths):0);
     host.dataset.modelFrames=String(Number(host.dataset.modelFrames || 0)+1);
     host.dataset.modelRotation=String(rotation);host.dataset.modelPitch=String(host===dialogHost?pitch:0);host.dataset.modelZoom=String(host===dialogHost?zoom:1);host.dataset.modelTriangles=String(renderer.info.render.triangles);
   }
