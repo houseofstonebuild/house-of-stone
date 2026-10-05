@@ -37,7 +37,7 @@ function el(tag, className, text) {
   if (text !== undefined) element.textContent = text;
   return element;
 }
-let catalog, artists, works, assets, media = {}, editorial = {};
+let catalog, artists, works, assets, media = {}, editorial = {}, models = {}, viewerPromise, modelViewer;
 let activePage = 'home', activeArtist, activeWork;
 let inquiryContext = {}, submissionId = '', inquiryStarted = false, submitting = false, lastInquiryButton, inquiryScroll = 0;
 const motionPreference = window.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -114,6 +114,29 @@ function chapterMedia(artist, work) {
 function editorialImage(source, alt, sizes) {
   const img = el('img'); applyImage(img, source, sizes); img.alt = alt; img.loading = 'lazy'; return img;
 }
+function modelDefinition(work) {
+  const entry=models[work.id];
+  return entry && entry.title===work.title && entry.source===assets[work.image] ? entry : null;
+}
+function loadViewer() {
+  if(!viewerPromise)viewerPromise=import('./sculpture-viewer.js').then(module=>{
+    modelViewer=module.initializeViewer({root,models,works,onInteraction:id=>{const work=works.find(w=>w.id===id);if(work)track('model_interaction',{workId:id,artistId:work.artistId});}});
+    return modelViewer;
+  }).catch(error=>{viewerPromise=null;throw error;});
+  return viewerPromise;
+}
+function modelPanel(work) {
+  if(!modelDefinition(work))return null;
+  const panel=el('div','hos-3d-panel'),top=el('div','hos-3d-top');
+  top.append(el('span','hos-eyebrow','SCULPTURE IN 3D'),link('Explore in 3D',{model:work.id}));
+  const stage=el('div','hos-3d-stage');stage.dataset.modelStage='';stage.dataset.modelId=work.id;stage.dataset.modelState='waiting';
+  stage.setAttribute('role','group');stage.setAttribute('aria-label',`${work.title} in three dimensions`);
+  const poster=image(work.image,'',true,'(max-width: 700px) 90vw, 750px');poster.className='hos-3d-poster';poster.setAttribute('aria-hidden','true');
+  const snapshot=el('canvas','hos-3d-snapshot');snapshot.hidden=true;snapshot.setAttribute('aria-hidden','true');
+  stage.append(poster,snapshot);
+  const hint=el('div','hos-3d-hint',motionPreference?.matches?'Explore the form in 3D':'Scroll to rotate');hint.setAttribute('role','status');
+  panel.append(top,stage,hint);return panel;
+}
 function sculptureSettings(artist, work, entry) {
   const carousel = el('div', 'hos-settings-carousel'); carousel.dataset.reveal = '';
   carousel.setAttribute('role', 'group'); carousel.setAttribute('aria-label', `${work.title} in different spaces`);
@@ -125,7 +148,7 @@ function sculptureSettings(artist, work, entry) {
     const photo = el('button', 'hos-setting-photo cursor-interaction'); photo.type = 'button'; photo.dataset.work = work.id;
     photo.setAttribute('aria-label', `View ${work.title} by ${artist.name} in ${space}`);
     photo.append(editorialImage(entry.settings[setting], `${work.title} by ${artist.name} in ${space}`, '(max-width: 700px) 90vw, (max-width: 1800px) 28vw, 480px'));
-    tile.append(photo, el('h3', '', label), link('View sculpture', {work:work.id})); grid.append(tile);
+    tile.append(photo, el('h3', '', label)); grid.append(tile);
   }
   const tiles = [...grid.children], controls = el('div', 'hos-carousel-controls');
   const previous = el('button', 'hos-carousel-previous cursor-interaction');
@@ -159,7 +182,8 @@ function sculptureSettings(artist, work, entry) {
     }
   });
   if ('ResizeObserver' in window) new window.ResizeObserver(sync).observe(grid);
-  controls.append(previous, counter, next); carousel.append(grid, controls);
+  const action=el('div','hos-setting-action');action.append(link('View sculpture',{work:work.id}));
+  controls.append(previous, counter, next); carousel.append(grid, controls, action);
   return carousel;
 }
 function artistChapter(artist, selected) {
@@ -167,7 +191,8 @@ function artistChapter(artist, selected) {
   if (featured) {
     const entry = chapterMedia(artist, featured), chapter = el('section', 'hos-artist-chapter hos-editorial-chapter');
     const campaign = el('div', 'hos-artist-campaign'); campaign.dataset.reveal = '';
-    campaign.append(editorialImage(entry.landscape, `${artist.name} beside ${featured.title} in the studio`, '(max-width: 1800px) 90vw, 1560px'));
+    const campaignImage=editorialImage(entry.landscape, `${artist.name} beside ${featured.title} in the studio`, '(max-width: 700px) 170vw, (max-width: 1800px) 90vw, 1560px');
+    campaignImage.style.objectPosition=entry.mobileFocus || '50% center';campaign.append(campaignImage);
     const details = el('div', 'hos-chapter-details'); details.dataset.reveal = '';
     const artistCopy = el('div', 'hos-chapter-artist');
     artistCopy.append(el('h2','',artist.name),el('p','',artist.description === entry.descriptionSource ? entry.shortDescription : artist.description),link('About the artist',{artist:artist.id}));
@@ -177,7 +202,9 @@ function artistChapter(artist, selected) {
     const specs = el('div', 'hos-chapter-work-specs');
     specs.append(el('p','',featured.material),el('p','',featured.dimensions));
     workCopy.append(workHeading, specs);
-    details.append(artistCopy,workCopy); chapter.append(campaign,details,sculptureSettings(artist,featured,entry));
+    details.append(artistCopy,workCopy);chapter.append(campaign,details);
+    const model=modelPanel(featured);if(model)chapter.append(model);
+    chapter.append(sculptureSettings(artist,featured,entry));
     const additional = selected.filter(work => work.id !== featured.id);
     if (additional.length) { const more = el('div','hos-chapter-additional');more.append(el('h3','','More works by '+artist.name),workGrid(additional));chapter.append(more); }
     return chapter;
@@ -208,6 +235,7 @@ function renderArtist(artist) {
 function renderWork(work) {
   activeWork = work; activeArtist = artists.find(a => a.id === work.artistId);
   $('#hos-work-title').textContent = work.title;
+  const modelLink=$('#hos-work-model');modelLink.hidden=!modelDefinition(work);modelLink.dataset.model=work.id;
   $('#hos-work-artist').textContent = activeArtist.name.toUpperCase();
   $('#hos-work-artist').dataset.artist = activeArtist.id;
   $('#hos-work-year').textContent = work.yearMade || 'Available on inquiry';
@@ -230,6 +258,7 @@ function route(path, shouldFocus = true) {
   pageAnimation?.cancel();
   root.querySelectorAll('[data-page]').forEach(view => { view.hidden = view.dataset.page !== page; });
   main.hidden = false; inquiry.hidden = true; setMenu(false);
+  modelViewer?.close();modelViewer?.refresh();
   const labels = {home:'Zimbabwean stone sculpture',collection:'The collection',artists:'The artists',making:'The making',designers:'For designers',collectors:'For collectors',house:'The house',privacy:'Privacy'};
   document.title = `${item?.title || item?.name || labels[page] || 'House of Stone'} | House of Stone`;
   const canonical = document.querySelector('link[rel="canonical"]'); if (canonical) canonical.href = location.origin + (previewMode ? '/admin/preview' : '') + path;
@@ -304,6 +333,18 @@ $('#hos-inquiry-continue').addEventListener('click', () => navigate('/collection
 root.addEventListener('keydown', event => { if (event.key === 'Escape') { if (!menu.hidden) { event.preventDefault(); setMenu(false); menuToggle.focus({preventScroll:true}); } else if (!inquiry.hidden) closeInquiry(); } });
 root.addEventListener('click', event => {
   if (!catalog || submitting) return;
+  const collection=event.target.closest('[data-scroll-collection]');
+  if(collection){
+    track('explore_click');const heading=$('#hos-home-collection-title');heading.setAttribute('tabindex','-1');heading.focus({preventScroll:true});
+    heading.scrollIntoView({behavior:motionPreference?.matches?'instant':'smooth',block:'start'});return;
+  }
+  const model=event.target.closest('[data-model]');
+  if(model){
+    const work=works.find(w=>w.id===model.dataset.model);if(!work||!modelDefinition(work))return;
+    model.disabled=true;
+    loadViewer().then(viewer=>{viewer.open(work,model,assets[work.image]);track('model_view',{workId:work.id,artistId:work.artistId});}).catch(()=>{const hint=model.closest('.hos-3d-panel')?.querySelector('.hos-3d-hint');if(hint)hint.textContent='The 3D view could not load. Please try again.';}).finally(()=>{model.disabled=false;});
+    return;
+  }
   if (event.target.closest('[data-back]')) { navigateBack(); return; }
   const view = event.target.closest('[data-view]');
   if (view) {
@@ -356,9 +397,10 @@ window.addEventListener('popstate', () => {
 });
 
 async function start() {
-  const [response,mediaResponse,editorialResponse] = await Promise.all([fetch(previewMode ? '/api/admin/preview-content' : '/content.json'),fetch('/media-manifest.json').catch(()=>({ok:false})),fetch('/editorial.json').catch(()=>({ok:false}))]); if (!response.ok) throw new Error('The collection could not load. Please refresh the page.');
+  const [response,mediaResponse,editorialResponse,modelResponse] = await Promise.all([fetch(previewMode ? '/api/admin/preview-content' : '/content.json'),fetch('/media-manifest.json').catch(()=>({ok:false})),fetch('/editorial.json').catch(()=>({ok:false})),fetch('/models.json').catch(()=>({ok:false}))]); if (!response.ok) throw new Error('The collection could not load. Please refresh the page.');
   if (mediaResponse.ok) media = await mediaResponse.json();
   if (editorialResponse.ok) editorial = await editorialResponse.json();
+  if (modelResponse.ok) models = await modelResponse.json();
   catalog = await response.json(); ({artists,works,assets} = catalog);
   catalog.site.description = catalog.site.description.replace(/\benquir/gi, word => word[0] === 'E' ? 'Inquir' : 'inquir');
   $('#hos-copyright').textContent = `© ${new Date().getFullYear()} House of Stone`;
@@ -376,6 +418,10 @@ async function start() {
   for (const target of ['#hos-home-chapters','#hos-collection-chapters']) {
     const chapters=$(target);chapters.replaceChildren();
     artists.forEach(artist=>{const selected=works.filter(work=>work.artistId===artist.id);if(selected.length)chapters.append(artistChapter(artist,selected));});
+  }
+  if('IntersectionObserver' in window){
+    const lazyViewer=new window.IntersectionObserver(entries=>{if(entries.some(entry=>entry.isIntersecting)){lazyViewer.disconnect();loadViewer().catch(()=>{});}},{rootMargin:'200px'});
+    root.querySelectorAll('[data-model-stage]').forEach(host=>lazyViewer.observe(host));
   }
   if (previewMode) {
     document.body.classList.add('hos-preview');

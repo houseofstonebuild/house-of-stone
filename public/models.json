@@ -1,0 +1,32 @@
+{
+  "folded-light": {
+    "title": "Folded Light",
+    "source": "/assets/fold.jpg",
+    "file": "/models/folded-light.glb",
+    "stoneGrain": true
+  },
+  "continuum": {
+    "title": "Continuum",
+    "source": "/assets/hero.jpg",
+    "file": "/models/continuum.glb",
+    "stoneGrain": true
+  },
+  "together": {
+    "title": "Together",
+    "source": "/assets/together.jpg",
+    "file": "/models/together.glb",
+    "stoneGrain": true
+  },
+  "quiet-flight": {
+    "title": "Quiet Flight",
+    "source": "/assets/bird.jpg",
+    "file": "/models/quiet-flight.glb",
+    "stoneGrain": true
+  },
+  "equilibrium": {
+    "title": "Equilibrium",
+    "source": "/assets/balance.jpg",
+    "file": "/models/equilibrium.glb",
+    "stoneGrain": true
+  }
+}

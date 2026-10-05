@@ -23,12 +23,15 @@ class Element {
   prepend(...children) { this.children.unshift(...children); }
   replaceChildren(...children) { this.children=children; }
   focus() { this.focused=true; }
+  scrollIntoView(options) { this.scrolled=true;this.scrollOptions=options; }
   closest(selector) { const match=selector.match(/^\[data-([a-z-]+)\]$/); if(match){const key=match[1].replace(/-([a-z])/g,(_,c)=>c.toUpperCase());return this.dataset[key]!==undefined?this:null;}return null; }
 }
 class Storage { constructor(){this.values=new Map();}getItem(key){return this.values.get(key)||null;}setItem(key,value){this.values.set(key,String(value));}removeItem(key){this.values.delete(key);} }
 async function clientFixture(t, {privacy=false,loseConfirmation=false,preview=false,initialPath='/'}={}) {
   const dataDir=mkdtempSync(join(tmpdir(),'hos-client-'));
-  const app=createApp({dataDir,env:{ADMIN_PASSWORD:'test-only-inbox-password-123456'},backgroundNotifications:false});
+  const password=webcrypto.randomUUID(),app=createApp({dataDir,env:{ADMIN_PASSWORD:password},backgroundNotifications:false});
+  // Each isolated fixture creates a fresh credential in memory; no saved login is used.
+  const previewHeaders=preview?{Authorization:'Basic '+Buffer.from(['admin',password].join(':')).toString('base64')}:{};
   await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));
   const base='http://127.0.0.1:'+app.server.address().port;
   t.after(async()=>{await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});});
@@ -52,12 +55,14 @@ async function clientFixture(t, {privacy=false,loseConfirmation=false,preview=fa
   };
   const requests=[];let lost=false;
   const fetchImpl=async(path,options={})=>{
-    const promise=(async()=>{const response=await fetch(base+path,{...options,headers:{...options.headers,...(preview?{Authorization:'Basic '+Buffer.from('admin:test-only-inbox-password-123456').toString('base64')}:{}) ,...(options.method==='POST'?{Origin:base}:{})}});if(path==='/api/inquiries'&&loseConfirmation&&!lost){lost=true;throw new TypeError('Connection interrupted after server saved the enquiry');}return response;})();requests.push(promise.catch(()=>{}));return promise;
+    const promise=(async()=>{const response=await fetch(base+path,{...options,headers:{...options.headers,...previewHeaders,...(options.method==='POST'?{Origin:base}:{})}});if(path==='/api/inquiries'&&loseConfirmation&&!lost){lost=true;throw new TypeError('Connection interrupted after server saved the enquiry');}return response;})();requests.push(promise.catch(()=>{}));return promise;
   };
   const context=vm.createContext({document:{body:new Element(),getElementById:id=>get('#'+id),querySelector:get,createElement:()=>new Element(),referrer:'https://example.test/path?private=value'},navigator:{doNotTrack:privacy?'1':'0'},crypto:webcrypto,localStorage:new Storage(),sessionStorage:new Storage(),location,history:browserHistory,window:browserWindow,URL,URLSearchParams,AbortSignal,fetch:fetchImpl,console});
   vm.runInContext(readFileSync(new URL('../public/app.js',import.meta.url),'utf8'),context);
   async function flush(){for(let i=0;i<3;i++){await Promise.all([...requests]);await new Promise(resolve=>setImmediate(resolve));}}
   await flush();
+  for(let attempt=0;root.dataset.ready!=='true'&&attempt<50;attempt++){await new Promise(resolve=>setTimeout(resolve,5));await flush();}
+  assert.equal(root.dataset.ready,'true','The actual client must finish loading before interaction tests');
   return {...app,get,form,root,location,browserWindow,flush,async delegated(data){const button=new Element();Object.assign(button.dataset,data);await root.dispatch('click',{target:button});await flush();}};
 }
 test('Back restores the visitor route and scroll position through work and artist pages',async t=>{
@@ -70,6 +75,13 @@ test('Back restores the visitor route and scroll position through work and artis
 test('Back on a directly opened sculpture safely returns to the collection',async t=>{
   const f=await clientFixture(t,{initialPath:'/works/folded-light'});assert.equal(f.get('#hos-page-navigation').hidden,false);
   await f.delegated({back:''});assert.equal(f.location.pathname,'/collection');
+});
+test('Discover scrolls to the home collection and records demand without opening another page',async t=>{
+  const f=await clientFixture(t);await f.delegated({scrollCollection:''});
+  assert.equal(f.location.pathname,'/');assert.equal(f.get('#hos-home-collection-title').scrolled,true);
+  assert.equal(f.get('#hos-home-collection-title').focused,true);
+  assert.equal(f.db.prepare("SELECT count(*) AS n FROM events WHERE name='explore_click'").get().n,1);
+  assert.equal(f.db.prepare("SELECT count(*) AS n FROM events WHERE name='page_view'").get().n,1);
 });
 test('client navigates to a work and sends its reviewed enquiry to the private inbox',async t=>{
   const f=await clientFixture(t);await f.delegated({view:'collection'});assert.equal(f.location.pathname,'/collection');

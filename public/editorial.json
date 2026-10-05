@@ -35,7 +35,8 @@
         "apartment": "/assets/folded-light-apartment.jpg",
         "gallery": "/assets/folded-light-gallery.jpg",
         "office": "/assets/folded-light-office.jpg"
-      }
+      },
+      "mobileFocus": "52% center"
     },
     "kuda": {
       "artistName": "Kudakwashe Nyamudeza",
@@ -50,7 +51,8 @@
         "apartment": "/assets/continuum-apartment.jpg",
         "gallery": "/assets/continuum-gallery.jpg",
         "office": "/assets/continuum-office.jpg"
-      }
+      },
+      "mobileFocus": "63% center"
     },
     "ruvimbo": {
       "artistName": "Ruvimbo Chikore",
@@ -65,7 +67,8 @@
         "apartment": "/assets/together-apartment.jpg",
         "gallery": "/assets/together-gallery.jpg",
         "office": "/assets/together-office.jpg"
-      }
+      },
+      "mobileFocus": "55% center"
     },
     "farai": {
       "artistName": "Farai Munetsi",
@@ -80,7 +83,8 @@
         "apartment": "/assets/quiet-flight-apartment.jpg",
         "gallery": "/assets/quiet-flight-gallery.jpg",
         "office": "/assets/quiet-flight-office.jpg"
-      }
+      },
+      "mobileFocus": "25% center"
     },
     "tendai": {
       "artistName": "Tendai Nyakudya",
@@ -95,7 +99,8 @@
         "apartment": "/assets/equilibrium-apartment.jpg",
         "gallery": "/assets/equilibrium-gallery.jpg",
         "office": "/assets/equilibrium-office.jpg"
-      }
+      },
+      "mobileFocus": "64% center"
     }
   }
 }

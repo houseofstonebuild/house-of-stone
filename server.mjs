@@ -1,5 +1,6 @@
 import { createServer } from 'node:http';
-import { readFileSync, writeFileSync, existsSync, mkdirSync, chmodSync, accessSync, constants } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, chmodSync, accessSync, statSync, constants } from 'node:fs';
+import { gzipSync } from 'node:zlib';
 import { resolve, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID, createHmac, createHash, timingSafeEqual } from 'node:crypto';
@@ -9,7 +10,7 @@ import { validateCatalog, homepageImage, publicCatalog } from './catalog.mjs';
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = resolve(ROOT, 'public');
 const INTERESTS = ['Collecting a work', 'Sourcing for a project', 'Following the launch', 'Learning about the artists'];
-const EVENTS = new Set(['page_view', 'explore_click', 'artist_view', 'work_view', 'inquiry_opened', 'inquiry_started']);
+const EVENTS = new Set(['page_view', 'explore_click', 'artist_view', 'work_view', 'inquiry_opened', 'inquiry_started', 'model_view', 'model_interaction']);
 const PAGES = new Set(['home', 'collection', 'artists', 'artist', 'work', 'making', 'designers', 'collectors', 'house', 'privacy']);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const esc = text => String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -19,6 +20,7 @@ const csv = rows => '\uFEFF' + rows.map(row => row.map(csvCell).join(',')).join(
 class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
 
 export function createApp(options = {}) {
+  const compressedFiles = new Map();
   const env = options.env ?? process.env;
   const adminPassword = env.ADMIN_PASSWORD ?? '';
   if (adminPassword.length < 16) throw new Error('Set ADMIN_PASSWORD to at least 16 characters. Run npm run setup to generate one.');
@@ -221,7 +223,8 @@ export function createApp(options = {}) {
       return { work_id:work.id, title:work.title, ...views, inquiries:db.prepare('SELECT count(*) AS n FROM inquiries WHERE work_id=? AND created_at>=?').get(work.id,since).n };
     }).filter(work => work.views || work.inquiries).sort((a,b) => b.inquiries-a.inquiries || b.views-a.views);
     const sources = db.prepare("SELECT coalesce(nullif(source,''),'Direct / unknown') AS source, count(DISTINCT session_hash) AS sessions FROM events WHERE name='page_view' AND created_at>=? GROUP BY source ORDER BY sessions DESC").all(since);
-    return { days, funnel, works, sources, inquiries: db.prepare('SELECT count(*) AS n FROM inquiries WHERE created_at>=?').get(since).n, emailConfigured, indexing, definition: 'Sessions are browser visits, not verified people. One session can skip steps. Bots and repeat visitors can affect counts.' };
+    const modelActivity = Object.fromEntries(['model_view','model_interaction'].map(name=>[name,db.prepare('SELECT count(DISTINCT session_hash) AS n FROM events WHERE name=? AND created_at>=?').get(name,since).n]));
+    return { days, funnel, works, sources, modelActivity, inquiries: db.prepare('SELECT count(*) AS n FROM inquiries WHERE created_at>=?').get(since).n, emailConfigured, indexing, definition: 'Sessions are browser visits, not verified people. One session can skip steps. Bots and repeat visitors can affect counts.' };
   }
   function pageMeta(path, content = catalog) {
     const labels = { '/':'Zimbabwean stone sculpture', '/collection':'The collection', '/artists':'The artists', '/making':'The making', '/designers':'For designers', '/collectors':'For collectors', '/house':'The house', '/privacy':'Privacy' };
@@ -238,7 +241,7 @@ export function createApp(options = {}) {
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; object-src 'none'");
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' blob:; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; object-src 'none'");
     if (env.NODE_ENV === 'production') res.setHeader('Strict-Transport-Security', 'max-age=31536000');
     try {
       const url = new URL(req.url, 'http://localhost');
@@ -380,11 +383,22 @@ export function createApp(options = {}) {
       }
       const filePath = resolve(PUBLIC, path === '/admin' ? 'admin.html' : path === '/admin/content' ? 'admin-content.html' : '.' + path);
       if (!filePath.startsWith(PUBLIC + '/') || !existsSync(filePath)) throw new HttpError(404, 'This page could not be found.');
-      const types = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.json':'application/json; charset=utf-8', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.webp':'image/webp', '.png':'image/png', '.ico':'image/x-icon' };
+      const types = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.json':'application/json; charset=utf-8', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.webp':'image/webp', '.png':'image/png', '.ico':'image/x-icon', '.glb':'model/gltf-binary', '.txt':'text/plain; charset=utf-8' };
       const type = types[extname(filePath)];
       if (!type) throw new HttpError(404, 'This file could not be found.');
-      res.writeHead(200, { 'Content-Type': type, 'Cache-Control': path.startsWith('/admin') ? 'no-store' : ['.js','.css','.html','.json'].includes(extname(filePath)) ? 'public, max-age=0, must-revalidate' : 'public, max-age=3600' });
-      res.end(req.method === 'HEAD' ? '' : readFileSync(filePath));
+      const headers = { 'Content-Type': type, 'Cache-Control': path.startsWith('/admin') ? 'no-store' : ['.js','.css','.html','.json','.glb'].includes(extname(filePath)) ? 'public, max-age=0, must-revalidate' : 'public, max-age=3600' };
+      const compressible=['.js','.css','.json','.glb'].includes(extname(filePath));
+      const acceptsGzip=String(req.headers['accept-encoding'] || '').split(',').some(part=>{const [encoding,...parameters]=part.trim().split(';');return encoding==='gzip'&&!parameters.some(p=>/^q=0(?:\.0*)?$/.test(p.trim()));});
+      let bytes;
+      if(compressible)headers.Vary='Accept-Encoding';
+      if(compressible&&acceptsGzip){
+        const info=statSync(filePath),cached=compressedFiles.get(filePath);
+        if(cached&&cached.mtime===info.mtimeMs&&cached.size===info.size)bytes=cached.bytes;
+        else{bytes=gzipSync(readFileSync(filePath));compressedFiles.set(filePath,{mtime:info.mtimeMs,size:info.size,bytes});}
+        headers['Content-Encoding']='gzip';headers['Content-Length']=bytes.length;
+      }
+      res.writeHead(200, headers);
+      res.end(req.method === 'HEAD' ? '' : bytes || readFileSync(filePath));
     } catch (error) {
       if (!res.headersSent) send(res, error.status ?? 500, { error: error.status ? error.message : 'We could not complete that request. Please try again.' });
     }

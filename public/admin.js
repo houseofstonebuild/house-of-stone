@@ -10,7 +10,7 @@ async function load() {
     if (responses.some(r => !r.ok)) throw new Error('Could not load the private inbox. Please refresh and sign in again.');
     const [summary,inquiries] = await Promise.all(responses.map(r => r.json()));
     const count = name => summary.funnel.find(step => step.name === name)?.sessions || 0;
-    const metrics = [['Website sessions',count('page_view')],['Collection click sessions',count('explore_click')],['Work viewing sessions',count('work_view')],['Inquiries received',summary.inquiries]];
+    const metrics = [['Website sessions',count('page_view')],['Collection click sessions',count('explore_click')],['Work viewing sessions',count('work_view')],['3D viewer sessions',summary.modelActivity?.model_view || 0],['3D interaction sessions',summary.modelActivity?.model_interaction || 0],['Inquiries received',summary.inquiries]];
     $('#metrics').replaceChildren(...metrics.map(([label,value]) => { const item = el('div','metric'); item.append(el('span','',label),el('strong','',String(value))); return item; }));
     $('#funnel').replaceChildren(...summary.funnel.map(step => {
       const row = el('div','funnel-row'),track = el('div','funnel-track'),fill = el('div','funnel-fill');

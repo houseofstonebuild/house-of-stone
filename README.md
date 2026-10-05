@@ -8,6 +8,7 @@ The approved black website and Taper logo, with a private collection editor, enq
 - Artist-led collection chapters, aligned biographies, and sculpture cards with specifications, descriptions and detail links. The homepage also introduces designers, collectors, the making and the House.
 - Complete sculpture, portrait and editorial image framing, responsive high-quality WebP delivery, and original-resolution uploads. The homepage hero fills the viewport with a responsive crop.
 - Short, interruptible page and drawer animations, subtle scroll reveals, and reduced-motion support.
+- A scroll-driven 3D sculpture panel, a full-screen viewer with drag, pinch, zoom and keyboard controls, and photo fallback when WebGL2 is unavailable. Mobile artist campaigns use a larger crop; sculpture and setting photos retain their full framing.
 - Designer and collector interior editorials, artist biographies, and a fuller account of the House and its founders.
 - A review and send enquiry flow with a real server, persistent storage, receipt reference, error handling, and safe retries.
 - A password protected inbox at `/admin`, with enquiry and activity CSV exports.
@@ -20,7 +21,7 @@ The approved black website and Taper logo, with a private collection editor, enq
 
 ## What still needs your account information
 
-This package has not been published to a public address. It needs a hosting service that can run Node.js 24 with persistent storage, a public HTTPS address, and your private inbox password. Email notifications also need a sender address, recipient address or addresses, and a Resend API key. These are not required to run the website or save enquiries locally.
+Hosting requires Node.js 24 with persistent storage, a public HTTPS address, and your private inbox password. Email notifications also need a sender address, recipient address or addresses, and a Resend API key. These are not required to run the website or save inquiries locally.
 
 The existing images and sample artist records are retained. The website does not display development labels. Search indexing is off until you enable it for the real public collection.
 
@@ -181,3 +182,15 @@ Stop the running server with Control-C. Copy the updated source files into your 
 The included images now use the largest recovered originals, rather than the small files in the first package. The smallest master is 1122 pixels wide; the apartment hero is 1536 pixels wide and the making image is 1672 pixels wide. These are not native 4K photographs. Responsive WebP versions never enlarge them. Sculpture, portrait and editorial images remain complete; only the homepage hero uses a viewport-filling crop. The new interior images were created with the built-in image-generation tool using the approved sculptures as references; they show a refined New York apartment and a private home gallery.
 
 For final photography, aim for 3840 pixels or more across a full-width hero or interior, and 2400 pixels or more across sculpture and portrait images. Keep the entire sculpture inside the photo with breathing room around the tip and base. Upload the highest-quality useful JPEG, PNG or WebP under 32 MB. Uploads retain the exact original bytes and resolution; the website cannot recover detail absent from a source photograph. Replace the sample artist biographies with approved factual biographies when the actual artists join the collection.
+
+## 3D models
+
+The five bundled GLB files are geometric approximations of the current reference photos. A single photo does not establish the reverse side, exact volume, surface detail or scale of a physical sculpture. Replace these studies with approved scans or professionally prepared models of the real works before relying on them for faithful representation. The public site retains the approved clean presentation.
+
+`public/models.json` associates each model with its work ID, title and source photo. The viewer is hidden when that association no longer matches published content. Replace the corresponding `public/models/WORK-ID.glb` file and update the association when changing the sculpture. Use self-contained, uncompressed glTF 2.0 GLB files with embedded textures; external texture references and Draco compression require additional configuration. Set `stoneGrain` to `false` for scans with their own material textures. The current authoring code is in `scripts/sculpture-geometries.mjs`; `node scripts/build-models.mjs` rebuilds the studies and their manifest.
+
+The renderer and GLTF loader are vendored from Three.js r184 under its MIT license, recorded in `public/vendor/THREE-LICENSE.txt`. They load only when a 3D panel approaches the viewport or a visitor opens the viewer. Panels share one WebGL renderer and draw only on movement, resize or control input. Reduced motion stops scroll-driven rotation; manual controls still work. All modules and model files are served locally, with negotiated compression.
+
+`model_view` records an explicit 3D viewer open, including browsers showing the fallback; `model_interaction` records the first manual control interaction in that opening. These are interest signals, not acquisitions. The dashboard counts distinct browser sessions for both, respecting existing privacy choices and private preview exclusions.
+
+The browser workflow runs the three engines in parallel. Its artifacts are named `browser-qa-chromium`, `browser-qa-firefox`, and `browser-qa-webkit`. It checks actual meshes, scrolling in both directions, reduced motion, idle rendering, dialog controls, keyboard input, native Chromium touch pinch, and the non-WebGL fallback, in addition to the full page/layout and inquiry checks.

@@ -9,6 +9,12 @@ jobs:
   browsers:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, firefox, webkit]
+    env:
+      QA_ENGINE: ${{ matrix.engine }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -18,11 +24,11 @@ jobs:
           node-version: '24.19.0'
           package-manager-cache: false
       - run: npm install --prefix qa --no-audit --no-fund
-      - run: npx --prefix qa playwright install --with-deps chromium firefox webkit
+      - run: npx --prefix qa playwright install --with-deps ${{ matrix.engine }}
       - run: node qa/browser.mjs
       - uses: actions/upload-artifact@v5
         if: always()
         with:
-          name: browser-qa
+          name: browser-qa-${{ matrix.engine }}
           path: test-results/browser/
           retention-days: 7

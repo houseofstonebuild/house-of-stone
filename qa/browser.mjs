@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {mkdtempSync,rmSync,mkdirSync,writeFileSync,readFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {randomUUID} from 'node:crypto';
 import {chromium,firefox,webkit} from 'playwright';
 import {createApp} from '../server.mjs';
 const output = new URL('../test-results/browser/',import.meta.url);
@@ -10,8 +11,9 @@ const catalog=JSON.parse(readFileSync(new URL('../content/catalog.json',import.m
 const routes=['/','/collection','/artists','/making','/designers','/collectors','/house','/privacy',...catalog.artists.map(a=>'/artists/'+a.slug),...catalog.works.map(w=>'/works/'+w.slug)];
 const sizes=[[320,568],[390,844],[844,390],[768,1024],[1024,768],[1440,900],[1920,1080],[2048,1152],[2560,1440],[3440,1440],[3840,2160]];
 const report={engines:{},errors:[]};
-const password='only-for-isolated-browser-tests-12345';
-for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
+const password=randomUUID();
+const engines=Object.entries({chromium,firefox,webkit}).filter(([name])=>!process.env.QA_ENGINE||name===process.env.QA_ENGINE);
+for(const [engineName,engine] of engines) {
   const dataDir=mkdtempSync(join(tmpdir(),'hos-browser-'));
   const app=createApp({dataDir,env:{ADMIN_PASSWORD:password},backgroundNotifications:false});
   await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));
@@ -22,7 +24,7 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
   const adminGet=async path=>(await fetch(base+path,{headers:auth})).json();
   async function ready(page,path='/',search='') {await page.goto(base+path+search);await page.locator('#hos-concept[data-ready="true"]').waitFor();await page.emulateMedia({reducedMotion:'reduce'});}
   try {
-    browser=await engine.launch();
+    browser=await engine.launch(engineName==='chromium'?{args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}:engineName==='firefox'?{firefoxUserPrefs:{'webgl.force-enabled':true,'webgl.disabled':false}}:{});
     const context=await browser.newContext({deviceScaleFactor:2,reducedMotion:'reduce'});
     await context.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
     const page=await context.newPage();
@@ -48,7 +50,7 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
           const layout=await page.evaluate(()=>{
             const rect=s=>{const r=document.querySelector(s).getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,height:r.height};};
             const visible=selector=>[...document.querySelectorAll(selector)].filter(el=>el.getClientRects().length);
-            return {viewport:innerWidth,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,root:rect('#hos-concept'),header:rect('.hos-header'),footer:rect('.hos-footer'),footerPosition:getComputedStyle(document.querySelector('.hos-footer')).position,main:rect('#hos-main'),hero:rect('.hos-hero-image'),images:visible('#hos-concept img').map(img=>({src:img.currentSrc,naturalWidth:img.naturalWidth,fit:getComputedStyle(img).objectFit,hero:img.classList.contains('hos-hero-image')})),text:visible('#hos-main p').filter(el=>!el.classList.contains('hos-artist-style')&&!el.classList.contains('hos-card-specs')).map(el=>({size:parseFloat(getComputedStyle(el).fontSize),text:el.textContent.slice(0,60)}))};
+            return {viewport:innerWidth,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,root:rect('#hos-concept'),header:rect('.hos-header'),footer:rect('.hos-footer'),footerPosition:getComputedStyle(document.querySelector('.hos-footer')).position,main:rect('#hos-main'),hero:rect('.hos-hero-image'),images:visible('#hos-concept img').map(img=>({src:img.currentSrc,naturalWidth:img.naturalWidth,fit:getComputedStyle(img).objectFit,hero:img.classList.contains('hos-hero-image'),campaign:!!img.closest('.hos-artist-campaign')})),text:visible('#hos-main p').filter(el=>!el.classList.contains('hos-artist-style')&&!el.classList.contains('hos-card-specs')).map(el=>({size:parseFloat(getComputedStyle(el).fontSize),text:el.textContent.slice(0,60)}))};
           });
           assert(layout.scrollWidth<=layout.clientWidth+1,`Horizontal overflow ${JSON.stringify(layout)}`);
           assert(Math.abs(layout.root.left)<1&&Math.abs(layout.root.right-layout.clientWidth)<2,`Root does not fill the page width ${JSON.stringify(layout)}`);
@@ -56,7 +58,7 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
           assert.equal(layout.footerPosition,'static','Footer must remain in normal page flow');
           assert(layout.footer.top>=layout.main.bottom-1,'Footer overlaps the page');
           assert(layout.main.top>=layout.header.bottom-1,'Header covers content');
-          assert(layout.images.every(i=>i.naturalWidth>0&&i.fit===(i.hero?'cover':'contain')),'Broken image or wrong framing');
+          assert(layout.images.every(i=>i.naturalWidth>0&&i.fit===(i.hero||(i.campaign&&width<=700)?'cover':'contain')),'Broken image or wrong framing');
           assert(layout.text.every(t=>t.size>=15),`Reading text is too small: ${JSON.stringify(layout.text.filter(t=>t.size<15))}`);
           if(path==='/') {
             assert(Math.abs(layout.hero.left)<1&&Math.abs(layout.hero.right-layout.clientWidth)<2,'Hero has side gaps');
@@ -64,6 +66,9 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
             assert.equal(await page.locator('#hos-home-chapters .hos-artist-chapter').count(),catalog.artists.length);
             assert.equal(await page.locator('#hos-home-chapters .hos-artist-campaign').count(),catalog.artists.length);
             assert.equal(await page.locator('#hos-home-chapters .hos-setting-tile').count(),catalog.artists.length*3);
+            assert.equal(await page.locator('#hos-home-chapters .hos-setting-action [data-work]').count(),catalog.artists.length);
+            assert.equal(await page.locator('#hos-home-chapters .hos-setting-tile .hos-text-link').count(),0);
+            if(width<=700)assert((await page.locator('#hos-home-chapters .hos-artist-campaign').first().boundingBox()).height>=390,'Mobile artist campaign should have a large crop');
             assert.equal(await page.locator('.hos-hero-copy h1 span').last().evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');
             assert.equal(await page.locator('#hos-home-collection-title').evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');
             assert(await page.locator('#hos-page-navigation').isHidden(),'Home should not show Back');
@@ -113,10 +118,12 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
       assert(await page.locator('#hos-menu').isHidden());
     }
     await page.locator('.hos-header [data-view="home"]').click();
-    await page.locator('.hos-hero-copy [data-view="collection"]').click();
-    await page.locator('[data-page="collection"] .hos-setting-photo').first().click();
+    await page.locator('.hos-hero-copy [data-scroll-collection]').click();
+    assert.equal(new URL(page.url()).pathname,'/');
+    assert((await page.locator('#hos-home-collection-title').boundingBox()).y>=64,'Collection scroll must clear the header');
+    await page.locator('[data-page="home"] .hos-setting-photo').first().click();
     assert(new URL(page.url()).pathname==='/works/folded-light');
-    await page.goBack();assert(new URL(page.url()).pathname==='/collection');
+    await page.goBack();assert(new URL(page.url()).pathname==='/');
     await page.goForward();assert(await page.locator('#hos-work-title').textContent()==='Folded Light');
     // Every setting for an artist opens the same work. Back restores the chapter.
     await page.setViewportSize({width:1440,height:900});
@@ -160,7 +167,7 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
       await track.evaluate(el=>el.scrollTo({left:0,behavior:'instant'}));await counter.filter({hasText:'1 / 3'}).waitFor();
       await track.focus();await page.keyboard.press('ArrowRight');await counter.filter({hasText:'2 / 3'}).waitFor();
       const work=catalog.works.find(work=>work.artistId===artist.id);
-      await chapter.locator('.hos-setting-tile').nth(1).getByRole('button',{name:'View sculpture',exact:true}).click();
+      await chapter.locator('.hos-setting-action').getByRole('button',{name:'View sculpture',exact:true}).click();
       assert.equal(new URL(page.url()).pathname,'/works/'+work.slug);
       await page.locator('#hos-page-navigation [data-back]').click();await page.waitForURL(base+'/');
       await counter.filter({hasText:'2 / 3'}).waitFor();
@@ -181,9 +188,15 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
     const tracked=await browser.newContext({viewport:{width:390,height:844}});
     const visitor=await tracked.newPage();
     await ready(visitor,'/','?utm_source=qa&utm_medium=browser&utm_campaign=launch');
-    await visitor.locator('.hos-hero-copy [data-view="collection"]').click();
-    await visitor.locator('[data-page="collection"] .hos-setting-photo').first().click();
+    await visitor.locator('.hos-hero-copy [data-scroll-collection]').click();
+    assert.equal(new URL(visitor.url()).pathname,'/');
+    await visitor.locator('[data-page="home"] .hos-setting-photo').first().click();
     await visitor.reload();await visitor.locator('#hos-concept[data-ready="true"]').waitFor();
+    await visitor.locator('#hos-work-model').click();
+    await visitor.locator('#hos-model-dialog').waitFor();
+    await visitor.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-model-stage').dataset.modelState));
+    if(await visitor.locator('#hos-model-stage').getAttribute('data-model-state')==='ready')await visitor.getByRole('button',{name:'Rotate right',exact:true}).click();
+    await visitor.locator('#hos-model-close').click();
     await visitor.locator('#hos-work-inquiry').click();
     await visitor.locator('#hos-inquiry-form button[type="submit"]').click();
     assert(await visitor.locator('#hos-inquiry-form').isVisible(),'Blank form reached review');
@@ -214,7 +227,7 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
     const entry=(await adminGet('/api/admin/inquiries'))[0];
     assert.equal(entry.work_id,'folded-light');assert.equal(entry.source,'qa');
     const sessionHashes=app.db.prepare('SELECT DISTINCT session_hash FROM events').all();assert.equal(sessionHashes.length,1);
-    for(const name of ['page_view','explore_click','work_view','inquiry_opened','inquiry_started','inquiry_submitted']) assert(app.db.prepare('SELECT count(*) AS n FROM events WHERE name=?').get(name).n>0,`Missing event ${name}`);
+    for(const name of ['page_view','explore_click','work_view','model_view','inquiry_opened','inquiry_started','inquiry_submitted']) assert(app.db.prepare('SELECT count(*) AS n FROM events WHERE name=?').get(name).n>0,`Missing event ${name}`);
     const eventsBefore=app.db.prepare('SELECT count(*) AS n FROM events').get().n;
     await visitor.locator('#hos-inquiry-continue').click();
     await visitor.locator('.hos-footer [data-view="privacy"]').click();
@@ -226,6 +239,63 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
     const privateEntry=app.db.prepare("SELECT * FROM inquiries WHERE email='private@example.test'").get();assert.equal(privateEntry.session_hash,null);
     assert(app.db.prepare('SELECT count(*) AS n FROM events').get().n<=eventsBefore+2,'Opt-out records activity');
     await tracked.close();
+    // Exercise actual WebGL models, reversible scroll rotation, demand-only
+    // rendering, orbit controls, pinch, keyboard, and a non-WebGL fallback.
+    const threeD=await browser.newContext({viewport:{width:1440,height:900},reducedMotion:'no-preference'});
+    await threeD.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
+    const modelPage=await threeD.newPage();modelPage.on('pageerror',error=>pageErrors.push(error.message));
+    modelPage.on('console',message=>{if(message.type()==='error'&&/WebGLProgram|Shader Error/i.test(message.text()))pageErrors.push(message.text());});
+    await ready(modelPage);await modelPage.emulateMedia({reducedMotion:'no-preference'});
+    let webglReady;
+    for(const [index,artist] of catalog.artists.entries()) {
+      const chapter=modelPage.locator('#hos-home-chapters .hos-artist-chapter').nth(index),stage=chapter.locator('[data-model-stage]');
+      await stage.scrollIntoViewIfNeeded();await modelPage.waitForFunction(el=>['ready','unavailable'].includes(el.dataset.modelState),await stage.elementHandle());
+      const state=await stage.getAttribute('data-model-state');
+      if(index===0){webglReady=state==='ready';if(engineName==='chromium')assert(webglReady,'Chromium must render the actual 3D mesh');}
+      if(webglReady){
+        assert.equal(state,'ready');await stage.waitFor({state:'visible'});await modelPage.waitForFunction(element=>Number(element.dataset.modelTriangles)>500,await stage.elementHandle());
+        assert(Number(await stage.getAttribute('data-model-triangles'))>500,'Model has no rendered volume');
+        const scroll=await modelPage.evaluate(()=>scrollY),before=Number(await stage.getAttribute('data-model-rotation'));
+        await modelPage.evaluate(()=>scrollBy(0,100));await modelPage.waitForFunction(({element,before})=>Math.abs(Number(element.dataset.modelRotation)-before)>.1,{element:await stage.elementHandle(),before});
+        await modelPage.evaluate(y=>scrollTo(0,y),scroll);await modelPage.waitForFunction(({element,before})=>Math.abs(Number(element.dataset.modelRotation)-before)<.02,{element:await stage.elementHandle(),before});
+        await modelPage.emulateMedia({reducedMotion:'reduce'});await modelPage.waitForFunction(el=>Math.abs(Number(el.dataset.modelRotation)+.3)<.001,await stage.elementHandle());
+        await modelPage.evaluate(()=>scrollBy(0,80));await modelPage.waitForFunction(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve(true)))));
+        assert.equal(Number(await stage.getAttribute('data-model-rotation')),-.3,'Reduced motion must stop scroll rotation');
+        const frames=await stage.getAttribute('data-model-frames');await modelPage.waitForTimeout(200);assert.equal(await stage.getAttribute('data-model-frames'),frames,'Idle models should not keep rendering');
+        await chapter.locator('.hos-3d-panel').screenshot({path:new URL(`${engineName}-3d-${catalog.works.find(w=>w.artistId===artist.id).id}.jpg`,output).pathname,type:'jpeg',quality:90,scale:'css'});
+        await modelPage.emulateMedia({reducedMotion:'no-preference'});
+      }
+      await chapter.getByRole('button',{name:'Explore in 3D'}).click();await modelPage.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-model-stage').dataset.modelState));
+      assert.equal(await modelPage.locator('#hos-model-title').textContent(),catalog.works.find(w=>w.artistId===artist.id).title);
+      if(webglReady){
+        const modal=modelPage.locator('#hos-model-stage');
+        await modelPage.getByRole('button',{name:'Rotate right',exact:true}).click();await modelPage.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelRotation)>-.1);
+        await modelPage.getByRole('button',{name:'Zoom in',exact:true}).click();await modelPage.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelZoom)>1);
+        await modelPage.getByRole('button',{name:'Reset',exact:true}).click();await modelPage.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelZoom)===1&&Number(document.querySelector('#hos-model-stage').dataset.modelRotation)===-.3);
+        const canvas=modal.locator('.hos-3d-canvas'),bounds=await canvas.boundingBox();
+        await modelPage.mouse.move(bounds.x+bounds.width/2,bounds.y+bounds.height/2);await modelPage.mouse.down();await modelPage.mouse.move(bounds.x+bounds.width/2+90,bounds.y+bounds.height/2+25,{steps:5});await modelPage.mouse.up();
+        await modelPage.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelRotation)>.2);
+        await canvas.focus();await modelPage.keyboard.press('Home');await modelPage.keyboard.press('ArrowUp');await modelPage.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelPitch)>0);
+      }
+      await modelPage.keyboard.press('Escape');assert(await modelPage.locator('#hos-model-dialog').isHidden());assert(!await modelPage.locator('body').evaluate(el=>el.classList.contains('hos-model-open')));
+    }
+    await ready(modelPage,'/works/folded-light');await modelPage.locator('#hos-work-model').click();await modelPage.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-model-stage').dataset.modelState));
+    if(webglReady){
+      await modelPage.locator('#hos-model-dialog').screenshot({path:new URL(`${engineName}-3d-viewer.jpg`,output).pathname,type:'jpeg',quality:90,scale:'css'});
+      if(engineName==='chromium'){
+        const session=await threeD.newCDPSession(modelPage),b=await modelPage.locator('#hos-model-stage').boundingBox(),x=b.x+b.width/2,y=b.y+b.height/2;
+        await session.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:x-35,y,id:1},{x:x+35,y,id:2}]});
+        await session.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x-65,y,id:1},{x:x+65,y,id:2}]});
+        await session.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await modelPage.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelZoom)>1.2);await session.detach();
+      }
+    }
+    await modelPage.locator('#hos-model-close').click();assert(await modelPage.locator('#hos-work-model').evaluate(el=>el===document.activeElement));await threeD.close();
+    const fallbackContext=await browser.newContext({viewport:{width:390,height:844}});
+    await fallbackContext.addInitScript(()=>{localStorage.setItem('hos-measurement','off');const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){return type==='webgl2'?null:original.call(this,type,...args);};});
+    const fallbackPage=await fallbackContext.newPage();fallbackPage.on('pageerror',error=>pageErrors.push(error.message));
+    await ready(fallbackPage,'/works/folded-light');await fallbackPage.locator('#hos-work-model').click();await fallbackPage.waitForFunction(()=>document.querySelector('#hos-model-stage').dataset.modelState==='unavailable');
+    assert(await fallbackPage.locator('#hos-model-stage .hos-3d-poster').isVisible());assert(await fallbackPage.getByRole('button',{name:'Rotate right',exact:true}).isDisabled());
+    await fallbackPage.locator('#hos-model-close').click();await fallbackPage.locator('#hos-work-inquiry').click();assert(await fallbackPage.locator('#hos-inquiry-form').isVisible());await fallbackContext.close();
     // Actual owner interface: biography, draft isolation, publish, restore and preview.
     const owner=await browser.newContext({httpCredentials:{username:'admin',password},viewport:{width:1440,height:900}});
     const editor=await owner.newPage();await editor.goto(base+'/admin/content');await editor.locator('#field-title').waitFor();
@@ -281,19 +351,19 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
     await motion.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
     const motionPage=await motion.newPage();motionPage.on('pageerror',error=>pageErrors.push(error.message));
     await motionPage.goto(base+'/');await motionPage.locator('#hos-concept[data-ready="true"]').waitFor();
-    await motionPage.locator('.hos-hero-copy [data-view="collection"]').click();
+    await motionPage.locator('.hos-footer [data-view="collection"]').click();
     assert(new URL(motionPage.url()).pathname==='/collection');
     assert(await motionPage.evaluate(()=>document.querySelector('[data-page="collection"]').getAnimations().length>0),'Navigation has no entrance animation');
     await motionPage.locator('.hos-header [data-view="home"]').click();assert(new URL(motionPage.url()).pathname==='/');
     await motionPage.locator('.hos-menu-toggle').click();await motionPage.keyboard.press('Escape');assert(await motionPage.locator('#hos-menu').isHidden());
     await motionPage.emulateMedia({reducedMotion:'reduce'});
-    await motionPage.locator('.hos-hero-copy [data-view="collection"]').click();
+    await motionPage.locator('.hos-footer [data-view="collection"]').click();
     assert.equal(await motionPage.evaluate(()=>document.querySelector('[data-page="collection"]').getAnimations().length),0,'Reduced-motion still animates');
     assert.equal(await motionPage.locator('[data-page="collection"]').evaluate(el=>getComputedStyle(el).opacity),'1');
     await motion.close();
     assert.equal(pageErrors.length,0,`Browser JS errors: ${pageErrors.join('; ')}`);
     assert.equal(failedResponses.length,0,`HTTP failures: ${JSON.stringify(failedResponses)}`);
-    report.engines[engineName]={pagesChecked:checked,viewports:sizes.length,errors};
+    report.engines[engineName]={pagesChecked:checked,viewports:sizes.length,webglReady,errors};
   } catch(error) {errors.push(error.stack||error.message);report.engines[engineName]={errors};}
   finally {await browser?.close();await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});}
   report.errors.push(...errors.map(e=>engineName+': '+e));
@@ -301,4 +371,4 @@ for(const [engineName,engine] of Object.entries({chromium,firefox,webkit})) {
 }
 writeFileSync(new URL('report.json',output),JSON.stringify(report,null,2));
 assert.equal(report.errors.length,0,report.errors.join('\n'));
-console.log(`Browser QA passed: ${routes.length*sizes.length*3} route/viewport checks, three engines, real enquiries, navigation, motion, measurement and owner editing.`);
+console.log(`Browser QA passed: ${routes.length*sizes.length*engines.length} route/viewport checks, ${engines.length} engine(s), real inquiries, navigation, motion, measurement, 3D and owner editing.`);
