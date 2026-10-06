@@ -82,7 +82,7 @@ body.hos-menu-open #hos-concept .hos-header,body.hos-model-open #hos-concept .ho
 #hos-concept .hos-setting-photo img {width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;transition:filter .2s ease;}
 #hos-concept .hos-setting-photo:hover img {filter:brightness(1.06);}
 #hos-concept .hos-setting-tile h3 {font-size:18px;font-weight:400;line-height:1.5;margin:14px 0 3px;}
-#hos-concept .hos-setting-action {padding:0 32px 28px;display:flex;justify-content:center;}
+#hos-concept .hos-setting-action {padding:0 32px 28px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 32px;}
 #hos-home-collection-title {scroll-margin-top:calc(env(safe-area-inset-top) + 4px);}
 #hos-concept .hos-3d-panel {margin:0 32px 28px;border:1px solid rgba(255,255,255,.08);background:radial-gradient(ellipse at 50% 46%,#282722 0,#141412 48%,#0b0b0a 85%);}
 #hos-concept .hos-3d-top {display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 24px 0;}

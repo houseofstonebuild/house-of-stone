@@ -137,7 +137,7 @@ function modelPanel(work) {
   const hint=el('div','hos-3d-hint',motionPreference?.matches?'Explore the form in 3D':'Scroll to rotate');hint.setAttribute('role','status');
   panel.append(top,stage,hint);return panel;
 }
-function sculptureSettings(artist, work, entry) {
+function sculptureSettings(artist, work, entry, withInquiry = false) {
   const carousel = el('div', 'hos-settings-carousel'); carousel.dataset.reveal = '';
   carousel.setAttribute('role', 'group'); carousel.setAttribute('aria-label', `${work.title} in different spaces`);
   const grid = el('div', 'hos-sculpture-settings'); grid.tabIndex = 0;
@@ -182,11 +182,13 @@ function sculptureSettings(artist, work, entry) {
     }
   });
   if ('ResizeObserver' in window) new window.ResizeObserver(sync).observe(grid);
-  const action=el('div','hos-setting-action');action.append(link('View sculpture',{work:work.id}));
+  const action=el('div','hos-setting-action');
+  action.append(link('View sculpture',{work:work.id}));
+  if(withInquiry)action.append(link('Inquire',{inquiry:`${work.title} by ${artist.name}`,inquiryWork:work.id,inquiryArtist:artist.id}));
   controls.append(previous, counter, next); carousel.append(grid, controls, action);
   return carousel;
 }
-function artistChapter(artist, selected) {
+function artistChapter(artist, selected, withInquiry = false) {
   const featured = selected.find(work => chapterMedia(artist, work));
   if (featured) {
     const entry = chapterMedia(artist, featured), chapter = el('section', 'hos-artist-chapter hos-editorial-chapter');
@@ -204,7 +206,7 @@ function artistChapter(artist, selected) {
     workCopy.append(workHeading, specs);
     details.append(artistCopy,workCopy);chapter.append(campaign,details);
     const model=modelPanel(featured);if(model)chapter.append(model);
-    chapter.append(sculptureSettings(artist,featured,entry));
+    chapter.append(sculptureSettings(artist,featured,entry,withInquiry));
     const additional = selected.filter(work => work.id !== featured.id);
     if (additional.length) { const more = el('div','hos-chapter-additional');more.append(el('h3','','More works by '+artist.name),workGrid(additional));chapter.append(more); }
     return chapter;
@@ -213,7 +215,9 @@ function artistChapter(artist, selected) {
   const portrait=el('button','hos-artist-intro-photo cursor-interaction');portrait.type='button';portrait.dataset.artist=artist.id;portrait.setAttribute('aria-label',`Read about ${artist.name}`);
   portrait.append(image(artist.portrait,'Portrait of '+artist.name,true,'(max-width: 700px) 90vw, 420px'));
   const copy=el('div','hos-artist-intro-copy');copy.append(el('div','hos-eyebrow','THE ARTIST'),el('h2','',artist.name),el('p','hos-artist-style',artist.style),el('p','',artistBiography(artist)),link('About the artist',{artist:artist.id}));
-  intro.append(portrait,copy);chapter.append(intro,workGrid(selected));return chapter;
+  intro.append(portrait,copy);chapter.append(intro,workGrid(selected));
+  if(withInquiry){const action=el('div','hos-setting-action');action.append(link('Inquire',{inquiry:`Works by ${artist.name}`,inquiryArtist:artist.id}));chapter.append(action);}
+  return chapter;
 }
 function renderArtist(artist) {
   activeArtist = artist;
@@ -417,7 +421,7 @@ async function start() {
   });
   for (const target of ['#hos-home-chapters','#hos-collection-chapters']) {
     const chapters=$(target);chapters.replaceChildren();
-    artists.forEach(artist=>{const selected=works.filter(work=>work.artistId===artist.id);if(selected.length)chapters.append(artistChapter(artist,selected));});
+    artists.forEach(artist=>{const selected=works.filter(work=>work.artistId===artist.id);if(selected.length)chapters.append(artistChapter(artist,selected,target==='#hos-home-chapters'));});
   }
   if('IntersectionObserver' in window){
     const lazyViewer=new window.IntersectionObserver(entries=>{if(entries.some(entry=>entry.isIntersecting)){lazyViewer.disconnect();loadViewer().catch(()=>{});}},{rootMargin:'200px'});

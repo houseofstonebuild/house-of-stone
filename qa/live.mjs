@@ -10,7 +10,7 @@ const models=JSON.parse(readFileSync(new URL('../public/models.json',import.meta
 const catalog=JSON.parse(readFileSync(new URL('../content/catalog.json',import.meta.url),'utf8'));
 const output=new URL('../test-results/live/',import.meta.url);mkdirSync(output,{recursive:true});
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
-const files=['/models.json','/sculpture-viewer.js','/stone-surface.js',...Object.values(models).map(m=>m.file)];
+const files=['/app.js','/styles.css','/models.json','/sculpture-viewer.js','/stone-surface.js',...Object.values(models).map(m=>m.file)];
 const expected=new Map(files.map(path=>[path,hash(readFileSync(new URL('../public'+path,import.meta.url)))]));
 let deployed=false,lastError;
 for(let attempt=0;attempt<48;attempt++) {
@@ -25,7 +25,7 @@ for(let attempt=0;attempt<48;attempt++) {
 }
 assert(deployed,lastError);
 const browser=await chromium.launch({args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
-const failures=[];const report={origin,sha:process.env.GITHUB_SHA,assets:files.length,routes:0,models:[]};
+const failures=[];const report={origin,sha:process.env.GITHUB_SHA,assets:files.length,routes:0,inquiries:[],models:[]};
 try {
   const context=await browser.newContext({viewport:{width:1440,height:900},reducedMotion:'reduce'});
   await context.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
@@ -33,6 +33,27 @@ try {
   page.on('pageerror',error=>failures.push(error.message));
   page.on('response',r=>{if(r.url().startsWith(origin)&&r.status()>=400)failures.push(`HTTP ${r.status()}: ${new URL(r.url()).pathname}`);});
   page.on('console',m=>{if(m.type()==='error'&&/WebGLProgram|Shader Error/i.test(m.text()))failures.push(m.text());});
+  for(const viewport of [{width:1440,height:900},{width:390,height:844}]) {
+    await page.setViewportSize(viewport);await page.goto(origin+'/');await page.locator('#hos-concept[data-ready="true"]').waitFor();
+    const chapters=page.locator('#hos-home-chapters .hos-artist-chapter');
+    assert(await chapters.count()>0,'Homepage has artist sections');
+    for(let index=0;index<await chapters.count();index++) {
+      const chapter=chapters.nth(index),button=chapter.getByRole('button',{name:'Inquire',exact:true});
+      assert.equal(await button.count(),1,'One inquiry action per artist section');
+      const topic=await button.getAttribute('data-inquiry'),artistId=await button.getAttribute('data-inquiry-artist'),workId=await button.getAttribute('data-inquiry-work');
+      assert(artistId,'Inquiry identifies the artist');
+      if(workId)assert.equal(await chapter.getByRole('button',{name:'View sculpture',exact:true}).getAttribute('data-work'),workId,'Inquiry identifies the selected sculpture');
+      if(await chapter.locator('.hos-chapter-work h3').count()) assert.equal(topic,`${await chapter.locator('.hos-chapter-work h3').innerText()} by ${await chapter.locator('.hos-chapter-artist h2').innerText()}`);
+      await button.scrollIntoViewIfNeeded();
+      if(index===0) await chapter.locator('.hos-setting-action').screenshot({path:new URL(`inquiry-${viewport.width}.jpg`,output).pathname,type:'jpeg',quality:94});
+      const scroll=await page.evaluate(()=>scrollY);await button.click();
+      assert(await page.locator('#hos-inquiry-form').isVisible());assert.equal(await page.locator('#hos-inquiry-context').innerText(),topic);
+      await page.locator('#hos-inquiry-close').click();assert(await button.isVisible());assert(await button.evaluate(el=>el===document.activeElement));
+      assert(Math.abs(await page.evaluate(()=>scrollY)-scroll)<2,'Closing inquiry restores collection position');
+      report.inquiries.push({viewport:viewport.width,artistId,workId,topic});
+    }
+  }
+  await page.setViewportSize({width:1440,height:900});
   for(const path of ['/','/collection','/artists','/making','/designers','/collectors','/house','/privacy',...catalog.artists.map(a=>'/artists/'+a.slug),...catalog.works.map(w=>'/works/'+w.slug)]) {
     await page.goto(origin+path);await page.locator('#hos-concept[data-ready="true"]').waitFor();report.routes++;
   }
