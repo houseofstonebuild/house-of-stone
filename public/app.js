@@ -41,6 +41,13 @@ let catalog, artists, works, assets, media = {}, editorial = {}, models = {}, vi
 let activePage = 'home', activeArtist, activeWork;
 let inquiryContext = {}, submissionId = '', inquiryStarted = false, submitting = false, lastInquiryButton, inquiryScroll = 0;
 const motionPreference = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+let compactHeader;
+function syncHeader() {
+  const y=window.scrollY || 0,compact=y>64 || (compactHeader===true && y>24);
+  if(compact!==compactHeader){compactHeader=compact;document.documentElement?.setAttribute('data-header-compact',String(compact));}
+}
+window.addEventListener('scroll',syncHeader,{passive:true});
+syncHeader();
 const heroSource = () => assets[catalog.site.heroImage] || '/assets/designer-apartment.jpg';
 const heroDescription = () => catalog.site.heroImage ? catalog.site.heroAlt : 'Stone sculptures in a New York apartment overlooking Manhattan';
 let pageAnimation;

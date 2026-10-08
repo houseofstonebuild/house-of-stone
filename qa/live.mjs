@@ -25,7 +25,7 @@ for(let attempt=0;attempt<48;attempt++) {
 }
 assert(deployed,lastError);
 const browser=await chromium.launch({args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
-const failures=[];const report={origin,sha:process.env.GITHUB_SHA,assets:files.length,routes:0,inquiries:[],models:[]};
+const failures=[];const report={origin,sha:process.env.GITHUB_SHA,assets:files.length,routes:0,headers:[],inquiries:[],models:[]};
 try {
   const context=await browser.newContext({viewport:{width:1440,height:900},reducedMotion:'reduce'});
   await context.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
@@ -35,6 +35,18 @@ try {
   page.on('console',m=>{if(m.type()==='error'&&/WebGLProgram|Shader Error/i.test(m.text()))failures.push(m.text());});
   for(const viewport of [{width:1440,height:900},{width:390,height:844}]) {
     await page.setViewportSize(viewport);await page.goto(origin+'/');await page.locator('#hos-concept[data-ready="true"]').waitFor();
+    const header=page.locator('.hos-header'),expanded=(await header.boundingBox()).height;
+    const anchor=await page.locator('#hos-home-collection-title').evaluate(el=>el.getBoundingClientRect().top+scrollY);
+    await page.evaluate(()=>scrollTo(0,300));await page.waitForFunction(()=>document.documentElement.dataset.headerCompact==='true');
+    const compact=(await header.boundingBox()).height;
+    assert.equal(compact,viewport.width<=700?56:expanded,'Mobile header shrinks and desktop header keeps its height');
+    assert(Math.abs(await page.locator('#hos-home-collection-title').evaluate(el=>el.getBoundingClientRect().top+scrollY)-anchor)<1,'Header does not move content');
+    await header.screenshot({path:new URL(`header-${viewport.width}-compact.jpg`,output).pathname,type:'jpeg',quality:94});
+    await page.locator('.hos-menu-toggle').click();assert(await page.locator('#hos-menu').isVisible());await page.keyboard.press('Escape');
+    assert.equal(await page.evaluate(()=>scrollY),300,'Menu preserves the scroll position');
+    await page.evaluate(()=>scrollTo(0,0));await page.waitForFunction(()=>document.documentElement.dataset.headerCompact==='false');
+    assert.equal((await header.boundingBox()).height,expanded,'Header returns to full size at the top');
+    report.headers.push({viewport:viewport.width,expanded,compact});
     const chapters=page.locator('#hos-home-chapters .hos-artist-chapter');
     assert(await chapters.count()>0,'Homepage has artist sections');
     for(let index=0;index<await chapters.count();index++) {
