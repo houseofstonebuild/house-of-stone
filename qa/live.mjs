@@ -10,7 +10,7 @@ const models=JSON.parse(readFileSync(new URL('../public/models.json',import.meta
 const catalog=JSON.parse(readFileSync(new URL('../content/catalog.json',import.meta.url),'utf8'));
 const output=new URL('../test-results/live/',import.meta.url);mkdirSync(output,{recursive:true});
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
-const files=['/app.js','/styles.css','/models.json','/sculpture-viewer.js','/stone-surface.js',...Object.values(models).map(m=>m.file)];
+const files=['/app.js','/styles.css','/light-theme.css','/models.json','/sculpture-viewer.js','/stone-surface.js',...Object.values(models).map(m=>m.file)];
 const expected=new Map(files.map(path=>[path,hash(readFileSync(new URL('../public'+path,import.meta.url)))]));
 let deployed=false,lastError;
 for(let attempt=0;attempt<48;attempt++) {
@@ -96,3 +96,4 @@ try {
   assert.deepEqual(failures,[]);report.passed=true;
 } finally {await browser.close();writeFileSync(new URL('report.json',output),JSON.stringify({...report,failures},null,2)+'\n');}
 console.log(JSON.stringify(report));
+

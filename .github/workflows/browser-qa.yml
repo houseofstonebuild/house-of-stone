@@ -25,6 +25,7 @@ jobs:
           package-manager-cache: false
       - run: npm install --prefix qa --no-audit --no-fund
       - run: npx --prefix qa playwright install --with-deps ${{ matrix.engine }}
+      - run: node qa/light-theme.mjs
       - run: node qa/browser.mjs
       - uses: actions/upload-artifact@v5
         if: always()
@@ -32,3 +33,4 @@ jobs:
           name: browser-qa-${{ matrix.engine }}
           path: test-results/browser/
           retention-days: 7
+

@@ -1,4 +1,4 @@
-name: Live website verification
++name: Live website verification
 on:
   push:
     branches: [main]
@@ -19,9 +19,15 @@ jobs:
       - run: npm install --prefix qa --no-audit --no-fund
       - run: npx --prefix qa playwright install --with-deps chromium
       - run: node qa/live.mjs
+      - run: node qa/light-theme.mjs
+        env:
+          HOS_LIGHT_PREVIEW_URL: https://house-of-stone-production.up.railway.app
       - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: live-website-verification
-          path: test-results/live/
+          path: |
+            test-results/live/
+            test-results/browser/light-*
           retention-days: 7
+

@@ -16,6 +16,7 @@ function session() {
   return sessionId;
 }
 const search = new URLSearchParams(location.search);
+const lightTheme = search.get('theme') === 'light';
 const campaignValue = value => /^[a-zA-Z0-9_. -]{0,80}$/.test(value || '') ? value || '' : '';
 let referrer = ''; try { referrer = new URL(document.referrer).origin; } catch {}
 let attribution = { source: campaignValue(search.get('utm_source')), medium: campaignValue(search.get('utm_medium')), campaign: campaignValue(search.get('utm_campaign')), referrer };
@@ -294,7 +295,7 @@ function rememberScroll() {
 function navigate(path) {
   if (path === routePath()) { route(path); return; }
   rememberScroll();
-  history.pushState({hosNavigation:{path,previous:routePath(),scrollY:0}}, '', (previewMode ? '/admin/preview' : '') + path); route(path);
+  history.pushState({hosNavigation:{path,previous:routePath(),scrollY:0}}, '', (previewMode ? '/admin/preview' : '') + path + (lightTheme ? '?theme=light' : '')); route(path);
 }
 function navigateBack() {
   if (history.state?.hosNavigation?.previous && history.back) { history.back(); return; }
@@ -447,3 +448,4 @@ async function start() {
 start().catch(error => {
   const notice = el('p','hos-form-note',error.message || 'The collection could not load. Please refresh the page.'); notice.setAttribute('role','alert'); $('.hos-hero-copy').append(notice);
 });
+
