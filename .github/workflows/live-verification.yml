@@ -1,4 +1,4 @@
-+name: Live website verification
+name: Live website verification
 on:
   push:
     branches: [main]
