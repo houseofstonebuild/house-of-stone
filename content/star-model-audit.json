@@ -1,0 +1,112 @@
+{
+  "zsa-013": {
+    "sourcePage": 13,
+    "sourceSha256": "1fcdf9ba0b65ffc15a7a60d3b506b9ed45405979da08f3b9fa3203e2e24726fa",
+    "vertices": 51401,
+    "triangles": 97540,
+    "bytes": 1448888,
+    "depth": 0.5968017336682547,
+    "closed": true,
+    "components": 1,
+    "sourceBounds": [
+      201.40616759179687,
+      140.50791956347655,
+      601.2413655917969,
+      940.1351815634766
+    ],
+    "inferred": [
+      "reverse",
+      "hidden sides",
+      "depth"
+    ],
+    "tracedFrontSilhouetteIoU": 0.97808
+  },
+  "zsa-028": {
+    "sourcePage": 28,
+    "sourceSha256": "d5ddf9372087e76d228f80937ef20fdc17a128085087f4b8cca6d2a891da8d29",
+    "vertices": 86205,
+    "triangles": 170012,
+    "bytes": 2460948,
+    "depth": 1.1893114433229008,
+    "closed": true,
+    "components": 1,
+    "sourceBounds": [
+      126.35122396240234,
+      257.9806175634766,
+      582.2620429624023,
+      924.3046185634765
+    ],
+    "inferred": [
+      "reverse",
+      "hidden sides",
+      "depth"
+    ],
+    "tracedFrontSilhouetteIoU": 0.9926
+  },
+  "zsa-001": {
+    "sourcePage": 1,
+    "sourceSha256": "f4637e3be953e09c567cde770c1925e059198c10b6b2d3d3d2fd63d470c7ae7e",
+    "vertices": 62825,
+    "triangles": 123844,
+    "bytes": 1789968,
+    "depth": 0.5316698325092138,
+    "closed": true,
+    "components": 1,
+    "sourceBounds": [
+      157.35259659179687,
+      29.127291792402268,
+      598.3768655917968,
+      849.7377115916844
+    ],
+    "inferred": [
+      "reverse",
+      "hidden sides",
+      "depth"
+    ],
+    "tracedFrontSilhouetteIoU": 0.98436
+  },
+  "zsa-020": {
+    "sourcePage": 20,
+    "sourceSha256": "12231e6c9ac638933a00a1e173b6bf718d043eba972e711b38133cc250e3d8ff",
+    "vertices": 26409,
+    "triangles": 50756,
+    "bytes": 745036,
+    "depth": 0.9437680465860152,
+    "closed": true,
+    "components": 1,
+    "sourceBounds": [
+      281.6408285917969,
+      354.4034803046875,
+      466.5477885917969,
+      884.3513603046874
+    ],
+    "inferred": [
+      "reverse",
+      "hidden sides",
+      "depth"
+    ],
+    "tracedFrontSilhouetteIoU": 0.98956
+  },
+  "zsa-005": {
+    "sourcePage": 5,
+    "sourceSha256": "b8c4f8ca4b84d9aff0dd801334d7f118644a26e557fee1253db4cf86c5f39010",
+    "vertices": 28389,
+    "triangles": 54256,
+    "bytes": 799492,
+    "depth": 0.6655149781195273,
+    "closed": true,
+    "components": 1,
+    "sourceBounds": [
+      295.4298275917969,
+      300.4489103046875,
+      492.43654659179685,
+      951.2077043046875
+    ],
+    "inferred": [
+      "reverse",
+      "hidden sides",
+      "depth"
+    ],
+    "tracedFrontSilhouetteIoU": 0.98143
+  }
+}

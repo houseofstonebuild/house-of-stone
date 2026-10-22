@@ -73,5 +73,105 @@
       0.1841620626151013
     ],
     "stonePolish": 1
+  },
+  "zsa-013": {
+    "workId": "zsa-013",
+    "title": "Original ZSA page 13",
+    "source": "/assets/zsa-page-13.jpg",
+    "sourcePage": 13,
+    "sourceSha256": "1fcdf9ba0b65ffc15a7a60d3b506b9ed45405979da08f3b9fa3203e2e24726fa",
+    "file": "/models/zsa-013.glb",
+    "referenceSurface": true,
+    "reconstruction": true,
+    "reviewOnly": true,
+    "referenceYaw": 0.3,
+    "stoneGrain": false,
+    "stoneSwatch": [
+      0.75,
+      0,
+      0.25,
+      1
+    ],
+    "stonePolish": 0.85
+  },
+  "zsa-028": {
+    "workId": "zsa-028",
+    "title": "Original ZSA page 28",
+    "source": "/assets/zsa-page-28.jpg",
+    "sourcePage": 28,
+    "sourceSha256": "d5ddf9372087e76d228f80937ef20fdc17a128085087f4b8cca6d2a891da8d29",
+    "file": "/models/zsa-028.glb",
+    "referenceSurface": true,
+    "reconstruction": true,
+    "reviewOnly": true,
+    "referenceYaw": 0.3,
+    "stoneGrain": false,
+    "stoneSwatch": [
+      0.75,
+      0,
+      0.25,
+      1
+    ],
+    "stonePolish": 0.82
+  },
+  "zsa-001": {
+    "workId": "zsa-001",
+    "title": "Original ZSA page 1",
+    "source": "/assets/zsa-page-01.jpg",
+    "sourcePage": 1,
+    "sourceSha256": "f4637e3be953e09c567cde770c1925e059198c10b6b2d3d3d2fd63d470c7ae7e",
+    "file": "/models/zsa-001.glb",
+    "referenceSurface": true,
+    "reconstruction": true,
+    "reviewOnly": true,
+    "referenceYaw": 0.3,
+    "stoneGrain": false,
+    "stoneSwatch": [
+      0.75,
+      0,
+      0.25,
+      1
+    ],
+    "stonePolish": 0.52
+  },
+  "zsa-020": {
+    "workId": "zsa-020",
+    "title": "Original ZSA page 20",
+    "source": "/assets/zsa-page-20.jpg",
+    "sourcePage": 20,
+    "sourceSha256": "12231e6c9ac638933a00a1e173b6bf718d043eba972e711b38133cc250e3d8ff",
+    "file": "/models/zsa-020.glb",
+    "referenceSurface": true,
+    "reconstruction": true,
+    "reviewOnly": true,
+    "referenceYaw": 0.3,
+    "stoneGrain": false,
+    "stoneSwatch": [
+      0.75,
+      0,
+      0.25,
+      1
+    ],
+    "stonePolish": 0.9
+  },
+  "zsa-005": {
+    "workId": "zsa-005",
+    "title": "Original ZSA page 5",
+    "source": "/assets/zsa-page-05.jpg",
+    "sourcePage": 5,
+    "sourceSha256": "b8c4f8ca4b84d9aff0dd801334d7f118644a26e557fee1253db4cf86c5f39010",
+    "file": "/models/zsa-005.glb",
+    "referenceSurface": true,
+    "reconstruction": true,
+    "reviewOnly": true,
+    "referenceYaw": 0.3,
+    "stoneGrain": false,
+    "stoneSwatch": [
+      0.75,
+      0,
+      0.25,
+      1
+    ],
+    "stonePolish": 0.78
   }
 }
