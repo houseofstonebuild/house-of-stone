@@ -65,8 +65,8 @@ def field_for(ref,mask,step):
             for cx,cy,rx,ry,amount,tilt in [(453,487,67,60,128,.35),(323,620,81,83,132,.65)]:
                 dx=x-cx;dy=y-cy;front-=amount*np.exp(-(((dx+tilt*dy)/rx)**2+(dy/ry)**2)*1.3)
             front+=19*np.exp(-((x-(235+(y-425)*.9))/28)**2)*np.exp(-((y-540)/160)**2)
-            back+=18*np.sin((y-310)/100)-.12*(x-350)
-            back+=42*np.exp(-((x-448)/80)**2-((y-485)/85)**2)+48*np.exp(-((x-325)/95)**2-((y-630)/100)**2)
+            back+=-20-24*np.sin((y-290)/95)-.12*(x-350)
+            back+=92*np.exp(-((x-448)/80)**2-((y-485)/85)**2)+102*np.exp(-((x-325)/95)**2-((y-630)/100)**2)
             back=np.minimum(back,front-28)
         else:
             seam=356+.00035*(y-550)**2;front=72-.14*np.abs(x-seam)+5*np.sin((y-100)/290);back=-55+.04*(x-350)
@@ -148,7 +148,11 @@ def build(id,ref,step):
     _,nearest=distance_transform_edt(~binary_erosion(mask,iterations=2),return_indices=True)
     px=np.clip(np.round(vertices[:,0]).astype(int),0,767);py=np.clip(np.round(vertices[:,1]).astype(int),0,1023)
     frontuv=np.stack([nearest[1,py,px]*2/2048,nearest[0,py,px]*2/2048],axis=1)
-    backuv=np.stack([.75+np.mod(vertices[:,0]+vertices[:,2]*.5,256)/1024,np.mod(vertices[:,1],1024)/1024],axis=1)
+    # Continuous UVs avoid interpolating across wrapped atlas seams on side triangles.
+    span=vertices.max(axis=0)-vertices.min(axis=0);minimum=vertices.min(axis=0)
+    u=np.clip((vertices[:,0]-minimum[0]+vertices[:,2]*.25)/(span[0]+span[2]*.25),0,1)
+    v=np.clip((vertices[:,1]-minimum[1])/span[1],0,1)
+    backuv=np.stack([.751+u*.248,.001+v*.998],axis=1)
     front_z=np.max(np.where(field<0,axes[2][None,None,:],-1000),axis=2)
     tri=indices.reshape(-1,3);centers=vertices[tri].mean(axis=1);tn=normals[tri].mean(axis=1)
     gridx=(centers[:,0]-axes[0][0])/step;gridy=(centers[:,1]-axes[1][0])/step
@@ -159,9 +163,9 @@ def build(id,ref,step):
         tx=np.clip(centers[:,0].astype(int),0,767);ty=np.clip(centers[:,1].astype(int),0,1023)
         photographed|=(color[ty,tx].mean(axis=1)>135)&(sample(distance(mask),centers[:,0],centers[:,1])<17)&(np.abs(tn[:,2])<.5)
     if ref['kind']=='interwoven':
-        base=(vertices[:,1]>=878)|~polygon(ref['outline'])[py,px];backuv[base,0]=.75+np.mod(vertices[base,0],256)/1024;backuv[base,1]=.76+np.mod(vertices[base,2]+90,90)/400
+        base=(vertices[:,1]>=878)|((vertices[:,1]>=829)&~polygon(ref['outline'])[py,px]);backuv[:,1]=.001+v*.737;backuv[base,0]=.751+u[base]*.248;backuv[base,1]=.77+np.clip((vertices[base,2]-minimum[2])/span[2],0,1)*.22
     if ref['kind']=='birds':
-        light=polygon(ref['parts'][4]['outline'])|polygon(ref['parts'][5]['outline'])|polygon(ref['parts'][2]['outline']);light&=~polygon(ref['parts'][3]['outline']);use=light[py,px];backuv[use,0]=.875+np.mod(vertices[use,0]+vertices[use,2]*.5,128)/1024
+        light=polygon(ref['parts'][4]['outline'])|polygon(ref['parts'][5]['outline'])|polygon(ref['parts'][2]['outline']);light&=~polygon(ref['parts'][3]['outline']);use=light[py,px];backuv[:,0]=.751+u*.122;backuv[use,0]=.877+u[use]*.122
     outv=[];outn=[];outuv=[];outix=[]
     for selected,uv in [(photographed,frontuv),(~photographed,backuv)]:
         flat=tri[selected].ravel();used,inv=np.unique(flat,return_inverse=True);outix.append(inv+sum(len(v) for v in outv));outv.append(vertices[used]);outn.append(normals[used]);outuv.append(uv[used])

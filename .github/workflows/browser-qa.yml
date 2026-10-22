@@ -8,7 +8,7 @@ permissions:
 jobs:
   browsers:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -28,10 +28,12 @@ jobs:
       - run: node qa/light-theme.mjs
       - run: node qa/browser.mjs
       - run: node qa/collections.mjs
+      - run: node qa/star-models.mjs
       - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: browser-qa-${{ matrix.engine }}
           path: test-results/browser/
           retention-days: 7
+
 

@@ -1,0 +1,66 @@
+name: Build collection star assets
+on:
+  push:
+    branches: [assets/star-models-build]
+    paths:
+      - scripts/star-models/**
+      - scripts/model-review/render.py
+      - public/stone-surface.js
+      - .github/workflows/star-model-authoring.yml
+permissions:
+  contents: write
+concurrency:
+  group: collection-star-authoring
+  cancel-in-progress: false
+jobs:
+  build:
+    if: github.ref == 'refs/heads/assets/star-models-build'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: python -m pip install numpy==2.3.5 scipy==1.17.0 Pillow==12.3.0
+      - run: sudo apt-get update -qq && sudo apt-get install -y libegl1 libgl1-mesa-dri fonts-dejavu-core
+      - run: python scripts/star-models/build.py --step 7
+      - run: python scripts/star-models/render.py
+      - name: Save generated assets to the isolated authoring branch
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs=require('node:fs');
+            const {owner,repo}=context.repo;
+            const ref='heads/assets/star-models-build';
+            if(context.ref!=='refs/'+ref)throw new Error('Unexpected branch');
+            const current=(await github.rest.git.getRef({owner,repo,ref})).data;
+            if(current.object.sha!==context.sha)throw new Error('Authoring branch changed; rebuild the latest commit');
+            const parent=(await github.rest.git.getCommit({owner,repo,commit_sha:context.sha})).data;
+            const paths=['public/models.json','content/star-model-audit.json'];
+            for(const id of ['zsa-013','zsa-028','zsa-001','zsa-020','zsa-005'])paths.push(`public/models/${id}.glb`,`public/models/textures/${id}-surface.jpg`,`docs/model-review/${id}-comparison.jpg`);
+            paths.push('docs/model-review/five-star-comparison.jpg');
+            const tree=[];
+            for(const path of paths){
+              const bytes=fs.readFileSync(path);
+              if(!bytes.length)throw new Error('Empty asset: '+path);
+              const blob=(await github.rest.git.createBlob({owner,repo,content:bytes.toString('base64'),encoding:'base64'})).data;
+              tree.push({path,mode:'100644',type:'blob',sha:blob.sha});
+            }
+            const generated=(await github.rest.git.createTree({owner,repo,base_tree:parent.tree.sha,tree})).data;
+            const commit=(await github.rest.git.createCommit({owner,repo,message:'Build and verify the five source-constrained collection star assets',tree:generated.sha,parents:[context.sha]})).data;
+            await github.rest.git.updateRef({owner,repo,ref,sha:commit.sha,force:false});
+            core.info('Saved generated assets to the isolated authoring branch: '+commit.sha);
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: collection-star-models
+          path: |
+            public/models/zsa-*.glb
+            public/models/textures/zsa-*.jpg
+            public/models.json
+            content/star-model-audit.json
+            docs/model-review/
+          retention-days: 7

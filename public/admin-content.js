@@ -122,11 +122,11 @@ function render() {
       grid.querySelector('#field-photos').addEventListener('input',event=>{record.additionalImages=event.target.value.split(/\s+/).filter(Boolean);});
       field(grid,record,'internalNotes','Private content and asset notes',{wide:true,multiline:true,max:5000});
       const checks=element('div',undefined,'wide');checks.append(element('h3','Confirmed information · show on the public site'));
-      for(const key of ['title','artist','material','dimensions','yearMade','description','size','finish','signature','weight','base','location','delivery','shipping','installation','care','authenticity','provenance','acquisitionMethod','availability']) {
+      for(const key of ['title','artist','material','dimensions','yearMade','description','size','finish','signature','weight','base','location','delivery','shipping','installation','care','authenticity','provenance','acquisitionMethod','availability','model']) {
         const wrapper=element('label',undefined,'checkbox'),input=element('input');input.type='checkbox';input.checked=record.verification[key]===true;
-        input.addEventListener('change',()=>{record.verification[key]=input.checked;edited();});wrapper.append(input,element('span',key));checks.append(wrapper);
+        input.addEventListener('change',()=>{record.verification[key]=input.checked;edited();});wrapper.append(input,element('span',key==='model'?'3D model · source and all visible geometry confirmed':key));checks.append(wrapper);
       }
-      fields.append(checks,element('p',`3D asset: ${record.modelStatus}. Only attach a model after matching it to this source photograph.`, 'note'));
+      fields.append(checks,element('p',`3D asset: ${record.modelStatus}. Reconstructions are visible in the private preview. Confirm the 3D model only after checking its source, depth, sides and reverse.`, 'note'));
     }
   } else if(selection.kind==='collection') {
     field(grid,record,'name','Collection name',{required:true,max:120});field(grid,record,'slug','Page address',{required:true,max:100});
@@ -185,3 +185,4 @@ $('#download').addEventListener('click',()=>{
 $('#reload').addEventListener('click',()=>operation(async()=>{accept(await api('content'));message('Latest collection loaded.');}));
 window.addEventListener('beforeunload',event=>{if(dirty||busy){event.preventDefault();event.returnValue='';}});
 api('content').then(result=>{accept(result);selection.id=draft.works.find(work=>!work.archived)?.id||draft.works[0]?.id||'';render();lock(false);}).catch(error=>message(error.message,true));
+

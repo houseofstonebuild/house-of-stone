@@ -6,7 +6,8 @@ from PIL import Image, ImageDraw, ImageFont
 from rebuild import ROOT, REFERENCES
 
 class Renderer:
-    def __init__(self,w=640,h=880):
+    def __init__(self,w=640,h=880,reconstruction=False,background=(.043,.043,.04)):
+        self.background=background
         self.w,self.h=w,h;E=C.CDLL('libEGL.so.1');self.E=E;E.eglGetProcAddress.restype=C.c_void_p
         get=C.CFUNCTYPE(C.c_void_p,C.c_uint,C.c_void_p,C.POINTER(C.c_int))(E.eglGetProcAddress(b'eglGetPlatformDisplayEXT'))
         self.display=get(0x31DD,None,None);E.eglInitialize.argtypes=[C.c_void_p,C.POINTER(C.c_int),C.POINTER(C.c_int)]
@@ -31,6 +32,7 @@ uniform sampler2D map;uniform vec4 stoneSwatch;uniform float stonePolish;uniform
 '''+surface+'''
 vec3 toSRGB(vec3 c){return mix(12.92*c,1.055*pow(max(c,vec3(0.)),vec3(1./2.4))-.055,step(vec3(.0031308),c));}
 void main(){vec3 c=polishedStone(texture2D(map,tex).rgb,sourceP-sourceOffset,sourceN,nn,viewP,stonePolish);gl_FragColor=vec4(toSRGB(c),1.);}'''
+        if reconstruction: fs=fs.replace('polishedStone(texture2D','reconstructionStone(texture2D')
         shaders=[]
         for kind,source in [(0x8B31,vs),(0x8B30,fs)]:
             s=self.call('glCreateShader',C.c_uint,[C.c_uint],kind);p=C.c_char_p(source.encode())
@@ -62,7 +64,7 @@ void main(){vec3 c=polishedStone(texture2D(map,tex).rgb,sourceP-sourceOffset,sou
         a=math.radians(angle);b=math.radians(pitch)
         ry=np.array([[math.cos(a),0,math.sin(a)],[0,1,0],[-math.sin(a),0,math.cos(a)]],dtype='f4');rx=np.array([[1,0,0],[0,math.cos(b),-math.sin(b)],[0,math.sin(b),math.cos(b)]],dtype='f4');r=np.ascontiguousarray((rx@ry).T)
         self.call('glUniformMatrix3fv',None,[C.c_int,C.c_int,C.c_ubyte,C.c_void_p],self.rotloc,1,0,r.ctypes.data)
-        self.call('glClearColor',None,[C.c_float]*4,.043,.043,.04,1);self.call('glClear',None,[C.c_uint],0x4000|0x100)
+        self.call('glClearColor',None,[C.c_float]*4,*self.background,1);self.call('glClear',None,[C.c_uint],0x4000|0x100)
         self.call('glDrawElements',None,[C.c_uint,C.c_int,C.c_uint,C.c_void_p],4,self.data['indices'].size,0x1405,self.data['indices'].ctypes.data)
         self.call('glFinish',None,[]);out=np.empty((self.h,self.w,4),dtype='u1');self.call('glReadPixels',None,[C.c_int]*4+[C.c_uint,C.c_uint,C.c_void_p],0,0,self.w,self.h,0x1908,0x1401,out.ctypes.data)
         return Image.fromarray(out[::-1,:,:3].copy())
