@@ -189,11 +189,13 @@ function editorialImage(source, alt, sizes) {
 }
 function modelDefinition(work) {
   const entry=models[work.id];
-  return entry && entry.title===work.title && entry.source===assets[work.image] ? entry : null;
+  if(!entry || entry.source!==assets[work.image])return null;
+  if(entry.reconstruction)return entry.workId===work.id && (previewMode || work.modelVerified===true) && (!work.sourcePage || entry.sourcePage===work.sourcePage) ? entry : null;
+  return entry.title===work.title ? entry : null;
 }
 function loadViewer() {
   if(!viewerPromise)viewerPromise=import('./sculpture-viewer.js').then(module=>{
-    modelViewer=module.initializeViewer({root,models,works,onInteraction:id=>{const work=works.find(w=>w.id===id);if(work)track('model_interaction',{workId:id,artistId:work.artistId});}});
+    modelViewer=module.initializeViewer({root,models,works,reviewMode:previewMode,onInteraction:id=>{const work=works.find(w=>w.id===id);if(work)track('model_interaction',{workId:id,artistId:work.artistId});}});
     return modelViewer;
   }).catch(error=>{viewerPromise=null;throw error;});
   return viewerPromise;
@@ -208,7 +210,9 @@ function modelPanel(work) {
   const snapshot=el('canvas','hos-3d-snapshot');snapshot.hidden=true;snapshot.setAttribute('aria-hidden','true');
   stage.append(poster,snapshot);
   const hint=el('div','hos-3d-hint',motionPreference?.matches?'Explore the form in 3D':'Scroll to rotate');hint.setAttribute('role','status');
-  panel.append(top,stage,hint);return panel;
+  panel.append(top,stage,hint);
+  if(previewMode && modelDefinition(work).reconstruction)panel.append(el('p','hos-model-review-note','Reference-based reconstruction. Depth and unseen surfaces are inferred.'));
+  return panel;
 }
 function sculptureSettings(artist, work, entry, withInquiry = false) {
   const carousel = el('div', 'hos-settings-carousel'); carousel.dataset.reveal = '';
@@ -535,5 +539,6 @@ async function start() {
 start().catch(error => {
   const notice = el('p','hos-form-note',error.message || 'The collection could not load. Please refresh the page.'); notice.setAttribute('role','alert'); $('.hos-hero-copy').append(notice);
 });
+
 
 

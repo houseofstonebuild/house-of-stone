@@ -25,7 +25,7 @@ function grain(material) {
 
 // Preserve the source stone colours with smooth, view-dependent reflections
 // across the whole mesh, including its sides, openings and reverse surfaces.
-function referenceSurface(material,extent,swatch,polish) {
+function referenceSurface(material,extent,swatch,polish,reconstruction=false) {
   if(!material.isMeshBasicMaterial)return;
   material.toneMapped=false;
   material.onBeforeCompile=shader=>{
@@ -42,20 +42,21 @@ function referenceSurface(material,extent,swatch,polish) {
     `).replace('#include <map_pars_fragment>',`#include <map_pars_fragment>
       ${stoneSurfaceGLSL}
     `).replace('#include <color_fragment>',`#include <color_fragment>
-      diffuseColor.rgb=polishedStone(diffuseColor.rgb,vSourcePosition,vSourceNormal,vReferenceNormal,vReferenceViewPosition,stonePolish);
+      diffuseColor.rgb=${reconstruction?'reconstructionStone':'polishedStone'}(diffuseColor.rgb,vSourcePosition,vSourceNormal,vReferenceNormal,vReferenceViewPosition,stonePolish);
     `);
   };
-  material.customProgramCacheKey=()=> 'house-of-stone-polished-surface-v3';
+  material.customProgramCacheKey=()=> reconstruction?'house-of-stone-reconstruction-surface-v1':'house-of-stone-polished-surface-v3';
 }
 
-export function initializeViewer({root,models,works,onInteraction}) {
+export function initializeViewer({root,models,works,onInteraction,reviewMode=false}) {
   const dialog=root.querySelector('#hos-model-dialog'),dialogHost=root.querySelector('#hos-model-stage');
   const dialogTitle=root.querySelector('#hos-model-title'),dialogStatus=root.querySelector('#hos-model-status');
+  const reviewNote=document.createElement('p');reviewNote.className='hos-model-review-note';reviewNote.textContent='Reference-based reconstruction. Depth and unseen surfaces are inferred.';reviewNote.hidden=true;dialog.append(reviewNote);
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)'),hosts=[...root.querySelectorAll('[data-model-stage]')];
   const scenes=new Map(),manager=new THREE.LoadingManager();
   // Native image loading keeps local JPEGs reliable across Safari navigations.
   // GLTFLoader still configures the UV orientation, samplers and colour space.
-  manager.addHandler(/(?:^|\/)assets\/[^/]+\.jpg$/i,new THREE.TextureLoader(manager));
+  manager.addHandler(/(?:^|\/)(?:assets|models\/textures)\/[^/]+\.jpg$/i,new THREE.TextureLoader(manager));
   const loader=new GLTFLoader(manager);
   let renderer,scene,camera,sculpture,active,pending=0,unavailable=false,contextLost=false,trigger,dialogWork,interactionCounted=false;
   let yaw=-.3,pitch=0,zoom=1,lastView='',loadingHost,activationGeneration=0,dialogCleaned=true;
@@ -114,7 +115,7 @@ export function initializeViewer({root,models,works,onInteraction}) {
       const scale=3.05/Math.max(size.y,size.x*.95,size.z*.95);group.scale.multiplyScalar(scale);
       group.position.set(-center.x*scale,-box.min.y*scale+.12,-center.z*scale);
       if(entry.stoneGrain)group.traverse(node=>{if(node.isMesh)for(const material of Array.isArray(node.material)?node.material:[node.material])grain(material);});
-      if(entry.referenceSurface)group.traverse(node=>{if(node.isMesh)for(const material of Array.isArray(node.material)?node.material:[node.material])referenceSurface(material,node.scale.clone(),entry.stoneSwatch,entry.stonePolish ?? 1);});
+      if(entry.referenceSurface)group.traverse(node=>{if(node.isMesh)for(const material of Array.isArray(node.material)?node.material:[node.material])referenceSurface(material,(entry.reconstruction && node.parent?.scale?node.parent.scale:node.scale).clone(),entry.stoneSwatch,entry.stonePolish ?? 1,entry.reconstruction===true);});
       const pose=new THREE.Group();pose.rotation.y=entry.referenceYaw||0;pose.add(group);
       const turntable=new THREE.Group();turntable.add(pose);return turntable;
     }).catch(error=>{scenes.delete(id);throw error;});
@@ -220,6 +221,7 @@ export function initializeViewer({root,models,works,onInteraction}) {
   const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(!unavailable&&entry.isIntersecting&&models[entry.target.dataset.modelId]&&makeRenderer())void model(entry.target.dataset.modelId).catch(()=>{});refresh();},{rootMargin:'200px',threshold:[0,.1,.5,1]});hosts.forEach(host=>observer.observe(host));
   refresh();
   return {refresh,close,observe(elements){for(const host of elements)if(!hosts.includes(host)){hosts.push(host);observer.observe(host);}for(let i=hosts.length-1;i>=0;i--)if(!hosts[i].isConnected){observer.unobserve(hosts[i]);hosts.splice(i,1);}refresh();},open(work,button,poster){
+    reviewNote.hidden=!(reviewMode && models[work.id]?.reconstruction);
     dialogWork=work;trigger=button;yaw=-.3;pitch=0;zoom=1;interactionCounted=false;pointers.clear();
     dialogTitle.textContent=work.title;dialogHost.dataset.modelId=work.id;dialogHost.dataset.modelState='waiting';
     dialogHost.querySelector('.hos-3d-poster').src=poster;dialogHost.querySelector('.hos-3d-poster').hidden=false;
@@ -228,3 +230,4 @@ export function initializeViewer({root,models,works,onInteraction}) {
     dialogCleaned=false;dialog.showModal();root.querySelector('#hos-model-close').focus({preventScroll:true});refresh();
   }};
 }
+

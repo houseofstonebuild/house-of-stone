@@ -20,7 +20,7 @@ test('source roster contains exactly 23 unique works in the locked five collecti
  assert.equal(new Set(catalog.collections.flatMap(c=>c.workIds)).size,23);
  for(const page of [3,4,8,11,15,19,22,30])assert(!works.some(w=>w.sourcePage===page));
  assert.equal(works.find(w=>w.sourcePage===13).availability,'sold');assert(works.filter(w=>w.sourcePage!==13).every(w=>w.availability==='unknown'));
- for(const work of works){assert(readFileSync(new URL('public'+catalog.assets[work.image],root)).length>60000);assert.equal(work.modelStatus,expected.some(pages=>pages[0]===work.sourcePage)?'needed':'not-planned');}
+ for(const work of works){assert(readFileSync(new URL('public'+catalog.assets[work.image],root)).length>60000);assert.equal(work.modelStatus,expected.some(pages=>pages[0]===work.sourcePage)?'review':'not-planned');}
 });
 test('unverified working content and assignments stay private, and verified dimensions support public filters',()=>{
  const catalog=renovated(),draft=publicCatalog(catalog,{preview:true}),publicView=publicCatalog(catalog);
@@ -53,3 +53,4 @@ test('safe draft import preserves history, inquiries and owner records, and is r
  response=await f.post('inquiries',{...sold,intent:'alternatives'},false);assert.equal(response.status,201);assert.match(f.app.db.prepare('SELECT topic FROM inquiries WHERE work_id=?').get('zsa-013').topic,/^Alternatives to /);
  response=await f.post('events',{id:randomUUID(),sessionId:randomUUID(),name:'page_view',page:'category',workId:'zsa-028'},false);assert.equal(response.status,202);
 });
+

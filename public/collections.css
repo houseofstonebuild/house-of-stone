@@ -48,3 +48,6 @@
  #hos-concept .hos-category-content {padding-top:24px;}
 }
 @media(prefers-reduced-motion:reduce){#hos-concept .hos-collection-chapter * {scroll-behavior:auto;}}
+
+
+.hos-model-review-note {font-size:13px;line-height:1.7;color:var(--hos-muted);margin:14px 24px 20px;}

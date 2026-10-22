@@ -41,4 +41,15 @@ vec3 polishedStone(vec3 photographed,vec3 position,vec3 sourceNormal,vec3 viewNo
     +vec3(1.,.98,.92)*.42*stoneSoftbox(reflection,vec3(.05,.80,.48),.75,.24);
   return base+reflected*(.045+fresnel*3.)*polish;
 }
+vec3 reconstructionStone(vec3 base,vec3 position,vec3 sourceNormal,vec3 viewNormal,vec3 viewPosition,float polish){
+  vec3 n=normalize(viewNormal),v=normalize(-viewPosition),r=reflect(-v,n);
+  float d=max(dot(n,normalize(vec3(-.35,.55,1.))),0.);
+  float front=smoothstep(.08,.62,normalize(sourceNormal).z);
+  float light=mix(.70+.30*d,.92+.08*d,front);
+  float fresnel=.045+.20*pow(1.-max(dot(n,v),0.),5.);
+  vec3 reflected=vec3(1.,.96,.88)*stoneSoftbox(r,vec3(-.62,.36,.72),.32,.85)
+    +vec3(.90,.94,1.)*.72*stoneSoftbox(r,vec3(.72,.24,.64),.25,.72)
+    +vec3(1.,.98,.92)*.42*stoneSoftbox(r,vec3(.05,.80,.48),.75,.24);
+  return base*light+reflected*(.025+fresnel*1.7)*polish;
+}
 `;

@@ -27,8 +27,8 @@ try {
  staged=await api('content');
  await page.goto(base+'/admin/preview');await page.locator('#hos-concept[data-ready="true"]').waitFor();
  assert.equal(await page.locator('#hos-home-chapters [data-collection-section]').count(),5);
- assert.equal(await page.locator('#hos-home-chapters [data-model-fallback]').count(),5);
- assert.equal(await page.locator('#hos-home-chapters [data-model-stage]').count(),0,'Unmatched models must never be displayed');
+ assert.equal(await page.locator('#hos-home-chapters [data-model-fallback]').count(),0);
+ assert.equal(await page.locator('#hos-home-chapters [data-model-stage]').count(),5,'All five source-matched reconstructions are reviewable privately');
  assert.equal(await page.locator('#hos-home-chapters [data-artist]').count(),5,'Proposed credits remain reviewable privately');
  await page.screenshot({path:new URL('collections-private-desktop.png',out).pathname,fullPage:true});
  await page.locator('#hos-home-chapters [data-collection="rhythm"]').first().click();await page.waitForURL('**/admin/preview/collections/rhythm');
@@ -83,3 +83,4 @@ try {
  assert(await viewerPage.locator('#hos-model-dialog').isVisible());await viewerPage.keyboard.press('Escape');assert(await viewerPage.locator('#hos-model-dialog').isHidden());await viewerContext.close();
  assert.deepEqual(errors,[]);assert.deepEqual(failedResponses,[]);writeFileSync(new URL(`collections-${engineName}-report.json`,out),JSON.stringify({engine:engineName,routes:routes.length,sizes:6,checks:checked,errors,inquiries:2,matchingStarModels:0,photoFallbacks:5},null,2));console.log(`Collection QA passed: ${checked} route/viewport checks, private draft, filters, links, sold alternatives, inquiries and session logging (${engineName}).`);
 } finally {await browser?.close();await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});}
+

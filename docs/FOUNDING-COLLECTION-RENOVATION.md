@@ -28,8 +28,8 @@ Each source record tracks private notes, original page, cropped edge, model stat
 
 ## Remaining assets and content
 
-- **All five matching star GLBs are missing:** original pages **13, 28, 1, 20 and 5**. The old GLBs depict different sculptures and are never assigned to these source records. Correct photographs are shown instead. The scroll-driven viewer, accessible modal controls, reduced motion, near-viewport loading and fallback behavior are retained. Matched model definitions must use the same record ID, title and photo source in `public/models.json`. No non-star model is required in this phase.
-- Additional angles, reverse views and detail photographs are missing for all 23 works. A single photograph does not establish the hidden geometry needed for an accurate 3D model. Obtain all-around reference photography or a scan before creating faithful models.
+- **Five star GLBs are built for private review:** original pages **13, 28, 1, 20 and 5**. These source-specific reconstructions replace none of the unrelated legacy models. Their fronts follow the source photos; depth, hidden sides and reverse details remain inferred. Verify those surfaces before confirming a model for publication. Definitions match a stable work ID, source page and photograph rather than an unverified working title. No supporting-work models are required in this phase.
+- Additional angles, reverse views and detail photographs are missing for all 23 works. A single photograph does not establish the hidden geometry needed for an accurate 3D model. All-around reference photography or a scan is still needed to verify the inferred geometry.
 - Original pages **21** (top) and **27** (bottom) are already cropped in the source. The site preserves them without further cropping or invented reconstruction. Replace them with uncropped originals when available.
 - Original pages **2, 9, 16, 17, 24, 25 and 27** are **810 × 1080**. The other 16 are **1536 × 2048**. Masters are extracted unchanged. Responsive variants are smaller than the originals, without artificial enlargement. Higher-resolution originals are needed for large-screen close inspection of the seven smaller photographs.
 - Official titles, actual artists, stone, dimensions, weight, year, finish details, signatures, bases, locations, availability of 22 works, artist-approved stories, delivery/shipping/install/care details and provenance/authenticity remain unverified.
@@ -41,3 +41,23 @@ All 23 photographs byte-match their corresponding page in the original 31-page *
 ## Verification
 
 `npm run check` validates both the legacy seed and the renovation blueprint. `npm test` covers catalogue contracts, private/public projection, revision conflicts, repeatable draft imports, routes, sitemap, Sold enforcement, selected-work inquiries and existing storage/privacy/editor/backend behavior. `node qa/collections.mjs` exercises the actual editor, private draft, all 41 routes at six viewports (320–3840 px), filtering, image decode and framing, navigation, normal and sold-alternative inquiries, and session logging. The existing browser, theme and real WebGL tests remain in CI for Chromium, Firefox and WebKit.
+
+
+## Five star reconstructions
+
+Source-constrained, textured GLBs now exist for original pages 13, 28, 1, 20 and 5.
+They retain the source front outlines and openings, with rounded volumes and
+polished source-stone surfaces. See `docs/model-review/five-star-comparison.jpg`,
+`content/star-model-audit.json`, and `scripts/star-models/README.md`. Each mesh is
+one connected closed surface; generated GLBs use quantized 16-bit geometry and
+compressed HTTP delivery. Original source JPEGs and the five legacy models are
+unchanged.
+
+All five reconstructions appear in the authenticated private preview. The new
+per-work model verification field controls their public visibility. Inferred
+depth and unseen surfaces need additional source views and owner review before
+confirmation. Source photographs remain the public fallback while unconfirmed.
+A single photograph cannot verify a full 360-degree reconstruction or dimensions.
+The 18 supporting works deliberately retain photography without substitute models.
+No production database, publication or Railway deployment is performed by this
+asset update.
