@@ -67,7 +67,8 @@ void main(){vec3 c=polishedStone(texture2D(map,tex).rgb,sourceP-sourceOffset,sou
         self.call('glClearColor',None,[C.c_float]*4,*self.background,0 if self.reconstruction else 1);self.call('glClear',None,[C.c_uint],0x4000|0x100)
         self.call('glDrawElements',None,[C.c_uint,C.c_int,C.c_uint,C.c_void_p],4,self.data['indices'].size,0x1405,self.data['indices'].ctypes.data)
         self.call('glFinish',None,[]);out=np.empty((self.h,self.w,4),dtype='u1');self.call('glReadPixels',None,[C.c_int]*4+[C.c_uint,C.c_uint,C.c_void_p],0,0,self.w,self.h,0x1908,0x1401,out.ctypes.data)
-        self.last_mask=out[::-1,:,3]>0
+        depth=np.empty((self.h,self.w),dtype='f4');self.call('glReadPixels',None,[C.c_int]*4+[C.c_uint,C.c_uint,C.c_void_p],0,0,self.w,self.h,0x1902,0x1406,depth.ctypes.data)
+        self.last_mask=depth[::-1]<.9999
         return Image.fromarray(out[::-1,:,:3].copy())
 
 if __name__=='__main__':
