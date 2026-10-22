@@ -36,7 +36,7 @@ try{
   await page.keyboard.press('Escape');assert(!(await dialog.isVisible()));results.push({id,webglReady:ready});
  }
  assert.equal(app.db.prepare('SELECT count(*) AS n FROM events').get().n,0,'Private review must not log visitors');
- await page.setViewportSize({width:390,height:844});await page.locator('#hos-home-chapters [data-model-stage]').first().scrollIntoViewIfNeeded();const before=await page.evaluate(()=>scrollY);await page.mouse.wheel(0,180);await page.waitForFunction(y=>scrollY>y,before);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ await page.setViewportSize({width:390,height:844});await page.locator('#hos-home-chapters [data-model-stage]').first().scrollIntoViewIfNeeded();const before=await page.evaluate(()=>scrollY);await page.mouse.move(195,600);await page.mouse.wheel(0,180);await page.waitForFunction(y=>scrollY>y,before);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  await api('publish',{revision:staged.revision});
  const publicContext=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});await publicContext.addInitScript(()=>localStorage.setItem('hos-measurement','off'));const publicPage=await publicContext.newPage();await publicPage.goto(base);await publicPage.locator('#hos-concept[data-ready="true"]').waitFor();
  assert.equal(await publicPage.locator('#hos-home-chapters [data-model-stage]').count(),0);assert.equal(await publicPage.locator('#hos-home-chapters [data-model-fallback]').count(),5);
