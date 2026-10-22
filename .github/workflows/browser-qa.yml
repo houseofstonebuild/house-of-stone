@@ -30,11 +30,11 @@ jobs:
           node-version: '24.19.0'
           package-manager-cache: false
       - run: npm install --prefix qa --no-audit --no-fund
-      - run: node qa/light-theme.mjs
-      - run: node qa/browser.mjs
-      - run: node qa/collections.mjs
-      - run: node qa/star-models.mjs
-      - run: node qa/live-fixtures.mjs
+      - run: sh scripts/run-browser-qa.sh qa/light-theme.mjs
+      - run: sh scripts/run-browser-qa.sh qa/browser.mjs
+      - run: sh scripts/run-browser-qa.sh qa/collections.mjs
+      - run: sh scripts/run-browser-qa.sh qa/star-models.mjs
+      - run: sh scripts/run-browser-qa.sh qa/live-fixtures.mjs
         if: matrix.engine == 'chromium'
       - uses: actions/upload-artifact@v5
         if: always()
