@@ -1,0 +1,30 @@
+name: Release verification
+on:
+  push:
+    branches: [release/verify-founding-collections]
+    paths: [.github/workflows/release-verification.yml]
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - name: Read the current public service
+        run: |
+          node --input-type=module <<'JS'
+          import {createHash} from 'node:crypto';
+          const origin='https://house-of-stone-production.up.railway.app';
+          const get=async path=>{const response=await fetch(origin+path,{signal:AbortSignal.timeout(20000)});if(!response.ok)throw Error(path+': HTTP '+response.status);return response;};
+          const health=await(await get('/health')).json();
+          const content=await(await get('/content.json')).json();
+          const app=await(await get('/app.js')).text();
+          console.log('HOUSE_OF_STONE_PREFLIGHT '+JSON.stringify({healthy:health.ok,works:content.works.length,artists:content.artists.length,collections:(content.collections || []).map(c=>c.name),appSha256:createHash('sha256').update(app).digest('hex')}));
+          JS
