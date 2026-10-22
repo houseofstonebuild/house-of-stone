@@ -22,7 +22,7 @@ try {
   assert(legacyHTML.includes('data-theme="light"')&&legacyHTML.includes('href="/light-theme.css"'),'The earlier comparison link remains usable');
   assert.equal(legacy.headers.get('x-robots-tag'),normal.headers.get('x-robots-tag'),'Appearance does not change indexing settings');
   const catalog=await (await fetch(origin+'/content.json')).json();
-  const routes=['/','/collection','/artists','/making','/designers','/collectors','/house','/privacy',...catalog.artists.map(a=>'/artists/'+a.slug),...catalog.works.map(w=>'/works/'+w.slug)];
+  const routes=['/','/collection','/artists','/making','/designers','/collectors','/house','/privacy',...(catalog.collections || []).map(c=>'/collections/'+c.slug),...catalog.artists.map(a=>'/artists/'+a.slug),...catalog.works.map(w=>'/works/'+w.slug)];
   browser=await engine.launch(engineName==='chromium'?{args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}:{});
   const context=await browser.newContext({reducedMotion:'reduce'});
   await context.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
@@ -45,9 +45,10 @@ try {
     await ready('/');
     await page.screenshot({path:new URL(`light-${engineName}-${viewport.width}-hero.jpg`,output).pathname,type:'jpeg',quality:90});
     await page.locator('.hos-hero-copy [data-scroll-collection]').click();assert.equal(new URL(page.url()).search,'');
-    const chapter=page.locator('#hos-home-chapters .hos-artist-chapter').first();await chapter.locator('.hos-chapter-details').scrollIntoViewIfNeeded();
+    const collectionLed=!!catalog.collections?.length;
+    const chapter=page.locator(collectionLed?'#hos-home-chapters [data-collection-section]':'#hos-home-chapters .hos-artist-chapter').first();await chapter.locator(collectionLed?'.hos-collection-copy':'.hos-chapter-details').scrollIntoViewIfNeeded();
     await page.screenshot({path:new URL(`light-${engineName}-${viewport.width}-artist.jpg`,output).pathname,type:'jpeg',quality:90});
-    await chapter.getByRole('button',{name:'View sculpture',exact:true}).click();assert.equal(new URL(page.url()).search,'');
+    await chapter.getByRole('button',{name:collectionLed?'View star sculpture':'View sculpture',exact:true}).click();assert.equal(new URL(page.url()).search,'');
     await page.reload();await page.locator('#hos-concept[data-ready="true"]').waitFor();assert.equal(await page.locator('html').getAttribute('data-theme'),'light');
     await page.locator('#hos-work-inquiry').click();assert(await page.locator('#hos-inquiry-form').isVisible());
     assert.equal(await page.locator('#hos-inquiry-form input[name="email"]').evaluate(el=>getComputedStyle(el).color),'rgb(40, 37, 31)');

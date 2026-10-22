@@ -1,6 +1,6 @@
 # Founding Collection renovation
 
-The application supports collection-led browsing while preserving the existing catalogue editor, inquiry inbox, analytics, artists, editorial pages and legacy catalogue. This branch does not deploy the renovation or modify the production database.
+The application supports collection-led browsing while preserving the existing catalogue editor, inquiry inbox, analytics, artists, editorial pages and legacy catalogue. A code release preserves the production database; importing and publishing the renovation remain authenticated content actions.
 
 ## Review and publish the content later
 
@@ -59,5 +59,16 @@ depth and unseen surfaces need additional source views and owner review before
 confirmation. Source photographs remain the public fallback while unconfirmed.
 A single photograph cannot verify a full 360-degree reconstruction or dimensions.
 The 18 supporting works deliberately retain photography without substitute models.
-No production database, publication or Railway deployment is performed by this
-asset update.
+Deploying the application does not publish the catalogue or confirm inferred
+models. Use the authenticated editor for those content actions.
+
+## Release verification
+
+`qa/live.mjs` discovers routes from the actual published catalogue and checks
+only eligible models. It supports the existing five-work catalogue, the 23-work
+catalogue with photographic fallbacks, and individually confirmed star models.
+It checks static release hashes (including textures), navigation, mobile
+headers, inquiry context, Sold alternatives, model controls and fallbacks.
+API writes are blocked during verification. `qa/live-fixtures.mjs` exercises
+all three states in a temporary database and verifies zero inquiries/events.
+The live theme review also supports category-led pages.

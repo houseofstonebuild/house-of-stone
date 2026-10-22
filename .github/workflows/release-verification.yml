@@ -5,26 +5,64 @@ on:
     paths: [.github/workflows/release-verification.yml]
 permissions:
   contents: read
+  actions: read
 jobs:
-  preflight:
+  wait-for-main:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 32
+    steps:
+      - name: Wait for the main release checks
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const expected='554fe5c4d099784b26969acda77a168293fd20fe';
+            const required=['Website checks','Browser QA'];
+            const deadline=Date.now()+30*60*1000;
+            while(Date.now()<deadline){
+              const response=await github.rest.actions.listWorkflowRunsForRepo({...context.repo,branch:'main',event:'push',per_page:30});
+              const runs=response.data.workflow_runs.filter(run=>run.head_sha===expected && required.includes(run.name));
+              for(const run of runs)if(run.status==='completed' && run.conclusion!=='success')throw new Error(run.name+' failed for the main release: '+run.conclusion);
+              if(required.every(name=>runs.some(run=>run.name===name && run.conclusion==='success'))){core.info('Main release checks passed: '+expected);return;}
+              core.info('Waiting for main: '+runs.map(run=>run.name+' '+run.status).join(', '));
+              await new Promise(resolve=>setTimeout(resolve,20000));
+            }
+            throw new Error('Main release checks did not finish within 30 minutes');
+  live:
+    needs: wait-for-main
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: 554fe5c4d099784b26969acda77a168293fd20fe
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: '24.19.0'
           package-manager-cache: false
-      - name: Read the current public service
+      - run: npm install --prefix qa --no-audit --no-fund
+      - run: npx --prefix qa playwright install --with-deps chromium
+      - name: Verify the deployed release without writes
+        run: node qa/live.mjs
+        env:
+          HOS_LIVE_ATTEMPTS: '48'
+      - run: node qa/light-theme.mjs
+        env:
+          HOS_LIGHT_PREVIEW_URL: https://house-of-stone-production.up.railway.app
+      - name: Confirm the editor is protected and report published content
         run: |
           node --input-type=module <<'JS'
-          import {createHash} from 'node:crypto';
-          const origin='https://house-of-stone-production.up.railway.app';
-          const get=async path=>{const response=await fetch(origin+path,{signal:AbortSignal.timeout(20000)});if(!response.ok)throw Error(path+': HTTP '+response.status);return response;};
-          const health=await(await get('/health')).json();
-          const content=await(await get('/content.json')).json();
-          const app=await(await get('/app.js')).text();
-          console.log('HOUSE_OF_STONE_PREFLIGHT '+JSON.stringify({healthy:health.ok,works:content.works.length,artists:content.artists.length,collections:(content.collections || []).map(c=>c.name),appSha256:createHash('sha256').update(app).digest('hex')}));
+          const base='https://house-of-stone-production.up.railway.app';
+          const editor=await fetch(base+'/admin/content');
+          if(editor.status!==401 || !editor.headers.get('www-authenticate'))throw Error('Editor authentication check failed');
+          const response=await fetch(base+'/content.json');const content=await response.json();
+          console.log('PUBLISHED_CATALOGUE '+JSON.stringify({works:content.works.length,collections:(content.collections || []).map(c=>c.name),editorStatus:editor.status,editorURL:editor.url}));
           JS
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: live-collection-release
+          path: |
+            test-results/live/
+            test-results/browser/light-*
+          retention-days: 7
