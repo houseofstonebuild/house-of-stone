@@ -376,10 +376,8 @@ export function createApp(options = {}) {
       const pagePath = preview ? path.slice('/admin/preview'.length) || '/' : path;
       const meta = pageMeta(pagePath, preview ? publicCatalog(collectionState().draft) : catalog);
       if (meta) {
-        const lightTheme = url.searchParams.get('theme') === 'light';
-        const replacements = { TITLE: meta.title, DESCRIPTION: meta.description, URL: origin(req) + path, IMAGE: origin(req) + meta.image, ROBOTS: indexing && !preview && !lightTheme ? 'index,follow' : 'noindex,nofollow' };
-        let html = template.replace(/\{\{(TITLE|DESCRIPTION|URL|IMAGE|ROBOTS)\}\}/g, (_, key) => esc(replacements[key]));
-        if (lightTheme) html = html.replace('<html lang="en">','<html lang="en" data-theme="light">').replace('<meta name="theme-color" content="#080808">','<meta name="theme-color" content="#f6f4ef">').replace('<link rel="stylesheet" href="/styles.css">','<link rel="stylesheet" href="/styles.css">\n  <link rel="stylesheet" href="/light-theme.css">');
+        const replacements = { TITLE: meta.title, DESCRIPTION: meta.description, URL: origin(req) + path, IMAGE: origin(req) + meta.image, ROBOTS: indexing && !preview ? 'index,follow' : 'noindex,nofollow' };
+        const html = template.replace(/\{\{(TITLE|DESCRIPTION|URL|IMAGE|ROBOTS)\}\}/g, (_, key) => esc(replacements[key]));
         res.setHeader('X-Robots-Tag', replacements.ROBOTS);
         return send(res, 200, req.method === 'HEAD' ? '' : html, 'text/html; charset=utf-8');
       }
@@ -423,4 +421,5 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   server.listen(port, process.env.HOST || '127.0.0.1', () => console.log(`House of Stone running on port ${port}. Private inbox: /admin (username admin).`));
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(() => process.exit(0)));
 }
+
 

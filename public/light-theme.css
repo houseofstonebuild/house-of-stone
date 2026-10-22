@@ -1,4 +1,4 @@
-/* Optional gallery palette. The regular website retains its dark theme. */
+/* Approved ivory gallery palette, applied to every public page. */
 :root[data-theme="light"] {color-scheme:light;background:#f6f4ef;}
 :root[data-theme="light"] body {background:#f6f4ef;}
 :root[data-theme="light"] #hos-concept {--hos-bg:#f6f4ef;--hos-fg:#28251f;--hos-muted:#625d54;--hos-line:rgba(50,42,31,.17);}
@@ -48,3 +48,4 @@
 :root[data-theme="light"] #hos-concept .hos-footer nav button:hover {color:var(--hos-fg);}
 :root[data-theme="light"] #hos-concept .hos-carousel-controls button:disabled,
 :root[data-theme="light"] #hos-concept .hos-model-controls button:disabled {color:#756e63;}
+

@@ -77,7 +77,7 @@ for(const [engineName,engine] of engines) {
             assert.equal(await page.locator('#hos-home-chapters .hos-setting-tile .hos-text-link').count(),0);
             if(width<=700)assert((await page.locator('#hos-home-chapters .hos-artist-campaign').first().boundingBox()).height>=Math.min(390,width),'Mobile artist campaign should have a large crop');
             assert.equal(await page.locator('.hos-hero-copy h1 span').last().evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');
-            assert.equal(await page.locator('#hos-home-collection-title').evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');
+            assert.equal(await page.locator('#hos-home-collection-title').evaluate(el=>getComputedStyle(el).color),'rgb(40, 37, 31)');
             assert(await page.locator('#hos-page-navigation').isHidden(),'Home should not show Back');
           }
           if(path.startsWith('/artists/')) {
@@ -401,3 +401,4 @@ for(const [engineName,engine] of engines) {
 writeFileSync(new URL('report.json',output),JSON.stringify(report,null,2));
 assert.equal(report.errors.length,0,report.errors.join('\n'));
 console.log(`Browser QA passed: ${routes.length*sizes.length*engines.length} route/viewport checks, ${engines.length} engine(s), real inquiries, navigation, motion, measurement, 3D and owner editing.`);
+
