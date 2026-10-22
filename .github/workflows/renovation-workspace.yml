@@ -1,0 +1,56 @@
+name: Prepare collection renovation workspace
+on:
+  push:
+    branches: [renovation/founding-collections]
+    paths: [.github/workflows/renovation-workspace.yml]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: 3e8f874366f9cf34409da4d5cb9a09f5d10d0ff6
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - run: npm install --prefix qa --no-audit --no-fund
+      - run: npx --prefix qa playwright install --with-deps chromium
+      - name: Package tracked project files and public source document
+        run: |
+          mkdir -p /tmp/hos-renovation-source
+          git archive --format=tar --output=/tmp/hos-renovation-source/repository.tar HEAD
+          python3 - <<'PY'
+          import json,urllib.request,zipfile,pathlib
+          out=pathlib.Path('/tmp/hos-renovation-source')
+          report={}
+          url='https://docs.google.com/document/d/1aAfyoVA-cpcTvSOy0XYS-SejzkVuHAi-PQVCwDaHPgY/export?format=pdf'
+          try:
+              with urllib.request.urlopen(url,timeout=40) as response:
+                  content=response.read()
+                  if not content.startswith(b'%PDF'): raise ValueError('The source did not return a public PDF')
+                  out.joinpath('zsa-original.pdf').write_bytes(content)
+                  report['sourcePdfBytes']=len(content)
+          except Exception as error: report['sourceDocumentError']=str(error)
+          out.joinpath('source-access.json').write_text(json.dumps(report,indent=2))
+          with zipfile.ZipFile(out/'workspace.zip','w',zipfile.ZIP_DEFLATED,compresslevel=3) as archive:
+              archive.write(out/'repository.tar','repository.tar')
+              for path in pathlib.Path('qa/node_modules').rglob('*'):
+                  if path.is_file(): archive.write(path,str(path))
+              for root in pathlib.Path.home().joinpath('.cache/ms-playwright').glob('chromium_headless_shell-*'):
+                  for path in root.rglob('*'):
+                      if path.is_file(): archive.write(path,'browser-runtime/'+str(path.relative_to(root.parent)))
+              for name in ['source-access.json','zsa-original.pdf']:
+                  path=out/name
+                  if path.exists(): archive.write(path,name)
+          print(json.dumps(report))
+          PY
+      - uses: actions/upload-artifact@v5
+        with:
+          name: renovation-workspace
+          path: /tmp/hos-renovation-source/workspace.zip
+          retention-days: 3
