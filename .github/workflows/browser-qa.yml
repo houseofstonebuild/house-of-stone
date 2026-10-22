@@ -5,10 +5,16 @@ on:
   pull_request:
 permissions:
   contents: read
+concurrency:
+  group: browser-qa-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   browsers:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
     strategy:
       fail-fast: false
       matrix:
@@ -24,7 +30,6 @@ jobs:
           node-version: '24.19.0'
           package-manager-cache: false
       - run: npm install --prefix qa --no-audit --no-fund
-      - run: npx --prefix qa playwright install --with-deps ${{ matrix.engine }}
       - run: node qa/light-theme.mjs
       - run: node qa/browser.mjs
       - run: node qa/collections.mjs
