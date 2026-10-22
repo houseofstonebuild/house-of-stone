@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: 554fe5c4d099784b26969acda77a168293fd20fe
+          ref: 5a53cb8fe1546b01915943d8d1926ee6a1524ac4
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
@@ -27,7 +27,7 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
-            const expected='554fe5c4d099784b26969acda77a168293fd20fe';
+            const expected='5a53cb8fe1546b01915943d8d1926ee6a1524ac4';
             const required=['Website checks','Browser QA'];
             const deadline=Date.now()+30*60*1000;
             while(Date.now()<deadline){
