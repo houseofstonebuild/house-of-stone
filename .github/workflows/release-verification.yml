@@ -7,10 +7,22 @@ permissions:
   contents: read
   actions: read
 jobs:
-  wait-for-main:
+  live:
     runs-on: ubuntu-latest
-    timeout-minutes: 32
+    timeout-minutes: 42
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
     steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: 554fe5c4d099784b26969acda77a168293fd20fe
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - run: npm install --prefix qa --no-audit --no-fund
       - name: Wait for the main release checks
         uses: actions/github-script@v8
         with:
@@ -27,25 +39,8 @@ jobs:
               await new Promise(resolve=>setTimeout(resolve,20000));
             }
             throw new Error('Main release checks did not finish within 30 minutes');
-  live:
-    needs: wait-for-main
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: 554fe5c4d099784b26969acda77a168293fd20fe
-          persist-credentials: false
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '24.19.0'
-          package-manager-cache: false
-      - run: npm install --prefix qa --no-audit --no-fund
-      - run: npx --prefix qa playwright install --with-deps chromium
       - name: Verify the deployed release without writes
         run: node qa/live.mjs
-        env:
-          HOS_LIVE_ATTEMPTS: '48'
       - run: node qa/light-theme.mjs
         env:
           HOS_LIGHT_PREVIEW_URL: https://house-of-stone-production.up.railway.app
