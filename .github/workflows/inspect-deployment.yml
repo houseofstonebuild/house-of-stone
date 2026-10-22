@@ -1,0 +1,24 @@
+name: Inspect public website deployment
+on:
+  push:
+    branches: [diagnostics/default-light-20261022]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Read public deployment state
+        run: |
+          node --input-type=module <<'JS'
+          import {createHash} from 'node:crypto';
+          const origin='https://house-of-stone-production.up.railway.app';
+          for(const path of ['/health','/','/app.js','/light-theme.css']) {
+            try {
+              const response=await fetch(origin+path+'?release=7669dcf3bb23bf7b3507815789646ad7e6982c36',{cache:'no-store',signal:AbortSignal.timeout(15000)});
+              const body=await response.text();
+              console.log(JSON.stringify({path,status:response.status,theme:path==='/'?(body.match(/<html[^>]*>/)?.[0]||'No HTML document'):undefined,lightStylesheet:path==='/'?body.includes('href="/light-theme.css"'):undefined,oldQuerySelector:path==='/app.js'?body.includes("const lightTheme = search.get('theme')"):undefined,sha256:createHash('sha256').update(body).digest('hex'),health:path==='/health'?body.slice(0,120):undefined}));
+            } catch(error) {console.log(JSON.stringify({path,error:error.message}));}
+          }
+          JS
