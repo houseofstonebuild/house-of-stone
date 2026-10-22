@@ -523,8 +523,9 @@ async function start() {
   watchModels(root);
   if (previewMode) {
     document.body.classList.add('hos-preview');
-    const banner = el('div','hos-preview-bar'); banner.append(el('span','','Draft preview · Titles, artist assignments and specifications await confirmation. Inquiries and measurement are paused.'));
+    const banner = el('div','hos-preview-bar'); banner.append(el('span','','Draft preview · Working information awaits confirmation.'));
     const back = el('a','','Return to editor'); back.href = '/admin/content'; banner.append(back); document.body.prepend(banner);
+    const sizeBanner=()=>{if(banner.getBoundingClientRect)document.body.style.setProperty('--hos-preview-height',Math.ceil(banner.getBoundingClientRect().height)+'px');};sizeBanner();if('ResizeObserver' in window)new window.ResizeObserver(sizeBanner).observe(banner);
     root.querySelectorAll('[data-inquiry]').forEach(button=>{ button.disabled=true; });
   }
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
