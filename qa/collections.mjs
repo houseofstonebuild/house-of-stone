@@ -68,5 +68,18 @@ try {
  await page.locator('#hos-work-inquiry').click();await page.locator('[name="name"]').fill('Alternatives QA');await page.locator('[name="email"]').fill('alternative@example.test');await page.getByRole('button',{name:'Review inquiry',exact:true}).click();await page.locator('#hos-inquiry-send').click();await page.locator('#hos-inquiry-success').waitFor({state:'visible'});assert.match(app.db.prepare('SELECT topic FROM inquiries WHERE work_id=?').get('zsa-013').topic,/^Alternatives to /);
  await context.close();
  const tracking=await browser.newContext();page=await tracking.newPage();await page.goto(base+'/collections/elemental');await page.locator('#hos-concept[data-ready="true"]').waitFor();await page.locator('#hos-category-content [data-work="zsa-028"]').click();await page.waitForURL('**/works/zsa-page-28');await page.waitForTimeout(100);assert(app.db.prepare("SELECT count(*) AS n FROM events WHERE page='category' AND name='page_view'").get().n>0);assert(app.db.prepare("SELECT count(*) AS n FROM events WHERE work_id='zsa-028' AND name='work_view'").get().n>0);
+ // A correctly matched legacy fixture verifies viewer lifecycle on a newly rendered
+ // collection route. It is local QA data, never a substitute for a source sculpture.
+ const liveState=await api('content');let restored=await api('restore',{revision:liveState.revision,version:0});
+ restored.draft.collections ||= [];restored.draft.collections.push({id:'viewer-fixture',slug:'viewer-fixture',name:'Viewer fixture',description:'Local QA only',introduction:'',starWorkId:'folded-light',workIds:['folded-light'],archived:false});
+ restored=await api('content',{revision:restored.revision,catalog:restored.draft});await api('publish',{revision:restored.revision});
+ const viewerContext=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});await viewerContext.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
+ const viewerPage=await viewerContext.newPage();viewerPage.on('pageerror',error=>errors.push(error.message));
+ await viewerPage.goto(base+'/');await viewerPage.locator('#hos-concept[data-ready="true"]').waitFor();await viewerPage.locator('#hos-home-chapters [data-model-stage]').scrollIntoViewIfNeeded();
+ await viewerPage.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-home-chapters [data-model-stage]').dataset.modelState));
+ await viewerPage.locator('#hos-home-chapters [data-collection="viewer-fixture"]').click();await viewerPage.waitForURL('**/collections/viewer-fixture');
+ await viewerPage.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-category-content [data-model-stage]').dataset.modelState));
+ await viewerPage.locator('#hos-category-content [data-model="folded-light"]').click();await viewerPage.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-model-stage').dataset.modelState));
+ assert(await viewerPage.locator('#hos-model-dialog').isVisible());await viewerPage.keyboard.press('Escape');assert(await viewerPage.locator('#hos-model-dialog').isHidden());await viewerContext.close();
  assert.deepEqual(errors,[]);assert.deepEqual(failedResponses,[]);writeFileSync(new URL(`collections-${engineName}-report.json`,out),JSON.stringify({engine:engineName,routes:routes.length,sizes:6,checks:checked,errors,inquiries:2,matchingStarModels:0,photoFallbacks:5},null,2));console.log(`Collection QA passed: ${checked} route/viewport checks, private draft, filters, links, sold alternatives, inquiries and session logging (${engineName}).`);
 } finally {await browser?.close();await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});}

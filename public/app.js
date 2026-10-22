@@ -141,6 +141,7 @@ function collectionChapter(collection, {heading = true} = {}) {
   if(heading)actions.append(link(work.availability==='sold'?'Explore available works':'Explore the collection',{collection:collection.id}));
   else if(work.availability==='sold')actions.append(link('Explore available works',{scrollSupporting:collection.id}));
   actions.append(link('View star sculpture',{work:work.id}));
+  const inquire=link(work.availability==='sold'?'Inquire about related works':'Inquire about this work',{inquiry:work.availability==='sold'?`Alternatives to ${workLabel(work)}`:workLabel(work),inquiryWork:work.id,inquiryArtist:artistFor(work)?.id || '',inquiryIntent:work.availability==='sold'?'alternatives':''});inquire.disabled=previewMode;actions.append(inquire);
   copy.append(actions);feature.append(visual,copy);section.append(introduction,feature);return section;
 }
 function filteredWorks(container, selected, label = 'Browse works') {
@@ -320,6 +321,7 @@ function renderWork(work) {
   $('#hos-work-description').textContent = work.description || '';
   const button = $('#hos-work-inquiry'),sold=work.availability==='sold';
   button.textContent=sold?'Inquire about related works':'Inquire about this work';
+  const arrow=el('span','hos-link-arrow');arrow.setAttribute('aria-hidden','true');arrow.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" focusable="false"><path d="M6 18 18 6M6 6h12v12"/></svg>';button.append(arrow);
   button.dataset.inquiry = sold?`Alternatives to ${workLabel(work)}`:workLabel(work);button.dataset.inquiryWork = work.id;button.dataset.inquiryArtist=activeArtist?.id || '';button.dataset.inquiryIntent=sold?'alternatives':'';
   const img = $('#hos-work-image'); applyImage(img, assets[work.image]); img.alt = work.description || workLabel(work);
   const context=$('#hos-work-context');context.replaceChildren();const badge=availabilityLabel(work);if(badge)context.append(badge);
@@ -366,7 +368,7 @@ function route(path, shouldFocus = true) {
     pageAnimation = animateSurface($(`[data-page="${page}"]`));
   }
   observeReveals($(`[data-page="${page}"]`));
-  const details = page === 'work' ? { workId:activeWork.id, artistId:activeArtist?.id || '' } : page === 'artist' ? { artistId:activeArtist.id } : {};
+  const details = page === 'category' ? {workId:item.starWorkId,artistId:artistFor(works.find(work=>work.id===item.starWorkId))?.id || ''} : page === 'work' ? { workId:activeWork.id, artistId:activeArtist?.id || '' } : page === 'artist' ? { artistId:activeArtist.id } : {};
   track('page_view', details);
   if (page === 'work') track('work_view', details);
   if (page === 'artist') track('artist_view', details);
@@ -381,7 +383,8 @@ function navigate(path) {
 }
 function navigateBack() {
   if (history.state?.hosNavigation?.previous && history.back) { history.back(); return; }
-  navigate(activePage === 'work' ? '/collection' : activePage === 'artist' ? '/artists' : '/');
+  const collection=activePage === 'work' ? collectionFor(activeWork) : null;
+  navigate(collection ? '/collections/'+collection.slug : activePage === 'work' || activePage === 'category' ? '/collection' : activePage === 'artist' ? '/artists' : '/');
 }
 function openInquiry(topic, trigger) {
   if (previewMode) return;
