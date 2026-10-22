@@ -1,0 +1,22 @@
+name: Hosting deployment state
+on:
+  push:
+    branches: [release/verify-founding-collections]
+    paths: [.github/workflows/deployment-state.yml]
+permissions:
+  contents: read
+  deployments: read
+jobs:
+  state:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/github-script@v8
+        with:
+          script: |
+            const deployments=(await github.rest.repos.listDeployments({...context.repo,per_page:5})).data;
+            for(const deployment of deployments){
+              const latest=(await github.rest.repos.listDeploymentStatuses({...context.repo,deployment_id:deployment.id,per_page:1})).data[0];
+              let url='';try{const value=new URL(latest?.environment_url || '');url=value.origin+value.pathname;}catch{}
+              core.info('DEPLOYMENT_STATE '+JSON.stringify({id:deployment.id,sha:deployment.sha,environment:deployment.environment,state:latest?.state,description:latest?.description,url}));
+            }
