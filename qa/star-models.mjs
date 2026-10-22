@@ -16,7 +16,9 @@ try{
  const staged=await api('prepare-founding-collection',{revision:0});assert.equal(staged.revision,1);
  browser=await engine.launch(name==='chromium'?{args:['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader']}:name==='firefox'?{firefoxUserPrefs:{'webgl.force-enabled':true}}:{});
  const context=await browser.newContext({httpCredentials:{username:'admin',password},viewport:{width:1440,height:1000},reducedMotion:'reduce'}),page=await context.newPage();
- page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.url().startsWith(base)&&r.status()>=400)failed.push([r.status(),r.url()]);});page.on('request',r=>requests.push(r.url()));
+ // Firefox exposes the normal HTTP Basic challenge before retrying with credentials.
+ // Private DOM/content assertions below still require authentication to succeed.
+ page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{const authChallenge=r.status()===401 && /^Basic /i.test(r.headers()['www-authenticate'] || '');if(r.url().startsWith(base)&&r.status()>=400&&!authChallenge)failed.push([r.status(),r.url()]);});page.on('request',r=>requests.push(r.url()));
  await page.goto(base+'/admin/preview');await page.locator('#hos-concept[data-ready="true"]').waitFor();
  assert.equal(requests.filter(url=>url.endsWith('.glb')).length,0,'3D must load only near its section');
  for(const id of ids){
