@@ -19,13 +19,16 @@ if __name__=='__main__':
     audit=json.loads((ROOT/'content/star-model-audit.json').read_text())
     for id,ref in REFS.items():
         data=dict(np.load(REVIEW/(id+'.npz')));renderer.load(data,ROOT/f'public/models/textures/{id}-surface.jpg',[1536,0,512,2048],ref['polish'])
-        views=[renderer.render(angle) for angle in [0,35,90,180,270]]
+        views=[]
+        for angle in [0,35,90,180,270]:
+            views.append(renderer.render(angle))
+            if angle==0:actual=renderer.last_mask.copy()
         mask=mask_for(ref);yy,xx=np.where(mask);bbox=(xx.min(),yy.min(),xx.max()+1,yy.max()+1)
         height=round(640*3.05/3.56);width=round(height*(bbox[2]-bbox[0])/(bbox[3]-bbox[1]));size=(width,height)
         source=Image.open(ROOT/f"public/assets/zsa-page-{ref['page']:02}.jpg").crop(tuple(v*2 for v in bbox)).resize(size,Image.Resampling.LANCZOS)
         panel=Image.new('RGB',(480,640),(246,244,239));offset=((480-width)//2,(640-height)//2);panel.paste(source,offset)
         target=Image.new('L',(480,640));target.paste(Image.fromarray(mask.astype('u1')*255).crop(bbox).resize(size,Image.Resampling.NEAREST),offset)
-        actual=np.max(np.abs(np.asarray(views[0],dtype=int)-np.array([246,244,239])),axis=2)>16;expected=np.asarray(target)>127
+        expected=np.asarray(target)>127
         iou=float(np.sum(actual&expected)/np.sum(actual|expected));audit[id]['tracedFrontSilhouetteIoU']=round(iou,5)
         assert iou>.955,(id,iou,'Compare the rendered contour with the source trace')
         board=Image.new('RGB',(2880,700),(246,244,239));draw=ImageDraw.Draw(board)
