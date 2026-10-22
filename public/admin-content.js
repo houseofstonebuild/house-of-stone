@@ -37,7 +37,7 @@ async function operation(action) {
   catch (error) { message(error.message,true); }
   finally { lock(false); }
 }
-function selected() { return selection.kind === 'site' ? draft.site : draft[selection.kind === 'artist'?'artists':'works'].find(item=>item.id===selection.id); }
+function selected() { return selection.kind === 'site' ? draft.site : draft[selection.kind === 'artist'?'artists':selection.kind === 'collection'?'collections':'works'].find(item=>item.id===selection.id); }
 function field(parent, record, key, label, {wide=false, multiline=false, options, required=false, max=200} = {}) {
   const wrapper = element('label',label,wide?'wide':'');
   const input = element(options?'select':multiline?'textarea':'input'); input.id = 'field-' + key; input.name = key;
@@ -85,14 +85,14 @@ function reorder(kind,id,direction) {
   [items[index],items[target]]=[items[target],items[index]]; edited(); renderLists();
 }
 function renderLists() {
-  for (const [kind,target] of [['works','#work-list'],['artists','#artist-list']]) {
+  for (const [kind,target] of [['collections','#collection-list'],['works','#work-list'],['artists','#artist-list']]) {
     const list=$(target); list.replaceChildren();
-    for (const item of draft[kind]) {
+    for (const item of draft[kind] || []) {
       const row=element('div',undefined,'record'), button=element('button'); button.type='button';
       if (selection.id===item.id) button.setAttribute('aria-current','true');
       const url=draft.assets[item.image||item.portrait]; if(url) {const image=element('img'); image.src=url;image.alt='';button.append(image);}
       const label=element('span',item.title||item.name); if(item.archived)label.append(element('small','Archived')); button.append(label);
-      button.addEventListener('click',()=>{selection={kind:kind==='works'?'work':'artist',id:item.id};render();}); row.append(button);
+      button.addEventListener('click',()=>{selection={kind:kind==='works'?'work':kind==='collections'?'collection':'artist',id:item.id};render();}); row.append(button);
       for (const [direction,text] of [[-1,'↑'],[1,'↓']]) {const order=element('button',text,'order');order.type='button';order.setAttribute('aria-label',`Move ${item.title||item.name} ${direction<0?'earlier':'later'}`);order.addEventListener('click',()=>reorder(kind,item.id,direction));row.append(order);}
       list.append(row);
     }
@@ -111,6 +111,31 @@ function render() {
     field(grid,record,'acquisitionMethod','How the artist acquired the stone',{wide:true,multiline:true,max:1000});
     field(grid,record,'description','About the sculpture',{wide:true,multiline:true,max:3000});
     photo(record,'image','Sculpture photo'); archive(record,'Archive this sculpture · hide it from the website');
+    if(record.sourcePage) {
+      fields.append(element('p',`Original ZSA page ${record.sourcePage}. ${record.sourceCrop ? 'Source photograph is cropped at the '+record.sourceCrop+'. ' : ''}Working information below stays private until each field is confirmed.`, 'note'));
+      field(grid,record,'availability','Availability',{options:[{value:'unknown',label:'Not yet confirmed'},{value:'available',label:'Available · confirmation required'},{value:'reserved',label:'Reserved · confirmation required'},{value:'sold',label:'Sold'}]});
+      field(grid,record,'colour','Colour visible in the source photo',{max:80});
+      field(grid,record,'size','Size category',{options:[{value:'',label:'Not recorded'},{value:'Small',label:'Small'},{value:'Medium',label:'Medium'},{value:'Large',label:'Large'}]});
+      record.details ||= {};record.verification ||= {};
+      for(const [key,label] of [['finish','Finish'],['signature','Signature information'],['weightKg','Weight in kilograms'],['base','Base details · state whether included'],['location','Current location'],['delivery','Delivery estimate'],['shipping','Shipping information'],['installation','Installation'],['care','Care'],['authenticity','Authenticity'],['provenance','Documented provenance']])field(grid,record.details,key,label,{wide:true,multiline:key!=='weightKg',max:2000});
+      const additional={photos:(record.additionalImages || []).join('\n')};field(grid,additional,'photos','Additional photo asset keys · one per line',{wide:true,multiline:true,max:3000});
+      grid.querySelector('#field-photos').addEventListener('input',event=>{record.additionalImages=event.target.value.split(/\s+/).filter(Boolean);});
+      field(grid,record,'internalNotes','Private content and asset notes',{wide:true,multiline:true,max:5000});
+      const checks=element('div',undefined,'wide');checks.append(element('h3','Confirmed information · show on the public site'));
+      for(const key of ['title','artist','material','dimensions','yearMade','description','size','finish','signature','weight','base','location','delivery','shipping','installation','care','authenticity','provenance','acquisitionMethod','availability']) {
+        const wrapper=element('label',undefined,'checkbox'),input=element('input');input.type='checkbox';input.checked=record.verification[key]===true;
+        input.addEventListener('change',()=>{record.verification[key]=input.checked;edited();});wrapper.append(input,element('span',key));checks.append(wrapper);
+      }
+      fields.append(checks,element('p',`3D asset: ${record.modelStatus}. Only attach a model after matching it to this source photograph.`, 'note'));
+    }
+  } else if(selection.kind==='collection') {
+    field(grid,record,'name','Collection name',{required:true,max:120});field(grid,record,'slug','Page address',{required:true,max:100});
+    field(grid,record,'description','Short description',{wide:true,multiline:true,max:400});field(grid,record,'introduction','Introduction',{wide:true,multiline:true,max:2000});
+    const ordering={members:record.workIds.join('\n')};field(grid,ordering,'members','Sculpture IDs in display order · star first · one per line',{wide:true,multiline:true,max:20000});
+    grid.querySelector('#field-members').addEventListener('input',event=>{record.workIds=event.target.value.split(/\s+/).filter(Boolean);});
+    field(grid,record,'starWorkId','Star sculpture',{options:draft.works.filter(w=>!w.archived).map(w=>({value:w.id,label:w.title+' · '+w.id}))});
+    grid.querySelector('#field-starWorkId').addEventListener('change',()=>{record.workIds=[record.starWorkId,...record.workIds.filter(id=>id!==record.starWorkId)];edited();render();});
+    fields.append(element('p','Move collections with the arrows in the sidebar. Each sculpture belongs to one primary collection. Source page 13 stays Sold.','note'));
   } else if(selection.kind==='artist') {
     field(grid,record,'name','Artist name',{required:true,max:120});field(grid,record,'slug','Page address',{max:100});
     field(grid,record,'style','Style',{max:120});
@@ -132,6 +157,7 @@ function renderHistory() {
     }));row.append(button);container.append(row);
   }
 }
+$('#prepare-founding').addEventListener('click',()=>operation(async()=>{await save();accept(await api('prepare-founding-collection',{revision:state.revision}));selection={kind:'collection',id:draft.collections[0].id};message('The 23-work renovation is in your private draft. Existing records are retained. Preview before publishing.');}));
 $('#editor').addEventListener('submit',event=>event.preventDefault());
 $('#save').addEventListener('click',()=>operation(async()=>{await save();message('Draft saved.');}));
 $('#publish').addEventListener('click',()=>operation(async()=>{await save();accept(await api('publish',{revision:state.revision}));message('Collection published. The website will show this version on the next page load.');}));
@@ -158,4 +184,4 @@ $('#download').addEventListener('click',()=>{
 });
 $('#reload').addEventListener('click',()=>operation(async()=>{accept(await api('content'));message('Latest collection loaded.');}));
 window.addEventListener('beforeunload',event=>{if(dirty||busy){event.preventDefault();event.returnValue='';}});
-api('content').then(result=>{accept(result);selection.id=draft.works[0]?.id||'';render();lock(false);}).catch(error=>message(error.message,true));
+api('content').then(result=>{accept(result);selection.id=draft.works.find(work=>!work.archived)?.id||draft.works[0]?.id||'';render();lock(false);}).catch(error=>message(error.message,true));

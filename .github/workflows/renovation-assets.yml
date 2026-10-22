@@ -1,0 +1,52 @@
+name: Import approved source photographs
+on:
+  push:
+    branches: [renovation/founding-collections]
+    paths: [.github/workflows/renovation-assets.yml]
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install PyMuPDF==1.26.6 Pillow==12.3.0
+      - name: Fetch the publicly shared original document
+        run: |
+          python - <<'PY'
+          import urllib.request
+          url='https://docs.google.com/document/d/1aAfyoVA-cpcTvSOy0XYS-SejzkVuHAi-PQVCwDaHPgY/export?format=pdf'
+          with urllib.request.urlopen(url,timeout=45) as response:
+              data=response.read()
+              if not data.startswith(b'%PDF'): raise ValueError('The source did not return a public PDF')
+              open('/tmp/zsa-original.pdf','wb').write(data)
+          PY
+      - run: python scripts/import-source-photographs.py /tmp/zsa-original.pdf
+      - name: Commit matched photographs only to the renovation branch
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs=require('fs');
+            const branch='renovation/founding-collections';
+            if(context.ref!==`refs/heads/${branch}`)throw new Error('Unexpected target branch');
+            const params={owner:context.repo.owner,repo:context.repo.repo};
+            const ref=(await github.rest.git.getRef({...params,ref:`heads/${branch}`})).data;
+            if(ref.object.sha!==context.sha)throw new Error('The branch changed; no assets were committed');
+            const base=(await github.rest.git.getCommit({...params,commit_sha:context.sha})).data;
+            const paths=fs.readdirSync('public/assets').filter(name=>/^zsa-page-\d{2}(?:-\d+)?\.(?:jpg|webp)$/.test(name)).map(name=>'public/assets/'+name);
+            paths.push('public/media-manifest.json');
+            const tree=[];
+            for(const path of paths){
+              const blob=(await github.rest.git.createBlob({...params,content:fs.readFileSync(path).toString('base64'),encoding:'base64'})).data;
+              tree.push({path,mode:'100644',type:'blob',sha:blob.sha});
+            }
+            const nextTree=(await github.rest.git.createTree({...params,base_tree:base.tree.sha,tree})).data;
+            const commit=(await github.rest.git.createCommit({...params,message:'Import 23 matched source photographs and responsive variants',tree:nextTree.sha,parents:[context.sha]})).data;
+            await github.rest.git.updateRef({...params,ref:`heads/${branch}`,sha:commit.sha,force:false});
+            core.info(`Imported ${paths.length-1} image files on ${branch}: ${commit.sha}`);

@@ -27,6 +27,7 @@ jobs:
       - run: npx --prefix qa playwright install --with-deps ${{ matrix.engine }}
       - run: node qa/light-theme.mjs
       - run: node qa/browser.mjs
+      - run: node qa/collections.mjs
       - uses: actions/upload-artifact@v5
         if: always()
         with:

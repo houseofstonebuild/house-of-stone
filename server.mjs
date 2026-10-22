@@ -6,12 +6,13 @@ import { fileURLToPath } from 'node:url';
 import { randomUUID, createHmac, createHash, timingSafeEqual } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 import { validateCatalog, homepageImage, publicCatalog } from './catalog.mjs';
+import { prepareFoundingCollection } from './founding-collection.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = resolve(ROOT, 'public');
 const INTERESTS = ['Collecting a work', 'Sourcing for a project', 'Following the launch', 'Learning about the artists'];
 const EVENTS = new Set(['page_view', 'explore_click', 'artist_view', 'work_view', 'inquiry_opened', 'inquiry_started', 'model_view', 'model_interaction']);
-const PAGES = new Set(['home', 'collection', 'artists', 'artist', 'work', 'making', 'designers', 'collectors', 'house', 'privacy']);
+const PAGES = new Set(['home', 'collection', 'category', 'artists', 'artist', 'work', 'making', 'designers', 'collectors', 'house', 'privacy']);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const esc = text => String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sha = value => createHash('sha256').update(value).digest();
@@ -177,7 +178,9 @@ export function createApp(options = {}) {
     const work = workMap.get(input.workId), artist = artistMap.get(input.artistId);
     if (input.workId && !work || input.artistId && !artist) throw new HttpError(400, 'This work is no longer listed. Please begin a general inquiry.');
     const allowedTopics = new Set(['General interest', 'Collection interest', 'Designer project', 'About the house']);
-    const topic = work ? `${work.title} by ${artistMap.get(work.artistId).name}` : artist ? `Work by ${artist.name}` : allowedTopics.has(input.topic) ? input.topic : 'General interest';
+    if (work?.availability === 'sold' && input.intent !== 'alternatives') throw new HttpError(400, 'This sculpture is sold. Please inquire about related works instead.');
+    const workTopic = work ? `${work.title}${artistMap.get(work.artistId) ? ' by ' + artistMap.get(work.artistId).name : ''}` : '';
+    const topic = work ? (work.availability === 'sold' ? `Alternatives to ${workTopic}` : workTopic) : artist ? `Work by ${artist.name}` : allowedTopics.has(input.topic) ? input.topic : 'General interest';
     const a = attribution(input.attribution);
     const fingerprint = hash(JSON.stringify([name, email, input.interest, message, topic, work?.id, artist?.id]));
     return { name, email, interest: input.interest, message, topic, workId: work?.id ?? '', artistId: work?.artistId ?? artist?.id ?? '', a, fingerprint };
@@ -229,6 +232,8 @@ export function createApp(options = {}) {
   function pageMeta(path, content = catalog) {
     const labels = { '/':'Zimbabwean stone sculpture', '/collection':'The collection', '/artists':'The artists', '/making':'The making', '/designers':'For designers', '/collectors':'For collectors', '/house':'The house', '/privacy':'Privacy' };
     if (labels[path]) return { title: `${labels[path]} | House of Stone`, description: content.site.description, image: homepageImage(content) };
+    const collection = (content.collections || []).find(c => `/collections/${c.slug}` === path);
+    if (collection) { const star = content.works.find(w => w.id === collection.starWorkId); return {title:`${collection.name} | House of Stone`,description:collection.description,image:content.assets[star?.image] || homepageImage(content)}; }
     const work = content.works.find(w => `/works/${w.slug}` === path);
     if (work) return { title: `${work.title} | House of Stone`, description: work.description, image: content.assets[work.image] || content.assets.hero };
     const artist = content.artists.find(a => `/artists/${a.slug}` === path);
@@ -257,7 +262,15 @@ export function createApp(options = {}) {
       if (req.method === 'GET' && path === '/health') return send(res, 200, { ok: true });
       if (req.method === 'GET' && path === '/content.json') return send(res, 200, catalog);
       if (req.method === 'GET' && path === '/api/admin/content') return send(res, 200, collectionState());
-      if (req.method === 'GET' && path === '/api/admin/preview-content') return send(res, 200, publicCatalog(collectionState().draft));
+      if (req.method === 'GET' && path === '/api/admin/preview-content') return send(res, 200, publicCatalog(collectionState().draft, {preview:true}));
+      if (req.method === 'POST' && path === '/api/admin/prepare-founding-collection') {
+        requireSameOrigin(req);
+        const current = expectedRevision(await body(req));
+        const blueprint = JSON.parse(readFileSync(resolve(ROOT, 'content/founding-collection.json'), 'utf8'));
+        const next = validateCatalog(prepareFoundingCollection(current.draft, blueprint), {...contentOptions, previous:current.draft});
+        db.prepare('UPDATE collection_state SET draft=?,revision=revision+1,updated_at=? WHERE id=1').run(JSON.stringify(next), new Date().toISOString());
+        return send(res, 200, collectionState());
+      }
       if (req.method === 'POST' && path === '/api/admin/content') {
         requireSameOrigin(req);
         const input = await body(req, 1000000), current = expectedRevision(input);
@@ -286,7 +299,8 @@ export function createApp(options = {}) {
         if (!previous) throw new HttpError(404, 'That published version could not be found.');
         const restored = JSON.parse(previous.catalog);
         // Retain newer records as archived, preserving identifiers and their history.
-        for (const key of ['artists','works']) for (const item of current.draft[key]) {
+        for (const key of ['artists','works','collections']) for (const item of current.draft[key] || []) {
+          restored[key] ||= [];
           if (!restored[key].some(old => old.id === item.id)) restored[key].push({ ...item, archived: true });
         }
         restored.assets = { ...current.draft.assets, ...restored.assets };
@@ -368,13 +382,13 @@ export function createApp(options = {}) {
       }
       if (req.method === 'GET' && path === '/robots.txt') return send(res, 200, `User-agent: *\nDisallow: ${indexing ? '/admin\nDisallow: /api/' : '/'}\n${siteURL ? `Sitemap: ${siteURL.origin}/sitemap.xml\n` : ''}`, 'text/plain; charset=utf-8');
       if (req.method === 'GET' && path === '/sitemap.xml') {
-        const paths = ['/', '/collection', '/artists', '/making', '/designers', '/collectors', '/house', ...catalog.artists.map(a => '/artists/' + a.slug), ...catalog.works.map(w => '/works/' + w.slug)];
+        const paths = ['/', '/collection', '/artists', '/making', '/designers', '/collectors', '/house', ...(catalog.collections || []).map(c => '/collections/' + c.slug), ...catalog.artists.map(a => '/artists/' + a.slug), ...catalog.works.map(w => '/works/' + w.slug)];
         return send(res, 200, `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${paths.map(p => `<url><loc>${esc(origin(req) + p)}</loc></url>`).join('')}</urlset>`, 'application/xml; charset=utf-8');
       }
       if (!['GET', 'HEAD'].includes(req.method)) { res.setHeader('Allow', 'GET, HEAD'); throw new HttpError(405, 'Method not allowed.'); }
       const preview = path === '/admin/preview' || path.startsWith('/admin/preview/');
       const pagePath = preview ? path.slice('/admin/preview'.length) || '/' : path;
-      const meta = pageMeta(pagePath, preview ? publicCatalog(collectionState().draft) : catalog);
+      const meta = pageMeta(pagePath, preview ? publicCatalog(collectionState().draft, {preview:true}) : catalog);
       if (meta) {
         const replacements = { TITLE: meta.title, DESCRIPTION: meta.description, URL: origin(req) + path, IMAGE: origin(req) + meta.image, ROBOTS: indexing && !preview ? 'index,follow' : 'noindex,nofollow' };
         const html = template.replace(/\{\{(TITLE|DESCRIPTION|URL|IMAGE|ROBOTS)\}\}/g, (_, key) => esc(replacements[key]));

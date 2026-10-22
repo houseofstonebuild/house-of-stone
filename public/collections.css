@@ -1,0 +1,50 @@
+/* Collection-led rooms within the approved ivory gallery. */
+#hos-concept .hos-category-content,#hos-concept .hos-work-additional-images {width:calc(100% - var(--hos-gutter) * 2);max-width:var(--hos-content-width);margin-inline:auto;}
+#hos-concept .hos-collection-chapter {padding:0 0 clamp(56px,7vw,112px);margin:0 0 clamp(38px,5vw,72px);border-bottom:1px solid var(--hos-line);}
+#hos-concept .hos-collection-introduction {display:flex;align-items:baseline;justify-content:space-between;gap:24px;margin-bottom:30px;}
+#hos-concept .hos-collection-introduction h1,#hos-concept .hos-collection-introduction h2 {font-size:clamp(27px,2.6vw,42px);font-weight:300;letter-spacing:-.025em;margin:0;}
+#hos-concept .hos-collection-introduction p {font-size:16px;line-height:1.8;margin:0;max-width:520px;color:var(--hos-muted);}
+#hos-concept .hos-collection-feature {display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(32px,6vw,100px);align-items:center;}
+#hos-concept .hos-collection-photo {display:flex;justify-content:center;align-items:center;background:#eeeae2;min-width:0;}
+#hos-concept .hos-collection-photo img {display:block;width:100%;height:clamp(440px,48vw,720px);object-fit:contain;}
+#hos-concept .hos-collection-feature .hos-3d-panel {margin:0;min-width:0;}
+#hos-concept .hos-collection-feature .hos-3d-stage {height:clamp(440px,48vw,720px);}
+#hos-concept .hos-collection-copy {max-width:520px;padding-block:24px;}
+#hos-concept .hos-collection-copy h2 {font-size:clamp(24px,2vw,32px);font-weight:300;line-height:1.3;letter-spacing:-.015em;margin:14px 0;}
+#hos-concept .hos-collection-copy p {font-size:16px;line-height:1.9;}
+#hos-concept .hos-collection-copy>.hos-text-link {margin:0 0 20px;}
+#hos-concept .hos-collection-actions {display:flex;flex-direction:column;align-items:flex-start;gap:18px;margin-top:30px;}
+#hos-concept .hos-collection-actions .hos-text-link:first-child {color:var(--hos-fg);}
+#hos-concept .hos-collection-actions .hos-text-link+ .hos-text-link {color:var(--hos-muted);border-bottom-color:transparent;}
+#hos-concept .hos-availability {display:inline-block;font-size:12px;line-height:1.5;letter-spacing:.1em;border:1px solid var(--hos-line);padding:5px 10px;margin:12px 0;color:var(--hos-fg);}
+#hos-concept .hos-category-content {padding:32px 0 72px;}
+#hos-concept .hos-category-content .hos-collection-chapter {padding-bottom:48px;margin-bottom:48px;}
+#hos-concept .hos-supporting-works>h2,#hos-concept .hos-more-works>h2 {font-size:26px;font-weight:300;margin:28px 0;}
+#hos-concept .hos-collection-filters {display:flex;flex-wrap:wrap;align-items:flex-end;gap:20px;padding-block:20px;border-bottom:1px solid var(--hos-line);}
+#hos-concept .hos-collection-filters label {font-size:12px;letter-spacing:.03em;min-width:140px;flex:1;max-width:260px;}
+#hos-concept .hos-collection-filters select {display:block;width:100%;margin-top:8px;padding:11px 30px 11px 10px;font:inherit;font-size:15px;border:1px solid var(--hos-line);background:#fffefa;border-radius:0;min-height:44px;}
+#hos-concept .hos-filter-count {font-size:15px;color:var(--hos-muted);margin:20px 0;}
+#hos-concept .hos-work-card-copy>.hos-text-link {display:table;margin:10px 0 0;}
+#hos-concept .hos-work-card-copy>.hos-text-link[data-artist],#hos-concept .hos-work-card-copy>.hos-text-link[data-collection] {border-bottom-color:transparent;font-size:13px;color:var(--hos-muted);}
+#hos-concept .hos-credit {font-size:15px;color:var(--hos-muted);}
+#hos-concept .hos-work-context {display:flex;flex-wrap:wrap;align-items:center;gap:18px;margin-bottom:20px;}
+#hos-concept .hos-work-context p {flex-basis:100%;margin:0;}
+#hos-concept #hos-work-extra-specs:empty {display:none;}
+#hos-concept .hos-work-additional-images {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;}
+#hos-concept .hos-work-additional-images img {width:100%;height:auto;max-height:700px;object-fit:contain;}
+#hos-concept .hos-artist-name-link:disabled {cursor:default;opacity:1;color:var(--hos-muted);}
+#hos-concept .hos-supporting-works {scroll-margin-top:100px;}
+@media(max-width:700px){
+ #hos-concept .hos-collection-introduction {display:block;margin-bottom:24px;}
+ #hos-concept .hos-collection-introduction p {margin-top:12px;font-size:15px;}
+ #hos-concept .hos-collection-feature {grid-template-columns:1fr;gap:8px;}
+ #hos-concept .hos-collection-photo img,#hos-concept .hos-collection-feature .hos-3d-stage {height:auto;aspect-ratio:3/4;max-height:none;}
+ #hos-concept .hos-collection-copy {padding:24px 0 0;}
+ #hos-concept .hos-collection-copy p {font-size:15px;line-height:1.85;}
+ #hos-concept .hos-collection-actions {gap:18px;margin-top:24px;}
+ #hos-concept .hos-collection-filters {gap:12px;}
+ #hos-concept .hos-collection-filters label {min-width:calc(50% - 12px);max-width:none;}
+ #hos-concept .hos-work-additional-images {grid-template-columns:1fr;}
+ #hos-concept .hos-category-content {padding-top:24px;}
+}
+@media(prefers-reduced-motion:reduce){#hos-concept .hos-collection-chapter * {scroll-behavior:auto;}}

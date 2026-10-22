@@ -219,7 +219,7 @@ export function initializeViewer({root,models,works,onInteraction}) {
   new ResizeObserver(refresh).observe(dialogHost);
   const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(!unavailable&&entry.isIntersecting&&models[entry.target.dataset.modelId]&&makeRenderer())void model(entry.target.dataset.modelId).catch(()=>{});refresh();},{rootMargin:'200px',threshold:[0,.1,.5,1]});hosts.forEach(host=>observer.observe(host));
   refresh();
-  return {refresh,close,open(work,button,poster){
+  return {refresh,close,observe(elements){for(const host of elements)if(!hosts.includes(host)){hosts.push(host);observer.observe(host);}for(let i=hosts.length-1;i>=0;i--)if(!hosts[i].isConnected){observer.unobserve(hosts[i]);hosts.splice(i,1);}refresh();},open(work,button,poster){
     dialogWork=work;trigger=button;yaw=-.3;pitch=0;zoom=1;interactionCounted=false;pointers.clear();
     dialogTitle.textContent=work.title;dialogHost.dataset.modelId=work.id;dialogHost.dataset.modelState='waiting';
     dialogHost.querySelector('.hos-3d-poster').src=poster;dialogHost.querySelector('.hos-3d-poster').hidden=false;

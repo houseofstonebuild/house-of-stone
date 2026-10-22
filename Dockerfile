@@ -1,6 +1,6 @@
 FROM node:24.19.0-alpine
 WORKDIR /app
-COPY --chown=node:node package.json server.mjs catalog.mjs ./
+COPY --chown=node:node package.json server.mjs catalog.mjs founding-collection.mjs ./
 COPY --chown=node:node public ./public
 COPY --chown=node:node content ./content
 COPY --chown=node:node scripts ./scripts

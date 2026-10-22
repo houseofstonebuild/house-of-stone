@@ -12,6 +12,7 @@ function field(value, label, max, required = false) {
 export function validateCatalog(input, { publicDir, mediaDir, publish = false, previous } = {}) {
   if (!input || !input.site || typeof input.site !== 'object' || !input.assets || typeof input.assets !== 'object' || Array.isArray(input.assets) || !Array.isArray(input.artists) || !Array.isArray(input.works)) fail('Invalid collection.');
   if (input.artists.length > 100 || input.works.length > 1000 || Object.keys(input.assets).length > 3000) fail('The collection is too large.');
+  if (input.collections !== undefined && (!Array.isArray(input.collections) || input.collections.length > 100)) fail('Invalid collections.');
   const assets = {};
   for (const [key, value] of Object.entries(input.assets)) {
     if (!/^[a-zA-Z0-9_-]{1,100}$/.test(key) || typeof value !== 'string') fail('Invalid image reference.');
@@ -49,9 +50,9 @@ export function validateCatalog(input, { publicDir, mediaDir, publish = false, p
     const required = publish && !record.archived && !artist.archived;
     const objectPosition = field(item.objectPosition, 'the image position', 30) || '50% center';
     if (!/^(\d{1,2}|100)% (center|top|bottom)$/.test(objectPosition)) fail('Invalid image position.');
-    works.push({ ...record, artistId, title: field(item.title, 'the sculpture title', 160, true), image: photo(item.image, 'the sculpture photo', required),
-      dimensions: field(item.dimensions, 'the dimensions', 120, required), material: field(item.material, 'the stone type', 120, required),
-      yearMade: field(item.yearMade, 'the year made', 80), acquisitionMethod: field(item.acquisitionMethod, 'the stone source', 1000), description: field(item.description, 'the sculpture description', 3000, required), objectPosition });
+    works.push({ ...record, ...sculptureFields(item), artistId, title: field(item.title, 'the sculpture title', 160, true), image: photo(item.image, 'the sculpture photo', required),
+      dimensions: field(item.dimensions, 'the dimensions', 120, required && !item.sourcePage), material: field(item.material, 'the stone type', 120, required && !item.sourcePage),
+      yearMade: field(item.yearMade, 'the year made', 80), acquisitionMethod: field(item.acquisitionMethod, 'the stone source', 1000), description: field(item.description, 'the sculpture description', 3000, required && !item.sourcePage), objectPosition });
   }
   if (previous) {
     for (const key of ['artists', 'works']) for (const item of previous[key]) {
@@ -60,16 +61,64 @@ export function validateCatalog(input, { publicDir, mediaDir, publish = false, p
   }
   const site = { name: 'House of Stone', description: field(input.site.description, 'the website description', 400, true),
     location: field(input.site.location, 'the location', 120), featuredWorkId: field(input.site.featuredWorkId, 'the featured sculpture', 80),
-    heroImage: photo(input.site.heroImage, 'the homepage hero', false), heroAlt: field(input.site.heroAlt, 'the hero image description', 300, true) };
+    catalogueEdition: field(input.site.catalogueEdition, 'the catalogue edition', 80), heroImage: photo(input.site.heroImage, 'the homepage hero', false), heroAlt: field(input.site.heroAlt, 'the hero image description', 300, true) };
   const available = works.filter(w => !w.archived && !artistMap.get(w.artistId).archived);
   if (publish && !available.length) fail('Keep at least one visible sculpture in the collection before publishing.');
   if (!available.some(w => w.id === site.featuredWorkId)) site.featuredWorkId = available[0]?.id || '';
-  return { site, assets, artists, works };
+  const collections = [];
+  const membership = new Set();
+  for (const item of input.collections || []) {
+    const record = identity(item, collections);
+    if (!Array.isArray(item.workIds) || item.workIds.length > 1000 || new Set(item.workIds).size !== item.workIds.length) fail('Each collection needs an ordered list of unique sculptures.');
+    const workIds = item.workIds.map(id => field(id, 'the collection sculpture', 80, true));
+    if (workIds.some(id => !works.some(work => work.id === id))) fail('A collection contains an unknown sculpture.');
+    const starWorkId = field(item.starWorkId, 'the star sculpture', 80, true);
+    if (!workIds.includes(starWorkId) || workIds[0] !== starWorkId) fail('The star sculpture must be first in its collection.');
+    if (publish && !record.archived && !available.some(work => work.id === starWorkId)) fail('Keep a visible star sculpture for each collection.');
+    if (!record.archived) for (const id of workIds) { if (membership.has(id)) fail('A sculpture can have only one primary collection.'); membership.add(id); }
+    collections.push({...record, name: field(item.name, 'the collection name', 120, true), description: field(item.description, 'the collection description', 400, true), introduction: field(item.introduction, 'the collection introduction', 2000), starWorkId, workIds});
+  }
+  if (works.some(work => work.sourcePage && !work.archived && !membership.has(work.id))) fail('Assign each sourced sculpture to one primary collection.');
+  for (const work of works) {
+    if (work.additionalImages?.some(key => !assets[key])) fail('An additional sculpture photograph is missing.');
+    // The one confirmed sold record must never silently revert to available.
+    if (work.sourcePage === 13 && work.availability !== 'sold') fail('Original page 13 is confirmed sold. Keep its Sold status.');
+    if (work.sourcePage && work.availability === 'available' && !work.verification.availability) fail('Confirm availability before marking a sourced work available.');
+  }
+  return { site, assets, artists, works, collections };
 }
-export function publicCatalog(catalog) {
+const verifiedFields = ['title','artist','material','dimensions','yearMade','description','size','finish','signature','weight','base','location','delivery','shipping','installation','care','authenticity','provenance','acquisitionMethod','availability'];
+const detailFields = ['finish','signature','weightKg','base','location','delivery','shipping','installation','care','authenticity','provenance'];
+function sculptureFields(item) {
+  if (!item.sourcePage) return {};
+  if (!Number.isInteger(item.sourcePage) || item.sourcePage < 1 || item.sourcePage > 31) fail('Invalid original source page.');
+  if (!['unknown','available','sold','reserved'].includes(item.availability)) fail('Choose a valid availability.');
+  const verification = Object.fromEntries(verifiedFields.map(key => [key,item.verification?.[key] === true]));
+  if (item.availability === 'reserved' && !verification.availability) fail('Confirm availability before marking a sourced work reserved.');
+  const details = Object.fromEntries(detailFields.map(key => [key,field(item.details?.[key],key,2000)]));
+  if (details.weightKg && (!Number.isFinite(Number(details.weightKg)) || Number(details.weightKg) <= 0)) fail('Weight must be a positive number of kilograms.');
+  if (!Array.isArray(item.additionalImages || []) || (item.additionalImages || []).length > 30) fail('Choose up to 30 additional photographs.');
+  const additionalImages = (item.additionalImages || []).map(key => field(key,'an additional photograph',100,true));
+  return {sourcePage:item.sourcePage,sourceDocument:field(item.sourceDocument,'the source document',200),sourceCrop:field(item.sourceCrop,'the source crop',30),visualDescription:field(item.visualDescription,'the photograph description',1000),
+    availability:item.availability,colour:field(item.colour,'the colour',80),size:field(item.size,'the size',80),verification,details,additionalImages,
+    modelStatus:['needed','ready','not-planned'].includes(item.modelStatus)?item.modelStatus:'needed',internalNotes:field(item.internalNotes,'the private notes',5000)};
+}
+export function publicCatalog(catalog, {preview = false} = {}) {
   const artists = catalog.artists.filter(a => !a.archived), ids = new Set(artists.map(a => a.id));
-  const works = catalog.works.filter(w => !w.archived && ids.has(w.artistId));
-  const keys = new Set(['hero','logo','process','balancing-rocks',catalog.site.heroImage,...artists.map(a => a.portrait),...works.map(w => w.image)]);
-  return { site: catalog.site, assets: Object.fromEntries(Object.entries(catalog.assets).filter(([key]) => keys.has(key))), artists, works };
+  const visible = catalog.works.filter(w => !w.archived && ids.has(w.artistId));
+  const collections = (catalog.collections || []).filter(c => !c.archived).map(c => ({...c,workIds:c.workIds.filter(id => visible.some(w => w.id === id))})).filter(c => c.workIds.includes(c.starWorkId));
+  const works = visible.map(work => {
+    if (!work.sourcePage || preview) return work;
+    const collection = collections.find(c => c.workIds.includes(work.id)), v = work.verification || {};
+    const result = {id:work.id,slug:work.slug,image:work.image,objectPosition:work.objectPosition,
+      title:v.title ? work.title : `${collection?.name || 'Sculpture'} ${String((collection?.workIds.indexOf(work.id) ?? 0)+1).padStart(2,'0')}`,
+      artistId:v.artist ? work.artistId : '',availability:work.availability === 'sold' || v.availability ? work.availability : 'unknown',
+      description:v.description ? work.description : work.visualDescription,colour:work.colour,size:v.size && v.dimensions ? work.size : '',additionalImages:work.additionalImages || [],details:{}};
+    for (const key of ['material','dimensions','yearMade','acquisitionMethod']) result[key] = v[key] ? work[key] : '';
+    for (const [key,value] of Object.entries(work.details || {})) if (v[key === 'weightKg' ? 'weight' : key]) result.details[key] = value;
+    return result;
+  });
+  const keys = new Set(['hero','logo','process','balancing-rocks',catalog.site.heroImage,...artists.map(a => a.portrait),...works.flatMap(w => [w.image,...(w.additionalImages || [])])]);
+  return { site: catalog.site, assets: Object.fromEntries(Object.entries(catalog.assets).filter(([key]) => keys.has(key))), artists, works, collections };
 }
 export function homepageImage(catalog) { return catalog.assets[catalog.site.heroImage] || '/assets/designer-apartment.jpg'; }

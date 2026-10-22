@@ -370,7 +370,7 @@ for(const [engineName,engine] of engines) {
       assert.equal(await grid.evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length),columns);
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1),'Multiple sculpture tiles overflow the screen');
     }
-    await page.locator('#hos-collection-chapters .hos-work-card .hos-text-link').nth(2).click();
+    await page.locator('#hos-collection-chapters .hos-work-card .hos-text-link[data-work]').nth(2).click();
     assert.equal(await page.locator('#hos-work-title').textContent(),'Browser QA sculpture 4');
     await editor.goto(base+'/admin');await editor.locator('#inbox .inquiry').first().waitFor();
     assert((await editor.locator('#inbox').textContent()).includes('Browser QA collector'));
