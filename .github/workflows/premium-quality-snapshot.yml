@@ -1,0 +1,34 @@
+name: Public quality snapshot
+on:
+  push:
+    branches: [audit/premium-quality-review]
+    paths: [.github/workflows/premium-quality-snapshot.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - name: Inspect public catalogue and routes without writes
+        run: |
+          node --input-type=module <<'JS'
+          import {writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const base='https://house-of-stone-production.up.railway.app';
+          const get=async path=>{const r=await fetch(base+path,{signal:AbortSignal.timeout(20000)});return {status:r.status,type:r.headers.get('content-type'),body:await r.text()};};
+          const content=await get('/content.json');if(content.status!==200)throw Error('Public catalogue HTTP '+content.status);const c=JSON.parse(content.body);
+          const paths=['/','/collection','/artists','/making','/designers','/collectors','/house','/privacy',...(c.collections||[]).map(x=>'/collections/'+x.slug),...c.artists.map(x=>'/artists/'+x.slug),...c.works.map(x=>'/works/'+x.slug)];
+          const routes=[];for(const path of paths){const r=await get(path);routes.push({path,status:r.status,title:r.body.match(/<title>(.*?)<\/title>/s)?.[1],robots:r.body.match(/name="robots" content="([^"]+)"/)?.[1]});}
+          const robots=await get('/robots.txt'),sitemap=await get('/sitemap.xml'),missing=await get('/works/not-a-real-work'),app=await get('/app.js'),editor=await get('/admin/content');
+          const report={at:new Date().toISOString(),origin:base,works:c.works.length,collections:(c.collections||[]).map(x=>x.name),artists:c.artists.length,routes,robots:robots.body,sitemapStatus:sitemap.status,missing,editorStatus:editor.status,appSha256:createHash('sha256').update(app.body).digest('hex')};
+          writeFileSync('live-quality-snapshot.json',JSON.stringify(report,null,2));console.log('LIVE_QUALITY_SNAPSHOT '+JSON.stringify(report));
+          JS
+      - uses: actions/upload-artifact@v5
+        with:
+          name: live-quality-snapshot
+          path: live-quality-snapshot.json
+          retention-days: 7
