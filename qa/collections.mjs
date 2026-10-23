@@ -29,7 +29,22 @@ try {
  assert.equal(await page.locator('#hos-home-chapters [data-collection-section]').count(),5);
  assert.equal(await page.locator('#hos-home-chapters [data-model-fallback]').count(),0);
  assert.equal(await page.locator('#hos-home-chapters [data-model-stage]').count(),5,'All five source-matched reconstructions are reviewable privately');
- assert.equal(await page.locator('#hos-home-chapters [data-artist]').count(),5,'Proposed credits remain reviewable privately');
+ assert.equal(await page.locator('#hos-home-chapters .hos-collection-copy .hos-artist-context').count(),5,'Proposed artist profiles remain reviewable privately');
+ assert.equal(await page.locator('#hos-home-chapters .hos-supporting-preview').count(),5);
+ assert.equal(await page.locator('#hos-home-chapters .hos-supporting-preview .hos-work-card').count(),15);
+ assert.equal(await page.locator('#hos-home-chapters .hos-collection-reversed').count(),2);
+ assert.equal(await page.locator('#hos-home-chapters [data-visual-mode="photo"][aria-pressed="true"]').count(),5);
+ for(const collection of staged.draft.collections){
+  assert.deepEqual(await page.locator(`#hos-home-chapters [data-collection-section="${collection.id}"] .hos-supporting-preview .hos-work-card`).evaluateAll(cards=>cards.map(card=>card.dataset.workRecord)),collection.workIds.slice(1,4));
+ }
+ assert(!requests.some(url=>url.endsWith('.glb')),'Photographic browsing must not request models');
+ await page.setViewportSize({width:390,height:844});
+ const mobilePreview=page.locator('#hos-home-chapters [data-collection-section="rhythm"] .hos-supporting-preview'),rail=mobilePreview.locator('.hos-supporting-preview-grid');
+ await mobilePreview.getByRole('button',{name:'Next supporting work',exact:true}).click();await page.waitForFunction(()=>document.querySelector('#hos-home-chapters [data-collection-section="rhythm"] .hos-supporting-preview-grid').scrollLeft>0);
+ assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ await mobilePreview.getByRole('button',{name:'Previous supporting work',exact:true}).click();await page.waitForFunction(()=>document.querySelector('#hos-home-chapters [data-collection-section="rhythm"] .hos-supporting-preview-grid').scrollLeft===0);
+ assert(await rail.locator('.hos-work-card').first().isVisible());
+ await page.setViewportSize({width:1440,height:1000});
  await page.screenshot({path:new URL('collections-private-desktop.png',out).pathname,fullPage:true});
  await page.locator('#hos-home-chapters [data-collection="rhythm"]').first().click();await page.waitForURL('**/admin/preview/collections/rhythm');
  assert.equal(await page.locator('#hos-category-content .hos-work-card').count(),4);
@@ -75,9 +90,10 @@ try {
  restored=await api('content',{revision:restored.revision,catalog:restored.draft});await api('publish',{revision:restored.revision});
  const viewerContext=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});await viewerContext.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
  const viewerPage=await viewerContext.newPage();viewerPage.on('pageerror',error=>errors.push(error.message));
- await viewerPage.goto(base+'/');await viewerPage.locator('#hos-concept[data-ready="true"]').waitFor();await viewerPage.locator('#hos-home-chapters [data-model-stage]').scrollIntoViewIfNeeded();
+ await viewerPage.goto(base+'/');await viewerPage.locator('#hos-concept[data-ready="true"]').waitFor();await viewerPage.locator('#hos-home-chapters [data-visual-mode="model"]').click();await viewerPage.locator('#hos-home-chapters [data-model-stage]').scrollIntoViewIfNeeded();
  await viewerPage.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-home-chapters [data-model-stage]').dataset.modelState));
  await viewerPage.locator('#hos-home-chapters [data-collection="viewer-fixture"]').click();await viewerPage.waitForURL('**/collections/viewer-fixture');
+ await viewerPage.locator('#hos-category-content [data-visual-mode="model"]').click();
  await viewerPage.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-category-content [data-model-stage]').dataset.modelState));
  await viewerPage.locator('#hos-category-content [data-model="folded-light"]').click();await viewerPage.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-model-stage').dataset.modelState));
  assert(await viewerPage.locator('#hos-model-dialog').isVisible());await viewerPage.keyboard.press('Escape');assert(await viewerPage.locator('#hos-model-dialog').isHidden());await viewerContext.close();

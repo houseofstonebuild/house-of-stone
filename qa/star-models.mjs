@@ -22,6 +22,11 @@ try{
  await page.goto(base+'/admin/preview');await page.locator('#hos-concept[data-ready="true"]').waitFor();
  assert.equal(requests.filter(url=>url.endsWith('.glb')).length,0,'3D must load only near its section');
  for(const id of ids){
+  const visual=page.locator(`#hos-home-chapters [data-visual-work="${id}"]`);
+  assert(await visual.locator('.hos-collection-photo').isVisible(),'The source photograph leads each chapter');
+  const photoHeight=(await visual.boundingBox()).height;
+  await visual.getByRole('button',{name:'View in 3D',exact:true}).click();
+  assert(Math.abs((await visual.boundingBox()).height-photoHeight)<2,'Changing the view must not shift the chapter layout');
   const stage=page.locator(`#hos-home-chapters [data-model-stage][data-model-id="${id}"]`);await stage.scrollIntoViewIfNeeded();
   await page.waitForFunction(id=>['ready','unavailable'].includes(document.querySelector(`#hos-home-chapters [data-model-id="${id}"]`)?.dataset.modelState),id,{timeout:45000});
   const ready=await stage.getAttribute('data-model-state')==='ready';if(ready)assert(Number(await stage.getAttribute('data-model-triangles'))>40000);
@@ -35,7 +40,9 @@ try{
    await page.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelRotation)>2.8);await modal.screenshot({path:new URL(id+'-reverse.png',out).pathname});
    await page.locator('[data-model-control="in"]').click();await page.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelZoom)>1);await page.locator('[data-model-control="reset"]').click();
   }else assert(await page.locator('[data-model-control="right"]').isDisabled());
-  await page.keyboard.press('Escape');assert(!(await dialog.isVisible()));results.push({id,webglReady:ready});
+  await page.keyboard.press('Escape');assert(!(await dialog.isVisible()));
+  await visual.getByRole('button',{name:'Photograph',exact:true}).click();assert(await visual.locator('.hos-collection-photo').isVisible());assert(!(await stage.isVisible()));
+  await visual.getByRole('button',{name:'View in 3D',exact:true}).click();results.push({id,webglReady:ready});
  }
  assert.equal(app.db.prepare('SELECT count(*) AS n FROM events').get().n,0,'Private review must not log visitors');
  await page.setViewportSize({width:390,height:844});await page.locator('#hos-home-chapters [data-model-stage]').first().scrollIntoViewIfNeeded();const before=await page.evaluate(()=>scrollY);await page.mouse.move(195,600);await page.mouse.wheel(0,180);await page.waitForFunction(y=>scrollY>y,before);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
@@ -47,6 +54,7 @@ try{
  const fallbackContext=await browser.newContext({viewport:{width:390,height:844}});
  await fallbackContext.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){return /webgl/i.test(type)?null:original.call(this,type,...args);};localStorage.setItem('hos-measurement','off');});
  const fallbackPage=await fallbackContext.newPage();await fallbackPage.goto(base);await fallbackPage.locator('#hos-concept[data-ready="true"]').waitFor();
+ await fallbackPage.locator('#hos-home-chapters [data-visual-mode="model"]').first().click();
  const fallbackStage=fallbackPage.locator('#hos-home-chapters [data-model-stage]').first();await fallbackStage.scrollIntoViewIfNeeded();
  await fallbackPage.waitForFunction(()=>document.querySelector('#hos-home-chapters [data-model-stage]').dataset.modelState==='unavailable');assert(await fallbackStage.locator('.hos-3d-poster').isVisible());
  await fallbackStage.locator('..').locator('[data-model]').click();await fallbackPage.waitForFunction(()=>document.querySelector('#hos-model-stage').dataset.modelState==='unavailable');assert(await fallbackPage.locator('[data-model-control="right"]').isDisabled());await fallbackPage.keyboard.press('Escape');

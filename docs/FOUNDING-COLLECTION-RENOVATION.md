@@ -72,3 +72,22 @@ headers, inquiry context, Sold alternatives, model controls and fallbacks.
 API writes are blocked during verification. `qa/live-fixtures.mjs` exercises
 all three states in a temporary database and verifies zero inquiries/events.
 The live theme review also supports category-led pages.
+
+## Homepage refinements
+
+Each collection chapter starts with its source photograph. When the matching
+model is eligible, Photograph / View in 3D controls switch the view in place
+without changing the visual's height. Inline scroll rotation and the full
+rotation/zoom dialog remain available; hidden models do not load during
+photographic browsing. The added display platform is removed from the viewer,
+leaving a soft contact shadow and any base present in the actual model.
+
+Alternating desktop compositions distinguish the chapters. Three supporting
+works follow each star in the locked collection order, with a native horizontal
+carousel and Previous / Next controls on mobile. Collection exploration is the
+primary action, followed by sculpture details and a quieter inquiry link.
+Artist portraits and biography excerpts appear on collection and sculpture
+pages only when that sculpture has a visible artist credit. Confirmation rules
+for working artist assignments and models are unchanged. Revised short
+introductions are stored in the renovation blueprint; repeat imports still
+preserve an owner's existing collection text.

@@ -76,7 +76,7 @@ try{
         const chapter=page.locator(`#hos-home-chapters [data-collection-section="${collection.id}"]`);
         assert.equal(await chapter.locator('.hos-collection-actions [data-work]').getAttribute('data-work'),work.id);
         assert.equal(await chapter.locator('[data-model-fallback]').count(),matchingModel(work)?0:1);if(!matchingModel(work))fallbacks++;
-        if(work.availability==='sold')assert.equal(await chapter.locator('.hos-availability').textContent(),'Sold');
+        if(work.availability==='sold')assert.equal(await chapter.locator('.hos-collection-copy > .hos-availability').textContent(),'Sold');
         await inquire(chapter.locator('.hos-collection-actions [data-inquiry-work]'),work,viewport.width);
       }
       report.photoFallbacks=fallbacks;

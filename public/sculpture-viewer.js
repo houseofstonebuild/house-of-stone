@@ -84,11 +84,10 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
       for(const [color,intensity,x,y,z] of [[0xffedd3,3.6,-3,5,4],[0xd9e5ff,1.8,4,3,2],[0xfffaf1,2.6,1,5,-4]]) {
         const light=new THREE.DirectionalLight(color,intensity);light.position.set(x,y,z);scene.add(light);
       }
-      const plinth=new THREE.Mesh(new THREE.CylinderGeometry(1.03,1.06,.12,80),new THREE.MeshStandardMaterial({color:0x252522,roughness:.82}));plinth.position.y=.06;scene.add(plinth);
       const shadowCanvas=document.createElement('canvas');shadowCanvas.width=shadowCanvas.height=128;
       const ctx=shadowCanvas.getContext('2d'),gradient=ctx.createRadialGradient(64,64,5,64,64,64);
-      gradient.addColorStop(0,'rgba(0,0,0,.65)');gradient.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=gradient;ctx.fillRect(0,0,128,128);
-      const shadow=new THREE.Mesh(new THREE.PlaneGeometry(4.6,4.6),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(shadowCanvas),transparent:true,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.001;scene.add(shadow);
+      gradient.addColorStop(0,'rgba(0,0,0,.24)');gradient.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=gradient;ctx.fillRect(0,0,128,128);
+      const shadow=new THREE.Mesh(new THREE.PlaneGeometry(2.8,2.8),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(shadowCanvas),transparent:true,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.001;scene.add(shadow);
       canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();contextLost=true;if(active)fallback(active,'3D is temporarily unavailable. The sculpture photos are still available.');});
       canvas.addEventListener('webglcontextrestored',()=>{contextLost=false;lastView='';if(active)active.dataset.modelState='waiting';active=null;loadingHost=null;renderer.domElement.remove();refresh();});
       canvas.addEventListener('pointerdown',pointerDown);canvas.addEventListener('pointermove',pointerMove);
@@ -113,7 +112,7 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
       const group=gltf.scene,box=new THREE.Box3().setFromObject(group),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
       if(!Number.isFinite(size.length())||size.y<=0)throw new Error('Invalid model bounds');
       const scale=3.05/Math.max(size.y,size.x*.95,size.z*.95);group.scale.multiplyScalar(scale);
-      group.position.set(-center.x*scale,-box.min.y*scale+.12,-center.z*scale);
+      group.position.set(-center.x*scale,-box.min.y*scale+.02,-center.z*scale);
       if(entry.stoneGrain)group.traverse(node=>{if(node.isMesh)for(const material of Array.isArray(node.material)?node.material:[node.material])grain(material);});
       if(entry.referenceSurface)group.traverse(node=>{if(node.isMesh)for(const material of Array.isArray(node.material)?node.material:[node.material])referenceSurface(material,(entry.reconstruction && node.parent?.scale?node.parent.scale:node.scale).clone(),entry.stoneSwatch,entry.stonePolish ?? 1,entry.reconstruction===true);});
       const pose=new THREE.Group();pose.rotation.y=entry.referenceYaw||0;pose.add(group);
