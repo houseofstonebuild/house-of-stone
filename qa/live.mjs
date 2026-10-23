@@ -46,7 +46,7 @@ const matchingModel=work=>{
   return entry.reconstruction?entry.workId===work.id && work.modelVerified===true && (!work.sourcePage || entry.sourcePage===work.sourcePage):entry.title===work.title;
 };
 const browser=await chromium.launch({args:['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
-const failures=[],report={origin,sha:process.env.GITHUB_SHA,assets:files.length,routes:0,collections:collections.map(c=>c.name),headers:[],inquiries:[],models:[],photoFallbacks:0};
+const failures=[],report={origin,sha:process.env.GITHUB_SHA,assets:files.length,routes:0,collections:collections.map(c=>c.name),headers:[],inquiries:[],models:[],photoFallbacks:0,relatedCardsChecked:0};
 try{
   const context=await browser.newContext({viewport:{width:1440,height:900},reducedMotion:'reduce'});
   await context.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
@@ -102,6 +102,8 @@ try{
   for(const path of routes){await ready(path);report.routes++;}
   for(const work of catalog.works){
     await ready('/works/'+work.slug);
+    const related=await page.locator('#hos-work-related .hos-work-card').evaluateAll(cards=>cards.map(card=>{const photo=card.querySelector('.hos-work-card-photo').getBoundingClientRect(),copy=card.querySelector('.hos-work-card-copy').getBoundingClientRect();return{photoWidth:photo.width,photoBottom:photo.bottom,copyWidth:copy.width,copyTop:copy.top};}));
+    for(const card of related){assert(card.copyWidth>=Math.min(200,card.photoWidth-1),work.id+': related-work text must remain readable');assert(card.copyTop>=card.photoBottom-1,work.id+': related-work caption must be below its image');report.relatedCardsChecked++;}
     assert.equal(await page.locator('#hos-work-model').isVisible(),matchingModel(work),work.id+': published model eligibility');
     await inquire(page.locator('#hos-work-inquiry'),work,1440);
     if(!matchingModel(work))continue;

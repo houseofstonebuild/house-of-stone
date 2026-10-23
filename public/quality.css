@@ -20,7 +20,8 @@
 #hos-concept .hos-work-card .hos-card-specs {font-size:15px;}
 #hos-concept .hos-related-rail {margin-bottom:20px;}
 #hos-concept .hos-related-rail .hos-work-grid {grid-template-columns:repeat(3,minmax(0,1fr));}
-#hos-concept .hos-related-rail .hos-work-card {display:block;}
+#hos-concept .hos-related-rail .hos-work-grid[data-count] .hos-work-card {display:block;}
+#hos-concept .hos-related-rail .hos-work-grid[data-count] .hos-work-card-copy {padding-top:18px;max-width:none;}
 #hos-concept .hos-more-works>.hos-text-link {margin:16px 0 38px;}
 #hos-concept .hos-work-photo-open {display:block;width:100%;cursor:zoom-in;}
 #hos-concept .hos-photo-caption {font-size:15px;margin-top:12px;}
