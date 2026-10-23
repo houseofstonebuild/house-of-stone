@@ -69,7 +69,7 @@
 #hos-concept .hos-artist-context>img {display:block;width:72px;height:96px;object-fit:contain;flex:0 0 72px;background:#eeeae2;}
 #hos-concept .hos-artist-context .hos-eyebrow {font-size:11px;margin-bottom:8px;}
 #hos-concept .hos-artist-context h3 {font-size:18px;font-weight:400;line-height:1.4;margin:0 0 8px;}
-#hos-concept .hos-artist-context p {font-size:14px;line-height:1.8;margin:0 0 10px;color:var(--hos-muted);}
+#hos-concept .hos-artist-context p {font-size:15px;line-height:1.8;margin:0 0 10px;color:var(--hos-muted);}
 #hos-concept .hos-artist-context .hos-text-link[data-artist] {font-size:13px;min-height:36px;border-bottom-color:transparent;}
 #hos-concept .hos-work-maker {width:calc(100% - var(--hos-gutter) * 2);max-width:var(--hos-content-width);margin:40px auto 60px;}
 #hos-concept .hos-work-maker .hos-artist-context {max-width:760px;}
@@ -80,7 +80,7 @@
 #hos-concept .hos-supporting-preview-grid .hos-work-card {min-width:0;}
 #hos-concept .hos-supporting-preview-grid .hos-work-card-photo img {height:clamp(220px,24vw,340px);aspect-ratio:auto;object-fit:contain;}
 #hos-concept .hos-supporting-preview-grid .hos-work-card-copy h3 {font-size:20px;line-height:1.4;}
-#hos-concept .hos-supporting-preview-grid .hos-work-card-copy p {font-size:14px;line-height:1.8;}
+#hos-concept .hos-supporting-preview-grid .hos-work-card-copy p {font-size:15px;line-height:1.8;}
 #hos-concept .hos-supporting-preview-controls {display:none;align-items:center;gap:14px;font-size:12px;color:var(--hos-muted);}
 #hos-concept .hos-supporting-preview-controls button {min-height:44px;padding:8px 0;background:none;border:0;color:inherit;font:inherit;}
 #hos-concept .hos-supporting-preview-controls button:disabled {opacity:.4;}
