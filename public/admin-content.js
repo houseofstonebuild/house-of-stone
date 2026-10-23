@@ -115,7 +115,7 @@ function render() {
     field(grid,record,'description','About the sculpture',{wide:true,multiline:true,max:3000});
     photo(record,'image','Front / main photograph');
     record.views ||= {};const angles=element('details',undefined,'photo-slots');angles.append(element('summary','Angles and detail photographs'));fields.append(angles);
-    for(const [key,label] of [['left','Left'],['right','Right'],['back','Back'],['detail','Surface detail'],['signature','Signature'],['scale','Scale view']])photo(record.views,key,label,angles);
+    for(const [key,label] of [['left','Left'],['right','Right'],['back','Back'],['detail','Surface detail'],['detail2','Second detail'],['signature','Signature'],['scale','Scale view'],['interior','In a residence'],['gallery','In a gallery'],['office','In an office']])photo(record.views,key,label,angles);
     archive(record,'Archive this sculpture · hide it from the website');
     record.details ||= {};
       record.details ||= {};

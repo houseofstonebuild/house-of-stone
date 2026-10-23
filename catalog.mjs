@@ -52,7 +52,7 @@ export function validateCatalog(input, { publicDir, mediaDir, publish = false, p
     const required = publish && !record.archived && !artist.archived;
     const objectPosition = field(item.objectPosition, 'the image position', 30) || '50% center';
     if (!/^(\d{1,2}|100)% (center|top|bottom)$/.test(objectPosition)) fail('Invalid image position.');
-    works.push({ ...record, ...sculptureFields(item), views:Object.fromEntries(['left','right','back','detail','signature','scale'].map(key=>[key,photo(item.views?.[key],'the '+key+' photograph',false)])), artistId, title: field(item.title, 'the sculpture title', 160, true), image: photo(item.image, 'the sculpture photo', required),
+    works.push({ ...record, ...sculptureFields(item), views:Object.fromEntries(['left','right','back','detail','detail2','signature','scale','interior','gallery','office'].map(key=>[key,photo(item.views?.[key],'the '+key+' photograph',false)])), artistId, title: field(item.title, 'the sculpture title', 160, true), image: photo(item.image, 'the sculpture photo', required),
       dimensions: field(item.dimensions, 'the dimensions', 120, required && !item.sourcePage), material: field(item.material, 'the stone type', 120, required && !item.sourcePage),
       yearMade: field(item.yearMade, 'the year made', 80), acquisitionMethod: field(item.acquisitionMethod, 'the stone source', 1000), description: field(item.description, 'the sculpture description', 3000, required && !item.sourcePage), objectPosition });
   }

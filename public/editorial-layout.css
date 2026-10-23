@@ -1,0 +1,114 @@
+/* Collection chapters and object galleries share the same quiet reading order. */
+#hos-concept .hos-collection-editorial {padding:34px 0 64px;margin:0;border-bottom:1px solid var(--hos-line);}
+#hos-concept .hos-collection-editorial + .hos-collection-editorial {padding-top:64px;}
+#hos-concept .hos-collection-editorial .hos-collection-introduction {display:block;text-align:center;max-width:760px;margin:0 auto 34px;padding:0 20px;}
+#hos-concept .hos-collection-introduction .hos-eyebrow {font-size:10px;letter-spacing:.14em;margin-bottom:12px;}
+#hos-concept .hos-collection-editorial .hos-collection-introduction :is(h1,h2) {font-size:clamp(30px,3vw,42px);line-height:1.25;margin:0 0 16px;}
+#hos-concept .hos-collection-editorial .hos-collection-introduction p {margin:0 auto;max-width:640px;}
+#hos-concept .hos-collection-editorial .hos-collection-introduction .hos-collection-tagline {font-size:16px;color:var(--hos-fg);}
+#hos-concept .hos-collection-editorial .hos-collection-introduction .hos-collection-blurb {font-size:15px;line-height:1.75;margin-top:8px;color:var(--hos-muted);}
+#hos-concept .hos-collection-editorial .hos-collection-feature {display:block;}
+#hos-concept .hos-collection-editorial .hos-collection-visual {--hos-visual-height:clamp(440px,68svh,820px);}
+#hos-concept .hos-collection-editorial .hos-collection-photo {display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:12px;height:var(--hos-visual-height);background:#eeeae2;overflow:hidden;}
+#hos-concept .hos-collection-editorial .hos-collection-photo img {width:100%;height:100%;min-height:0;object-fit:contain;}
+#hos-concept .hos-collection-setting {height:100%;min-width:0;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#eeeae2;}
+#hos-concept .hos-collection-setting.hos-stone-closeup img {transform:scale(1.65);}
+#hos-concept .hos-collection-editorial .hos-visual-modes {justify-content:center;gap:30px;}
+#hos-concept .hos-collection-editorial .hos-collection-copy {max-width:900px;margin:0 auto;text-align:center;padding:24px 20px 0;}
+#hos-concept .hos-collection-copy>.hos-eyebrow {font-size:10px;letter-spacing:.12em;}
+#hos-concept .hos-collection-copy .hos-star-title {font-size:clamp(23px,2vw,30px);margin:8px 0 4px;}
+#hos-concept .hos-collection-copy>.hos-collection-credit {display:table;margin:0 auto;border:0;font-size:15px;min-height:30px;}
+#hos-concept .hos-collection-copy>.hos-card-specs {font-size:14px;line-height:1.75;margin:4px auto 8px;}
+#hos-concept .hos-collection-copy>.hos-text-link:not(.hos-collection-credit) {font-size:13px;margin:0 auto;min-height:36px;border:0;}
+#hos-concept .hos-collection-copy>.hos-availability {margin:10px 0 4px;}
+#hos-concept .hos-collection-editorial .hos-supporting-preview {margin-top:28px;}
+#hos-concept .hos-supporting-preview-grid .hos-work-card-photo img {height:clamp(260px,34vw,500px);aspect-ratio:auto;object-fit:contain;}
+#hos-concept .hos-supporting-preview-grid .hos-work-card-copy {padding-top:16px;}
+#hos-concept .hos-supporting-preview-grid .hos-work-card-copy h3 {font-size:19px;margin-bottom:6px;}
+#hos-concept .hos-supporting-preview-grid .hos-work-card-copy .hos-card-specs {font-size:13px;}
+#hos-concept .hos-supporting-preview-grid .hos-work-card-copy .hos-text-link {font-size:13px;}
+#hos-concept .hos-collection-editorial>.hos-collection-actions {display:flex;align-items:center;gap:14px;margin:34px 0 0;}
+#hos-concept .hos-collection-secondary-actions {display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px 28px;}
+#hos-concept .hos-collection-secondary-actions .hos-text-link {font-size:13px;min-height:44px;margin:0;}
+#hos-concept .hos-primary-action,#hos-concept .hos-collection-actions>.hos-collection-primary {display:flex;align-items:center;justify-content:center;gap:16px;min-height:50px;padding:14px 28px;background:#28251f;color:#fffefa;border:1px solid #28251f;font:inherit;font-size:13px;line-height:1.5;letter-spacing:.035em;text-align:center;cursor:pointer;}
+#hos-concept .hos-primary-action:hover,#hos-concept .hos-collection-actions>.hos-collection-primary:hover {background:#443f35;color:#fffefa;}
+#hos-concept .hos-primary-action:focus-visible {outline:2px solid var(--hos-fg);outline-offset:4px;}
+#hos-concept .hos-category-content .hos-collection-editorial {padding-bottom:40px;margin-bottom:32px;}
+#hos-concept .hos-work-layout {grid-template-columns:minmax(0,1fr) minmax(320px,440px);gap:24px clamp(36px,4vw,80px);align-items:start;padding-top:26px;}
+#hos-concept .hos-work-photo {display:grid;grid-template-columns:64px minmax(0,1fr);gap:20px;min-width:0;max-width:1300px;width:100%;justify-self:center;}
+#hos-concept .hos-work-photo .hos-work-additional-images {display:flex;flex-direction:column;gap:14px;width:64px;max-width:none;margin:0;padding:0;overflow-y:auto;overflow-x:hidden;max-height:calc(100svh - 150px);}
+#hos-concept .hos-work-photo .hos-photo-thumbnail {flex:0 0 auto;width:64px;padding-bottom:6px;}
+#hos-concept .hos-work-photo .hos-photo-thumbnail img {width:64px;height:80px;}
+#hos-concept .hos-work-photo .hos-photo-thumbnail span {font-size:10px;line-height:1.4;margin-top:4px;}
+#hos-concept .hos-work-primary-photo {min-width:0;}
+#hos-concept .hos-work-photo-open {height:clamp(420px,76svh,900px);overflow:hidden;touch-action:pan-y;background:#eeeae2;}
+#hos-concept .hos-work-photo-open img {width:100%;height:100%;object-fit:contain;transform-origin:center;}
+#hos-concept .hos-work-photo-caption {font-size:12px;text-align:center;margin-top:10px;}
+#hos-concept .hos-gallery-navigation {display:flex;justify-content:center;gap:24px;align-items:center;font-size:12px;margin-top:6px;}
+#hos-concept .hos-gallery-navigation button {min-height:44px;min-width:44px;cursor:pointer;}
+#hos-concept .hos-work-details {grid-column:2;grid-row:1 / span 2;position:sticky;top:calc(var(--hos-visible-header-height,var(--hos-header-height)) + 24px);max-width:440px;width:100%;}
+#hos-concept .hos-work-details h1 {font-size:clamp(27px,2.1vw,36px);margin:8px 0 6px;}
+#hos-concept .hos-work-details .hos-artist-name-link {font-size:13px;letter-spacing:.025em;min-height:36px;text-transform:none;}
+#hos-concept .hos-work-details #hos-work-description {font-size:15px;line-height:1.85;margin:14px 0;}
+#hos-concept .hos-work-details .hos-work-short-specs {font-size:13px;line-height:1.8;margin:14px 0 24px;}
+#hos-concept .hos-work-details #hos-work-inquiry {width:100%;margin:0 0 14px;}
+#hos-concept .hos-work-details #hos-work-model {display:table;font-size:13px;margin:0 auto 24px;min-height:44px;}
+#hos-concept .hos-work-context {gap:8px 20px;margin-bottom:8px;font-size:12px;}
+#hos-concept .hos-work-context .hos-text-link {font-size:12px;margin:0;min-height:32px;}
+#hos-concept .hos-work-context .hos-availability {font-size:10px;margin:0;}
+#hos-concept .hos-work-context p {font-size:13px;}
+#hos-concept .hos-work-disclosure {border-top:1px solid var(--hos-line);padding:0;}
+#hos-concept .hos-work-disclosure:last-child {border-bottom:1px solid var(--hos-line);}
+#hos-concept .hos-work-disclosure summary {position:relative;list-style:none;cursor:pointer;min-height:54px;display:flex;align-items:center;padding:14px 26px 14px 0;font-size:13px;letter-spacing:.02em;}
+#hos-concept .hos-work-disclosure summary::-webkit-details-marker {display:none;}
+#hos-concept .hos-work-disclosure summary::after {content:'+';position:absolute;right:0;font-size:19px;font-weight:300;}
+#hos-concept .hos-work-disclosure[open] summary::after {content:'−';}
+#hos-concept .hos-work-disclosure .hos-work-specs {border:0;margin:0 0 12px;}
+#hos-concept .hos-work-disclosure .hos-work-specs div {font-size:13px;padding:12px 0;}
+#hos-concept .hos-work-disclosure p {font-size:15px;margin:0 0 18px;}
+#hos-concept .hos-work-gallery-story {grid-column:1;grid-row:2;display:grid;gap:28px;max-width:1300px;width:100%;justify-self:center;padding-left:84px;}
+#hos-concept .hos-gallery-image {margin:0;min-width:0;}
+#hos-concept .hos-gallery-image button {display:block;width:100%;overflow:hidden;background:#eeeae2;cursor:zoom-in;}
+#hos-concept .hos-gallery-image img {display:block;width:100%;height:auto;object-fit:contain;}
+#hos-concept .hos-gallery-detail button {height:clamp(340px,65svh,720px);}
+#hos-concept .hos-gallery-detail img {height:100%;transform-origin:center;}
+#hos-concept .hos-gallery-image figcaption {font-size:12px;margin-top:10px;}
+#hos-concept .hos-mobile-work-action {display:none;}
+@media(max-width:1000px) and (min-width:701px){
+ #hos-concept .hos-work-layout {grid-template-columns:minmax(0,1fr) minmax(280px,340px);gap:28px;}
+ #hos-concept .hos-work-photo {grid-template-columns:48px minmax(0,1fr);gap:12px;}
+ #hos-concept .hos-work-photo .hos-work-additional-images,#hos-concept .hos-work-photo .hos-photo-thumbnail {width:48px;}
+ #hos-concept .hos-work-photo .hos-photo-thumbnail img {width:48px;height:64px;}
+ #hos-concept .hos-work-gallery-story {padding-left:60px;}
+}
+@media(max-width:700px){
+ #hos-concept .hos-collection-editorial {padding:20px 0 44px;}
+ #hos-concept .hos-collection-editorial + .hos-collection-editorial {padding-top:40px;}
+ #hos-concept .hos-collection-editorial .hos-collection-introduction {margin-bottom:24px;padding:0;}
+ #hos-concept .hos-collection-editorial .hos-collection-introduction :is(h1,h2) {font-size:29px;}
+ #hos-concept .hos-collection-editorial .hos-collection-introduction p {font-size:15px;}
+ #hos-concept .hos-collection-editorial .hos-collection-visual {--hos-visual-height:calc((100vw - var(--hos-gutter) * 2) * 4 / 3);}
+ #hos-concept .hos-collection-editorial .hos-collection-photo {grid-template-columns:1fr;gap:0;}
+ #hos-concept .hos-collection-photo .hos-collection-setting {display:none;}
+ #hos-concept .hos-collection-editorial .hos-collection-photo>img {height:100%;aspect-ratio:auto;}
+ #hos-concept .hos-collection-editorial .hos-collection-copy {padding:20px 0 0;}
+ #hos-concept .hos-collection-copy .hos-star-title {font-size:23px;}
+ #hos-concept .hos-supporting-preview-grid .hos-work-card-photo img {height:auto;aspect-ratio:4/5;}
+ #hos-concept .hos-collection-secondary-actions {gap:6px 20px;}
+ #hos-concept .hos-collection-actions>.hos-collection-primary {width:100%;max-width:340px;}
+ #hos-concept .hos-work-layout {grid-template-columns:1fr;gap:24px;padding-bottom:30px;}
+ #hos-concept .hos-work-photo {grid-column:1;grid-row:1;display:flex;flex-direction:column;gap:12px;}
+ #hos-concept .hos-work-photo .hos-work-additional-images {flex-direction:row;order:2;width:100%;max-height:none;overflow-x:auto;padding-bottom:8px;gap:12px;}
+ #hos-concept .hos-work-photo .hos-photo-thumbnail {width:58px;flex:0 0 58px;}
+ #hos-concept .hos-work-photo .hos-photo-thumbnail img {width:58px;height:74px;}
+ #hos-concept .hos-work-primary-photo {order:1;}
+ #hos-concept .hos-work-photo-open {height:auto;aspect-ratio:3/4;min-height:0;}
+ #hos-concept .hos-work-photo-open img {height:100%;}
+ #hos-concept .hos-work-details {grid-column:1;grid-row:2;position:static;max-width:none;}
+ #hos-concept .hos-work-details h1 {font-size:27px;}
+ #hos-concept .hos-work-details #hos-work-description {font-size:15px;}
+ #hos-concept .hos-work-gallery-story {grid-column:1;grid-row:3;padding-left:0;gap:24px;}
+ #hos-concept [data-page="work"] {padding-bottom:82px;}
+ #hos-concept .hos-mobile-work-action {display:block;position:fixed;inset:auto 0 0;z-index:24;padding:10px 24px calc(10px + env(safe-area-inset-bottom));background:rgba(246,244,239,.97);border-top:1px solid var(--hos-line);}
+ #hos-concept .hos-mobile-work-action button {width:100%;min-height:46px;}
+}

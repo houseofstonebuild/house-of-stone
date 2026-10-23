@@ -157,10 +157,18 @@ function artistContext(work) {
   if(biography){const sentence=biography.match(/^.*?[.!?](?:\s|$)/)?.[0]?.trim() || biography;copy.append(el('p','',sentence.length>190?sentence.slice(0,187).replace(/\s+\S*$/,'')+'…':sentence));}
   copy.append(link('About the artist',{artist:artist.id}));context.append(copy);return context;
 }
+function workScenes(work) {
+  const entry=editorial.workScenes?.[work.id];
+  return entry?.source===assets[work.image] ? entry.scenes || [] : [];
+}
 function collectionVisual(work) {
   const visual=el('div','hos-collection-visual'),photo=el('div','hos-collection-photo'),panel=modelPanel(work);
   visual.dataset.visualWork=work.id;
   photo.append(image(work.image,work.description || workLabel(work),true,'(max-width: 700px) 90vw, 820px'));
+  const setting=el('div','hos-collection-setting'),scene=workScenes(work)[0];
+  if(scene){setting.append(editorialImage(scene.source,work.title+' · Interior study','(max-width:700px) 90vw, 60vw'));}
+  else{setting.classList.add('hos-stone-closeup');setting.append(image(work.image,'Stone detail of '+work.title,true,'50vw'));}
+  photo.append(setting);
   visual.append(photo);
   if(!panel){photo.dataset.modelFallback=work.id;return visual;}
   panel.hidden=true;visual.append(panel);
@@ -188,26 +196,28 @@ function supportingPreview(collection) {
 function collectionChapter(collection, {heading = true} = {}) {
   const work=works.find(work=>work.id===collection.starWorkId), section=el('section','hos-collection-chapter');
   section.dataset.collectionSection=collection.id;if(heading)section.id='hos-home-'+collection.id;
-  if(heading && collections.indexOf(collection)%2===1)section.classList.add('hos-collection-reversed');
+  section.classList.add('hos-collection-editorial');
   if(!work)return section;
   const introduction=el('div','hos-collection-introduction');introduction.dataset.reveal='';
-  introduction.append(el(heading?'h2':'h1','',collection.name),el('p','',collection.description));
+  introduction.append(el('div','hos-eyebrow','THE FOUNDING COLLECTION'),el(heading?'h2':'h1','',collection.name),el('p','hos-collection-tagline',collection.description));
+  if(collection.introduction)introduction.append(el('p','hos-collection-blurb',collection.introduction));
   const feature=el('div','hos-collection-feature');
   const visual=collectionVisual(work);
   const copy=el('div','hos-collection-copy');copy.dataset.reveal='';
-  copy.append(el('div','hos-eyebrow','THE STAR SCULPTURE'));
+  copy.append(el('div','hos-eyebrow','THE FEATURED WORK'));
   const badge=availabilityLabel(work);if(badge)copy.append(badge);
   copy.append(el('h2','hos-star-title',work.title));
-  if(collection.introduction)copy.append(el('p','',collection.introduction));
+  const artist=artistFor(work);if(artist){const author=credit(work);author.classList.add('hos-collection-credit');copy.append(author);}
   if(work.material || work.dimensions)copy.append(el('p','hos-card-specs',[work.material,work.dimensions].filter(Boolean).join(' · ')));
   const actions=el('div','hos-collection-actions');
   if(heading){const primary=link(work.availability==='sold'?'Explore available works':'Explore the collection',{collection:collection.id,...(work.availability==='sold'?{available:'true'}:{})});primary.classList.add('hos-collection-primary');actions.append(primary);}
   else if(work.availability==='sold')actions.append(link('Explore available works',{scrollSupporting:collection.id}));
-  const detail=link('View star sculpture',{work:work.id});detail.classList.add('hos-collection-secondary');actions.append(detail);
-  const inquire=link(work.availability==='sold'?'Inquire about related works':'Inquire about this work',{inquiry:work.availability==='sold'?`Alternatives to ${workLabel(work)}`:workLabel(work),inquiryWork:work.id,inquiryArtist:artistFor(work)?.id || '',inquiryIntent:work.availability==='sold'?'alternatives':''});inquire.disabled=previewMode;actions.append(inquire);
+  const secondary=el('div','hos-collection-secondary-actions');
+  const detail=link('View star sculpture',{work:work.id});detail.classList.add('hos-collection-secondary');secondary.append(detail);
+  const inquire=link(work.availability==='sold'?'Inquire about related works':'Inquire about this work',{inquiry:work.availability==='sold'?`Alternatives to ${workLabel(work)}`:workLabel(work),inquiryWork:work.id,inquiryArtist:artistFor(work)?.id || '',inquiryIntent:work.availability==='sold'?'alternatives':''});inquire.disabled=previewMode;secondary.append(inquire);actions.append(secondary);
   inquire.classList.add('hos-collection-inquiry');
-  copy.append(actions);const maker=artistContext(work);if(maker)copy.append(maker);
-  feature.append(visual,copy);section.append(introduction,feature);if(heading){const supporting=supportingPreview(collection);if(supporting)section.append(supporting);}return section;
+  if(artist)copy.append(link('About the artist',{artist:artist.id}));
+  feature.append(visual,copy);section.append(introduction,feature);if(heading){const supporting=supportingPreview(collection);if(supporting)section.append(supporting);}section.append(actions);return section;
 }
 function filteredWorks(container, selected, label = 'Browse works') {
   const section=el('section','hos-collection-browser');section.setAttribute('aria-label',label);
@@ -426,6 +436,7 @@ function renderArtist(artist) {
     more.append(el('h2', '', 'Works by ' + artist.name), workGrid(selected));
   }
 }
+let workActionObserver;
 function renderWork(work) {
   activeWork = work; activeArtist = artistFor(work);
   $('#hos-work-title').textContent = work.title;
@@ -436,6 +447,7 @@ function renderWork(work) {
   }
   $('#hos-work-core-specs').hidden=![work.yearMade,work.dimensions,work.material,work.acquisitionMethod].some(Boolean);
   $('#hos-work-description').textContent = work.description || '';
+  $('#hos-work-short-specs').textContent=[work.material,work.dimensions].filter(Boolean).join(' · ');
   const button = $('#hos-work-inquiry'),sold=work.availability==='sold';
   button.textContent=sold?'Inquire about related works':'Inquire about this work';
   const arrow=el('span','hos-link-arrow');arrow.setAttribute('aria-hidden','true');arrow.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" focusable="false"><path d="M6 18 18 6M6 6h12v12"/></svg>';button.append(arrow);
@@ -444,14 +456,21 @@ function renderWork(work) {
   const context=$('#hos-work-context');context.replaceChildren();const badge=availabilityLabel(work);if(badge)context.append(badge);
   const collection=collectionFor(work);if(collection)context.append(link(collection.name,{collection:collection.id}));
   if(sold)context.append(el('p','','This work is sold. Explore related works or ask us about alternatives.'));
-  const details=$('#hos-work-extra-specs');details.replaceChildren();
+  const details=$('#hos-work-extra-specs'),serviceDetails=$('#hos-work-service-specs'),provenanceDetails=$('#hos-work-provenance-specs');details.replaceChildren();serviceDetails.replaceChildren();provenanceDetails.replaceChildren();
   const units = work.dimensions?.match(/([\d.]+)\s*×\s*([\d.]+)\s*×\s*([\d.]+)\s*cm/i);
   const values={...(work.details || {})};
   if(units)values.inches=units.slice(1).map(n=>(Number(n)/2.54).toFixed(1)).join(' × ')+' in';
   if(values.weightKg)values.weightKg=`${values.weightKg} kg / ${(Number(values.weightKg)*2.20462262).toFixed(1)} lb`;
   const labels={inches:'Dimensions in inches',finish:'Finish',signature:'Signature',weightKg:'Weight',base:'Base & inclusion',location:'Current location',delivery:'Delivery estimate',shipping:'Shipping',installation:'Installation',care:'Care',authenticity:'Authenticity',provenance:'Provenance'};
-  for(const [key,label] of Object.entries(labels))if(values[key]){const row=el('div');row.append(el('span','',label),el('span','',values[key]));details.append(row);}
-  gallery?.setWork(work,assets);
+  for(const [key,label] of Object.entries(labels))if(values[key]){const row=el('div');row.append(el('span','',label),el('span','',values[key]));(['delivery','shipping','installation','care'].includes(key)?serviceDetails:['authenticity','provenance'].includes(key)?provenanceDetails:details).append(row);}
+  $('#hos-work-provenance').hidden=!provenanceDetails.childElementCount;
+  $('#hos-work-delivery-note').hidden=Boolean(serviceDetails.childElementCount);
+  $('#hos-work-specifications').hidden=$('#hos-work-core-specs').hidden && !details.childElementCount;
+  for(const id of ['#hos-work-specifications','#hos-work-delivery','#hos-work-provenance'])$(id).open=false;
+  gallery?.setWork(work,assets,workScenes(work));
+  const mobileAction=$('#hos-mobile-work-action'),mobileButton=$('#hos-mobile-work-inquiry');mobileButton.textContent=button.textContent;Object.assign(mobileButton.dataset,button.dataset);mobileButton.setAttribute('aria-label',(sold?'Inquire about alternatives to ':'Inquire about ')+work.title);mobileAction.hidden=true;
+  workActionObserver?.disconnect();
+  if('IntersectionObserver' in window && !previewMode){let originalVisible=false,footerVisible=false;workActionObserver=new window.IntersectionObserver(entries=>{for(const entry of entries){if(entry.target===button)originalVisible=entry.isIntersecting;else footerVisible=entry.isIntersecting;}mobileAction.hidden=originalVisible||footerVisible;});workActionObserver.observe(button);workActionObserver.observe($('.hos-footer'));}
   const maker=$('#hos-work-maker');maker.replaceChildren();const contextArtist=artistContext(work);maker.hidden=!contextArtist;if(contextArtist)maker.append(contextArtist);
   const related=$('#hos-work-related');related.replaceChildren();
   const sameCollection=collection?collection.workIds.filter(id=>id!==work.id).map(id=>works.find(w=>w.id===id)).filter(Boolean):[];
@@ -664,10 +683,6 @@ async function start() {
   renderOverview();refreshLinks();
   watchModels(root);
   if (previewMode) {
-    document.body.classList.add('hos-preview');
-    const banner = el('div','hos-preview-bar'); banner.append(el('span','','Draft preview · Working information awaits confirmation.'));
-    const back = el('a','','Return to editor'); back.href = '/admin/content'; banner.append(back); document.body.prepend(banner);
-    const sizeBanner=()=>{if(banner.getBoundingClientRect)document.body.style.setProperty('--hos-preview-height',Math.ceil(banner.getBoundingClientRect().height)+'px');};sizeBanner();if('ResizeObserver' in window)new window.ResizeObserver(sizeBanner).observe(banner);
     root.querySelectorAll('[data-inquiry]').forEach(button=>{ button.disabled=true; });
   }
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';

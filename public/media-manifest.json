@@ -283,5 +283,30 @@
     "width": 1536,
     "height": 2048,
     "srcset": "/assets/zsa-page-31-480.webp 480w, /assets/zsa-page-31-800.webp 800w, /assets/zsa-page-31-1200.webp 1200w, /assets/zsa-page-31.jpg 1536w"
+  },
+  "/assets/zsa-028-interior-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-028-interior-480.webp 480w, /assets/zsa-028-interior-960.webp 960w, /assets/zsa-028-interior-1536.webp 1536w"
+  },
+  "/assets/zsa-013-interior-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-013-interior-480.webp 480w, /assets/zsa-013-interior-960.webp 960w, /assets/zsa-013-interior-1536.webp 1536w"
+  },
+  "/assets/zsa-001-interior-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-001-interior-480.webp 480w, /assets/zsa-001-interior-960.webp 960w, /assets/zsa-001-interior-1536.webp 1536w"
+  },
+  "/assets/zsa-020-interior-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-020-interior-480.webp 480w, /assets/zsa-020-interior-960.webp 960w, /assets/zsa-020-interior-1536.webp 1536w"
+  },
+  "/assets/zsa-005-interior-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-005-interior-480.webp 480w, /assets/zsa-005-interior-960.webp 960w, /assets/zsa-005-interior-1536.webp 1536w"
   }
 }

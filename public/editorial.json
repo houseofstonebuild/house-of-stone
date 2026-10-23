@@ -102,5 +102,52 @@
       },
       "mobileFocus": "64% center"
     }
+  },
+  "workScenes": {
+    "zsa-028": {
+      "source": "/assets/zsa-page-28.jpg",
+      "scenes": [
+        {
+          "source": "/assets/zsa-028-interior-1536.webp",
+          "label": "Interior study"
+        }
+      ]
+    },
+    "zsa-013": {
+      "source": "/assets/zsa-page-13.jpg",
+      "scenes": [
+        {
+          "source": "/assets/zsa-013-interior-1536.webp",
+          "label": "Interior study"
+        }
+      ]
+    },
+    "zsa-001": {
+      "source": "/assets/zsa-page-01.jpg",
+      "scenes": [
+        {
+          "source": "/assets/zsa-001-interior-1536.webp",
+          "label": "Interior study"
+        }
+      ]
+    },
+    "zsa-020": {
+      "source": "/assets/zsa-page-20.jpg",
+      "scenes": [
+        {
+          "source": "/assets/zsa-020-interior-1536.webp",
+          "label": "Interior study"
+        }
+      ]
+    },
+    "zsa-005": {
+      "source": "/assets/zsa-page-05.jpg",
+      "scenes": [
+        {
+          "source": "/assets/zsa-005-interior-1536.webp",
+          "label": "Interior study"
+        }
+      ]
+    }
   }
 }

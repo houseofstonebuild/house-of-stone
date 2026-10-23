@@ -29,10 +29,10 @@ try {
  assert.equal(await page.locator('#hos-home-chapters [data-collection-section]').count(),5);
  assert.equal(await page.locator('#hos-home-chapters [data-model-fallback]').count(),0);
  assert.equal(await page.locator('#hos-home-chapters [data-model-stage]').count(),5,'All five source-matched reconstructions are reviewable privately');
- assert.equal(await page.locator('#hos-home-chapters .hos-collection-copy .hos-artist-context').count(),5,'Proposed artist profiles remain reviewable privately');
+ assert.equal(await page.locator('#hos-home-chapters .hos-collection-copy .hos-collection-credit').count(),5,'Proposed artist profiles remain reviewable privately');
  assert.equal(await page.locator('#hos-home-chapters .hos-supporting-preview').count(),5);
  assert.equal(await page.locator('#hos-home-chapters .hos-supporting-preview .hos-work-card').count(),15);
- assert.equal(await page.locator('#hos-home-chapters .hos-collection-reversed').count(),2);
+ assert.equal(await page.locator('#hos-home-chapters .hos-collection-reversed').count(),0);
  assert.equal(await page.locator('#hos-home-chapters [data-visual-mode="photo"][aria-pressed="true"]').count(),5);
  for(const collection of staged.draft.collections){
   assert.deepEqual(await page.locator(`#hos-home-chapters [data-collection-section="${collection.id}"] .hos-supporting-preview .hos-work-card`).evaluateAll(cards=>cards.map(card=>card.dataset.workRecord)),collection.workIds.slice(1,4));

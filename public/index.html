@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="/light-theme.css">
   <link rel="stylesheet" href="/collections.css">
   <link rel="stylesheet" href="/quality.css">
+  <link rel="stylesheet" href="/editorial-layout.css">
   <script type="module" src="/app.js"></script>
 </head>
 <body>
@@ -84,7 +85,22 @@
       <div id="hos-artist-studio" class="hos-artist-studio"></div><div id="hos-artist-works" class="hos-more-works"></div>
     </section>
     <section class="hos-view" data-page="work" hidden>
-      <div class="hos-work-layout"><div class="hos-work-photo" data-reveal><button id="hos-work-photo-open" type="button" class="hos-work-photo-open" aria-label="Inspect sculpture photograph"><img id="hos-work-image" alt="Sculpture photograph"></button><p id="hos-work-photo-caption" class="hos-photo-caption"></p><div id="hos-work-additional-images" class="hos-work-additional-images"></div></div><div class="hos-work-details" data-reveal><a id="hos-work-artist" class="hos-eyebrow hos-artist-name-link cursor-interaction" data-artist="tariro">TARIRO MAVHUNGA</a><h1 id="hos-work-title">Folded Light</h1><div id="hos-work-context" class="hos-work-context"></div><p id="hos-work-description"></p><button id="hos-work-model" class="hos-text-link cursor-interaction" type="button" data-model="folded-light" hidden>View in 3D <span class="hos-link-arrow" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M6 18 18 6M6 6h12v12"/></svg></span></button><div id="hos-work-core-specs" class="hos-work-specs"><div><span>Year made</span><span id="hos-work-year">Available on inquiry</span></div><div><span>Dimensions</span><span id="hos-work-dimensions">46 × 23 × 18 cm</span></div><div><span>Stone</span><span id="hos-work-material">Ivory limestone</span></div><div><span>Stone source</span><span id="hos-work-acquisition">Available on inquiry</span></div></div><div id="hos-work-extra-specs" class="hos-work-specs"></div><button id="hos-work-inquiry" class="hos-text-link cursor-interaction" type="button" data-inquiry="Folded Light">Inquire about this work <span class="hos-link-arrow" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M6 18 18 6M6 6h12v12"/></svg></span></button></div></div>
+      <div class="hos-work-layout">
+        <div class="hos-work-photo" data-reveal>
+          <div id="hos-work-additional-images" class="hos-work-additional-images" aria-label="Sculpture photographs"></div>
+          <div class="hos-work-primary-photo"><button id="hos-work-photo-open" type="button" class="hos-work-photo-open" aria-label="Inspect sculpture photograph"><img id="hos-work-image" alt="Sculpture photograph"></button><p id="hos-work-photo-caption" class="hos-photo-caption"></p><div class="hos-gallery-navigation"><button type="button" data-gallery-step="-1" aria-label="Previous sculpture photograph">Previous</button><span id="hos-gallery-count" role="status"></span><button type="button" data-gallery-step="1" aria-label="Next sculpture photograph">Next</button></div></div>
+        </div>
+        <div class="hos-work-details" data-reveal>
+          <div id="hos-work-context" class="hos-work-context"></div><h1 id="hos-work-title">Folded Light</h1><a id="hos-work-artist" class="hos-eyebrow hos-artist-name-link cursor-interaction" data-artist="tariro">TARIRO MAVHUNGA</a><p id="hos-work-description"></p><p id="hos-work-short-specs" class="hos-work-short-specs"></p>
+          <button id="hos-work-inquiry" class="hos-text-link hos-primary-action cursor-interaction" type="button" data-inquiry="Folded Light">Inquire about this work</button>
+          <button id="hos-work-model" class="hos-text-link cursor-interaction" type="button" data-model="folded-light" hidden>View in 3D</button>
+          <details id="hos-work-specifications" class="hos-work-disclosure"><summary>Sculpture details</summary><div id="hos-work-core-specs" class="hos-work-specs"><div><span>Year made</span><span id="hos-work-year"></span></div><div><span>Dimensions</span><span id="hos-work-dimensions"></span></div><div><span>Stone</span><span id="hos-work-material"></span></div><div><span>Stone source</span><span id="hos-work-acquisition"></span></div></div><div id="hos-work-extra-specs" class="hos-work-specs"></div></details>
+          <details id="hos-work-delivery" class="hos-work-disclosure"><summary>Delivery &amp; care</summary><div id="hos-work-service-specs" class="hos-work-specs"></div><p id="hos-work-delivery-note">Contact us to discuss delivery, installation and care for this sculpture.</p></details>
+          <details id="hos-work-provenance" class="hos-work-disclosure" hidden><summary>Authenticity &amp; provenance</summary><div id="hos-work-provenance-specs" class="hos-work-specs"></div></details>
+        </div>
+        <div id="hos-work-gallery-story" class="hos-work-gallery-story" aria-label="Details and settings"></div>
+      </div>
+      <div id="hos-mobile-work-action" class="hos-mobile-work-action" hidden><button id="hos-mobile-work-inquiry" class="hos-primary-action" type="button">Inquire about this work</button></div>
       <div id="hos-work-maker" class="hos-work-maker" hidden></div><div id="hos-work-related" class="hos-more-works"></div>
     </section>
     <section class="hos-view" data-page="making" hidden>
