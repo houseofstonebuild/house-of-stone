@@ -63,6 +63,11 @@
 #hos-concept .hos-recovery {padding-bottom:100px;}
 #hos-concept .hos-recovery .hos-text-link {display:table;margin-top:24px;}
 body.hos-photo-open {overflow:hidden;}
+@media(min-width:1600px){
+ #hos-concept .hos-collection-visual {--hos-visual-height:clamp(720px,76svh,1120px);}
+ #hos-concept .hos-collection-photo img {height:var(--hos-visual-height);}
+ #hos-concept .hos-work-photo-open img {height:clamp(720px,76svh,1120px);object-fit:contain;}
+}
 @media(max-width:1000px){#hos-concept .hos-collection-index {grid-template-columns:repeat(3,minmax(0,1fr));}}
 @media(max-width:700px){
  #hos-concept .hos-collection-jumps {gap:4px 20px;justify-content:flex-start;margin-bottom:30px;}
