@@ -43,7 +43,7 @@ export function storeMedia(input,mediaDir){
     if(image.width>original.width||Math.abs(image.width/image.height-original.width/original.height)>.015||seen.has(image.width))fail('Responsive image sizes do not match the original.');seen.add(image.width);
   }
   for(const image of [original,...sizes]){image.url='/media/'+image.digest+'.'+image.extension;const target=resolve(mediaDir,image.url.slice(7));if(!existsSync(target))writeFileSync(target,image.bytes,{mode:0o600,flag:'wx'});}
-  const candidates=sizes.sort((a,b)=>a.width-b.width);const metadata={width:original.width,height:original.height,srcset:candidates.map(image=>image.url+' '+image.width+'w').join(', '),variants:candidates.map(image=>image.url)};
+  const candidates=sizes.sort((a,b)=>a.width-b.width);const metadata={width:original.width,height:original.height,srcset:[...candidates.filter(image=>image.width<original.width).map(image=>image.url+' '+image.width+'w'),original.url+' '+original.width+'w'].join(', '),variants:candidates.map(image=>image.url)};
   // Content-derived names make re-uploading an image idempotent. Keep existing derivatives.
   const sidecar=resolve(mediaDir,original.digest+'.json');if(candidates.length||!existsSync(sidecar))writeFileSync(sidecar,JSON.stringify(metadata),{mode:0o600});
   return {key:'upload_'+original.digest,url:original.url,...metadata};

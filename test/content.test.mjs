@@ -118,7 +118,7 @@ test('responsive uploads preserve original bytes and keep every derivative priva
  const f=await fixture(t),bytes=readFileSync(new URL('../public/assets/fold.jpg',import.meta.url));
  const derivative=readFileSync(new URL('../public/assets/responsive/fold-960.webp',import.meta.url));
  const upload=await f.post('media',{type:'image/jpeg',data:bytes.toString('base64'),variants:[{type:'image/webp',data:derivative.toString('base64')}]});assert.equal(upload.status,201,await upload.clone().text());const photo=await upload.json();
- assert(photo.width>1000);assert(photo.srcset.includes('w'));const variant=photo.variants[0];assert.equal((await f.get(variant,false)).status,404);
+ assert(photo.width>1000);assert(photo.srcset.includes(photo.url+' '+photo.width+'w'),'Retina and large screens can request the untouched original at its native width');const variant=photo.variants[0];assert.equal((await f.get(variant,false)).status,404);
  const privateManifest=await(await f.get('/api/admin/media-manifest')).json();assert(!privateManifest[photo.url],'Unassigned uploads are not in the draft manifest');
  const state=await f.state();state.draft.assets[photo.key]=photo.url;state.draft.works[0].image=photo.key;const saved=await f.save(state.draft,state.revision);
  const draftManifest=await(await f.get('/api/admin/media-manifest')).json();assert(draftManifest[photo.url]);assert(!(await(await f.get('/media-manifest.json',false)).json())[photo.url]);await f.post('publish',{revision:saved.revision});
