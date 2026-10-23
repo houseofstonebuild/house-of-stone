@@ -68,9 +68,9 @@ try{
    if(screenshot){
     await page.locator('#hos-main img').evaluateAll(images=>images.filter(image=>image.getClientRects().length).forEach(image=>{image.loading='eager';}));
     await page.waitForFunction(()=>[...document.querySelectorAll('#hos-main img')].filter(image=>image.getClientRects().length).every(image=>image.complete&&image.naturalWidth>0));
-    await page.mouse.move(0,0);await page.evaluate(()=>{document.activeElement?.blur();window.scrollTo(0,0);});
+    await page.locator('#hos-main img').evaluateAll(images=>Promise.all(images.filter(image=>image.getClientRects().length).map(image=>image.decode())));await page.mouse.move(0,0);await page.evaluate(()=>{document.activeElement?.blur();window.scrollTo(0,0);});await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
     await page.screenshot({path:new URL(width+'-'+(work?work.id:'home')+'.jpg',output).pathname,type:'jpeg',quality:85,fullPage:true});
-    if(path==='/')for(const collection of catalog.collections)await page.locator('[data-collection-section="'+collection.id+'"]').screenshot({path:new URL(width+'-collection-'+collection.id+'.jpg',output).pathname,type:'jpeg',quality:90});
+    if(path==='/')for(const collection of catalog.collections){await page.locator('[data-collection-section="'+collection.id+'"]>.hos-collection-actions').scrollIntoViewIfNeeded();await page.screenshot({path:new URL(width+'-collection-'+collection.id+'.jpg',output).pathname,type:'jpeg',quality:90});}else{await page.locator('#hos-work-inquiry').scrollIntoViewIfNeeded();await page.screenshot({path:new URL(width+'-'+work.id+'-viewport.jpg',output).pathname,type:'jpeg',quality:90});}
    }
   }
  }
