@@ -1,0 +1,88 @@
+/* Refinements retain the approved ivory, proportions and type scale. */
+#hos-concept a {color:inherit;text-decoration:none;cursor:pointer;}
+#hos-concept a[aria-disabled="true"] {cursor:default;color:var(--hos-muted);}
+#hos-concept .hos-collection-jumps {display:flex;justify-content:center;flex-wrap:wrap;gap:8px 30px;margin:0 0 40px;padding:10px 0 22px;border-bottom:1px solid var(--hos-line);}
+#hos-concept .hos-collection-jumps a {min-height:44px;display:inline-flex;align-items:center;font-size:14px;border-bottom:1px solid transparent;}
+#hos-concept .hos-collection-jumps a:hover {border-color:currentColor;}
+#hos-concept .hos-collection-chapter {scroll-margin-top:110px;}
+#hos-concept .hos-collection-index {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:24px;padding-bottom:48px;border-bottom:1px solid var(--hos-line);}
+#hos-concept .hos-collection-index-card {display:block;min-width:0;}
+#hos-concept .hos-collection-index-card img {width:100%;aspect-ratio:3/4;height:auto;object-fit:contain;background:#eeeae2;}
+#hos-concept .hos-collection-index-card h2 {font-size:22px;margin:18px 0 8px;}
+#hos-concept .hos-collection-index-card p {font-size:15px;line-height:1.8;}
+#hos-concept .hos-index-count {display:block;font-size:13px;margin-top:12px;color:var(--hos-muted);}
+#hos-concept .hos-browse-heading {padding-top:40px;scroll-margin-top:100px;}
+#hos-concept .hos-browse-heading h2 {font-size:28px;margin-bottom:12px;}
+#hos-concept .hos-browse-heading p {font-size:15px;}
+#hos-concept .hos-work-card-photo img {aspect-ratio:3/4;height:auto;max-height:620px;object-fit:contain;}
+#hos-concept .hos-supporting-preview-grid .hos-work-card-photo img {height:auto;aspect-ratio:4/5;}
+#hos-concept .hos-work-card-copy>.hos-text-link[data-artist] {font-size:14px;}
+#hos-concept .hos-work-card .hos-card-specs {font-size:15px;}
+#hos-concept .hos-related-rail {margin-bottom:20px;}
+#hos-concept .hos-related-rail .hos-work-grid {grid-template-columns:repeat(3,minmax(0,1fr));}
+#hos-concept .hos-related-rail .hos-work-card {display:block;}
+#hos-concept .hos-more-works>.hos-text-link {margin:16px 0 38px;}
+#hos-concept .hos-work-photo-open {display:block;width:100%;cursor:zoom-in;}
+#hos-concept .hos-photo-caption {font-size:15px;margin-top:12px;}
+#hos-concept .hos-work-additional-images {display:flex;gap:14px;width:100%;margin:20px 0 0;overflow-x:auto;padding:5px 4px 12px;}
+#hos-concept .hos-photo-thumbnail {flex:0 0 88px;min-width:0;border-bottom:1px solid transparent;padding-bottom:6px;cursor:pointer;}
+#hos-concept .hos-photo-thumbnail[aria-pressed="true"] {border-bottom-color:var(--hos-fg);}
+#hos-concept .hos-photo-thumbnail img {width:88px;height:110px;object-fit:contain;background:#eeeae2;}
+#hos-concept .hos-photo-thumbnail span {font-size:12px;display:block;margin-top:6px;}
+#hos-concept .hos-photo-dialog {width:calc(100% - 48px);max-width:1600px;height:calc(100dvh - 48px);max-height:none;border:1px solid var(--hos-line);padding:24px;background:var(--hos-bg);color:var(--hos-fg);}
+#hos-concept .hos-photo-dialog::backdrop {background:rgba(35,30,23,.55);backdrop-filter:blur(4px);}
+#hos-concept .hos-photo-top {display:flex;justify-content:space-between;align-items:center;gap:24px;}
+#hos-concept .hos-photo-top h2 {font-size:24px;}
+#hos-concept .hos-photo-stage {height:calc(100% - 150px);overflow:auto;margin:18px 0;background:#eeeae2;text-align:center;}
+#hos-concept .hos-photo-stage img {width:100%;height:auto;max-width:none;max-height:100%;object-fit:contain;display:block;margin:auto;}
+#hos-concept .hos-photo-controls {display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 24px;font-size:13px;}
+#hos-concept .hos-photo-controls button {min-width:44px;min-height:44px;cursor:pointer;}
+#hos-concept .hos-photo-controls button:disabled {opacity:.4;cursor:default;}
+#hos-concept .hos-photo-zoom-controls {display:flex;gap:10px;}
+#hos-concept .hos-artist-studio,#hos-concept .hos-process-gallery,#hos-concept .hos-service-questions {width:calc(100% - var(--hos-gutter) * 2);max-width:var(--hos-content-width);margin:0 auto 60px;}
+#hos-concept .hos-artist-studio figure {margin:0;}
+#hos-concept .hos-artist-studio img {width:100%;max-height:800px;object-fit:contain;}
+#hos-concept figcaption {font-size:13px;color:var(--hos-muted);margin-top:12px;}
+#hos-concept .hos-artist-studio blockquote {font-size:clamp(20px,2vw,28px);max-width:800px;margin:40px auto;line-height:1.65;font-weight:300;}
+#hos-concept .hos-service-grid {padding-top:18px;}
+#hos-concept .hos-service-grid h2 {margin:12px 0;}
+#hos-concept .hos-service-questions {max-width:1000px;padding-top:28px;}
+#hos-concept .hos-service-questions h2 {font-size:26px;margin-bottom:26px;}
+#hos-concept .hos-service-questions details {border-top:1px solid var(--hos-line);padding:18px 0;}
+#hos-concept .hos-service-questions details:last-child {border-bottom:1px solid var(--hos-line);}
+#hos-concept .hos-service-questions summary {cursor:pointer;font-size:16px;min-height:44px;padding:10px 24px 10px 0;}
+#hos-concept .hos-service-questions details p {font-size:16px;margin:12px 0 8px;}
+#hos-concept .hos-process-gallery {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px;}
+#hos-concept .hos-process-gallery figure {margin:0;}
+#hos-concept .hos-process-gallery figure:first-child {grid-column:1/-1;}
+#hos-concept .hos-process-gallery img {width:100%;height:auto;max-height:850px;object-fit:contain;}
+#hos-concept .hos-inquiry-response-note {font-size:15px;margin:12px 0 30px;}
+#hos-concept .hos-discard {font-size:13px;min-height:44px;margin-top:24px;color:var(--hos-muted);text-decoration:underline;text-underline-offset:5px;cursor:pointer;}
+#hos-concept .hos-contact-email {display:block;font-size:14px;overflow-wrap:anywhere;margin:16px 0;}
+#hos-concept .hos-recovery {padding-bottom:100px;}
+#hos-concept .hos-recovery .hos-text-link {display:table;margin-top:24px;}
+body.hos-photo-open {overflow:hidden;}
+@media(max-width:1000px){#hos-concept .hos-collection-index {grid-template-columns:repeat(3,minmax(0,1fr));}}
+@media(max-width:700px){
+ #hos-concept .hos-collection-jumps {gap:4px 20px;justify-content:flex-start;margin-bottom:30px;}
+ #hos-concept .hos-collection-index {display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:68%;overflow-x:auto;scroll-snap-type:x proximity;gap:20px;padding-bottom:24px;}
+ #hos-concept .hos-collection-index-card {scroll-snap-align:start;}
+ #hos-concept .hos-collection-index-card h2 {font-size:22px;}
+ #hos-concept .hos-collection-filters label {min-width:calc(50% - 12px);}
+ #hos-concept .hos-related-rail .hos-work-grid {grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:78%;overflow-x:auto;scroll-snap-type:x proximity;gap:20px;padding-bottom:16px;}
+ #hos-concept .hos-related-rail .hos-work-card {scroll-snap-align:start;}
+ #hos-concept .hos-related-rail .hos-work-card-photo img {max-height:none;}
+ #hos-concept .hos-process-gallery {grid-template-columns:1fr;gap:28px;}
+ #hos-concept .hos-process-gallery figure:first-child {grid-column:auto;}
+ #hos-concept .hos-service-questions summary,#hos-concept .hos-service-questions details p {font-size:15px;}
+ #hos-concept .hos-photo-dialog {width:100%;height:100dvh;padding:18px;max-width:none;margin:0;}
+ #hos-concept .hos-photo-top h2 {font-size:20px;}
+ #hos-concept .hos-photo-stage {height:calc(100% - 180px);}
+ #hos-concept .hos-photo-controls {gap:4px 12px;}
+ #hos-concept .hos-photo-zoom-controls {width:100%;justify-content:center;}
+}
+@media(prefers-reduced-motion:reduce){#hos-concept .hos-related-rail * {scroll-behavior:auto!important;}}
+/* The browser already reserves space for the fixed header. */
+#hos-concept .hos-supporting-works,#hos-concept .hos-collection-chapter,#hos-concept .hos-browse-heading {scroll-margin-top:24px;}
+#hos-concept .hos-footer nav a,#hos-concept .hos-footer-bottom>a {display:inline-flex;align-items:center;min-height:44px;}
+#hos-concept .hos-footer-bottom .hos-privacy-link {font-size:13px;}

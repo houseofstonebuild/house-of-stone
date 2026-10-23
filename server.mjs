@@ -6,13 +6,15 @@ import { fileURLToPath } from 'node:url';
 import { randomUUID, createHmac, createHash, timingSafeEqual } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 import { validateCatalog, homepageImage, publicCatalog } from './catalog.mjs';
+import {storeMedia,uploadedManifest} from './media.mjs';
+import {pageDescriptions} from './public/presentation.js';
 import { prepareFoundingCollection } from './founding-collection.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = resolve(ROOT, 'public');
 const INTERESTS = ['Collecting a work', 'Sourcing for a project', 'Following the launch', 'Learning about the artists'];
-const EVENTS = new Set(['page_view', 'explore_click', 'artist_view', 'work_view', 'inquiry_opened', 'inquiry_started', 'model_view', 'model_interaction']);
-const PAGES = new Set(['home', 'collection', 'category', 'artists', 'artist', 'work', 'making', 'designers', 'collectors', 'house', 'privacy']);
+const EVENTS = new Set(['page_view', 'explore_click', 'artist_view', 'work_view', 'inquiry_opened', 'inquiry_started', 'model_view', 'model_interaction', 'photo_view']);
+const PAGES = new Set(['home', 'collection', 'category', 'artists', 'artist', 'work', 'making', 'designers', 'collectors', 'house', 'privacy', 'notfound']);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const esc = text => String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sha = value => createHash('sha256').update(value).digest();
@@ -226,12 +228,12 @@ export function createApp(options = {}) {
       return { work_id:work.id, title:work.title, ...views, inquiries:db.prepare('SELECT count(*) AS n FROM inquiries WHERE work_id=? AND created_at>=?').get(work.id,since).n };
     }).filter(work => work.views || work.inquiries).sort((a,b) => b.inquiries-a.inquiries || b.views-a.views);
     const sources = db.prepare("SELECT coalesce(nullif(source,''),'Direct / unknown') AS source, count(DISTINCT session_hash) AS sessions FROM events WHERE name='page_view' AND created_at>=? GROUP BY source ORDER BY sessions DESC").all(since);
-    const modelActivity = Object.fromEntries(['model_view','model_interaction'].map(name=>[name,db.prepare('SELECT count(DISTINCT session_hash) AS n FROM events WHERE name=? AND created_at>=?').get(name,since).n]));
+    const modelActivity = Object.fromEntries(['model_view','model_interaction','photo_view'].map(name=>[name,db.prepare('SELECT count(DISTINCT session_hash) AS n FROM events WHERE name=? AND created_at>=?').get(name,since).n]));
     return { days, funnel, works, sources, modelActivity, inquiries: db.prepare('SELECT count(*) AS n FROM inquiries WHERE created_at>=?').get(since).n, emailConfigured, indexing, definition: 'Sessions are browser visits, not verified people. One session can skip steps. Bots and repeat visitors can affect counts.' };
   }
   function pageMeta(path, content = catalog) {
     const labels = { '/':'Zimbabwean stone sculpture', '/collection':'The collection', '/artists':'The artists', '/making':'The making', '/designers':'For designers', '/collectors':'For collectors', '/house':'The house', '/privacy':'Privacy' };
-    if (labels[path]) return { title: `${labels[path]} | House of Stone`, description: content.site.description, image: homepageImage(content) };
+    if (labels[path]) return { title: `${labels[path]} | House of Stone`, description: pageDescriptions[path==='/'?'home':path.slice(1)] || content.site.description, image: homepageImage(content) };
     const collection = (content.collections || []).find(c => `/collections/${c.slug}` === path);
     if (collection) { const star = content.works.find(w => w.id === collection.starWorkId); return {title:`${collection.name} | House of Stone`,description:collection.description,image:content.assets[star?.image] || homepageImage(content)}; }
     const work = content.works.find(w => `/works/${w.slug}` === path);
@@ -309,21 +311,15 @@ export function createApp(options = {}) {
       }
       if (req.method === 'POST' && path === '/api/admin/media') {
         requireSameOrigin(req); rateLimit('uploads:' + clientHash(req), 40, 60000);
-        const input = await body(req, 45000000);
-        if (typeof input.data !== 'string' || input.data.length > 44750000 || !/^[A-Za-z0-9+/]+={0,2}$/.test(input.data)) throw new HttpError(400, 'Choose a JPEG, PNG or WebP image.');
-        const bytes = Buffer.from(input.data,'base64');
-        if (bytes.length > 32 * 1024 * 1024) throw new HttpError(413, 'Choose an image under 32 MB.');
-        let extension, mime;
-        if (bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) { extension = 'jpg'; mime = 'image/jpeg'; }
-        if (bytes.length > 8 && bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) { extension = 'png'; mime = 'image/png'; }
-        if (bytes.length > 12 && bytes.subarray(0,4).toString() === 'RIFF' && bytes.subarray(8,12).toString() === 'WEBP') { extension = 'webp'; mime = 'image/webp'; }
-        if (!extension || input.type !== mime) throw new HttpError(400, 'Choose a JPEG, PNG or WebP image.');
-        const digest = createHash('sha256').update(bytes).digest('hex'), filename = `${digest}.${extension}`;
-        if (!existsSync(resolve(mediaDir,filename))) writeFileSync(resolve(mediaDir,filename),bytes,{ mode: 0o600, flag: 'wx' });
-        return send(res, 201, { key: 'upload_' + digest, url: '/media/' + filename });
+        const input=await body(req,75000000);
+        return send(res,201,storeMedia(input,mediaDir));
+      }
+      if(req.method==='GET' && ['/media-manifest.json','/api/admin/media-manifest'].includes(path)){
+        const source=path.startsWith('/api/admin/')?collectionState().draft:catalog;
+        return send(res,200,{...JSON.parse(readFileSync(resolve(PUBLIC,'media-manifest.json'),'utf8')),...uploadedManifest(source.assets,mediaDir)});
       }
       if (['GET','HEAD'].includes(req.method) && /^\/media\/[a-f0-9]{64}\.(jpg|png|webp)$/.test(path)) {
-        const published = Object.values(catalog.assets).includes(path);
+        const published = Object.values(catalog.assets).includes(path) || Object.values(uploadedManifest(catalog.assets,mediaDir)).some(info=>info.variants?.includes(path));
         if (!published && !authenticated(req)) throw new HttpError(404, 'This image could not be found.');
         const filePath = resolve(mediaDir,path.slice(7));
         if (!existsSync(filePath)) throw new HttpError(404, 'This image could not be found.');
@@ -414,6 +410,10 @@ export function createApp(options = {}) {
       res.writeHead(200, headers);
       res.end(req.method === 'HEAD' ? '' : bytes || readFileSync(filePath));
     } catch (error) {
+      if(!res.headersSent && error.status===404 && ['GET','HEAD'].includes(req.method) && !req.url.startsWith('/api/') && !extname(req.url.split('?')[0]) && !req.url.startsWith('/media/')){
+        const replacements={TITLE:'Page not found | House of Stone',DESCRIPTION:'Explore the House of Stone collections or contact us about a sculpture.',URL:origin(req)+req.url.split('?')[0],IMAGE:origin(req)+homepageImage(catalog),ROBOTS:'noindex,nofollow'};
+        res.setHeader('X-Robots-Tag','noindex,nofollow');return send(res,404,req.method==='HEAD'?'':template.replace(/\{\{(TITLE|DESCRIPTION|URL|IMAGE|ROBOTS)\}\}/g,(_,key)=>esc(replacements[key])),'text/html; charset=utf-8');
+      }
       if (!res.headersSent) send(res, error.status ?? 500, { error: error.status ? error.message : 'We could not complete that request. Please try again.' });
     }
   });
@@ -435,5 +435,6 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   server.listen(port, process.env.HOST || '127.0.0.1', () => console.log(`House of Stone running on port ${port}. Private inbox: /admin (username admin).`));
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(() => process.exit(0)));
 }
+
 
 

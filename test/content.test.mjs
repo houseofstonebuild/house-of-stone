@@ -103,3 +103,29 @@ test('database backup includes content versions and uploaded media',async t=>{
   assert(existsSync(join(f.dataDir,'backups',file+'-media',uploaded.url.slice(7))));
   const copy=new DatabaseSync(join(f.dataDir,'backups',file));assert.equal(copy.prepare('SELECT count(*) AS n FROM collection_history').get().n,1);copy.close();
 });
+
+test('shoot content replaces existing records, retains named angles, biographies and editable page copy',async t=>{
+ const f=await fixture(t),state=await f.state(),work=state.draft.works[0];
+ work.views={left:'hero',right:'balance',back:'bird',detail:'together'};work.details={weightKg:'15',base:'Included',care:'A soft dry cloth.'};work.availability='reserved';
+ state.draft.artists[0].studioImage='fold';state.draft.artists[0].quote='The shape begins with the stone.';
+ state.draft.site.presentation.designers.intro='A new designer introduction.';state.draft.site.presentation.making.gallery=[{image:'process',caption:'Refining the form'}];
+ const saved=await f.save(state.draft,state.revision);assert.equal((await f.post('publish',{revision:saved.revision})).status,200);await f.restart();
+ const live=await(await f.get('/content.json',false)).json();assert.equal(live.works[0].id,work.id);assert.equal(live.works[0].views.back,'bird');assert.equal(live.works[0].details.weightKg,'15');assert.equal(live.works[0].availability,'reserved');assert.equal(live.artists[0].studioImage,'fold');assert.equal(live.site.presentation.making.gallery[0].caption,'Refining the form');
+ const invalid=await f.state();invalid.draft.works[0].views.left='missing-photo';assert.equal((await f.post('content',{revision:invalid.revision,catalog:invalid.draft})).status,400);
+});
+
+test('responsive uploads preserve original bytes and keep every derivative private until the master is published',async t=>{
+ const f=await fixture(t),bytes=readFileSync(new URL('../public/assets/fold.jpg',import.meta.url));
+ const derivative=readFileSync(new URL('../public/assets/responsive/fold-960.webp',import.meta.url));
+ const upload=await f.post('media',{type:'image/jpeg',data:bytes.toString('base64'),variants:[{type:'image/webp',data:derivative.toString('base64')}]});assert.equal(upload.status,201,await upload.clone().text());const photo=await upload.json();
+ assert(photo.width>1000);assert(photo.srcset.includes('w'));const variant=photo.variants[0];assert.equal((await f.get(variant,false)).status,404);
+ const privateManifest=await(await f.get('/api/admin/media-manifest')).json();assert(!privateManifest[photo.url],'Unassigned uploads are not in the draft manifest');
+ const state=await f.state();state.draft.assets[photo.key]=photo.url;state.draft.works[0].image=photo.key;const saved=await f.save(state.draft,state.revision);
+ const draftManifest=await(await f.get('/api/admin/media-manifest')).json();assert(draftManifest[photo.url]);assert(!(await(await f.get('/media-manifest.json',false)).json())[photo.url]);await f.post('publish',{revision:saved.revision});
+ assert.equal((await f.get(variant,false)).status,200);assert.deepEqual(Buffer.from(await(await f.get(photo.url,false)).arrayBuffer()),bytes);await f.restart();assert((await(await f.get('/media-manifest.json',false)).json())[photo.url].srcset.includes(variant));
+});
+
+test('missing page addresses use a branded noindex recovery page while missing APIs keep JSON errors',async t=>{
+ const f=await fixture(t),page=await f.get('/works/a-missing-sculpture',false);assert.equal(page.status,404);assert(page.headers.get('content-type').includes('text/html'));assert.equal(page.headers.get('x-robots-tag'),'noindex,nofollow');assert.match(await page.text(),/data-page="notfound"/);
+ const api=await f.get('/api/a-missing-endpoint',false);assert.equal(api.status,404);assert(api.headers.get('content-type').includes('application/json'));
+});

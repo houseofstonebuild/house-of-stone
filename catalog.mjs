@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { normalizePresentation } from './presentation.mjs';
 
 export class ContentError extends Error { constructor(message) { super(message); this.status = 400; } }
 const fail = message => { throw new ContentError(message); };
@@ -40,6 +41,7 @@ export function validateCatalog(input, { publicDir, mediaDir, publish = false, p
   for (const item of input.artists) {
     const record = identity(item, artists), required = publish && !record.archived;
     artists.push({ ...record, name: field(item.name, 'the artist name', 120, true), portrait: photo(item.portrait, 'the artist portrait', required),
+      studioImage:photo(item.studioImage,'the artist studio image',false),quote:field(item.quote,'the artist quotation',1000),
       practice: field(item.practice, 'the practice', 200), style: field(item.style, 'the style', 120),
       description: field(item.description, 'the artist introduction', 2000, required), biography: field(item.biography, 'the artist biography', 5000), story: field(item.story, 'the artist story', 5000) });
   }
@@ -50,7 +52,7 @@ export function validateCatalog(input, { publicDir, mediaDir, publish = false, p
     const required = publish && !record.archived && !artist.archived;
     const objectPosition = field(item.objectPosition, 'the image position', 30) || '50% center';
     if (!/^(\d{1,2}|100)% (center|top|bottom)$/.test(objectPosition)) fail('Invalid image position.');
-    works.push({ ...record, ...sculptureFields(item), artistId, title: field(item.title, 'the sculpture title', 160, true), image: photo(item.image, 'the sculpture photo', required),
+    works.push({ ...record, ...sculptureFields(item), views:Object.fromEntries(['left','right','back','detail','signature','scale'].map(key=>[key,photo(item.views?.[key],'the '+key+' photograph',false)])), artistId, title: field(item.title, 'the sculpture title', 160, true), image: photo(item.image, 'the sculpture photo', required),
       dimensions: field(item.dimensions, 'the dimensions', 120, required && !item.sourcePage), material: field(item.material, 'the stone type', 120, required && !item.sourcePage),
       yearMade: field(item.yearMade, 'the year made', 80), acquisitionMethod: field(item.acquisitionMethod, 'the stone source', 1000), description: field(item.description, 'the sculpture description', 3000, required && !item.sourcePage), objectPosition });
   }
@@ -61,7 +63,9 @@ export function validateCatalog(input, { publicDir, mediaDir, publish = false, p
   }
   const site = { name: 'House of Stone', description: field(input.site.description, 'the website description', 400, true),
     location: field(input.site.location, 'the location', 120), featuredWorkId: field(input.site.featuredWorkId, 'the featured sculpture', 80),
-    catalogueEdition: field(input.site.catalogueEdition, 'the catalogue edition', 80), heroImage: photo(input.site.heroImage, 'the homepage hero', false), heroAlt: field(input.site.heroAlt, 'the hero image description', 300, true) };
+    catalogueEdition: field(input.site.catalogueEdition, 'the catalogue edition', 80), heroImage: photo(input.site.heroImage, 'the homepage hero', false), contactEmail:field(input.site.contactEmail,'the contact email',254),inquiryNote:field(input.site.inquiryNote,'the inquiry response note',400),
+    presentation:normalizePresentation(input.site.presentation,{field,photo,fail}),heroAlt: field(input.site.heroAlt, 'the hero image description', 300, true) };
+  if(site.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(site.contactEmail))fail('Enter a valid contact email.');
   const available = works.filter(w => !w.archived && !artistMap.get(w.artistId).archived);
   if (publish && !available.length) fail('Keep at least one visible sculpture in the collection before publishing.');
   if (!available.some(w => w.id === site.featuredWorkId)) site.featuredWorkId = available[0]?.id || '';
@@ -90,17 +94,17 @@ export function validateCatalog(input, { publicDir, mediaDir, publish = false, p
 const verifiedFields = ['title','artist','material','dimensions','yearMade','description','size','finish','signature','weight','base','location','delivery','shipping','installation','care','authenticity','provenance','acquisitionMethod','availability','model'];
 const detailFields = ['finish','signature','weightKg','base','location','delivery','shipping','installation','care','authenticity','provenance'];
 function sculptureFields(item) {
-  if (!item.sourcePage) return {};
-  if (!Number.isInteger(item.sourcePage) || item.sourcePage < 1 || item.sourcePage > 31) fail('Invalid original source page.');
-  if (!['unknown','available','sold','reserved'].includes(item.availability)) fail('Choose a valid availability.');
+  const legacy=!item.sourcePage;
+  if (!legacy && (!Number.isInteger(item.sourcePage) || item.sourcePage < 1 || item.sourcePage > 31)) fail('Invalid original source page.');
+  if (!['unknown','available','sold','reserved'].includes(item.availability || 'unknown')) fail('Choose a valid availability.');
   const verification = Object.fromEntries(verifiedFields.map(key => [key,item.verification?.[key] === true]));
-  if (item.availability === 'reserved' && !verification.availability) fail('Confirm availability before marking a sourced work reserved.');
+  if (!legacy && item.availability === 'reserved' && !verification.availability) fail('Confirm availability before marking a sourced work reserved.');
   const details = Object.fromEntries(detailFields.map(key => [key,field(item.details?.[key],key,2000)]));
   if (details.weightKg && (!Number.isFinite(Number(details.weightKg)) || Number(details.weightKg) <= 0)) fail('Weight must be a positive number of kilograms.');
   if (!Array.isArray(item.additionalImages || []) || (item.additionalImages || []).length > 30) fail('Choose up to 30 additional photographs.');
   const additionalImages = (item.additionalImages || []).map(key => field(key,'an additional photograph',100,true));
-  return {sourcePage:item.sourcePage,sourceDocument:field(item.sourceDocument,'the source document',200),sourceCrop:field(item.sourceCrop,'the source crop',30),visualDescription:field(item.visualDescription,'the photograph description',1000),
-    availability:item.availability,colour:field(item.colour,'the colour',80),size:field(item.size,'the size',80),verification,details,additionalImages,
+  return {...(legacy?{}:{sourcePage:item.sourcePage}),sourceDocument:field(item.sourceDocument,'the source document',200),sourceCrop:field(item.sourceCrop,'the source crop',30),visualDescription:field(item.visualDescription,'the photograph description',1000),
+    availability:item.availability || 'unknown',colour:field(item.colour,'the colour',80),size:field(item.size,'the size',80),verification,details,additionalImages,
     modelStatus:['needed','ready','review','not-planned'].includes(item.modelStatus)?item.modelStatus:'needed',internalNotes:field(item.internalNotes,'the private notes',5000)};
 }
 export function publicCatalog(catalog, {preview = false} = {}) {
@@ -113,12 +117,13 @@ export function publicCatalog(catalog, {preview = false} = {}) {
     const result = {id:work.id,slug:work.slug,image:work.image,objectPosition:work.objectPosition,
       modelVerified:v.model===true,title:v.title ? work.title : `${collection?.name || 'Sculpture'} ${String((collection?.workIds.indexOf(work.id) ?? 0)+1).padStart(2,'0')}`,
       artistId:v.artist ? work.artistId : '',availability:work.availability === 'sold' || v.availability ? work.availability : 'unknown',
-      description:v.description ? work.description : work.visualDescription,colour:work.colour,size:v.size && v.dimensions ? work.size : '',additionalImages:work.additionalImages || [],details:{}};
+      description:v.description ? work.description : work.visualDescription,colour:work.colour,size:v.size && v.dimensions ? work.size : '',additionalImages:work.additionalImages || [],views:work.views || {},details:{}};
     for (const key of ['material','dimensions','yearMade','acquisitionMethod']) result[key] = v[key] ? work[key] : '';
     for (const [key,value] of Object.entries(work.details || {})) if (v[key === 'weightKg' ? 'weight' : key]) result.details[key] = value;
     return result;
   });
-  const keys = new Set(['hero','logo','process','balancing-rocks',catalog.site.heroImage,...artists.map(a => a.portrait),...works.flatMap(w => [w.image,...(w.additionalImages || [])])]);
+  const pageImages=Object.values(catalog.site.presentation || {}).flatMap(page=>[page.image,...(page.gallery || []).map(photo=>photo.image)]);
+  const keys = new Set([...pageImages,'hero','logo','process','balancing-rocks',catalog.site.heroImage,...artists.flatMap(a => [a.portrait,a.studioImage]),...works.flatMap(w => [w.image,...Object.values(w.views || {}),...(w.additionalImages || [])])]);
   return { site: catalog.site, assets: Object.fromEntries(Object.entries(catalog.assets).filter(([key]) => keys.has(key))), artists, works, collections };
 }
 export function homepageImage(catalog) { return catalog.assets[catalog.site.heroImage] || '/assets/designer-apartment.jpg'; }

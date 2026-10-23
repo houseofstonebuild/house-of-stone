@@ -1,3 +1,5 @@
+import {defaultPresentation} from './presentation.js';
+import {preparePhoto} from './media-upload.js';
 const $ = selector => document.querySelector(selector);
 const fields = $('#fields');
 let state, draft, selection = {kind:'work',id:''}, dirty = false, busy = false;
@@ -24,6 +26,7 @@ async function api(path, data) {
 function accept(result) {
   state = result; draft = structuredClone(result.draft);
   if (!draft.site.heroImage) { draft.assets['designer-apartment'] ||= '/assets/designer-apartment.jpg'; draft.site.heroImage = 'designer-apartment'; draft.site.heroAlt = 'Stone sculptures in a New York apartment overlooking Manhattan'; }
+  draft.site.presentation ||= structuredClone(defaultPresentation);
   dirty = false; $('#conflict').hidden = true;
 }
 async function save() {
@@ -40,7 +43,7 @@ async function operation(action) {
 function selected() { return selection.kind === 'site' ? draft.site : draft[selection.kind === 'artist'?'artists':selection.kind === 'collection'?'collections':'works'].find(item=>item.id===selection.id); }
 function field(parent, record, key, label, {wide=false, multiline=false, options, required=false, max=200} = {}) {
   const wrapper = element('label',label,wide?'wide':'');
-  const input = element(options?'select':multiline?'textarea':'input'); input.id = 'field-' + key; input.name = key;
+  const input = element(options?'select':multiline?'textarea':'input'); input.id = 'field-' + key + (document.querySelector('#field-'+key)?'-'+crypto.randomUUID():''); input.name = key;
   if (options) for (const choice of options) { const option = element('option',choice.label); option.value = choice.value; input.append(option); }
   if (!options) { input.maxLength = max; if (!multiline) input.type = 'text'; }
   input.required = required; input.value = record[key] || '';
@@ -52,18 +55,17 @@ function field(parent, record, key, label, {wide=false, multiline=false, options
   });
   wrapper.append(input); parent.append(wrapper); return input;
 }
-function photo(record,key,label) {
+function photo(record,key,label,parent=fields) {
   const section = element('div',undefined,'photo-editor'); section.append(element('h3',label));
   const current = element('div',undefined,'photo-current'), img = element('img');
   img.alt = label; img.hidden = !draft.assets[record[key]]; if (!img.hidden) img.src = draft.assets[record[key]];
   const wrapper = element('label','Upload a new photo'), input = element('input'); input.type='file'; input.accept='image/jpeg,image/png,image/webp';
-  wrapper.append(input,element('span','JPEG, PNG or WebP · up to 32 MB. Original resolution is preserved. Use a sharp, well-lit image with the entire work visible.','note')); current.append(img,wrapper); section.append(current);
+  wrapper.append(input,element('span','JPEG, PNG or WebP · up to 32 MB. Original resolution is preserved; responsive sizes are prepared automatically. Use a sharp, well-lit image with the entire work visible.','note')); current.append(img,wrapper); section.append(current);
   input.addEventListener('change',()=>operation(async()=>{
     const file = input.files[0]; if (!file) return;
     if (file.size > 32*1024*1024 || !['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('Choose a JPEG, PNG or WebP image under 32 MB.');
     message('Uploading photo…');
-    const data = await new Promise((resolve,reject)=>{ const reader=new FileReader(); reader.onload=()=>resolve(reader.result.split(',')[1]); reader.onerror=()=>reject(new Error('The photo could not be read.')); reader.readAsDataURL(file); });
-    const uploaded = await api('media',{data,type:file.type}); draft.assets[uploaded.key] = uploaded.url; record[key] = uploaded.key; edited(); message('Photo uploaded. Save the draft or publish when ready.');
+    const uploaded=await api('media',await preparePhoto(file)); draft.assets[uploaded.key] = uploaded.url; record[key] = uploaded.key;if(selection.kind==='work' && ['image','left','right','back'].includes(key)){const work=selected();if(work.verification)work.verification.model=false;work.modelStatus='needed';}edited(); message('Photo uploaded. Save the draft or publish when ready.');
   }));
   const details = element('details'), grid = element('div',undefined,'photo-grid'); details.append(element('summary','Choose an existing photo'),grid);
   for (const [asset,url] of Object.entries(draft.assets)) {
@@ -71,9 +73,9 @@ function photo(record,key,label) {
     const button = element('button'); button.type='button'; button.title = asset.startsWith('upload_')?'Uploaded photo':asset;
     button.setAttribute('aria-label',button.title); button.setAttribute('aria-pressed',String(asset===record[key]));
     const thumb=element('img'); thumb.src=url; thumb.alt=''; thumb.loading='lazy'; button.append(thumb);
-    button.addEventListener('click',()=>{record[key]=asset;edited();render();}); grid.append(button);
+    button.addEventListener('click',()=>{record[key]=asset;if(selection.kind==='work' && ['image','left','right','back'].includes(key)){const work=selected();if(work.verification)work.verification.model=false;work.modelStatus='needed';}edited();render();}); grid.append(button);
   }
-  section.append(details); fields.append(section);
+  section.append(details);parent.append(section);
 }
 function archive(record, label) {
   const wrapper=element('label',undefined,'checkbox'), input=element('input'); input.type='checkbox'; input.checked=record.archived;
@@ -103,6 +105,7 @@ function render() {
   fields.append(element('h2',selection.kind==='site'?'Homepage & site details':record.title||record.name));
   const grid=element('div',undefined,'field-grid');fields.append(grid);
   if(selection.kind==='work') {
+    const ready=['Front: '+(record.image?'ready':'needed'),...['left','right','back'].map(key=>key[0].toUpperCase()+key.slice(1)+': '+(record.views?.[key]?'ready':'needed'))];fields.append(element('p','Shoot handoff · '+ready.join(' · '),'note'));
     field(grid,record,'title','Sculpture title',{required:true,max:160});
     field(grid,record,'artistId','Artist',{required:true,options:draft.artists.map(a=>({value:a.id,label:a.name+(a.archived?' · Archived':'')}))});
     field(grid,record,'slug','Page address',{max:100}); field(grid,record,'dimensions','Dimensions · height × width × depth',{max:120});
@@ -110,14 +113,20 @@ function render() {
     field(grid,record,'yearMade','Year made (optional)',{max:80});
     field(grid,record,'acquisitionMethod','How the artist acquired the stone',{wide:true,multiline:true,max:1000});
     field(grid,record,'description','About the sculpture',{wide:true,multiline:true,max:3000});
-    photo(record,'image','Sculpture photo'); archive(record,'Archive this sculpture · hide it from the website');
+    photo(record,'image','Front / main photograph');
+    record.views ||= {};const angles=element('details',undefined,'photo-slots');angles.append(element('summary','Angles and detail photographs'));fields.append(angles);
+    for(const [key,label] of [['left','Left'],['right','Right'],['back','Back'],['detail','Surface detail'],['signature','Signature'],['scale','Scale view']])photo(record.views,key,label,angles);
+    archive(record,'Archive this sculpture · hide it from the website');
+    record.details ||= {};
+      record.details ||= {};
+      for(const [key,label] of [['finish','Finish'],['signature','Signature information'],['weightKg','Weight in kilograms'],['base','Base details · state whether included'],['location','Current location'],['delivery','Delivery estimate'],['shipping','Shipping information'],['installation','Installation'],['care','Care'],['authenticity','Authenticity'],['provenance','Documented provenance']])field(grid,record.details,key,label,{wide:true,multiline:key!=='weightKg',max:2000});
+
+    field(grid,record,'availability','Availability',{options:[{value:'unknown',label:'Details on inquiry'},{value:'available',label:'Available'},{value:'reserved',label:'Reserved'},{value:'sold',label:'Sold'}]});
     if(record.sourcePage) {
+      record.verification ||= {};
       fields.append(element('p',`Original ZSA page ${record.sourcePage}. ${record.sourceCrop ? 'Source photograph is cropped at the '+record.sourceCrop+'. ' : ''}Working information below stays private until each field is confirmed.`, 'note'));
-      field(grid,record,'availability','Availability',{options:[{value:'unknown',label:'Not yet confirmed'},{value:'available',label:'Available · confirmation required'},{value:'reserved',label:'Reserved · confirmation required'},{value:'sold',label:'Sold'}]});
       field(grid,record,'colour','Colour visible in the source photo',{max:80});
       field(grid,record,'size','Size category',{options:[{value:'',label:'Not recorded'},{value:'Small',label:'Small'},{value:'Medium',label:'Medium'},{value:'Large',label:'Large'}]});
-      record.details ||= {};record.verification ||= {};
-      for(const [key,label] of [['finish','Finish'],['signature','Signature information'],['weightKg','Weight in kilograms'],['base','Base details · state whether included'],['location','Current location'],['delivery','Delivery estimate'],['shipping','Shipping information'],['installation','Installation'],['care','Care'],['authenticity','Authenticity'],['provenance','Documented provenance']])field(grid,record.details,key,label,{wide:true,multiline:key!=='weightKg',max:2000});
       const additional={photos:(record.additionalImages || []).join('\n')};field(grid,additional,'photos','Additional photo asset keys · one per line',{wide:true,multiline:true,max:3000});
       grid.querySelector('#field-photos').addEventListener('input',event=>{record.additionalImages=event.target.value.split(/\s+/).filter(Boolean);});
       field(grid,record,'internalNotes','Private content and asset notes',{wide:true,multiline:true,max:5000});
@@ -140,14 +149,32 @@ function render() {
     field(grid,record,'name','Artist name',{required:true,max:120});field(grid,record,'slug','Page address',{max:100});
     field(grid,record,'style','Style',{max:120});
     field(grid,record,'description','Introduction',{wide:true,multiline:true,max:2000});field(grid,record,'biography','Brief biography',{wide:true,multiline:true,max:5000});field(grid,record,'story','The artistic practice',{wide:true,multiline:true,max:5000});
-    photo(record,'portrait','Artist portrait');archive(record,'Archive this artist · hide their profile and sculptures');
+    field(grid,record,'quote','Artist quotation · use their own words',{wide:true,multiline:true,max:1000});
+    photo(record,'portrait','Artist portrait');photo(record,'studioImage','Artist beside their sculpture / studio portrait');archive(record,'Archive this artist · hide their profile and sculptures');
   } else {
     field(grid,record,'location','Location',{wide:true,max:120});field(grid,record,'description','Website description for search and sharing',{wide:true,multiline:true,max:400});
+    field(grid,record,'contactEmail','Public contact email · leave empty until ready',{wide:true,max:254});field(grid,record,'inquiryNote','Inquiry response note · only promise a timing you can meet',{wide:true,multiline:true,max:400});
     field(grid,record,'heroAlt','Hero photo description for screen readers',{wide:true,max:300});
-    photo(record,'heroImage','Homepage hero photo');
+    photo(record,'heroImage','Homepage hero photo');renderPageFields(record);
   }
   renderHistory();
 }
+function renderPageFields(site){
+  for(const key of ['designers','collectors','house','making']){
+    const page=site.presentation[key] ||= structuredClone(defaultPresentation[key]);const section=element('details',undefined,'page-content-editor');section.append(element('summary',key==='house'?'The House':key==='making'?'The Making':'For '+key));fields.append(section);
+    const grid=element('div',undefined,'field-grid');section.append(grid);
+    for(const name of ['title','intro','vision','foundersTitle','founders','approach','caption'])if(name in page)field(grid,page,name,key+' · '+name,{wide:true,multiline:!['title','foundersTitle'].includes(name),max:name==='title'?160:3000});
+    if('image' in page)photo(page,'image',key==='house'?'Founders photograph':key+' page photograph',section);
+    for(const name of ['steps','questions'])if(page[name])for(const [i,item] of page[name].entries()){
+      field(grid,item,'title',name+' '+(i+1)+' · heading',{wide:true,max:160});field(grid,item,'text',name+' '+(i+1)+' · text',{wide:true,multiline:true,max:3000});
+    }
+    if(key==='making'){
+      page.gallery ||= [];while(page.gallery.length<10)page.gallery.push({image:'',caption:''});
+      page.gallery.forEach((item,i)=>{const slot=element('details',undefined,'process-photo-slot');slot.append(element('summary','Process photograph '+(i+1)));section.append(slot);photo(item,'image','Process photograph '+(i+1),slot);const text=element('div');slot.append(text);field(text,item,'caption','Caption',{wide:true,max:300});});
+    }
+  }
+}
+
 function renderHistory() {
   const container=$('#history');container.replaceChildren();
   for(const version of state.history) {

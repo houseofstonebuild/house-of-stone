@@ -1,3 +1,5 @@
+import { presentationFor, pageDescriptions } from './presentation.js';
+import { initializeGallery } from './gallery.js';
 const root = document.getElementById('hos-concept');
 const previewMode = location.pathname === '/admin/preview' || location.pathname.startsWith('/admin/preview/');
 const routePath = () => previewMode ? location.pathname.slice('/admin/preview'.length) || '/' : location.pathname;
@@ -39,6 +41,15 @@ function el(tag, className, text) {
 }
 let catalog, artists, works, assets, collections = [], media = {}, editorial = {}, models = {}, viewerPromise, modelViewer;
 let activePage = 'home', activeArtist, activeWork;
+let gallery;
+const inquiryDrafts=new Map();
+let inquiryDraftKey='', privacyReturn=false;
+const inquiryKey=context=>[context.workId,context.artistId,context.intent,context.topic].join('|');
+function saveInquiryDraft(){
+ if(!inquiryDraftKey || success.hidden===false)return;
+ inquiryDrafts.set(inquiryDraftKey,{context:{...inquiryContext},submissionId,started:inquiryStarted,values:Object.fromEntries(['name','email','interest','message'].map(key=>[key,form.elements[key].value]))});
+}
+
 let inquiryContext = {}, submissionId = '', inquiryStarted = false, submitting = false, lastInquiryButton, inquiryScroll = 0;
 const motionPreference = window.matchMedia?.('(prefers-reduced-motion: reduce)');
 let compactHeader;
@@ -76,6 +87,7 @@ function setMenu(open) {
 }
 function statusMessage(text, error = false) { status.textContent = text; status.setAttribute('role', error ? 'alert' : 'status'); }
 function applyImage(img, source, sizes = '(max-width: 650px) 100vw, 55vw') {
+  if(!source){img.removeAttribute('src');img.removeAttribute('srcset');return;}
   img.decoding = 'async';
   const info = media[source];
   img.removeAttribute('srcset'); img.removeAttribute('width'); img.removeAttribute('height');
@@ -90,14 +102,28 @@ function image(key, alt, lazy = true, sizes) {
   if (lazy) img.loading = 'lazy';
   return img;
 }
-function link(text, data) {
-  const button = el('button', 'hos-text-link cursor-interaction', text);
-  button.type = 'button'; Object.assign(button.dataset, data);
-  const arrow = el('span', 'hos-link-arrow'); arrow.setAttribute('aria-hidden', 'true');
-  arrow.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M6 18 18 6M6 6h12v12"/></svg>';
-  button.append(arrow);
-  return button;
+function routeURL(path) { return (previewMode ? '/admin/preview' : '') + path; }
+function destination(data) {
+  if(data.view)return data.view==='home'?'/':'/'+data.view;
+  if(data.work!==undefined){const work=works?.find(w=>w.id===data.work)||works?.[Number(data.work)];if(work)return '/works/'+work.slug;}
+  if(data.artist){const artist=artists?.find(a=>a.id===data.artist);if(artist)return '/artists/'+artist.slug;}
+  if(data.collection){const collection=collections.find(c=>c.id===data.collection);if(collection)return '/collections/'+collection.slug+(data.available?'#hos-supporting-'+collection.id:'');}
+  if(data.scrollSupporting)return '/collections/'+collections.find(c=>c.id===data.scrollSupporting)?.slug+'#hos-supporting-'+data.scrollSupporting;
+  return '';
 }
+function refreshLinks(container=root){
+  for(const node of container.querySelectorAll('a[data-view],a[data-work],a[data-artist],a[data-collection],a[data-scroll-supporting]')){
+    const path=destination(node.dataset);if(path){node.href=routeURL(path);node.removeAttribute('aria-disabled');}else{node.removeAttribute('href');node.setAttribute('aria-disabled','true');}
+  }
+}
+function link(text, data) {
+  const path=destination(data),button=el(path?'a':'button','hos-text-link cursor-interaction',text);
+  if(path)button.href=routeURL(path);else button.type='button';Object.assign(button.dataset,data);
+  const arrow=el('span','hos-link-arrow');arrow.setAttribute('aria-hidden','true');
+  arrow.innerHTML=path?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg>':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg>';
+  button.append(arrow);return button;
+}
+function photoLink(className,data,label){const node=el('a',className);Object.assign(node.dataset,data);node.href=routeURL(destination(data));node.setAttribute('aria-label',label);return node;}
 const artistFor = work => artists.find(artist => artist.id === work.artistId);
 const collectionFor = work => collections.find(collection => collection.workIds.includes(work.id));
 const workLabel = work => `${work.title}${artistFor(work) ? ' by ' + artistFor(work).name : ''}`;
@@ -111,7 +137,7 @@ function credit(work) {
 }
 function workCard(work, {compact = false} = {}) {
   const card = el('article', 'hos-work-card');card.dataset.workRecord=work.id;
-  const photo = el('button','hos-work-card-photo cursor-interaction'); photo.type = 'button'; photo.dataset.work = work.id;
+  const photo = photoLink('hos-work-card-photo cursor-interaction',{work:work.id},`View ${workLabel(work)}`);
   photo.setAttribute('aria-label', `View ${workLabel(work)}`);
   photo.append(image(work.image,work.description || workLabel(work),true,'(max-width: 700px) 90vw, 520px'));
   const copy = el('div','hos-work-card-copy'), badge=availabilityLabel(work);
@@ -161,7 +187,7 @@ function supportingPreview(collection) {
 }
 function collectionChapter(collection, {heading = true} = {}) {
   const work=works.find(work=>work.id===collection.starWorkId), section=el('section','hos-collection-chapter');
-  section.dataset.collectionSection=collection.id;
+  section.dataset.collectionSection=collection.id;if(heading)section.id='hos-home-'+collection.id;
   if(heading && collections.indexOf(collection)%2===1)section.classList.add('hos-collection-reversed');
   if(!work)return section;
   const introduction=el('div','hos-collection-introduction');introduction.dataset.reveal='';
@@ -175,7 +201,7 @@ function collectionChapter(collection, {heading = true} = {}) {
   if(collection.introduction)copy.append(el('p','',collection.introduction));
   if(work.material || work.dimensions)copy.append(el('p','hos-card-specs',[work.material,work.dimensions].filter(Boolean).join(' · ')));
   const actions=el('div','hos-collection-actions');
-  if(heading){const primary=link(work.availability==='sold'?'Explore available works':'Explore the collection',{collection:collection.id});primary.classList.add('hos-collection-primary');actions.append(primary);}
+  if(heading){const primary=link(work.availability==='sold'?'Explore available works':'Explore the collection',{collection:collection.id,...(work.availability==='sold'?{available:'true'}:{})});primary.classList.add('hos-collection-primary');actions.append(primary);}
   else if(work.availability==='sold')actions.append(link('Explore available works',{scrollSupporting:collection.id}));
   const detail=link('View star sculpture',{work:work.id});detail.classList.add('hos-collection-secondary');actions.append(detail);
   const inquire=link(work.availability==='sold'?'Inquire about related works':'Inquire about this work',{inquiry:work.availability==='sold'?`Alternatives to ${workLabel(work)}`:workLabel(work),inquiryWork:work.id,inquiryArtist:artistFor(work)?.id || '',inquiryIntent:work.availability==='sold'?'alternatives':''});inquire.disabled=previewMode;actions.append(inquire);
@@ -188,24 +214,66 @@ function filteredWorks(container, selected, label = 'Browse works') {
   const filters=el('div','hos-collection-filters'), gridHost=el('div'),counter=el('p','hos-filter-count');
   counter.setAttribute('role','status');counter.setAttribute('aria-live','polite');
   const state={};
-  for(const [key,name] of [['material','Stone'],['colour','Colour'],['size','Size']]) {
+  selected=selected.map(work=>({...work,collectionName:collectionFor(work)?.name || '',artistName:artistFor(work)?.name || ''}));
+  for(const [key,name] of [['collectionName','Collection'],['artistName','Artist'],['material','Stone'],['colour','Color'],['size','Size']]) {
+    if(new Set(selected.map(work=>work[key]).filter(Boolean)).size<2)continue;
     const wrapper=el('label','',name), select=el('select');select.setAttribute('aria-label',name);select.dataset.filter=key;
     const options=[['',`All ${name.toLowerCase()}s`],...[...new Set(selected.map(work=>work[key]).filter(Boolean))].sort().map(value=>[value,value])];
     if(selected.some(work=>!work[key]))options.push(['__unknown','Details on inquiry']);
     for(const [value,text] of options){const option=el('option','',text);option.value=value;select.append(option);}
     select.addEventListener('change',()=>{state[key]=select.value;update();});wrapper.append(select);filters.append(wrapper);
   }
-  const reset=el('button','hos-text-link','Reset filters');reset.type='button';reset.addEventListener('click',()=>{for(const key of Object.keys(state))delete state[key];filters.querySelectorAll('select').forEach(select=>select.value='');update();});filters.append(reset);
-  function update(){const result=selected.filter(work=>Object.entries(state).every(([key,value])=>!value || (value==='__unknown'?!work[key]:work[key]===value)));counter.textContent=`${result.length} ${result.length===1?'work':'works'}`;gridHost.replaceChildren(result.length?workGrid(result):el('p','hos-empty-results','No works match these filters. Try another selection.'));observeReveals(section);}
+  const reset=el('button','hos-text-link','Reset filters');reset.type='button';reset.addEventListener('click',()=>{for(const key of Object.keys(state))delete state[key];filters.querySelectorAll('select').forEach(select=>select.value='');update();});filters.append(reset);if(!filters.querySelector('select'))filters.hidden=true;
+  function update(){const result=selected.filter(work=>Object.entries(state).every(([key,value])=>!value || (value==='__unknown'?!work[key]:work[key]===value)));counter.textContent=`${result.length} ${result.length===1?'work':'works'}${label==='Supporting sculptures'?' beyond the featured sculpture':''}`;gridHost.replaceChildren(result.length?workGrid(result):el('p','hos-empty-results','No works match these filters. Try another selection.'));refreshLinks(section);observeReveals(section);}
   section.append(filters,counter,gridHost);container.append(section);update();
 }
 function renderCollection(collection) {
   const container=$('#hos-category-content');container.replaceChildren(collectionChapter(collection,{heading:false}));
   const supporting=el('section','hos-supporting-works');supporting.id='hos-supporting-'+collection.id;
-  supporting.append(el('h2','','In this collection'));
+  supporting.append(el('h2','','More from '+collection.name));
   const selected=collection.workIds.filter(id=>id!==collection.starWorkId).map(id=>works.find(work=>work.id===id)).filter(Boolean);
   filteredWorks(supporting,selected,'Supporting sculptures');container.append(supporting);watchModels(container);
 }
+function relatedRail(selected,label) {
+  const container=el('section','hos-related-rail');container.setAttribute('aria-label',label);
+  const grid=workGrid(selected.slice(0,3));container.append(grid);return container;
+}
+function collectionIndex(container,{home=false}={}) {
+  const nav=el('nav',home?'hos-collection-jumps':'hos-collection-index');nav.setAttribute('aria-label',home?'Jump to a collection':'Browse collections');
+  for(const collection of collections){
+    const work=works.find(work=>work.id===collection.starWorkId);if(!work)continue;
+    if(home){const anchor=el('a','',collection.name);anchor.href='#hos-home-'+collection.id;anchor.dataset.jumpCollection='hos-home-'+collection.id;nav.append(anchor);}
+    else{const card=el('a','hos-collection-index-card');card.href=routeURL('/collections/'+collection.slug);card.dataset.collection=collection.id;card.append(image(work.image,collection.name+' collection',true,'(max-width:700px) 70vw, 260px'),el('h2','',collection.name),el('p','',collection.description),el('span','hos-index-count',collection.workIds.length+' works'));nav.append(card);}
+  }
+  container.append(nav);
+}
+function renderOverview(){
+  const container=$('#hos-collection-chapters');container.replaceChildren();
+  if(collections.length)collectionIndex(container);
+  const heading=el('div','hos-browse-heading');heading.id='hos-all-works';heading.append(el('h2','','All works'),el('p','',works.length+' sculptures in the Founding Collection.'));container.append(heading);
+  filteredWorks(container,works,'All sculptures');
+}
+function renderPresentation(){
+  for(const key of ['designers','collectors']){
+    const page=$(`[data-page="${key}"]`),content=presentationFor(catalog.site,key);
+    page.querySelector('h1').textContent=content.title;page.querySelector('.hos-page-heading p').textContent=content.intro;
+    const img=page.querySelector('.hos-editorial-image img');if(assets[content.image]){applyImage(img,assets[content.image],'90vw');img.alt=content.caption;}page.querySelector('figcaption').textContent=content.caption;
+    const steps=page.querySelector('.hos-service-grid');steps.replaceChildren();content.steps.forEach((step,i)=>{const card=el('div');card.dataset.reveal='';card.append(el('div','hos-eyebrow',String(i+1).padStart(2,'0')),el('h2','',step.title),el('p','',step.text));steps.append(card);});
+    const faq=page.querySelector('.hos-service-questions');faq.replaceChildren(el('h2','','A few practical questions'));
+    for(const question of content.questions){const item=el('details'),summary=el('summary','',question.title);item.append(summary,el('p','',question.text));faq.append(item);}
+  }
+  const house=presentationFor(catalog.site,'house'),page=$('[data-page="house"]');page.querySelector('h1').textContent=house.title;page.querySelector('.hos-page-heading p').textContent=house.intro;
+  $('#hos-house-vision').textContent=house.vision;$('#hos-house-founders-title').textContent=house.foundersTitle;$('#hos-house-founders').textContent=house.founders;$('#hos-house-approach').textContent=house.approach;
+  const founderPhoto=$('#hos-house-image');founderPhoto.hidden=!assets[house.image];if(assets[house.image]){const img=founderPhoto.querySelector('img');applyImage(img,assets[house.image],'90vw');img.alt=house.caption;founderPhoto.querySelector('figcaption').textContent=house.caption;}
+  const making=presentationFor(catalog.site,'making'),process=$('[data-page="making"]');process.querySelector('h1').textContent=making.title;process.querySelector('.hos-page-heading p').textContent=making.intro;
+  const steps=process.querySelector('.hos-process-steps');steps.replaceChildren();making.steps.forEach((step,i)=>{const card=el('div');card.dataset.reveal='';card.append(el('span','',String(i+1).padStart(2,'0')),el('h2','',step.title),el('p','',step.text));steps.append(card);});
+  const processGallery=$('#hos-process-gallery');processGallery.replaceChildren();
+  const configured=making.gallery.filter(photo=>assets[photo.image]);
+  const galleryPhotos=configured.length?configured.map(photo=>({source:assets[photo.image],caption:photo.caption})):[{source:'/assets/tariro-studio.jpg',caption:'In the studio'},{source:'/assets/process.jpg',caption:'Carving the stone'},{source:'/assets/kuda-studio.jpg',caption:'Form and surface'}];
+  galleryPhotos.forEach(photo=>{const figure=el('figure');figure.dataset.reveal='';figure.append(editorialImage(photo.source,photo.caption,'(max-width:700px) 90vw, 45vw'),el('figcaption','',photo.caption));processGallery.append(figure);});
+  const contact=$('#hos-contact-email');contact.hidden=!catalog.site.contactEmail;if(catalog.site.contactEmail){contact.href='mailto:'+catalog.site.contactEmail;contact.textContent=catalog.site.contactEmail;}
+}
+
 function watchModels(container) {
   const hosts=container.querySelectorAll('[data-model-stage]');
   if(!hosts.length)return;
@@ -307,7 +375,7 @@ function sculptureSettings(artist, work, entry, withInquiry = false) {
 function artistChapter(artist, selected, withInquiry = false) {
   const featured = selected.find(work => chapterMedia(artist, work));
   if (featured) {
-    const entry = chapterMedia(artist, featured), chapter = el('section', 'hos-artist-chapter hos-editorial-chapter');
+    const entry = chapterMedia(artist, featured), chapter = el('section', 'hos-artist-chapter hos-editorial-chapter');chapter.id='hos-home-artist-'+artist.id;
     const campaign = el('div', 'hos-artist-campaign'); campaign.dataset.reveal = '';
     const campaignImage=editorialImage(entry.landscape, `${artist.name} beside ${featured.title} in the studio`, '(max-width: 700px) 170vw, (max-width: 1800px) 90vw, 1560px');
     campaignImage.style.objectPosition=entry.mobileFocus || '50% center';campaign.append(campaignImage);
@@ -327,8 +395,8 @@ function artistChapter(artist, selected, withInquiry = false) {
     if (additional.length) { const more = el('div','hos-chapter-additional');more.append(el('h3','','More works by '+artist.name),workGrid(additional));chapter.append(more); }
     return chapter;
   }
-  const chapter=el('section','hos-artist-chapter'),intro=el('div','hos-artist-intro');intro.dataset.reveal='';
-  const portrait=el('button','hos-artist-intro-photo cursor-interaction');portrait.type='button';portrait.dataset.artist=artist.id;portrait.setAttribute('aria-label',`Read about ${artist.name}`);
+  const chapter=el('section','hos-artist-chapter');chapter.id='hos-home-artist-'+artist.id;const intro=el('div','hos-artist-intro');intro.dataset.reveal='';
+  const portrait=photoLink('hos-artist-intro-photo cursor-interaction',{artist:artist.id},`Read about ${artist.name}`);portrait.setAttribute('aria-label',`Read about ${artist.name}`);
   portrait.append(image(artist.portrait,'Portrait of '+artist.name,true,'(max-width: 700px) 90vw, 420px'));
   const copy=el('div','hos-artist-intro-copy');copy.append(el('div','hos-eyebrow','THE ARTIST'),el('h2','',artist.name),el('p','hos-artist-style',artist.style),el('p','',artistBiography(artist)),link('About the artist',{artist:artist.id}));
   intro.append(portrait,copy);chapter.append(intro,workGrid(selected));
@@ -347,6 +415,12 @@ function renderArtist(artist) {
   const selected = works.filter(w => w.artistId === artist.id);
   $('#hos-artist-work-link').hidden = selected.length === 0;
   if (selected.length) $('#hos-artist-work-link').dataset.work = selected[0].id;
+  const studio=$('#hos-artist-studio');studio.replaceChildren();
+  const legacyStudio=editorial.chapters?.[artist.id];
+  const studioSource=assets[artist.studioImage] || (legacyStudio?.artistName===artist.name && legacyStudio.portraitSource===assets[artist.portrait]?legacyStudio.landscape:'');
+  if(studioSource){const figure=el('figure');figure.append(editorialImage(studioSource,artist.name+' in the studio','90vw'));const caption=el('figcaption','',artist.name+' · In the studio');figure.append(caption);studio.append(figure);}
+  if(artist.quote){const quote=el('blockquote','',artist.quote);studio.append(quote);}
+  studio.hidden=!studio.childElementCount;
   const more = $('#hos-artist-works'); more.replaceChildren();
   if (selected.length) {
     more.append(el('h2', '', 'Works by ' + artist.name), workGrid(selected));
@@ -356,7 +430,7 @@ function renderWork(work) {
   activeWork = work; activeArtist = artistFor(work);
   $('#hos-work-title').textContent = work.title;
   const modelLink=$('#hos-work-model');modelLink.hidden=!modelDefinition(work);modelLink.dataset.model=work.id;
-  const artistLink=$('#hos-work-artist');artistLink.textContent=activeArtist?.name || 'Artist details on inquiry';artistLink.dataset.artist=activeArtist?.id || '';artistLink.disabled=!activeArtist;
+  const artistLink=$('#hos-work-artist');artistLink.textContent=activeArtist?.name || 'Artist details on inquiry';artistLink.dataset.artist=activeArtist?.id || '';artistLink.toggleAttribute('aria-disabled',!activeArtist);
   for(const [id,value] of [['year',work.yearMade],['dimensions',work.dimensions],['material',work.material],['acquisition',work.acquisitionMethod]]) {
     const node=$('#hos-work-'+id);node.textContent=value || '';if(node.parentElement)node.parentElement.hidden=!value;
   }
@@ -377,13 +451,13 @@ function renderWork(work) {
   if(values.weightKg)values.weightKg=`${values.weightKg} kg / ${(Number(values.weightKg)*2.20462262).toFixed(1)} lb`;
   const labels={inches:'Dimensions in inches',finish:'Finish',signature:'Signature',weightKg:'Weight',base:'Base & inclusion',location:'Current location',delivery:'Delivery estimate',shipping:'Shipping',installation:'Installation',care:'Care',authenticity:'Authenticity',provenance:'Provenance'};
   for(const [key,label] of Object.entries(labels))if(values[key]){const row=el('div');row.append(el('span','',label),el('span','',values[key]));details.append(row);}
-  const photos=$('#hos-work-additional-images');photos.replaceChildren();for(const key of work.additionalImages || [])photos.append(image(key,`Additional view of ${work.title}`,true,'(max-width:700px) 90vw, 700px'));
+  gallery?.setWork(work,assets);
   const maker=$('#hos-work-maker');maker.replaceChildren();const contextArtist=artistContext(work);maker.hidden=!contextArtist;if(contextArtist)maker.append(contextArtist);
   const related=$('#hos-work-related');related.replaceChildren();
   const sameCollection=collection?collection.workIds.filter(id=>id!==work.id).map(id=>works.find(w=>w.id===id)).filter(Boolean):[];
-  if(sameCollection.length){related.append(el('h2','',sold?'Explore related works':`More from ${collection.name}`),workGrid(sameCollection));}
+  if(sameCollection.length){related.append(el('h2','',sold?'Explore related works':`More from ${collection.name}`),relatedRail(sameCollection,'More from '+collection.name),link('Explore '+collection.name,{collection:collection.id}));}
   const sameArtist=activeArtist?works.filter(w=>w.artistId===activeArtist.id&&w.id!==work.id&&!sameCollection.some(other=>other.id===w.id)):[];
-  if(sameArtist.length)related.append(el('h2','','More by '+activeArtist.name),workGrid(sameArtist));
+  if(sameArtist.length)related.append(el('h2','','More by '+activeArtist.name),relatedRail(sameArtist,'More by '+activeArtist.name),link('All works by '+activeArtist.name,{artist:activeArtist.id}));
 }
 function route(path, shouldFocus = true) {
   let page = path === '/' ? 'home' : path.slice(1);
@@ -391,17 +465,17 @@ function route(path, shouldFocus = true) {
   if (path.startsWith('/artists/')) { item = artists.find(a => a.slug === path.split('/')[2]); if (item) { renderArtist(item); page = 'artist'; } }
   if (path.startsWith('/collections/')) { item=collections.find(c=>c.slug===path.split('/')[2]);if(item){renderCollection(item);page='category';} }
   if (path.startsWith('/works/')) { item = works.find(w => w.slug === path.split('/')[2]); if (item) { renderWork(item); page = 'work'; } }
-  if (!$(`[data-page="${page.replace(/[^a-z]/g, '')}"]`) || !['home','collection','category','artists','artist','work','making','designers','collectors','house','privacy'].includes(page)) page = 'home';
+  if (!$(`[data-page="${page.replace(/[^a-z]/g, '')}"]`) || !['home','collection','category','artists','artist','work','making','designers','collectors','house','privacy','notfound'].includes(page)) page = 'notfound';
   activePage = page;
   $('#hos-page-navigation').hidden = page === 'home';
   pageAnimation?.cancel();
   root.querySelectorAll('[data-page]').forEach(view => { view.hidden = view.dataset.page !== page; });
   main.hidden = false; inquiry.hidden = true; setMenu(false);
-  modelViewer?.close();modelViewer?.refresh();
-  const labels = {home:'Zimbabwean stone sculpture',collection:'The collection',artists:'The artists',making:'The making',designers:'For designers',collectors:'For collectors',house:'The house',privacy:'Privacy'};
+  modelViewer?.close();modelViewer?.refresh();gallery?.close();refreshLinks();
+  const labels = {home:'Zimbabwean stone sculpture',collection:'The collection',artists:'The artists',making:'The making',designers:'For designers',collectors:'For collectors',house:'The house',privacy:'Privacy',notfound:'Page not found'};
   document.title = `${item?.title || item?.name || labels[page] || 'House of Stone'} | House of Stone`;
   const canonical = document.querySelector('link[rel="canonical"]'); if (canonical) canonical.href = location.origin + (previewMode ? '/admin/preview' : '') + path;
-  const description = item?.description || catalog.site.description;
+  const description = item?.description || pageDescriptions[page] || catalog.site.description;
   const collectionImage=page==='category'?works.find(work=>work.id===item.starWorkId)?.image:'';
   const photo = location.origin + (assets[collectionImage || item?.image || item?.portrait] || heroSource());
   for (const [selector, value] of [['meta[name="description"]',description],['meta[property="og:title"]',document.title],['meta[name="twitter:title"]',document.title],['meta[property="og:description"]',description],['meta[name="twitter:description"]',description],['meta[property="og:url"]',canonical?.href],['meta[property="og:image"]',photo],['meta[name="twitter:image"]',photo]]) document.querySelector(selector)?.setAttribute('content',value);
@@ -421,11 +495,17 @@ function rememberScroll() {
   history.replaceState?.({...history.state,hosNavigation:{...history.state?.hosNavigation,path:routePath(),scrollY:window.scrollY || 0}},'');
 }
 function navigate(path) {
+  if(!inquiry.hidden)saveInquiryDraft();
   if (path === routePath()) { route(path); return; }
   rememberScroll();
-  history.pushState({hosNavigation:{path,previous:routePath(),scrollY:0}}, '', (previewMode ? '/admin/preview' : '') + path); route(path);
+  history.pushState({hosNavigation:{path,previous:routePath(),scrollY:0}}, '', routeURL(path));route(path.split('#')[0]);scrollToHash();
+}
+function scrollToHash(){
+  if(!location.hash)return;let id;try{id=decodeURIComponent(location.hash.slice(1));}catch{return;}
+  const target=document.getElementById(id);if(target&&!target.closest('[hidden]'))requestAnimationFrame(()=>{target.setAttribute('tabindex','-1');target.focus({preventScroll:true});target.scrollIntoView({block:'start',behavior:'instant'});});
 }
 function navigateBack() {
+  if(privacyReturn && activePage==='privacy'){history.back();return;}
   if (history.state?.hosNavigation?.previous && history.back) { history.back(); return; }
   const collection=activePage === 'work' ? collectionFor(activeWork) : null;
   navigate(collection ? '/collections/'+collection.slug : activePage === 'work' || activePage === 'category' ? '/collection' : activePage === 'artist' ? '/artists' : '/');
@@ -436,11 +516,13 @@ function openInquiry(topic, trigger) {
   lastInquiryButton = trigger;
   inquiryScroll = window.scrollY || 0;
   inquiryContext = { topic, workId: trigger?.dataset.inquiryWork || '', artistId: trigger?.dataset.inquiryArtist || '', intent:trigger?.dataset.inquiryIntent || '' };
-  submissionId = uuid(); inquiryStarted = false;
+  inquiryDraftKey=inquiryKey(inquiryContext);const saved=inquiryDrafts.get(inquiryDraftKey);
+  submissionId=saved?.submissionId || uuid();inquiryStarted=saved?.started || false;
   form.reset(); form.hidden = false; review.hidden = true; success.hidden = true;
-  title.textContent = 'Your inquiry'; statusMessage(''); $('#hos-inquiry-context').textContent = topic;
-  if (inquiryContext.intent === 'alternatives') form.elements.interest.value = 'Sourcing for a project';
-  if (topic === 'Designer project') form.elements.interest.value = 'Sourcing for a project';
+  $('#hos-inquiry-discard').hidden=false;title.textContent = 'Your inquiry'; statusMessage(''); $('#hos-inquiry-context').textContent = topic;
+  if (['Designer project','Corporate project'].includes(topic))form.elements.interest.value='Sourcing for a project';
+  if(saved)for(const [key,value] of Object.entries(saved.values))form.elements[key].value=value;
+  $('#hos-inquiry-response-note').textContent=catalog.site.inquiryNote || 'Your inquiry starts a direct conversation with House of Stone. We will respond by email.';
   main.hidden = true; inquiry.hidden = false; setMenu(false);
   window.scrollTo({top:0,behavior:'instant'}); form.elements.name.focus({preventScroll:true});
   pageAnimation?.cancel();pageAnimation=animateSurface(inquiry);
@@ -448,9 +530,10 @@ function openInquiry(topic, trigger) {
 }
 function closeInquiry() {
   if (submitting) return;
+  saveInquiryDraft();
   main.hidden = false; inquiry.hidden = true;
   window.scrollTo({top:inquiryScroll,behavior:'instant'});
-  if (lastInquiryButton && !lastInquiryButton.closest('[hidden]')) lastInquiryButton.focus({preventScroll:true});
+  if (lastInquiryButton && !lastInquiryButton.closest?.('[hidden]')) lastInquiryButton.focus?.({preventScroll:true});
 }
 function preferenceUI() {
   const checkbox = $('#hos-analytics-preference'); checkbox.checked = trackingAllowed(); checkbox.disabled = protectedPreference;
@@ -470,11 +553,14 @@ menu.addEventListener('click', event => {
   if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) { setMenu(false); menuToggle.focus({preventScroll:true}); }
 });
 $('#hos-inquiry-close').addEventListener('click', closeInquiry);
-$('#hos-form-privacy').addEventListener('click', () => { if (!submitting) navigate('/privacy'); });
+$('#hos-form-privacy').addEventListener('click', () => { if (!submitting){saveInquiryDraft();privacyReturn=true;navigate('/privacy');} });
+$('#hos-inquiry-discard').addEventListener('click',()=>{inquiryDrafts.delete(inquiryDraftKey);form.reset();inquiryStarted=false;submissionId=uuid();statusMessage('Inquiry draft cleared.');});
 $('#hos-inquiry-continue').addEventListener('click', () => navigate('/collection'));
 root.addEventListener('keydown', event => { if (event.key === 'Escape') { if (!menu.hidden) { event.preventDefault(); setMenu(false); menuToggle.focus({preventScroll:true}); } else if (!inquiry.hidden) closeInquiry(); } });
 root.addEventListener('click', event => {
   if (!catalog || submitting) return;
+  const anchor=event.target.closest('a');if(anchor){if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||anchor.target==='_blank'||anchor.hasAttribute('download'))return;if(anchor.getAttribute('aria-disabled')==='true'){event.preventDefault();return;}if(anchor.matches('[data-view],[data-work],[data-artist],[data-collection],[data-scroll-supporting],[data-scroll-collection],[data-jump-collection]'))event.preventDefault();}
+  const jump=event.target.closest('[data-jump-collection]');if(jump){const target=document.getElementById(jump.dataset.jumpCollection);target?.scrollIntoView({behavior:motionPreference?.matches?'instant':'smooth',block:'start'});return;}
   const mode=event.target.closest('[data-visual-mode]');
   if(mode){
     const visual=mode.closest('.hos-collection-visual'),showModel=mode.dataset.visualMode==='model';
@@ -488,7 +574,7 @@ root.addEventListener('click', event => {
     heading.scrollIntoView({behavior:motionPreference?.matches?'instant':'smooth',block:'start'});return;
   }
   const supporting=event.target.closest('[data-scroll-supporting]');if(supporting){const section=document.getElementById('hos-supporting-'+supporting.dataset.scrollSupporting);section?.scrollIntoView({behavior:motionPreference?.matches?'instant':'smooth',block:'start'});return;}
-  const category=event.target.closest('[data-collection]');if(category){const item=collections.find(c=>c.id===category.dataset.collection);if(item){track('explore_click',{workId:item.starWorkId});navigate('/collections/'+item.slug);}return;}
+  const category=event.target.closest('[data-collection]');if(category){const item=collections.find(c=>c.id===category.dataset.collection);if(item){track('explore_click',{workId:item.starWorkId});navigate(destination(category.dataset));}return;}
   const model=event.target.closest('[data-model]');
   if(model){
     const work=works.find(w=>w.id===model.dataset.model);if(!work||!modelDefinition(work))return;
@@ -517,7 +603,7 @@ form.addEventListener('submit', event => {
 });
 $('#hos-inquiry-edit').addEventListener('click', () => {
   if (submitting) return;
-  submissionId = uuid(); form.hidden = false; review.hidden = true; title.textContent = 'Your inquiry'; statusMessage(''); window.scrollTo({top:0,behavior:'instant'}); form.elements.name.focus({preventScroll:true});
+  submissionId = uuid(); form.hidden = false; review.hidden = true; $('#hos-inquiry-discard').hidden=false;title.textContent = 'Your inquiry'; statusMessage(''); window.scrollTo({top:0,behavior:'instant'}); form.elements.name.focus({preventScroll:true});
 });
 sendButton.addEventListener('click', async () => {
   if (previewMode) return;
@@ -530,6 +616,7 @@ sendButton.addEventListener('click', async () => {
     const response = await fetch('/api/inquiries', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(15000)});
     const data = await response.json();
     if (!response.ok || !data.ok || !data.reference) throw new Error(data.error || 'We could not send your inquiry. Please try again.');
+    inquiryDrafts.delete(inquiryDraftKey);$('#hos-inquiry-discard').hidden=true;
     review.hidden = true; success.hidden = false; title.textContent = 'Inquiry received.';
     $('#hos-inquiry-reference').textContent = data.reference; statusMessage(''); form.reset();
     window.scrollTo({top:0,behavior:'instant'}); $('#hos-inquiry-continue').focus({preventScroll:true});
@@ -539,8 +626,11 @@ sendButton.addEventListener('click', async () => {
 });
 window.addEventListener('popstate', () => {
   if (!catalog || submitting) return;
+  if(!inquiry.hidden)saveInquiryDraft();
   route(routePath(), false);
+  const returning=privacyReturn && activePage!=='privacy';
   const restore = () => {
+    if(returning){privacyReturn=false;const draft=inquiryDrafts.get(inquiryDraftKey);if(draft){openInquiry(draft.context.topic,lastInquiryButton || {dataset:{inquiryWork:draft.context.workId,inquiryArtist:draft.context.artistId,inquiryIntent:draft.context.intent}});return;}}
     window.scrollTo({top:history.state?.hosNavigation?.scrollY || 0,behavior:'instant'});
     const heading = $(`[data-page="${activePage}"] h1`);heading?.setAttribute('tabindex','-1');heading?.focus({preventScroll:true});
   };
@@ -548,7 +638,7 @@ window.addEventListener('popstate', () => {
 });
 
 async function start() {
-  const [response,mediaResponse,editorialResponse,modelResponse] = await Promise.all([fetch(previewMode ? '/api/admin/preview-content' : '/content.json'),fetch('/media-manifest.json').catch(()=>({ok:false})),fetch('/editorial.json').catch(()=>({ok:false})),fetch('/models.json').catch(()=>({ok:false}))]); if (!response.ok) throw new Error('The collection could not load. Please refresh the page.');
+  const [response,mediaResponse,editorialResponse,modelResponse] = await Promise.all([fetch(previewMode ? '/api/admin/preview-content' : '/content.json'),fetch(previewMode?'/api/admin/media-manifest':'/media-manifest.json').catch(()=>({ok:false})),fetch('/editorial.json').catch(()=>({ok:false})),fetch('/models.json').catch(()=>({ok:false}))]); if (!response.ok) throw new Error('The collection could not load. Please refresh the page.');
   if (mediaResponse.ok) media = await mediaResponse.json();
   if (editorialResponse.ok) editorial = await editorialResponse.json();
   if (modelResponse.ok) models = await modelResponse.json();
@@ -562,15 +652,16 @@ async function start() {
   root.querySelectorAll('.hos-editorial-image img,.hos-summary-photo img[src]').forEach(img=>applyImage(img,img.getAttribute('src'),'90vw'));
   root.querySelectorAll('[data-artist-grid]').forEach(grid => {
     artists.forEach(artist => {
-      const card=el('button','hos-portrait-card cursor-interaction');card.type='button';card.dataset.artist=artist.id;card.dataset.reveal='';
+      const card=photoLink('hos-portrait-card cursor-interaction',{artist:artist.id},'About '+artist.name);card.dataset.reveal='';
       card.append(image(artist.portrait,'Portrait of '+artist.name,true,'(max-width: 700px) 90vw, 29vw'),el('h3','',artist.name),el('p','',artist.style));grid.append(card);
     });
   });
-  for (const target of ['#hos-home-chapters','#hos-collection-chapters']) {
-    const chapters=$(target);chapters.replaceChildren();
-    if(collections.length){collections.forEach(collection=>chapters.append(collectionChapter(collection)));}
-    else artists.forEach(artist=>{const selected=works.filter(work=>work.artistId===artist.id);if(selected.length)chapters.append(artistChapter(artist,selected,target==='#hos-home-chapters'));});
-  }
+  gallery=initializeGallery({root,document,applyImage,motionPreference,onView:()=>track('photo_view',{workId:activeWork?.id || '',artistId:activeArtist?.id || ''})});
+  renderPresentation();
+  const chapters=$('#hos-home-chapters');chapters.replaceChildren();
+  if(collections.length){collectionIndex($('#hos-home-collection-index'),{home:true});collections.forEach(collection=>chapters.append(collectionChapter(collection)));}
+  else {const jumps=el('nav','hos-collection-jumps');jumps.setAttribute('aria-label','Jump to an artist');artists.forEach(artist=>{const selected=works.filter(work=>work.artistId===artist.id);if(selected.length){chapters.append(artistChapter(artist,selected,true));const anchor=el('a','',artist.name);anchor.href='#hos-home-artist-'+artist.id;anchor.dataset.jumpCollection='hos-home-artist-'+artist.id;jumps.append(anchor);}});$('#hos-home-collection-index').append(jumps);}
+  renderOverview();refreshLinks();
   watchModels(root);
   if (previewMode) {
     document.body.classList.add('hos-preview');
@@ -581,7 +672,7 @@ async function start() {
   }
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   rememberScroll();
-  preferenceUI(); route(routePath(), false); root.dataset.ready = 'true';
+  preferenceUI();route(routePath(),false);scrollToHash();root.dataset.ready='true';
 }
 start().catch(error => {
   const notice = el('p','hos-form-note',error.message || 'The collection could not load. Please refresh the page.'); notice.setAttribute('role','alert'); $('.hos-hero-copy').append(notice);

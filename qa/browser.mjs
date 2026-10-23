@@ -160,7 +160,7 @@ for(const [engineName,engine] of engines) {
         await page.waitForURL(base+'/');
         await page.waitForFunction(y=>Math.abs(scrollY-y)<3,scroll);
       }
-      await page.locator('#hos-home-chapters .hos-artist-chapter').nth(artistIndex).getByRole('button',{name:'About the artist'}).click();
+      await page.locator('#hos-home-chapters .hos-artist-chapter').nth(artistIndex).getByRole('link',{name:'About the artist'}).click();
       assert.equal(new URL(page.url()).pathname,'/artists/'+artist.slug);
       await page.locator('#hos-page-navigation [data-back]').click();await page.waitForURL(base+'/');
     }
@@ -183,7 +183,7 @@ for(const [engineName,engine] of engines) {
       await track.evaluate(el=>el.scrollTo({left:0,behavior:'instant'}));await counter.filter({hasText:'1 / 3'}).waitFor();
       await track.focus();await page.keyboard.press('ArrowRight');await counter.filter({hasText:'2 / 3'}).waitFor();
       const work=catalog.works.find(work=>work.artistId===artist.id);
-      await chapter.locator('.hos-setting-action').getByRole('button',{name:'View sculpture',exact:true}).click();
+      await chapter.locator('.hos-setting-action').getByRole('link',{name:'View sculpture',exact:true}).click();
       assert.equal(new URL(page.url()).pathname,'/works/'+work.slug);
       await page.locator('#hos-page-navigation [data-back]').click();await page.waitForURL(base+'/');
       await counter.filter({hasText:'2 / 3'}).waitFor();
@@ -332,7 +332,7 @@ for(const [engineName,engine] of engines) {
     await editor.locator('#artist-list .record button').first().click();
     await editor.locator('#field-biography').fill('A biography entered through the real editor.');
     await editor.locator('#save').click();await editor.locator('#status').filter({hasText:'Draft saved.'}).waitFor();
-    await editor.locator('input[type="file"]').setInputFiles(new URL('../public/assets/fold.jpg',import.meta.url).pathname);
+    await editor.locator('input[type="file"]').first().setInputFiles(new URL('../public/assets/fold.jpg',import.meta.url).pathname);
     await editor.locator('#status').filter({hasText:'Photo uploaded.'}).waitFor();
     await editor.locator('#save').click();await editor.locator('#status').filter({hasText:'Draft saved.'}).waitFor();
     const state=await adminGet('/api/admin/content');const uploadedUrl=state.draft.assets[state.draft.artists[0].portrait];
@@ -360,17 +360,17 @@ for(const [engineName,engine] of engines) {
       await editor.locator('#field-dimensions').fill('40 × 20 × 15 cm');
       await editor.locator('#field-material').fill('Springstone');
       await editor.locator('#field-description').fill('A sculpture added through the collection editor.');
-      await editor.locator('.photo-editor summary').click();await editor.locator('.photo-grid button[title="fold"]').click();
+      await editor.locator('.photo-editor summary').first().click();await editor.locator('.photo-grid button[title="fold"]').first().click();
     }
     await editor.locator('#publish').click();await editor.locator('#status').filter({hasText:'Collection published.'}).waitFor();
     for(const [width,columns] of [[1440,3],[768,2],[390,1]]) {
       await page.setViewportSize({width,height:900});await ready(page,'/collection');
       const grid=page.locator('#hos-collection-chapters .hos-work-grid').first();
-      assert.equal(await grid.locator('.hos-work-card').count(),3);
+      assert.equal(await grid.locator('.hos-work-card').count(),8);
       assert.equal(await grid.evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length),columns);
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1),'Multiple sculpture tiles overflow the screen');
     }
-    await page.locator('#hos-collection-chapters .hos-work-card .hos-text-link[data-work]').nth(2).click();
+    await page.locator('#hos-collection-chapters .hos-work-card .hos-text-link[data-work]').last().click();
     assert.equal(await page.locator('#hos-work-title').textContent(),'Browser QA sculpture 4');
     await editor.goto(base+'/admin');await editor.locator('#inbox .inquiry').first().waitFor();
     assert((await editor.locator('#inbox').textContent()).includes('Browser QA collector'));
@@ -401,4 +401,5 @@ for(const [engineName,engine] of engines) {
 writeFileSync(new URL('report.json',output),JSON.stringify(report,null,2));
 assert.equal(report.errors.length,0,report.errors.join('\n'));
 console.log(`Browser QA passed: ${routes.length*sizes.length*engines.length} route/viewport checks, ${engines.length} engine(s), real inquiries, navigation, motion, measurement, 3D and owner editing.`);
+
 

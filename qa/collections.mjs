@@ -46,7 +46,7 @@ try {
  assert(await rail.locator('.hos-work-card').first().isVisible());
  await page.setViewportSize({width:1440,height:1000});
  await page.screenshot({path:new URL('collections-private-desktop.png',out).pathname,fullPage:true});
- await page.locator('#hos-home-chapters [data-collection="rhythm"]').first().click();await page.waitForURL('**/admin/preview/collections/rhythm');
+ await page.locator('#hos-home-chapters [data-collection="rhythm"]').first().click();await page.waitForURL('**/admin/preview/collections/rhythm#hos-supporting-rhythm');
  assert.equal(await page.locator('#hos-category-content .hos-work-card').count(),4);
  await page.locator('#hos-category-content [data-filter="material"]').selectOption('Springstone');assert.equal(await page.locator('#hos-category-content .hos-work-card').count(),2);
  await page.getByRole('button',{name:'Reset filters',exact:true}).click();assert.equal(await page.locator('#hos-category-content .hos-work-card').count(),4);
@@ -74,8 +74,8 @@ try {
  }
  assert(!requests.some(url=>url.endsWith('.glb') || url.includes('sculpture-viewer.js')),'No GPU resources should load for missing matching models');
  await page.setViewportSize({width:390,height:844});await page.goto(base+'/');await page.locator('#hos-concept[data-ready="true"]').waitFor();
- await page.getByRole('button',{name:'Discover the collection',exact:true}).click();assert.equal(new URL(page.url()).pathname,'/');await page.waitForFunction(()=>scrollY>100);
- await page.locator('.hos-menu-toggle').click();await page.getByRole('button',{name:'The collection 01'}).click();await page.waitForURL('**/collection');
+ await page.getByRole('link',{name:'Discover the collection',exact:true}).click();assert.equal(new URL(page.url()).pathname,'/');await page.waitForFunction(()=>scrollY>100);
+ await page.locator('.hos-menu-toggle').click();await page.getByRole('link',{name:'The collection 01'}).click();await page.waitForURL('**/collection');
  await page.goto(base+'/works/zsa-page-28');await page.locator('#hos-concept[data-ready="true"]').waitFor();await page.locator('#hos-work-inquiry').click();
  await page.locator('[name="name"]').fill('Local browser QA');await page.locator('[name="email"]').fill('local@example.test');await page.getByRole('button',{name:'Review inquiry',exact:true}).click();await page.locator('#hos-inquiry-send').click();await page.locator('#hos-inquiry-success').waitFor({state:'visible'});
  assert.equal(app.db.prepare('SELECT work_id FROM inquiries').get().work_id,'zsa-028');

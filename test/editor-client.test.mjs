@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { webcrypto } from 'node:crypto';
 import vm from 'node:vm';
+import {defaultPresentation} from '../public/presentation.js';
 import { createApp } from '../server.mjs';
 
 class Element {
@@ -34,8 +35,8 @@ async function fixture(t){
     requests.push(promise);return promise;
   };
   class Reader {readAsDataURL(file){this.result='data:'+file.type+';base64,'+file.bytes.toString('base64');this.onload();}}
-  const context=vm.createContext({document:{querySelector:get,querySelectorAll:selector=>all().filter(item=>selector.split(',').map(tag=>tag.trim()).includes(item.tagName)),createElement:tag=>new Element(tag)},window:{addEventListener(){},open(){const tab={location:{href:'about:blank'},close(){this.closed=true;}};tabs.push(tab);return tab;}},fetch:fetchImpl,crypto:webcrypto,structuredClone,FileReader:Reader,Blob,URL,console});
-  vm.runInContext(readFileSync(new URL('../public/admin-content.js',import.meta.url),'utf8'),context);
+  const context=vm.createContext({document:{querySelector:get,querySelectorAll:selector=>all().filter(item=>selector.split(',').map(tag=>tag.trim()).includes(item.tagName)),createElement:tag=>new Element(tag)},window:{addEventListener(){},open(){const tab={location:{href:'about:blank'},close(){this.closed=true;}};tabs.push(tab);return tab;}},fetch:fetchImpl,crypto:webcrypto,structuredClone,defaultPresentation,preparePhoto:async file=>({type:file.type,data:file.bytes.toString('base64')}),FileReader:Reader,Blob,URL,console});
+  vm.runInContext(readFileSync(new URL('../public/admin-content.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,''),context);
   const flush=async()=>{for(let i=0;i<4;i++){await Promise.all(requests);await new Promise(resolve=>setImmediate(resolve));}};
   await flush();
   return {app,get,all,tabs,flush,base,auth,async input(id,value){const field=get('#field-'+id);assert(field,'Missing field '+id);field.value=value;await field.dispatch('input');},async click(id){await get('#'+id).dispatch('click');await flush();},async state(){return (await fetch(base+'/api/admin/content',{headers:{Authorization:auth}})).json();}};
