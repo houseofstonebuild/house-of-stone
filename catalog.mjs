@@ -105,6 +105,7 @@ function sculptureFields(item) {
   const additionalImages = (item.additionalImages || []).map(key => field(key,'an additional photograph',100,true));
   return {...(legacy?{}:{sourcePage:item.sourcePage}),sourceDocument:field(item.sourceDocument,'the source document',200),sourceCrop:field(item.sourceCrop,'the source crop',30),visualDescription:field(item.visualDescription,'the photograph description',1000),
     availability:item.availability || 'unknown',colour:field(item.colour,'the colour',80),size:field(item.size,'the size',80),verification,details,additionalImages,
+    workingContent:item.workingContent===true,workingModel:item.workingModel===true,
     modelStatus:['needed','ready','review','not-planned'].includes(item.modelStatus)?item.modelStatus:'needed',internalNotes:field(item.internalNotes,'the private notes',5000)};
 }
 export function publicCatalog(catalog, {preview = false} = {}) {
@@ -114,12 +115,16 @@ export function publicCatalog(catalog, {preview = false} = {}) {
   const works = visible.map(work => {
     if (!work.sourcePage || preview) return work;
     const collection = collections.find(c => c.workIds.includes(work.id)), v = work.verification || {};
+    // Owner-authorized working copy is separate from factual verification. It
+    // never authorizes availability, provenance, signatures or delivery claims.
+    const workingFields=new Set(['title','artist','material','dimensions','yearMade','description','size','finish']);
+    const show=key=>v[key]===true || work.workingContent===true && workingFields.has(key);
     const result = {id:work.id,slug:work.slug,image:work.image,objectPosition:work.objectPosition,
-      modelVerified:v.model===true,title:v.title ? work.title : `${collection?.name || 'Sculpture'} ${String((collection?.workIds.indexOf(work.id) ?? 0)+1).padStart(2,'0')}`,
-      artistId:v.artist ? work.artistId : '',availability:work.availability === 'sold' || v.availability ? work.availability : 'unknown',
-      description:v.description ? work.description : work.visualDescription,colour:work.colour,size:v.size && v.dimensions ? work.size : '',additionalImages:work.additionalImages || [],views:work.views || {},details:{}};
-    for (const key of ['material','dimensions','yearMade','acquisitionMethod']) result[key] = v[key] ? work[key] : '';
-    for (const [key,value] of Object.entries(work.details || {})) if (v[key === 'weightKg' ? 'weight' : key]) result.details[key] = value;
+      modelVerified:v.model===true || work.workingModel===true,title:show('title') ? work.title : `${collection?.name || 'Sculpture'} ${String((collection?.workIds.indexOf(work.id) ?? 0)+1).padStart(2,'0')}`,
+      artistId:show('artist') ? work.artistId : '',availability:work.availability === 'sold' || v.availability ? work.availability : 'unknown',
+      description:show('description') ? work.description : work.visualDescription,colour:work.colour,size:show('size') && show('dimensions') ? work.size : '',additionalImages:work.additionalImages || [],views:work.views || {},details:{}};
+    for (const key of ['material','dimensions','yearMade','acquisitionMethod']) result[key] = show(key) ? work[key] : '';
+    for (const [key,value] of Object.entries(work.details || {})) if (show(key === 'weightKg' ? 'weight' : key)) result.details[key] = value;
     return result;
   });
   const pageImages=Object.values(catalog.site.presentation || {}).flatMap(page=>[page.image,...(page.gallery || []).map(photo=>photo.image)]);

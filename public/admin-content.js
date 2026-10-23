@@ -65,7 +65,7 @@ function photo(record,key,label,parent=fields) {
     const file = input.files[0]; if (!file) return;
     if (file.size > 32*1024*1024 || !['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('Choose a JPEG, PNG or WebP image under 32 MB.');
     message('Uploading photo…');
-    const uploaded=await api('media',await preparePhoto(file)); draft.assets[uploaded.key] = uploaded.url; record[key] = uploaded.key;if(selection.kind==='work' && ['image','left','right','back'].includes(key)){const work=selected();if(work.verification)work.verification.model=false;work.modelStatus='needed';}edited(); message('Photo uploaded. Save the draft or publish when ready.');
+    const uploaded=await api('media',await preparePhoto(file)); draft.assets[uploaded.key] = uploaded.url; record[key] = uploaded.key;if(selection.kind==='work' && ['image','left','right','back'].includes(key)){const work=selected();if(work.verification)work.verification.model=false;work.workingModel=false;work.modelStatus='needed';}edited(); message('Photo uploaded. Save the draft or publish when ready.');
   }));
   const details = element('details'), grid = element('div',undefined,'photo-grid'); details.append(element('summary','Choose an existing photo'),grid);
   for (const [asset,url] of Object.entries(draft.assets)) {
@@ -73,7 +73,7 @@ function photo(record,key,label,parent=fields) {
     const button = element('button'); button.type='button'; button.title = asset.startsWith('upload_')?'Uploaded photo':asset;
     button.setAttribute('aria-label',button.title); button.setAttribute('aria-pressed',String(asset===record[key]));
     const thumb=element('img'); thumb.src=url; thumb.alt=''; thumb.loading='lazy'; button.append(thumb);
-    button.addEventListener('click',()=>{record[key]=asset;if(selection.kind==='work' && ['image','left','right','back'].includes(key)){const work=selected();if(work.verification)work.verification.model=false;work.modelStatus='needed';}edited();render();}); grid.append(button);
+    button.addEventListener('click',()=>{record[key]=asset;if(selection.kind==='work' && ['image','left','right','back'].includes(key)){const work=selected();if(work.verification)work.verification.model=false;work.workingModel=false;work.modelStatus='needed';}edited();render();}); grid.append(button);
   }
   section.append(details);parent.append(section);
 }
@@ -124,7 +124,10 @@ function render() {
     field(grid,record,'availability','Availability',{options:[{value:'unknown',label:'Details on inquiry'},{value:'available',label:'Available'},{value:'reserved',label:'Reserved'},{value:'sold',label:'Sold'}]});
     if(record.sourcePage) {
       record.verification ||= {};
-      fields.append(element('p',`Original ZSA page ${record.sourcePage}. ${record.sourceCrop ? 'Source photograph is cropped at the '+record.sourceCrop+'. ' : ''}Working information below stays private until each field is confirmed.`, 'note'));
+      fields.append(element('p',`Original ZSA page ${record.sourcePage}. ${record.sourceCrop ? 'Source photograph is cropped at the '+record.sourceCrop+'. ' : ''}Working publication is separate from factual confirmation. Replace the working details after the photoshoot.`, 'note'));
+      for(const [key,label] of [['workingContent','Publish working titles, artist assignments and design specifications'],['workingModel','Show the current source-based 3D reconstruction']]) {
+        const wrapper=element('label',undefined,'checkbox'),input=element('input');input.type='checkbox';input.checked=record[key]===true;input.addEventListener('change',()=>{record[key]=input.checked;edited();});wrapper.append(input,element('span',label));fields.append(wrapper);
+      }
       field(grid,record,'colour','Colour visible in the source photo',{max:80});
       field(grid,record,'size','Size category',{options:[{value:'',label:'Not recorded'},{value:'Small',label:'Small'},{value:'Medium',label:'Medium'},{value:'Large',label:'Large'}]});
       const additional={photos:(record.additionalImages || []).join('\n')};field(grid,additional,'photos','Additional photo asset keys · one per line',{wide:true,multiline:true,max:3000});
@@ -135,7 +138,7 @@ function render() {
         const wrapper=element('label',undefined,'checkbox'),input=element('input');input.type='checkbox';input.checked=record.verification[key]===true;
         input.addEventListener('change',()=>{record.verification[key]=input.checked;edited();});wrapper.append(input,element('span',key==='model'?'3D model · source and all visible geometry confirmed':key));checks.append(wrapper);
       }
-      fields.append(checks,element('p',`3D asset: ${record.modelStatus}. Reconstructions are visible in the private preview. Confirm the 3D model only after checking its source, depth, sides and reverse.`, 'note'));
+      fields.append(checks,element('p',`3D asset: ${record.modelStatus}. The working-model switch controls public display without marking the geometry verified. Confirm the 3D model only after checking its source, depth, sides and reverse.`, 'note'));
     }
   } else if(selection.kind==='collection') {
     field(grid,record,'name','Collection name',{required:true,max:120});field(grid,record,'slug','Page address',{required:true,max:100});

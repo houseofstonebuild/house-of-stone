@@ -8,6 +8,7 @@ import {randomUUID} from 'node:crypto';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {createApp} from '../server.mjs';
+import {prepareOwnerPublication} from '../scripts/publish-owner-release.mjs';
 const exec=promisify(execFile),dataDir=mkdtempSync(join(tmpdir(),'hos-release-fixtures-')),password=randomUUID();
 const app=createApp({dataDir,env:{ADMIN_PASSWORD:password},backgroundNotifications:false});
 await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));
@@ -26,10 +27,16 @@ async function verify(name,modelCount,fallbackCount){
  console.log(`Release fixture passed: ${name}; ${report.routes} routes, ${modelCount} models, ${fallbackCount} photographic stars, zero writes.`);
 }
 try{
+ if(process.env.HOS_RELEASE_FIXTURE==='owner-working'){
+  const current=await api('content');let state=await api('content',{revision:current.revision,catalog:prepareOwnerPublication(current.draft)});await api('publish',{revision:state.revision});
+  const live=await(await fetch(origin+'/content.json')).json();assert.equal(live.works.length,23);assert(live.works.every(w=>w.artistId&&w.title&&w.material&&w.dimensions));assert.equal(live.works.filter(w=>w.modelVerified).length,5);
+  await verify('collections-owner-working',5,0);
+ }else{
  await verify('legacy',5,0);
  let state=await api('prepare-founding-collection',{revision:0});await api('publish',{revision:state.revision});
  await verify('collections-unconfirmed',0,5);
  state=await api('content');for(const work of state.draft.works)if(work.modelStatus==='review')work.verification.model=true;
  state=await api('content',{revision:state.revision,catalog:state.draft});await api('publish',{revision:state.revision});
  await verify('collections-confirmed',5,0);
+ }
 }finally{await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});}

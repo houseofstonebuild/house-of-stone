@@ -9,6 +9,12 @@ There are two ways to update House of Stone:
 
 Code and content stay separate. The database and uploaded photos live on a persistent hosting volume. A deployment replaces the application code while keeping that volume.
 
+### Owner-authorized collection publication, 23 October 2026
+
+This release includes a one-time publication of the full five-collection, 23-work renovation at the existing Railway origin. On production startup, `scripts/publish-owner-release.mjs` uses the authenticated, revision-checked content and publish endpoints over loopback. The previous catalogue remains in publication history; existing inquiries, events, uploaded media and record IDs remain intact. A persistent settings marker prevents later deployments from publishing drafts again. Other hosting origins do not run this release.
+
+The owner has explicitly authorized public working titles, artist assignments, stone/dimension copy and the five source-matched reconstructions until the photoshoot arrives. The editor keeps these publication switches separate from factual verification. Availability remains unknown except the confirmed sold page 13. Provenance, signatures, sourcing and delivery claims still require verification. Replacing a sculpture photograph disables working-model publication as well as the normal model confirmation. After this one-time release, content publishing continues through the editor as usual.
+
 ## One-time setup
 
 1. Create or choose a GitHub account, enable the GitHub connection here, and grant access to the repository for this website. A private repository named `house-of-stone` is a suitable choice. Put the contents of this folder at the repository root, including `.github/workflows/checks.yml`. Do not upload `.env`, `data`, or backups. This package's `.gitignore` excludes them.

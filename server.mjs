@@ -431,9 +431,18 @@ export function createApp(options = {}) {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const { server } = createApp();
+  const { server, db } = createApp();
   const port = Number(process.env.PORT) || 8000;
-  server.listen(port, process.env.HOST || '127.0.0.1', () => console.log(`House of Stone running on port ${port}. Private inbox: /admin (username admin).`));
+  server.listen(port, process.env.HOST || '127.0.0.1', async () => {
+    console.log(`House of Stone running on port ${port}. Private inbox: /admin (username admin).`);
+    if(process.env.NODE_ENV==='production' && new URL(process.env.SITE_URL).origin==='https://house-of-stone-production.up.railway.app') {
+      try {
+        const {publishOwnerRelease}=await import('./scripts/publish-owner-release.mjs');
+        const result=await publishOwnerRelease({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
+        console.log('Owner-requested catalogue publication:',JSON.stringify(result));
+      } catch(error) { console.error('Owner-requested publication did not complete:',error.message); }
+    }
+  });
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(() => process.exit(0)));
 }
 

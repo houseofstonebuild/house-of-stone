@@ -35,6 +35,12 @@ for(let attempt=0;attempt<attempts;attempt++){
 assert(deployed,lastError);
 const response=await fetch(origin+'/content.json');assert(response.ok);const catalog=await response.json();
 const collections=catalog.collections || [],works=new Map(catalog.works.map(work=>[work.id,work]));
+if(process.env.HOS_EXPECT_FOUNDING_RELEASE==='true'){
+  const expected=JSON.parse(readFileSync(new URL('../content/founding-collection.json',import.meta.url),'utf8'));
+  assert.deepEqual(collections.map(c=>({id:c.id,star:c.starWorkId,works:c.workIds})),expected.collections.map(c=>({id:c.id,star:c.starWorkId,works:c.workIds})),'The full collection renovation must be public.');
+  assert.equal(catalog.works.length,23);assert(catalog.works.every(w=>w.title && w.artistId && w.material && w.dimensions));
+  assert.equal(works.get('zsa-013').availability,'sold');assert.equal(catalog.works.filter(w=>w.modelVerified).length,5);
+}
 const matchingModel=work=>{
   const entry=models[work?.id];if(!entry || entry.source!==catalog.assets[work.image])return false;
   return entry.reconstruction?entry.workId===work.id && work.modelVerified===true && (!work.sourcePage || entry.sourcePage===work.sourcePage):entry.title===work.title;
