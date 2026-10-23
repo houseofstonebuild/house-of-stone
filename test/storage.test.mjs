@@ -56,7 +56,7 @@ test('root-owned mounted storage works without chmod access and preserves the ex
   const root = mkdtempSync(join(tmpdir(), 'hos-mounted-storage-'));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const source = resolve(import.meta.dirname, '..');
-  for (const path of ['server.mjs', 'catalog.mjs', 'founding-collection.mjs', 'content', 'public']) {
+  for (const path of ['server.mjs', 'catalog.mjs', 'founding-collection.mjs', 'presentation.mjs', 'media.mjs', 'content', 'public']) {
     cpSync(join(source, path), join(root, path), { recursive: true });
   }
   function makeReadable(path) {
@@ -96,3 +96,4 @@ test('root-owned mounted storage works without chmod access and preserves the ex
   });
   assert.match(output, /Mounted storage supports startup/);
 });
+
