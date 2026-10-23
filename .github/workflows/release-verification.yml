@@ -16,29 +16,30 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: 006cb263c82a196b45adf5d63628b302dfd0e2e7
+          ref: c56885dad503b60617ae9eab356d22ccc0ee98ce
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: '24.19.0'
           package-manager-cache: false
       - run: npm install --prefix qa --no-audit --no-fund
-      - name: Wait for the main release checks
+      - name: Wait for the tested refinement release
         uses: actions/github-script@v8
         with:
           script: |
-            const expected='006cb263c82a196b45adf5d63628b302dfd0e2e7';
+            const expected='c56885dad503b60617ae9eab356d22ccc0ee98ce';
             const required=['Website checks','Browser QA'];
             const deadline=Date.now()+30*60*1000;
             while(Date.now()<deadline){
-              const response=await github.rest.actions.listWorkflowRunsForRepo({...context.repo,branch:'main',event:'push',per_page:30});
+              const response=await github.rest.actions.listWorkflowRunsForRepo({...context.repo,branch:'enhancement/collection-presentation',event:'pull_request',per_page:30});
               const runs=response.data.workflow_runs.filter(run=>run.head_sha===expected && required.includes(run.name));
               for(const run of runs)if(run.status==='completed' && run.conclusion!=='success')throw new Error(run.name+' failed for the main release: '+run.conclusion);
-              if(required.every(name=>runs.some(run=>run.name===name && run.conclusion==='success'))){core.info('Main release checks passed: '+expected);return;}
+              const main=await github.rest.repos.getBranch({...context.repo,branch:'main'});
+              if(main.data.commit.sha===expected && required.every(name=>runs.some(run=>run.name===name && run.conclusion==='success'))){core.info('Tested refinement release is on main: '+expected);return;}
               core.info('Waiting for main: '+runs.map(run=>run.name+' '+run.status).join(', '));
               await new Promise(resolve=>setTimeout(resolve,20000));
             }
-            throw new Error('Main release checks did not finish within 30 minutes');
+            throw new Error('Tested refinement release was not on main within 30 minutes');
       - name: Verify the deployed release without writes
         run: node qa/live.mjs
       - run: node qa/light-theme.mjs
