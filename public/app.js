@@ -329,7 +329,7 @@ function sculptureSettings(artist, work, entry, withInquiry = false) {
   grid.setAttribute('aria-label', 'Sculpture settings');
   for (const [setting, label, space] of [['apartment','For designers','an apartment'],['gallery','For collectors','a private gallery'],['office','For corporate offices','a corporate office']]) {
     const tile = el('article', 'hos-setting-tile');
-    const photo = el('button', 'hos-setting-photo cursor-interaction'); photo.type = 'button'; photo.dataset.work = work.id;
+    const photo = photoLink('hos-setting-photo cursor-interaction',{work:work.id},'View '+workLabel(work));
     photo.setAttribute('aria-label', `View ${work.title} by ${artist.name} in ${space}`);
     photo.append(editorialImage(entry.settings[setting], `${work.title} by ${artist.name} in ${space}`, '(max-width: 700px) 90vw, (max-width: 1800px) 28vw, 480px'));
     tile.append(photo, el('h3', '', label)); grid.append(tile);

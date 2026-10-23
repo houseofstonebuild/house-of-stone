@@ -66,7 +66,7 @@ test('funnel counts distinct sessions, records campaign attribution, and rate li
   for(const name of ['page_view','explore_click','work_view','work_view','inquiry_started','photo_view']) assert.equal((await post(f,'/api/events',{id:randomUUID(),sessionId,name,page:'collection',workId:name==='work_view'?'folded-light':'',attribution:{source:'designer-outreach'}})).status,202);
   for(let i=0;i<5;i++) assert.equal((await post(f,'/api/inquiries',enquiry({sessionId}))).status,201);
   assert.equal((await post(f,'/api/inquiries',enquiry({sessionId}))).status,429);
-  const result=await (await fetch(f.base+'/api/admin/summary?days=30',{headers:f.auth})).json();assert.equal(result.funnel.find(s=>s.name==='work_view').sessions,1);assert.equal(result.funnel.find(s=>s.name==='work_view').events,2);assert.equal(result.sources[0].source,'designer-outreach');assert.equal(result.modelActivity.photo_view,1);
+  const result=await (await fetch(f.base+'/api/admin/summary?days=30',{headers:f.auth})).json();assert.equal(result.funnel.find(s=>s.name==='work_view').sessions,1);assert.equal(result.funnel.find(s=>s.name==='work_view').events,2);assert.equal(result.sources[0].source,'designer-outreach');assert.equal(result.photoActivity.sessions,1);
 });
 test('artist and work links, metadata, sitemap and health are ready for hosting',async t=>{
   const f=await fixture(t);

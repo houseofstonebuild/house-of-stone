@@ -228,8 +228,9 @@ export function createApp(options = {}) {
       return { work_id:work.id, title:work.title, ...views, inquiries:db.prepare('SELECT count(*) AS n FROM inquiries WHERE work_id=? AND created_at>=?').get(work.id,since).n };
     }).filter(work => work.views || work.inquiries).sort((a,b) => b.inquiries-a.inquiries || b.views-a.views);
     const sources = db.prepare("SELECT coalesce(nullif(source,''),'Direct / unknown') AS source, count(DISTINCT session_hash) AS sessions FROM events WHERE name='page_view' AND created_at>=? GROUP BY source ORDER BY sessions DESC").all(since);
-    const modelActivity = Object.fromEntries(['model_view','model_interaction','photo_view'].map(name=>[name,db.prepare('SELECT count(DISTINCT session_hash) AS n FROM events WHERE name=? AND created_at>=?').get(name,since).n]));
-    return { days, funnel, works, sources, modelActivity, inquiries: db.prepare('SELECT count(*) AS n FROM inquiries WHERE created_at>=?').get(since).n, emailConfigured, indexing, definition: 'Sessions are browser visits, not verified people. One session can skip steps. Bots and repeat visitors can affect counts.' };
+    const modelActivity = Object.fromEntries(['model_view','model_interaction'].map(name=>[name,db.prepare('SELECT count(DISTINCT session_hash) AS n FROM events WHERE name=? AND created_at>=?').get(name,since).n]));
+    const photoActivity={sessions:db.prepare("SELECT count(DISTINCT session_hash) AS n FROM events WHERE name='photo_view' AND created_at>=?").get(since).n};
+    return { days, funnel, works, sources, modelActivity, photoActivity, inquiries: db.prepare('SELECT count(*) AS n FROM inquiries WHERE created_at>=?').get(since).n, emailConfigured, indexing, definition: 'Sessions are browser visits, not verified people. One session can skip steps. Bots and repeat visitors can affect counts.' };
   }
   function pageMeta(path, content = catalog) {
     const labels = { '/':'Zimbabwean stone sculpture', '/collection':'The collection', '/artists':'The artists', '/making':'The making', '/designers':'For designers', '/collectors':'For collectors', '/house':'The house', '/privacy':'Privacy' };

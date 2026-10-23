@@ -40,7 +40,7 @@ export function storeMedia(input,mediaDir){
   const sizes=variants.map(variant=>decode(variant,6*1024*1024));
   if(sizes.reduce((sum,image)=>sum+image.bytes.length,0)>20*1024*1024)fail('Responsive images are too large.');
   const seen=new Set();for(const image of sizes){
-    if(image.type!=='image/webp'||image.width>original.width||Math.abs(image.width/image.height-original.width/original.height)>.015||seen.has(image.width))fail('Responsive image sizes do not match the original.');seen.add(image.width);
+    if(image.width>original.width||Math.abs(image.width/image.height-original.width/original.height)>.015||seen.has(image.width))fail('Responsive image sizes do not match the original.');seen.add(image.width);
   }
   for(const image of [original,...sizes]){image.url='/media/'+image.digest+'.'+image.extension;const target=resolve(mediaDir,image.url.slice(7));if(!existsSync(target))writeFileSync(target,image.bytes,{mode:0o600,flag:'wx'});}
   const candidates=sizes.sort((a,b)=>a.width-b.width);const metadata={width:original.width,height:original.height,srcset:candidates.map(image=>image.url+' '+image.width+'w').join(', '),variants:candidates.map(image=>image.url)};
