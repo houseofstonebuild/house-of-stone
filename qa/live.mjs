@@ -10,7 +10,7 @@ const origin=new URL(process.env.HOS_LIVE_URL || 'https://house-of-stone-product
 const models=JSON.parse(readFileSync(new URL('../public/models.json',import.meta.url),'utf8'));
 const output=new URL(process.env.HOS_LIVE_OUTPUT || '../test-results/live/',import.meta.url);mkdirSync(output,{recursive:true});
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
-const paths=new Set(['/app.js','/styles.css','/light-theme.css','/collections.css','/media-manifest.json','/models.json','/sculpture-viewer.js','/stone-surface.js']);
+const paths=new Set(['/app.js','/styles.css','/light-theme.css','/collections.css','/quality.css','/gallery.js','/presentation.js','/media-upload.js','/models.json','/sculpture-viewer.js','/stone-surface.js']);
 for(const entry of Object.values(models)){
   paths.add(entry.file);
   const bytes=readFileSync(new URL('../public'+entry.file,import.meta.url));
@@ -27,6 +27,8 @@ for(let attempt=0;attempt<attempts;attempt++){
       const response=await fetch(origin+path+'?release='+encodeURIComponent(process.env.GITHUB_SHA || expected.get(path)),{cache:'no-store',signal:AbortSignal.timeout(15000)});
       assert(response.ok,`${path}: HTTP ${response.status}`);assert.equal(hash(Buffer.from(await response.arrayBuffer())),expected.get(path),`${path}: waiting for current release`);
     }
+    const manifestResponse=await fetch(origin+'/media-manifest.json',{cache:'no-store',signal:AbortSignal.timeout(15000)});assert(manifestResponse.ok);const manifest=await manifestResponse.json(),bundled=JSON.parse(readFileSync(new URL('../public/media-manifest.json',import.meta.url),'utf8'));
+    for(const [source,info] of Object.entries(bundled))assert.deepEqual(manifest[source],info,'Bundled responsive image '+source);
     deployed=true;break;
   }catch(error){lastError=error.message;console.log(`Waiting for release (${attempt+1}/${attempts}): ${lastError}`);if(attempt+1<attempts)await delay(retry);}
 }
