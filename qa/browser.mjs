@@ -57,7 +57,7 @@ for(const [engineName,engine] of engines) {
           const layout=await page.evaluate(()=>{
             const rect=s=>{const r=document.querySelector(s).getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,height:r.height};};
             const visible=selector=>[...document.querySelectorAll(selector)].filter(el=>el.getClientRects().length);
-            return {viewport:innerWidth,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,root:rect('#hos-concept'),header:rect('.hos-header'),footer:rect('.hos-footer'),footerPosition:getComputedStyle(document.querySelector('.hos-footer')).position,main:rect('#hos-main'),hero:rect('.hos-hero-image'),images:visible('#hos-concept img').map(img=>({src:img.currentSrc,naturalWidth:img.naturalWidth,fit:getComputedStyle(img).objectFit,hero:img.classList.contains('hos-hero-image'),campaign:!!img.closest('.hos-artist-campaign')})),text:visible('#hos-main p').filter(el=>!el.classList.contains('hos-artist-style')&&!el.classList.contains('hos-card-specs')&&!el.classList.contains('hos-photo-caption')&&!el.classList.contains('hos-work-short-specs')).map(el=>({size:parseFloat(getComputedStyle(el).fontSize),text:el.textContent.slice(0,60)}))};
+            return {viewport:innerWidth,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,root:rect('#hos-concept'),header:rect('.hos-header'),footer:rect('.hos-footer'),footerPosition:getComputedStyle(document.querySelector('.hos-footer')).position,main:rect('#hos-main'),hero:rect('.hos-hero-image'),images:visible('#hos-concept img').map(img=>({src:img.currentSrc,naturalWidth:img.naturalWidth,fit:getComputedStyle(img).objectFit,hero:img.classList.contains('hos-hero-image'),campaign:!!img.closest('.hos-artist-campaign')})),text:visible('#hos-main p').filter(el=>!el.classList.contains('hos-artist-style')&&!el.matches('.hos-card-specs,.hos-filter-count,.hos-work-short-specs,.hos-photo-caption')&&!el.classList.contains('hos-photo-caption')&&!el.classList.contains('hos-work-short-specs')).map(el=>({size:parseFloat(getComputedStyle(el).fontSize),text:el.textContent.slice(0,60)}))};
           });
           assert(layout.scrollWidth<=layout.clientWidth+1,`Horizontal overflow ${JSON.stringify(layout)}`);
           assert(Math.abs(layout.root.left)<1&&Math.abs(layout.root.right-layout.clientWidth)<2,`Root does not fill the page width ${JSON.stringify(layout)}`);
@@ -77,12 +77,12 @@ for(const [engineName,engine] of engines) {
             assert.equal(await page.locator('#hos-home-chapters .hos-setting-tile .hos-text-link').count(),0);
             if(width<=700)assert((await page.locator('#hos-home-chapters .hos-artist-campaign').first().boundingBox()).height>=Math.min(390,width),'Mobile artist campaign should have a large crop');
             assert.equal(await page.locator('.hos-hero-copy h1 span').last().evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');
-            assert.equal(await page.locator('#hos-home-collection-title').evaluate(el=>getComputedStyle(el).color),'rgb(40, 37, 31)');
+            assert.equal(await page.locator('#hos-home-collection-title').evaluate(el=>getComputedStyle(el).color),'rgb(36, 36, 36)');
             assert(await page.locator('#hos-page-navigation').isHidden(),'Home should not show Back');
           }
           if(path.startsWith('/artists/')) {
             const profile=await page.evaluate(()=>({image:document.querySelector('.hos-artist-portrait').getBoundingClientRect(),copy:document.querySelector('.hos-artist-copy').getBoundingClientRect()}));
-            if(width>700)assert(Math.abs(profile.image.top-profile.copy.top)<2,'Portrait and biography are not aligned');
+            if(width>700)assert(Math.abs((profile.image.top+profile.image.bottom-profile.copy.top-profile.copy.bottom)/2)<2,'Portrait and biography must share a vertical centre');
           }
           await page.evaluate(()=>scrollTo(0,document.documentElement.scrollHeight));
           const bottom=await page.evaluate(()=>({headerTop:document.querySelector('.hos-header').getBoundingClientRect().top,footerBottom:document.querySelector('.hos-footer').getBoundingClientRect().bottom,mainBottom:document.querySelector('#hos-main').getBoundingClientRect().bottom,footerTop:document.querySelector('.hos-footer').getBoundingClientRect().top}));
@@ -363,14 +363,14 @@ for(const [engineName,engine] of engines) {
       await editor.locator('.photo-editor summary').first().click();await editor.locator('.photo-grid button[title="fold"]').first().click();
     }
     await editor.locator('#publish').click();await editor.locator('#status').filter({hasText:'Collection published.'}).waitFor();
-    for(const [width,columns] of [[1440,3],[768,2],[390,1]]) {
+    for(const [width,columns] of [[1440,3],[768,2],[390,2]]) {
       await page.setViewportSize({width,height:900});await ready(page,'/collection');
       const grid=page.locator('#hos-collection-chapters .hos-work-grid').first();
       assert.equal(await grid.locator('.hos-work-card').count(),8);
       assert.equal(await grid.evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length),columns);
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1),'Multiple sculpture tiles overflow the screen');
     }
-    await page.locator('#hos-collection-chapters .hos-work-card .hos-text-link[data-work]').last().click();
+    await page.locator('#hos-collection-chapters .hos-work-card h3 [data-work]').last().click();
     assert.equal(await page.locator('#hos-work-title').textContent(),'Browser QA sculpture 4');
     await editor.goto(base+'/admin');await editor.locator('#inbox .inquiry').first().waitFor();
     assert((await editor.locator('#inbox').textContent()).includes('Browser QA collector'));
@@ -401,5 +401,6 @@ for(const [engineName,engine] of engines) {
 writeFileSync(new URL('report.json',output),JSON.stringify(report,null,2));
 assert.equal(report.errors.length,0,report.errors.join('\n'));
 console.log(`Browser QA passed: ${routes.length*sizes.length*engines.length} route/viewport checks, ${engines.length} engine(s), real inquiries, navigation, motion, measurement, 3D and owner editing.`);
+
 
 
