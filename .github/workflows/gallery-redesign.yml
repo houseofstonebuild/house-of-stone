@@ -1,0 +1,27 @@
+name: Gallery redesign
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  gallery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - run: npm install --prefix qa --no-package-lock
+      - run: cd qa && npx playwright install --with-deps chromium
+      - run: node qa/gallery-redesign.mjs
+      - run: node qa/light-theme.mjs
+      - run: node qa/related-cards.mjs
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: gallery-redesign
+          path: test-results/

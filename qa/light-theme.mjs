@@ -35,11 +35,11 @@ try {
     for(const path of routes) {
       await ready(path);
       assert.equal(await page.locator('html').getAttribute('data-theme'),'light');
-      assert.equal(await page.locator('#hos-concept').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(246, 244, 239)');
+      assert.equal(await page.locator('#hos-concept').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1),path+': horizontal overflow');
       assert.equal(await page.locator('link[rel="canonical"]').getAttribute('href'),origin+path);
       const heading=page.locator('#hos-main [data-page]:not([hidden]) h1').first();
-      assert.equal(await heading.evaluate(el=>getComputedStyle(el).color),path==='/'?'rgb(255, 255, 255)':'rgb(40, 37, 31)',path+': readable heading');
+      assert.equal(await heading.evaluate(el=>getComputedStyle(el).color),path==='/'?'rgb(255, 255, 255)':'rgb(36, 36, 36)',path+': readable heading');
       report.routes++;
     }
     await ready('/');
@@ -57,7 +57,7 @@ try {
     await page.locator('.hos-menu-toggle').click();await page.locator('#hos-menu [data-view="house"]').click();assert.equal(new URL(page.url()).pathname,'/house');assert.equal(new URL(page.url()).search,'');
     await page.goto(origin+'/?theme=light');await page.locator('#hos-concept[data-ready="true"]').waitFor();assert.equal(await page.locator('html').getAttribute('data-theme'),'light');
     await page.locator('.hos-menu-toggle').click();await page.locator('#hos-menu [data-view="house"]').click();assert.equal(new URL(page.url()).search,'');
-    assert.equal(await page.locator('#hos-concept').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(246, 244, 239)');
+    assert.equal(await page.locator('#hos-concept').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
     report.viewports.push(viewport);
   }
   assert.deepEqual(report.errors,[]);report.passed=true;console.log('Light-theme review passed: '+JSON.stringify(report));
@@ -65,4 +65,5 @@ try {
   await browser?.close();if(app)await new Promise(resolve=>app.server.close(resolve));if(dataDir)rmSync(dataDir,{recursive:true,force:true});
   writeFileSync(new URL(`light-${engineName}-report.json`,output),JSON.stringify(report,null,2)+'\n');
 }
+
 

@@ -112,3 +112,130 @@
  #hos-concept .hos-mobile-work-action {display:block;position:fixed;inset:auto 0 0;z-index:24;padding:10px 24px calc(10px + env(safe-area-inset-bottom));background:rgba(246,244,239,.97);border-top:1px solid var(--hos-line);}
  #hos-concept .hos-mobile-work-action button {width:100%;min-height:46px;}
 }
+
+/* Contemporary gallery: one grid, compact captions and deliberate reading groups. */
+:root[data-theme="light"],:root[data-theme="light"] body {background:#fff;}
+:root[data-theme="light"] {--hos-content-width:1560px;--hos-gutter:clamp(24px,4.5vw,96px);}
+:root[data-theme="light"] #hos-concept {--hos-bg:#fff;--hos-fg:#242424;--hos-muted:#646464;--hos-line:#dededb;background:#fff;line-height:1.65;}
+:root[data-theme="light"] #hos-concept .hos-header {background:rgba(255,255,255,.96);}
+:root[data-theme="light"] #hos-concept :is(.hos-menu,.hos-inquiry) {background:#fff;}
+:root[data-theme="light"] #hos-concept :is(.hos-editorial-chapter,.hos-footer) {background:#f5f5f2;}
+:root[data-theme="light"] #hos-concept :is(.hos-eyebrow,.hos-menu-label,.hos-artist-style) {color:#646464;}
+#hos-concept :is(h1,h2,h3) {letter-spacing:-.035em;line-height:1.15;}
+#hos-concept .hos-page-heading {padding:70px 0 48px;max-width:var(--hos-content-width);}
+#hos-concept .hos-page-heading h1 {font-size:clamp(38px,4.5vw,72px);max-width:1000px;margin:18px 0 22px;}
+#hos-concept .hos-page-heading>p {max-width:600px;font-size:17px;line-height:1.65;}
+#hos-concept .hos-eyebrow {font-size:10px;letter-spacing:.14em;font-weight:500;}
+#hos-concept .hos-text-link {font-size:13px;letter-spacing:.01em;transition:color .2s,border-color .25s,background .25s;}
+#hos-concept .hos-link-arrow {transition:transform .3s cubic-bezier(.2,.65,.3,1);}
+#hos-concept .hos-text-link:is(:hover,:focus-visible) .hos-link-arrow {transform:translateX(4px);}
+:root[data-theme] #hos-concept .hos-primary-action,:root[data-theme] #hos-concept .hos-collection-actions>.hos-collection-primary {background:#242424;color:#fff;border:1px solid #242424;min-height:48px;font-weight:500;letter-spacing:.025em;}
+:root[data-theme] #hos-concept .hos-primary-action:hover,:root[data-theme] #hos-concept .hos-collection-actions>.hos-collection-primary:hover {background:#444;color:#fff;border-color:#444;}
+#hos-concept .hos-collection-editorial {padding:60px 0 84px;}
+#hos-concept .hos-collection-editorial + .hos-collection-editorial {padding-top:84px;}
+#hos-concept .hos-collection-editorial .hos-collection-introduction {display:grid;grid-template-columns:1fr 1fr;align-items:end;text-align:left;max-width:none;padding:0;gap:12px 48px;margin:0 0 40px;}
+#hos-concept .hos-collection-introduction .hos-eyebrow {grid-column:1/-1;margin:0;}
+#hos-concept .hos-collection-editorial .hos-collection-introduction :is(h1,h2) {font-size:clamp(42px,5vw,76px);line-height:1.05;margin:0;}
+#hos-concept .hos-collection-editorial .hos-collection-introduction .hos-collection-tagline {font-size:17px;max-width:420px;margin:0;justify-self:end;line-height:1.6;}
+#hos-concept .hos-collection-editorial .hos-collection-feature {display:grid;grid-template-columns:minmax(0,1.55fr) minmax(260px,.65fr);gap:clamp(36px,6vw,100px);align-items:center;}
+#hos-concept .hos-collection-editorial .hos-collection-visual {--hos-visual-height:clamp(460px,53vw,720px);}
+#hos-concept .hos-collection-editorial .hos-collection-photo {grid-template-columns:1fr;background:#f5f5f2;}
+#hos-concept .hos-collection-editorial .hos-collection-photo>img {object-fit:contain;}
+#hos-concept .hos-collection-photo .hos-collection-setting {display:none;}
+#hos-concept .hos-collection-editorial .hos-visual-modes {justify-content:flex-start;gap:28px;min-height:50px;}
+#hos-concept .hos-visual-modes button {font-size:12px;}
+#hos-concept .hos-collection-editorial .hos-collection-copy {max-width:360px;margin:0;text-align:left;padding:0;}
+#hos-concept .hos-collection-copy .hos-star-title {font-size:clamp(28px,3vw,42px);line-height:1.15;margin:16px 0 10px;}
+#hos-concept .hos-collection-copy>.hos-collection-credit {display:inline-flex;margin:0;min-height:32px;font-size:14px;}
+#hos-concept .hos-collection-copy>.hos-card-specs {font-size:12px;line-height:1.8;margin:16px 0 0;}
+#hos-concept .hos-collection-copy .hos-feature-story {font-size:15px;line-height:1.8;color:var(--hos-muted);margin:26px 0;}
+#hos-concept .hos-collection-copy>.hos-availability {display:table;margin:12px 0 0;}
+#hos-concept .hos-collection-copy .hos-collection-actions {margin-top:28px;align-items:flex-start;gap:12px;}
+#hos-concept .hos-collection-editorial .hos-supporting-preview {margin-top:64px;}
+#hos-concept .hos-supporting-preview-heading {margin-bottom:24px;}
+#hos-concept .hos-supporting-preview-heading h3,#hos-concept .hos-more-works>h2,#hos-concept .hos-supporting-works>h2 {font-size:25px;letter-spacing:-.025em;}
+#hos-concept .hos-work-grid {gap:48px 28px;}
+#hos-concept .hos-work-grid[data-count="1"] {grid-template-columns:repeat(3,minmax(0,1fr));}
+#hos-concept .hos-work-grid[data-count="1"] .hos-work-card {display:block;}
+:root[data-theme="light"] #hos-concept .hos-work-card-photo {background:#f5f5f2;overflow:hidden;}
+#hos-concept .hos-work-card-photo img,#hos-concept .hos-supporting-preview-grid .hos-work-card-photo img {display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;transition:transform .65s cubic-bezier(.2,.65,.3,1);}
+#hos-concept .hos-work-card-photo:is(:hover,:focus-visible) img {transform:scale(1.025);filter:none;}
+#hos-concept .hos-work-card-copy,#hos-concept .hos-supporting-preview-grid .hos-work-card-copy {position:relative;padding-top:16px;}
+#hos-concept .hos-work-card-copy h3,#hos-concept .hos-supporting-preview-grid .hos-work-card-copy h3 {font-size:19px;font-weight:400;line-height:1.35;margin:0 0 3px;}
+#hos-concept .hos-card-title {display:inline-block;color:inherit;text-decoration:none;min-height:32px;}
+#hos-concept .hos-card-title:hover {text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:1px;}
+#hos-concept .hos-work-card-copy>.hos-text-link[data-artist] {display:inline-flex;margin:0;min-height:32px;font-size:12px;line-height:1.5;border:0;color:var(--hos-muted);}
+#hos-concept .hos-work-card-copy>.hos-availability {float:right;border:0;padding:6px 0;margin:0 0 0 12px;font-size:10px;letter-spacing:.06em;color:var(--hos-muted);}
+#hos-concept .hos-work-card-copy>.hos-availability:has(+ h3) {max-width:30%;}
+#hos-concept .hos-collection-filters {gap:24px;padding:16px 0 24px;}
+#hos-concept .hos-collection-filters select {border:0;border-bottom:1px solid var(--hos-line);background:transparent;padding-left:0;font-size:13px;}
+#hos-concept .hos-filter-count {font-size:12px;margin:24px 0;}
+#hos-concept .hos-work-layout {grid-template-columns:minmax(0,1.65fr) minmax(300px,.75fr);gap:32px clamp(36px,6vw,100px);padding-top:40px;}
+#hos-concept .hos-work-photo {grid-template-columns:1fr;gap:14px;}
+#hos-concept .hos-work-photo .hos-work-additional-images {grid-row:2;flex-direction:row;width:100%;max-height:none;gap:10px;overflow-x:auto;}
+#hos-concept .hos-work-photo .hos-photo-thumbnail {width:48px;padding:0 0 6px;}
+#hos-concept .hos-work-photo .hos-photo-thumbnail img {width:48px;height:60px;object-fit:cover;}
+#hos-concept .hos-work-photo .hos-photo-thumbnail span {display:none;}
+#hos-concept .hos-work-primary-photo {position:relative;grid-row:1;}
+#hos-concept .hos-work-photo-open {height:clamp(440px,72svh,840px);background:#f5f5f2;}
+#hos-concept .hos-work-photo-caption {font-size:11px;text-align:left;margin:12px 0;max-width:45%;color:var(--hos-muted);}
+#hos-concept .hos-gallery-navigation {position:absolute;right:0;bottom:0;gap:14px;margin:0;font-size:11px;}
+#hos-concept .hos-gallery-navigation button {font-size:11px;}
+#hos-concept .hos-work-details {max-width:400px;padding-top:18px;}
+#hos-concept .hos-work-details h1 {font-size:clamp(36px,3.4vw,54px);line-height:1.1;margin:18px 0 8px;}
+#hos-concept .hos-work-details .hos-artist-name-link {font-size:14px;letter-spacing:0;}
+#hos-concept .hos-work-details #hos-work-description {font-size:15px;line-height:1.75;margin:30px 0 16px;}
+#hos-concept .hos-work-details .hos-work-short-specs {font-size:12px;margin:0 0 28px;}
+#hos-concept .hos-work-gallery-story {padding-left:0;gap:40px;}
+#hos-concept .hos-work-maker {margin:64px auto;}
+#hos-concept .hos-work-maker .hos-artist-context {max-width:780px;margin:0;padding-top:28px;}
+#hos-concept .hos-artist-profile {grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(40px,7vw,120px);align-items:center;margin-bottom:72px;}
+#hos-concept .hos-artist-portrait img {max-height:720px;width:100%;object-fit:cover;}
+#hos-concept .hos-artist-copy {max-width:550px;}
+#hos-concept .hos-artist-copy h2 {font-size:23px;margin:0 0 16px;}
+#hos-concept .hos-artist-copy p {font-size:16px;line-height:1.9;}
+#hos-concept .hos-artist-copy>div+div {margin-top:36px;}
+#hos-concept .hos-artist-studio figure {max-width:1100px;margin:0 0 0 auto;}
+#hos-concept .hos-more-works {padding-top:36px;padding-bottom:64px;}
+#hos-concept .hos-mobile-work-action {background:rgba(255,255,255,.97);}
+@media(max-width:1000px){
+ #hos-concept .hos-collection-editorial .hos-collection-feature {grid-template-columns:minmax(0,1.2fr) minmax(240px,.8fr);gap:32px;}
+ #hos-concept .hos-work-layout {grid-template-columns:minmax(0,1fr) minmax(280px,.8fr);gap:32px;}
+}
+@media(max-width:700px){
+ :root[data-theme="light"] {--hos-gutter:24px;}
+ #hos-concept .hos-page-heading {padding:40px 0 32px;}
+ #hos-concept .hos-page-heading h1 {font-size:40px;}
+ #hos-concept .hos-page-heading>p {font-size:15px;}
+ #hos-concept .hos-collection-editorial,#hos-concept .hos-collection-editorial + .hos-collection-editorial {padding:36px 0 48px;}
+ #hos-concept .hos-collection-editorial .hos-collection-introduction {display:block;text-align:left;margin-bottom:28px;}
+ #hos-concept .hos-collection-editorial .hos-collection-introduction :is(h1,h2) {font-size:48px;margin:12px 0;}
+ #hos-concept .hos-collection-editorial .hos-collection-introduction .hos-collection-tagline {font-size:14px;margin:0;max-width:290px;}
+ #hos-concept .hos-collection-editorial .hos-collection-feature {display:block;}
+ #hos-concept .hos-collection-editorial .hos-collection-visual {--hos-visual-height:calc((100vw - 48px) * 4 / 3);}
+ #hos-concept .hos-collection-editorial .hos-collection-copy {max-width:none;padding:24px 0 0;}
+ #hos-concept .hos-collection-copy .hos-star-title {font-size:30px;margin:10px 0 4px;}
+ #hos-concept .hos-collection-copy .hos-feature-story {margin:18px 0;font-size:14px;max-width:340px;}
+ #hos-concept .hos-collection-copy .hos-collection-actions {margin-top:20px;}
+ #hos-concept .hos-collection-editorial .hos-supporting-preview {margin-top:40px;}
+ #hos-concept .hos-work-grid,#hos-concept .hos-work-grid[data-count="1"] {grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 16px;}
+ #hos-concept .hos-work-card-copy h3,#hos-concept .hos-supporting-preview-grid .hos-work-card-copy h3 {font-size:16px;}
+ #hos-concept .hos-work-card-copy>.hos-text-link[data-artist] {font-size:11px;}
+ #hos-concept .hos-work-card-copy>.hos-availability {float:none;display:block;max-width:none;padding:0;margin:0 0 5px;font-size:9px;}
+ #hos-concept .hos-work-layout {grid-template-columns:1fr;gap:24px;padding-top:24px;}
+ #hos-concept .hos-work-photo {display:grid;gap:8px;}
+ #hos-concept .hos-work-photo .hos-work-additional-images {order:initial;padding-bottom:0;}
+ #hos-concept .hos-work-photo-open {height:auto;aspect-ratio:3/4;}
+ #hos-concept .hos-work-details {padding:0;max-width:none;}
+ #hos-concept .hos-work-details h1 {font-size:36px;margin-top:10px;}
+ #hos-concept .hos-work-details #hos-work-description {font-size:14px;margin-top:20px;}
+ #hos-concept .hos-work-gallery-story {gap:28px;}
+ #hos-concept .hos-artist-profile {grid-template-columns:1fr;gap:32px;margin-bottom:48px;}
+ #hos-concept .hos-artist-copy p {font-size:15px;line-height:1.8;}
+ #hos-concept .hos-work-maker {margin:40px auto;}
+ #hos-concept .hos-supporting-preview-heading h3,#hos-concept .hos-more-works>h2,#hos-concept .hos-supporting-works>h2 {font-size:23px;}
+}
+@media(prefers-reduced-motion:reduce){
+ #hos-concept *,#hos-concept *::before,#hos-concept *::after {transition:none!important;scroll-behavior:auto!important;}
+ #hos-concept .hos-work-card-photo:is(:hover,:focus-visible) img {transform:none;}
+}

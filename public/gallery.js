@@ -9,7 +9,8 @@ export function initializeGallery({root,document,applyImage,motionPreference,onV
     applyImage(main,photo.source,'(max-width:700px) 90vw, 65vw');main.alt=photo.label+' of '+title.textContent;main.style.transform=photo.zoom?'scale('+photo.zoom+')':'';
     opener.setAttribute('aria-label','Inspect '+photo.label.toLowerCase()+' of '+title.textContent);opener.dataset.detailCrop=String(Boolean(photo.zoom));
     thumbs.querySelectorAll('button').forEach((button,n)=>button.setAttribute('aria-pressed',String(n===index)));
-    root.querySelector('#hos-work-photo-caption').textContent=photo.label+' · Select image to inspect';count.textContent=(index+1)+' / '+photos.length;
+    root.querySelector('#hos-work-photo-caption').textContent=photo.label;count.textContent=(index+1)+' / '+photos.length;
+    if(!motionPreference?.matches && main.decode)main.decode().then(()=>{if(photos[index]===photo)main.animate?.([{opacity:.35},{opacity:1}],{duration:320,easing:'ease-out'});}).catch(()=>{});
     root.querySelectorAll('[data-gallery-step]').forEach(button=>button.disabled=photos.length<2);
   }
   function display(){
@@ -45,3 +46,4 @@ export function initializeGallery({root,document,applyImage,motionPreference,onV
     thumbs.hidden=photos.length<2;story.hidden=!story.childElementCount;if(photos.length)select(0);
   }};
 }
+

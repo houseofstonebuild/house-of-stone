@@ -141,12 +141,10 @@ function workCard(work, {compact = false} = {}) {
   photo.setAttribute('aria-label', `View ${workLabel(work)}`);
   photo.append(image(work.image,work.description || workLabel(work),true,'(max-width: 700px) 90vw, 520px'));
   const copy = el('div','hos-work-card-copy'), badge=availabilityLabel(work);
-  if(badge)copy.append(badge);
-  copy.append(el('h3','',work.title),credit(work));
-  if(work.material || work.dimensions)copy.append(el('p','hos-card-specs',[work.material,work.dimensions].filter(Boolean).join(' · ')));
-  if(work.description && !compact)copy.append(el('p','hos-card-description',work.description));
-  const collection=collectionFor(work);if(collection && !compact)copy.append(link(collection.name,{collection:collection.id}));
-  copy.append(link('View sculpture',{work:work.id}));card.append(photo,copy);return card;
+  if(badge && work.availability!=='available')copy.append(badge);
+  const heading=el('h3'),titleLink=photoLink('hos-card-title',{work:work.id},`View ${workLabel(work)}`);titleLink.textContent=work.title;heading.append(titleLink);
+  const artist=artistFor(work),author=artist?photoLink('hos-text-link',{artist:artist.id},'About '+artist.name):el('p','hos-credit','Artist details on inquiry');if(artist)author.textContent=artist.name;
+  copy.append(heading,author);card.append(photo,copy);return card;
 }
 function artistContext(work) {
   const artist=artistFor(work);if(!artist)return null;
@@ -200,7 +198,6 @@ function collectionChapter(collection, {heading = true} = {}) {
   if(!work)return section;
   const introduction=el('div','hos-collection-introduction');introduction.dataset.reveal='';
   introduction.append(el('div','hos-eyebrow','THE FOUNDING COLLECTION'),el(heading?'h2':'h1','',collection.name),el('p','hos-collection-tagline',collection.description));
-  if(collection.introduction)introduction.append(el('p','hos-collection-blurb',collection.introduction));
   const feature=el('div','hos-collection-feature');
   const visual=collectionVisual(work);
   const copy=el('div','hos-collection-copy');copy.dataset.reveal='';
@@ -211,13 +208,13 @@ function collectionChapter(collection, {heading = true} = {}) {
   if(work.material || work.dimensions)copy.append(el('p','hos-card-specs',[work.material,work.dimensions].filter(Boolean).join(' · ')));
   const actions=el('div','hos-collection-actions');
   if(heading){const primary=link(work.availability==='sold'?'Explore available works':'Explore the collection',{collection:collection.id,...(work.availability==='sold'?{available:'true'}:{})});primary.classList.add('hos-collection-primary');actions.append(primary);}
-  else if(work.availability==='sold')actions.append(link('Explore available works',{scrollSupporting:collection.id}));
-  const secondary=el('div','hos-collection-secondary-actions');
-  const detail=link('View star sculpture',{work:work.id});detail.classList.add('hos-collection-secondary');secondary.append(detail);
-  const inquire=link(work.availability==='sold'?'Inquire about related works':'Inquire about this work',{inquiry:work.availability==='sold'?`Alternatives to ${workLabel(work)}`:workLabel(work),inquiryWork:work.id,inquiryArtist:artistFor(work)?.id || '',inquiryIntent:work.availability==='sold'?'alternatives':''});inquire.disabled=previewMode;secondary.append(inquire);actions.append(secondary);
-  inquire.classList.add('hos-collection-inquiry');
-  if(artist)copy.append(link('About the artist',{artist:artist.id}));
-  feature.append(visual,copy);section.append(introduction,feature);if(heading){const supporting=supportingPreview(collection);if(supporting)section.append(supporting);}section.append(actions);return section;
+  else if(work.availability==='sold'){const primary=link('Explore available works',{scrollSupporting:collection.id});primary.classList.add('hos-collection-primary');actions.append(primary);}
+  if(!heading && work.availability!=='sold'){
+    const detail=link('Discover this work',{work:work.id});detail.classList.add('hos-collection-primary');actions.append(detail);
+  }
+  if(collection.introduction)copy.append(el('p','hos-feature-story',collection.introduction));
+  copy.append(actions);
+  feature.append(visual,copy);section.append(introduction,feature);if(heading){const supporting=supportingPreview(collection);if(supporting)section.append(supporting);}return section;
 }
 function filteredWorks(container, selected, label = 'Browse works') {
   const section=el('section','hos-collection-browser');section.setAttribute('aria-label',label);
@@ -692,6 +689,7 @@ async function start() {
 start().catch(error => {
   const notice = el('p','hos-form-note',error.message || 'The collection could not load. Please refresh the page.'); notice.setAttribute('role','alert'); $('.hos-hero-copy').append(notice);
 });
+
 
 
 
