@@ -203,7 +203,7 @@ function collectionChapter(collection, {heading = true} = {}) {
   const copy=el('div','hos-collection-copy');copy.dataset.reveal='';
   copy.append(el('div','hos-eyebrow','THE FEATURED WORK'));
   const badge=availabilityLabel(work);if(badge)copy.append(badge);
-  copy.append(el('h2','hos-star-title',work.title));
+  const featuredTitle=el('h2','hos-star-title'),featuredLink=photoLink('hos-feature-title',{work:work.id},`View ${workLabel(work)}`);featuredLink.textContent=work.title;featuredTitle.append(featuredLink);copy.append(featuredTitle);
   const artist=artistFor(work);if(artist){const author=credit(work);author.classList.add('hos-collection-credit');copy.append(author);}
   if(work.material || work.dimensions)copy.append(el('p','hos-card-specs',[work.material,work.dimensions].filter(Boolean).join(' · ')));
   const actions=el('div','hos-collection-actions');

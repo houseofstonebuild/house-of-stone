@@ -82,10 +82,10 @@ try{
       for(const collection of collections){
         const work=works.get(collection.starWorkId);assert(work,'A collection must have a published star');
         const chapter=page.locator(`#hos-home-chapters [data-collection-section="${collection.id}"]`);
-        assert.equal(await chapter.locator('.hos-collection-actions [data-work]').getAttribute('data-work'),work.id);
+        assert.equal(await chapter.locator('.hos-star-title [data-work]').getAttribute('data-work'),work.id);
         assert.equal(await chapter.locator('[data-model-fallback]').count(),matchingModel(work)?0:1);if(!matchingModel(work))fallbacks++;
         if(work.availability==='sold')assert.equal(await chapter.locator('.hos-collection-copy > .hos-availability').textContent(),'Sold');
-        await inquire(chapter.locator('.hos-collection-actions [data-inquiry-work]'),work,viewport.width);
+        await chapter.locator('.hos-star-title [data-work]').click();await page.locator('#hos-work-title').waitFor();await inquire(page.locator('#hos-work-inquiry'),work,viewport.width);await page.goto(origin+'/');await page.locator('#hos-concept[data-ready="true"]').waitFor();
       }
       report.photoFallbacks=fallbacks;
     }else{
@@ -121,3 +121,4 @@ try{
   assert.deepEqual(failures,[]);report.passed=true;
 }finally{await browser.close();writeFileSync(new URL('report.json',output),JSON.stringify({...report,failures},null,2)+'\n');}
 console.log('Live verification passed: '+JSON.stringify(report));
+
