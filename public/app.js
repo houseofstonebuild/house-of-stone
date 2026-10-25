@@ -159,12 +159,16 @@ function workScenes(work) {
   const entry=editorial.workScenes?.[work.id];
   return entry?.source===assets[work.image] ? entry.scenes || [] : [];
 }
-function collectionVisual(work, collection) {
+function collectionVisual(work, collection, {interior = false} = {}) {
   const visual=el('div','hos-collection-visual'),photo=el('div','hos-collection-photo'),panel=modelPanel(work);
   visual.dataset.visualWork=work.id;
   const portrait=collection && editorial.collectionPortraits?.[collection.id],artist=artistFor(work);
   const portraitMatches=portrait && portrait.workId===work.id && portrait.workSource===assets[work.image] && portrait.artistId===artist?.id && portrait.portraitSource===assets[artist?.portrait];
-  if(portraitMatches){
+  const interiorScene=interior && workScenes(work)[0];
+  if(interiorScene){
+    photo.classList.add('hos-collection-landscape','hos-collection-interior');
+    photo.append(editorialImage(interiorScene.source,work.title+' in an interior setting','100vw'));
+  }else if(portraitMatches){
     photo.classList.add('hos-collection-landscape');
     photo.append(editorialImage(portrait.source,artist.name+' beside '+work.title,'(max-width: 700px) 100vw, 90vw'));
   }else photo.append(image(work.image,work.description || workLabel(work),true,'(max-width: 700px) 90vw, 1200px'));
@@ -195,14 +199,15 @@ function collectionChapter(collection, {heading = true} = {}) {
   if(!work)return section;
   if(heading){
     section.classList.add('hos-collection-campaign');
-    const visual=collectionVisual(work,collection);
+    const visual=collectionVisual(work,collection,{interior:true});
     const selection=collectionSelection(collection);
-    selection.querySelector('.hos-selection-heading').replaceChildren(el('h2','',collection.name));
+    const title=el('div','hos-campaign-heading');title.append(el('h2','',collection.name));
+    selection.querySelector('.hos-selection-heading').remove();
     const action=link('Explore the collection',{collection:collection.id});
     action.classList.add('hos-collection-route');
     action.setAttribute('aria-label','Explore '+collection.name);
     const footer=el('div','hos-campaign-action');footer.append(action);
-    section.append(visual,selection,footer);
+    section.append(title,visual,selection,footer);
     return section;
   }
   const introduction=el('div','hos-collection-introduction');introduction.dataset.reveal='';
