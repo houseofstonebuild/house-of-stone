@@ -44,7 +44,7 @@ try {
  await page.screenshot({path:new URL('collections-private-desktop.png',out).pathname,fullPage:true});
  await page.locator('#hos-home-chapters [data-collection="rhythm"]').first().click();await page.waitForURL('**/admin/preview/collections/rhythm');
  assert.equal(await page.locator('#hos-category-content .hos-work-card').count(),5);
- await page.locator('#hos-category-content [data-filter="material"]').selectOption('Springstone');assert.equal(await page.locator('#hos-category-content .hos-work-card').count(),2);
+ if(await page.locator('#hos-category-content .hos-filter-toggle').isVisible())await page.locator('#hos-category-content .hos-filter-toggle').click();await page.locator('#hos-category-content [data-filter="material"]').selectOption('Springstone');assert.equal(await page.locator('#hos-category-content .hos-work-card').count(),2);
  await page.getByRole('button',{name:'Reset filters',exact:true}).click();assert.equal(await page.locator('#hos-category-content .hos-work-card').count(),5);
  await page.locator('#hos-category-content [data-artist]').first().click();await page.waitForURL('**/admin/preview/artists/*');assert((await page.locator('#hos-artist-works h3 a[data-work]').count())>0);
  assert.equal(app.db.prepare('SELECT count(*) AS n FROM events').get().n,0,'Private preview cannot log sessions');
