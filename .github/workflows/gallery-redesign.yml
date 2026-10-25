@@ -19,6 +19,7 @@ jobs:
           node-version: '24.19.0'
           package-manager-cache: false
       - run: npm install --prefix qa --no-package-lock
+      - run: node qa/compact-layout.mjs
       - run: node qa/collection-experience.mjs
       - run: node qa/gallery-redesign.mjs
       - run: node qa/light-theme.mjs
