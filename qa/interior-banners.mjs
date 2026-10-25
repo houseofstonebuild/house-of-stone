@@ -19,7 +19,7 @@ try{
  await page.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
  const out=new URL('../test-results/interiors/',import.meta.url);mkdirSync(out,{recursive:true});
  const catalog=await(await fetch(origin+'/content.json')).json();
- for(const width of [390,1440]){
+ for(const width of [320,390,1440]){
   await page.setViewportSize({width,height:1000});await page.goto(origin);
   await page.locator('#hos-concept[data-ready="true"]').waitFor();
   for(const c of catalog.collections){
@@ -31,9 +31,25 @@ try{
    assert(Math.abs(geometry.left)<2);assert(Math.abs(geometry.width-geometry.viewport)<2);
    assert(Math.abs(geometry.width/geometry.height-(width<700?.75:1.5))<.02);
    const heading=await title.evaluate(n=>n.getBoundingClientRect().bottom),top=await banner.evaluate(n=>n.getBoundingClientRect().top);assert(heading<=top);
+   assert.equal(await chapter.locator('.hos-visual-modes,[data-model-stage]').count(),0);
+   const grid=chapter.locator('.hos-equal-works');
+   await grid.scrollIntoViewIfNeeded();
+   const cards=await grid.locator('.hos-work-card').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {top:r.top,width:r.width};}));
+   assert.equal(cards.length,c.workIds.length);
+   assert(Math.max(...cards.map(n=>n.top))-Math.min(...cards.map(n=>n.top))<2,'Cards should share a single row');
+   if(width<700){
+    const before=await grid.evaluate(n=>({width:n.clientWidth,scroll:n.scrollWidth}));assert(before.scroll>before.width);
+    await grid.hover();await page.mouse.wheel(240,0);await page.waitForFunction(id=>document.querySelector('[data-collection-section="'+id+'"] .hos-equal-works').scrollLeft>20,c.id);
+    await grid.evaluate(n=>n.scrollTo({left:n.scrollWidth,behavior:'instant'}));
+    const last=await grid.evaluate(n=>{const a=n.lastElementChild.getBoundingClientRect(),b=n.getBoundingClientRect();return a.right<=b.right+2;});assert(last,'Last sculpture must be reachable');
+    await grid.evaluate(n=>n.scrollTo({left:0,behavior:'instant'}));
+    await grid.screenshot({path:new URL(width+'-'+c.id+'-carousel.jpg',out).pathname,type:'jpeg',quality:88});
+   }
    await banner.screenshot({path:new URL(width+'-'+c.id+'.jpg',out).pathname,type:'jpeg',quality:88});
   }
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  }
- console.log('Interior banners passed: five sources, title-first order, landscape desktop and edge-to-edge portrait mobile.');
+ for(const c of catalog.collections){await page.goto(origin+'/collections/'+c.slug);await page.locator('#hos-concept[data-ready="true"]').waitFor();assert.equal(await page.locator('#hos-category-content .hos-visual-modes,#hos-category-content [data-model-stage]').count(),0);}
+ const star=catalog.works.find(w=>w.id===catalog.collections[0].starWorkId);await page.goto(origin+'/works/'+star.slug);await page.locator('#hos-concept[data-ready="true"]').waitFor();assert(await page.locator('#hos-work-model').isVisible(),'3D remains on sculpture pages');
+ console.log('Interior banners and mobile carousel passed: five sources, title-first order, landscape desktop and edge-to-edge portrait mobile.');
 }finally{await browser?.close();await new Promise(r=>app.server.close(r));rmSync(dataDir,{recursive:true,force:true});}

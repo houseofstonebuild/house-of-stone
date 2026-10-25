@@ -427,3 +427,11 @@
  #hos-concept .hos-filter-toolbar .hos-filter-count {font-size:12px;margin:0;}
  #hos-concept .hos-editorial-story > div + div,#hos-concept .hos-home-house > div + div {margin-top:12px;}
 }
+
+/* Mobile home collections use a single swipeable row to shorten the page. */
+@media(max-width:700px){
+ #hos-concept .hos-collection-campaign .hos-equal-works[data-count] {display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:72%;gap:16px;width:calc(100% + var(--hos-gutter));max-width:none;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-padding-inline-start:0;padding:0 var(--hos-gutter) 12px 0;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:var(--hos-line) transparent;}
+ #hos-concept .hos-collection-campaign .hos-equal-works > .hos-work-card {scroll-snap-align:start;min-width:0;}
+ #hos-concept .hos-collection-campaign .hos-equal-works .hos-work-card-photo img {max-height:none;}
+ #hos-concept .hos-collection-campaign .hos-equal-works:focus-visible {outline:1px solid var(--hos-fg);outline-offset:4px;}
+}

@@ -160,7 +160,7 @@ function workScenes(work) {
   return entry?.source===assets[work.image] ? entry.scenes || [] : [];
 }
 function collectionVisual(work, collection, {interior = false} = {}) {
-  const visual=el('div','hos-collection-visual'),photo=el('div','hos-collection-photo'),panel=modelPanel(work);
+  const visual=el('div','hos-collection-visual'),photo=el('div','hos-collection-photo');
   visual.dataset.visualWork=work.id;
   const portrait=collection && editorial.collectionPortraits?.[collection.id],artist=artistFor(work);
   const portraitMatches=portrait && portrait.workId===work.id && portrait.workSource===assets[work.image] && portrait.artistId===artist?.id && portrait.portraitSource===assets[artist?.portrait];
@@ -172,25 +172,14 @@ function collectionVisual(work, collection, {interior = false} = {}) {
     photo.classList.add('hos-collection-landscape');
     photo.append(editorialImage(portrait.source,artist.name+' beside '+work.title,'(max-width: 700px) 100vw, 90vw'));
   }else photo.append(image(work.image,work.description || workLabel(work),true,'(max-width: 700px) 90vw, 1200px'));
-  const setting=el('div','hos-collection-setting'),scene=workScenes(work)[0];
-  if(scene){setting.append(editorialImage(scene.source,work.title+' · Interior study','(max-width:700px) 90vw, 60vw'));}
-  else{setting.classList.add('hos-stone-closeup');setting.append(image(work.image,'Stone detail of '+work.title,true,'50vw'));}
-  photo.append(setting);
-  visual.append(photo);
-  if(!panel){photo.dataset.modelFallback=work.id;return visual;}
-  panel.hidden=true;visual.append(panel);
-  const modes=el('div','hos-visual-modes');modes.setAttribute('role','group');modes.setAttribute('aria-label','View '+work.title);
-  for(const [mode,label] of [['photo','Photograph'],['model','View in 3D']]){
-    const button=el('button','cursor-interaction',label);button.type='button';button.dataset.visualMode=mode;button.setAttribute('aria-pressed',String(mode==='photo'));modes.append(button);
-  }
-  visual.append(modes);return visual;
+  visual.append(photo);return visual;
 }
 function collectionSelection(collection) {
   const selected=collection.workIds.map(id=>works.find(work=>work.id===id)).filter(Boolean);
   if(!selected.length)return null;
   const section=el('section','hos-collection-selection');section.dataset.reveal='';section.setAttribute('aria-label','Works in '+collection.name);
   const heading=el('div','hos-selection-heading');heading.append(el('h3','','The works'),el('span','',selected.length+' sculptures'));
-  const grid=workGrid(selected);grid.classList.add('hos-equal-works');
+  const grid=workGrid(selected);grid.classList.add('hos-equal-works');grid.tabIndex=0;grid.setAttribute('aria-label',collection.name+' sculptures');
   section.append(heading,grid);return section;
 }
 function collectionChapter(collection, {heading = true} = {}) {
@@ -413,7 +402,6 @@ function artistChapter(artist, selected, withInquiry = false) {
     specs.append(el('p','',featured.material),el('p','',featured.dimensions));
     workCopy.append(workHeading, specs);
     details.append(artistCopy,workCopy);chapter.append(campaign,details);
-    const model=modelPanel(featured);if(model)chapter.append(model);
     chapter.append(sculptureSettings(artist,featured,entry,withInquiry));
     const additional = selected.filter(work => work.id !== featured.id);
     if (additional.length) { const more = el('div','hos-chapter-additional');more.append(el('h3','','More works by '+artist.name),workGrid(additional));chapter.append(more); }
