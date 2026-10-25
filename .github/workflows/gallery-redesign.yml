@@ -20,6 +20,11 @@ jobs:
           package-manager-cache: false
       - run: npm install --prefix qa --no-package-lock
       - run: node qa/compact-layout.mjs
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: compact-layout
+          path: test-results/compact/
       - run: node qa/collection-experience.mjs
       - run: node qa/gallery-redesign.mjs
       - run: node qa/light-theme.mjs
