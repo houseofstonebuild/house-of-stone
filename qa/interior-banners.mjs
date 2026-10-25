@@ -25,7 +25,7 @@ try{
   for(const c of catalog.collections){
    const chapter=page.locator('[data-collection-section="'+c.id+'"]');
    const title=chapter.locator('.hos-campaign-heading'),banner=chapter.locator('.hos-collection-photo.hos-collection-interior'),img=banner.locator(':scope > img');
-   await img.evaluate(n=>n.decode());
+   await banner.scrollIntoViewIfNeeded();await img.evaluate(n=>n.decode());
    assert((await img.getAttribute('src')).includes('campaign-v2'));
    const geometry=await banner.evaluate(n=>{const r=n.getBoundingClientRect();return {left:r.left,width:r.width,height:r.height,viewport:innerWidth};});
    assert(Math.abs(geometry.left)<2);assert(Math.abs(geometry.width-geometry.viewport)<2);
