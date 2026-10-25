@@ -193,6 +193,18 @@ function collectionChapter(collection, {heading = true} = {}) {
   const work=works.find(work=>work.id===collection.starWorkId),section=el('section','hos-collection-chapter hos-collection-editorial');
   section.dataset.collectionSection=collection.id;if(heading)section.id='hos-home-'+collection.id;
   if(!work)return section;
+  if(heading){
+    section.classList.add('hos-collection-campaign');
+    const visual=collectionVisual(work,collection);
+    const selection=collectionSelection(collection);
+    selection.querySelector('.hos-selection-heading').replaceChildren(el('h2','',collection.name));
+    const action=link('Explore the collection',{collection:collection.id});
+    action.classList.add('hos-collection-route');
+    action.setAttribute('aria-label','Explore '+collection.name);
+    const footer=el('div','hos-campaign-action');footer.append(action);
+    section.append(visual,selection,footer);
+    return section;
+  }
   const introduction=el('div','hos-collection-introduction');introduction.dataset.reveal='';
   introduction.append(el('div','hos-eyebrow','THE FOUNDING COLLECTION'),el(heading?'h2':'h1','',collection.name));
   const description=el('div','hos-collection-description');description.append(el('p','hos-collection-tagline',collection.description));
