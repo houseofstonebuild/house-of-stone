@@ -360,3 +360,30 @@
  #hos-concept .hos-artist-profile {grid-template-columns:1fr;gap:28px;margin-bottom:42px;}
  #hos-concept .hos-artist-copy {padding-top:0;}
 }
+
+/* Home collections: campaign image, quiet title, equal works, one action. */
+#hos-concept #hos-home-chapters .hos-collection-campaign {padding:0 0 72px;border:0;}
+#hos-concept #hos-home-chapters .hos-collection-campaign + .hos-collection-campaign {padding-top:0;}
+#hos-concept .hos-collection-campaign > .hos-collection-visual {width:100vw;max-width:none;margin-left:calc((100% - 100vw) / 2);}
+#hos-concept .hos-collection-campaign .hos-visual-modes {width:calc(100% - var(--hos-gutter) * 2);max-width:var(--hos-content-width);margin:auto;border:0;min-height:40px;gap:22px;}
+#hos-concept .hos-collection-campaign .hos-visual-modes button {font-size:11px;}
+#hos-concept .hos-collection-campaign .hos-collection-selection {margin-top:28px;}
+#hos-concept .hos-collection-campaign .hos-selection-heading {display:block;text-align:center;border:0;padding:0;margin:0 0 28px;}
+#hos-concept .hos-collection-campaign .hos-selection-heading h2 {font-size:clamp(24px,2.2vw,32px);font-weight:400;line-height:1.3;letter-spacing:-.025em;margin:0;}
+#hos-concept .hos-collection-campaign .hos-work-grid {margin-top:0;}
+#hos-concept .hos-collection-campaign .hos-work-card-copy {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;padding-top:12px;}
+#hos-concept .hos-collection-campaign .hos-work-card-copy h3 {grid-column:1;grid-row:1;margin:0;font-size:13px;}
+#hos-concept .hos-collection-campaign .hos-card-title {min-height:0;line-height:1.5;}
+#hos-concept .hos-collection-campaign .hos-work-card-copy > [data-artist] {grid-column:1;grid-row:2;min-height:0;font-size:11px;line-height:1.6;align-items:start;}
+#hos-concept .hos-collection-campaign .hos-work-card-copy > .hos-availability {grid-column:2;grid-row:1;float:none;max-width:none;align-self:start;margin:0;padding:2px 0;font-size:9px;line-height:1.5;}
+#hos-concept .hos-campaign-action {display:flex;justify-content:center;margin-top:38px;}
+#hos-concept .hos-campaign-action .hos-collection-route {display:inline-flex;justify-content:center;align-items:center;min-height:44px;padding:10px 25px;margin:0;border:1px solid var(--hos-fg);border-radius:28px;font-size:12px;gap:0;}
+#hos-concept .hos-campaign-action .hos-link-arrow {display:none;}
+#hos-concept .hos-campaign-action .hos-collection-route:hover {background:var(--hos-fg);color:var(--hos-bg);}
+@media(max-width:700px){
+ #hos-concept #hos-home-chapters .hos-collection-campaign {padding-bottom:48px;}
+ #hos-concept .hos-collection-campaign .hos-collection-selection {margin-top:20px;}
+ #hos-concept .hos-collection-campaign .hos-selection-heading {margin-bottom:22px;}
+ #hos-concept .hos-collection-campaign .hos-work-card-copy {gap:3px 6px;}
+ #hos-concept .hos-campaign-action {margin-top:28px;}
+}
