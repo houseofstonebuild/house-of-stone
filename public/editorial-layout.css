@@ -312,3 +312,51 @@
  #hos-concept .hos-motion-toggle {display:none;}
  #hos-concept .hos-work-card-photo:is(:hover,:focus-visible) img,#hos-concept .hos-discover:is(:hover,:focus-visible) .hos-discover-circle,#hos-concept .hos-discover:is(:hover,:focus-visible) svg {transform:none;}
 }
+
+/* Final alignment pass: each collection reads as one deliberate editorial unit. */
+#hos-concept .hos-collection-editorial .hos-collection-introduction {align-items:end;gap:18px clamp(32px,5vw,88px);margin-bottom:32px;}
+#hos-concept .hos-collection-editorial .hos-collection-feature {display:block;}
+#hos-concept .hos-collection-editorial .hos-collection-visual {--hos-visual-height:clamp(420px,48vw,720px);}
+#hos-concept .hos-collection-editorial .hos-collection-photo.hos-collection-landscape {height:auto;aspect-ratio:auto;background:#f5f5f2;}
+#hos-concept .hos-collection-editorial .hos-collection-photo.hos-collection-landscape>img {display:block;width:100%;height:auto;object-fit:contain;object-position:center center;}
+#hos-concept .hos-collection-editorial .hos-collection-copy {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:24px;padding:16px 0 0;}
+#hos-concept .hos-poster-caption {display:flex;align-items:baseline;gap:12px 18px;min-width:0;}
+#hos-concept .hos-collection-copy .hos-star-title {font-size:16px;line-height:1.35;white-space:nowrap;}
+#hos-concept .hos-collection-copy .hos-collection-route {justify-self:end;display:inline-flex;align-items:center;min-height:36px;margin:0;border-bottom:1px solid var(--hos-line);padding-bottom:2px;}
+#hos-concept .hos-collection-copy .hos-collection-route:hover {border-color:var(--hos-fg);}
+#hos-concept .hos-collection-selection {margin-top:48px;}
+#hos-concept .hos-selection-heading {align-items:center;border-top:1px solid var(--hos-line);padding-top:18px;margin-bottom:24px;}
+#hos-concept .hos-selection-heading h3 {margin:0;font-size:22px;}
+#hos-concept .hos-selection-heading>span {display:block;line-height:1;white-space:nowrap;}
+
+/* Collection index counts share one baseline despite uneven copy lengths. */
+#hos-concept .hos-collection-index-card {display:flex;flex-direction:column;height:100%;}
+#hos-concept .hos-collection-index-card img {aspect-ratio:3/4;object-fit:contain;}
+#hos-concept .hos-collection-index-card h2 {margin-bottom:8px;}
+#hos-concept .hos-collection-index-card p {margin:0;}
+#hos-concept .hos-collection-index-card .hos-index-count {margin-top:auto;padding-top:12px;}
+
+/* Artist pages use a consistent, uncropped image and copy rhythm. */
+#hos-concept .hos-artist-profile {grid-template-columns:minmax(0,1fr) minmax(300px,.78fr);gap:clamp(40px,6vw,104px);align-items:start;margin-bottom:64px;}
+#hos-concept .hos-artist-portrait {background:#f5f5f2;}
+#hos-concept .hos-artist-portrait img {display:block;width:100%;height:auto;max-height:none;object-fit:contain;}
+#hos-concept .hos-artist-copy {max-width:520px;padding-top:8px;}
+#hos-concept .hos-artist-studio figure {max-width:none;margin:0;}
+#hos-concept .hos-artist-studio img {width:100%;height:auto;max-height:none;object-fit:contain;}
+
+/* The hero moves quietly without an on-canvas utility control. */
+#hos-concept .hos-motion-toggle {display:none!important;}
+
+@media(max-width:700px){
+ #hos-concept .hos-collection-editorial .hos-collection-introduction {margin-bottom:22px;}
+ #hos-concept .hos-collection-editorial .hos-collection-visual {--hos-visual-height:calc((100vw - 48px) * .74);}
+ #hos-concept .hos-collection-editorial .hos-collection-copy {grid-template-columns:minmax(0,1fr) auto;gap:14px;padding-top:14px;}
+ #hos-concept .hos-poster-caption {display:block;}
+ #hos-concept .hos-collection-copy .hos-star-title {font-size:15px;white-space:normal;}
+ #hos-concept .hos-poster-caption .hos-collection-credit {display:inline-flex;margin-top:2px;}
+ #hos-concept .hos-collection-copy .hos-collection-route {font-size:11px;min-height:32px;align-self:start;}
+ #hos-concept .hos-selection-heading {padding-top:16px;margin-bottom:18px;}
+ #hos-concept .hos-selection-heading h3 {font-size:20px;}
+ #hos-concept .hos-artist-profile {grid-template-columns:1fr;gap:28px;margin-bottom:42px;}
+ #hos-concept .hos-artist-copy {padding-top:0;}
+}
