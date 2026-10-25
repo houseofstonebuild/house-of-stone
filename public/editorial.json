@@ -108,8 +108,8 @@
       "source": "/assets/zsa-page-28.jpg",
       "scenes": [
         {
-          "source": "/assets/zsa-028-interior-1536.webp",
-          "label": "Interior study"
+          "source": "/assets/elemental-campaign-v2.webp",
+          "label": "Penthouse"
         }
       ]
     },
@@ -117,8 +117,8 @@
       "source": "/assets/zsa-page-13.jpg",
       "scenes": [
         {
-          "source": "/assets/zsa-013-interior-1536.webp",
-          "label": "Interior study"
+          "source": "/assets/rhythm-campaign-v2.webp",
+          "label": "Apartment"
         }
       ]
     },
@@ -126,8 +126,8 @@
       "source": "/assets/zsa-page-01.jpg",
       "scenes": [
         {
-          "source": "/assets/zsa-001-interior-1536.webp",
-          "label": "Interior study"
+          "source": "/assets/presence-campaign-v2.webp",
+          "label": "Executive office"
         }
       ]
     },
@@ -135,8 +135,8 @@
       "source": "/assets/zsa-page-20.jpg",
       "scenes": [
         {
-          "source": "/assets/zsa-020-interior-1536.webp",
-          "label": "Interior study"
+          "source": "/assets/kinship-campaign-v2.webp",
+          "label": "Home library"
         }
       ]
     },
@@ -144,8 +144,8 @@
       "source": "/assets/zsa-page-05.jpg",
       "scenes": [
         {
-          "source": "/assets/zsa-005-interior-1536.webp",
-          "label": "Interior study"
+          "source": "/assets/wild-grace-campaign-v2.webp",
+          "label": "Reception lounge"
         }
       ]
     }

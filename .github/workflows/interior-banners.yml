@@ -1,0 +1,27 @@
+name: Interior banner review
+on:
+  push:
+    branches: [main]
+    paths: ['public/assets/*campaign-v2*', 'public/editorial.json', 'qa/interior-banners.mjs', '.github/workflows/interior-banners.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  interiors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+      - run: npm install --prefix qa --no-package-lock
+      - run: node qa/interior-banners.mjs
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: interior-banners
+          path: test-results/interiors/

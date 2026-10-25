@@ -333,5 +333,30 @@
     "width": 1672,
     "height": 941,
     "srcset": "/assets/collection-wild-grace-portrait-v1.webp 1672w"
+  },
+  "/assets/rhythm-campaign-v2.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/rhythm-campaign-v2.webp 1536w"
+  },
+  "/assets/elemental-campaign-v2.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/elemental-campaign-v2.webp 1536w"
+  },
+  "/assets/presence-campaign-v2.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/presence-campaign-v2.webp 1536w"
+  },
+  "/assets/kinship-campaign-v2.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/kinship-campaign-v2.webp 1536w"
+  },
+  "/assets/wild-grace-campaign-v2.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/wild-grace-campaign-v2.webp 1536w"
   }
 }
