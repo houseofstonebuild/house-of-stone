@@ -245,9 +245,9 @@
 
 /* Collection portraits introduce the selection. Every work shares one catalogue grid. */
 #hos-concept .hos-collection-editorial .hos-collection-introduction {grid-template-columns:1fr 1fr;gap:14px 60px;margin-bottom:36px;}
-#hos-concept .hos-collection-description {max-width:440px;justify-self:end;}
-#hos-concept .hos-collection-editorial .hos-collection-description .hos-collection-tagline {font-size:18px;max-width:none;}
-#hos-concept .hos-collection-story {margin:10px 0 0;font-size:14px;line-height:1.8;color:var(--hos-muted);}
+#hos-concept .hos-collection-description {width:100%;max-width:480px;justify-self:start;text-align:left;}
+#hos-concept .hos-collection-editorial .hos-collection-description .hos-collection-tagline {font-size:18px;width:100%;max-width:none;justify-self:start;text-align:left;margin:0;}
+#hos-concept .hos-collection-editorial .hos-collection-description .hos-collection-story {width:100%;max-width:none;justify-self:start;text-align:left;margin:8px 0 0;font-size:14px;line-height:1.8;color:var(--hos-muted);}
 #hos-concept .hos-collection-editorial .hos-collection-feature {display:block;}
 #hos-concept .hos-collection-editorial .hos-collection-visual {--hos-visual-height:clamp(360px,45vw,760px);}
 #hos-concept .hos-collection-editorial .hos-collection-photo {grid-template-columns:1fr;}
