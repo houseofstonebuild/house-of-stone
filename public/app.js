@@ -231,6 +231,11 @@ function filteredWorks(container, selected, label = 'Browse works') {
   const section=el('section','hos-collection-browser');section.setAttribute('aria-label',label);
   const filters=el('div','hos-collection-filters'), gridHost=el('div'),counter=el('p','hos-filter-count');
   counter.setAttribute('role','status');counter.setAttribute('aria-live','polite');
+  const toolbar=el('div','hos-filter-toolbar'),toggle=el('button','hos-filter-toggle','Filters');
+  toggle.type='button';toggle.setAttribute('aria-expanded','false');
+  filters.id='hos-filters-'+(container.id || Math.random().toString(36).slice(2));
+  toggle.setAttribute('aria-controls',filters.id);
+  toggle.addEventListener('click',()=>{const open=toggle.getAttribute('aria-expanded')!=='true';toggle.setAttribute('aria-expanded',String(open));section.dataset.filtersOpen=String(open);});
   const state={};
   selected=selected.map(work=>({...work,collectionName:collectionFor(work)?.name || '',artistName:artistFor(work)?.name || ''}));
   for(const [key,name] of [['collectionName','Collection'],['artistName','Artist'],['material','Stone'],['colour','Color'],['size','Size']]) {
@@ -243,7 +248,8 @@ function filteredWorks(container, selected, label = 'Browse works') {
   }
   const reset=el('button','hos-text-link','Reset filters');reset.type='button';reset.addEventListener('click',()=>{for(const key of Object.keys(state))delete state[key];filters.querySelectorAll('select').forEach(select=>select.value='');update();});filters.append(reset);if(!filters.querySelector('select'))filters.hidden=true;
   function update(){const result=selected.filter(work=>Object.entries(state).every(([key,value])=>!value || (value==='__unknown'?!work[key]:work[key]===value)));counter.textContent=`${result.length} ${result.length===1?'work':'works'}`;gridHost.replaceChildren(result.length?workGrid(result):el('p','hos-empty-results','No works match these filters. Try another selection.'));refreshLinks(section);observeReveals(section);}
-  section.append(filters,counter,gridHost);container.append(section);update();
+  toggle.hidden=!filters.querySelector('select');toolbar.append(counter,toggle);
+  section.append(toolbar,filters,gridHost);container.append(section);update();
 }
 function renderCollection(collection) {
   const container=$('#hos-category-content');container.replaceChildren(collectionChapter(collection,{heading:false}));
