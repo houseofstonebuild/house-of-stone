@@ -62,15 +62,15 @@ syncHeader();
 const heroSource = () => assets[catalog.site.heroImage] || '/assets/designer-apartment.jpg';
 const heroDescription = () => catalog.site.heroImage ? catalog.site.heroAlt : 'Stone sculptures in a New York apartment overlooking Manhattan';
 let pageAnimation;
-function animateSurface(element, distance = 8, duration = 260) {
+function animateSurface(element, distance = 22, duration = 700) {
   if (motionPreference?.matches || !element?.animate) return;
-  return element.animate([{opacity:.65,transform:`translateY(${distance}px)`},{opacity:1,transform:'translateY(0)'}],{duration,easing:'cubic-bezier(.2,.65,.3,1)'});
+  return element.animate([{opacity:0,transform:`translateY(${distance}px)`},{opacity:1,transform:'translateY(0)'}],{duration,easing:'cubic-bezier(.16,1,.3,1)'});
 }
 motionPreference?.addEventListener('change', event => { if (event.matches) root.getAnimations?.({subtree:true}).forEach(animation => animation.cancel()); });
 const revealObserver = 'IntersectionObserver' in window ? new window.IntersectionObserver(entries => {
   for (const entry of entries) if (entry.isIntersecting) {
     revealObserver.unobserve(entry.target);
-    if (!entry.target.dataset.revealed) { entry.target.dataset.revealed = 'true'; animateSurface(entry.target,10,420); }
+    if (!entry.target.dataset.revealed) { entry.target.dataset.revealed = 'true'; animateSurface(entry.target,30,850); }
   }
 },{threshold:.08,rootMargin:'0px 0px -24px 0px'}) : null;
 function observeReveals(view) { view?.querySelectorAll('[data-reveal]').forEach(element => { if (!element.dataset.revealed) revealObserver?.observe(element); }); }
@@ -159,10 +159,15 @@ function workScenes(work) {
   const entry=editorial.workScenes?.[work.id];
   return entry?.source===assets[work.image] ? entry.scenes || [] : [];
 }
-function collectionVisual(work) {
+function collectionVisual(work, collection) {
   const visual=el('div','hos-collection-visual'),photo=el('div','hos-collection-photo'),panel=modelPanel(work);
   visual.dataset.visualWork=work.id;
-  photo.append(image(work.image,work.description || workLabel(work),true,'(max-width: 700px) 90vw, 820px'));
+  const portrait=collection && editorial.collectionPortraits?.[collection.id],artist=artistFor(work);
+  const portraitMatches=portrait && portrait.workId===work.id && portrait.workSource===assets[work.image] && portrait.artistId===artist?.id && portrait.portraitSource===assets[artist?.portrait];
+  if(portraitMatches){
+    photo.classList.add('hos-collection-landscape');
+    photo.append(editorialImage(portrait.source,artist.name+' beside '+work.title,'(max-width: 700px) 100vw, 90vw'));
+  }else photo.append(image(work.image,work.description || workLabel(work),true,'(max-width: 700px) 90vw, 1200px'));
   const setting=el('div','hos-collection-setting'),scene=workScenes(work)[0];
   if(scene){setting.append(editorialImage(scene.source,work.title+' · Interior study','(max-width:700px) 90vw, 60vw'));}
   else{setting.classList.add('hos-stone-closeup');setting.append(image(work.image,'Stone detail of '+work.title,true,'50vw'));}
@@ -176,45 +181,34 @@ function collectionVisual(work) {
   }
   visual.append(modes);return visual;
 }
-function supportingPreview(collection) {
-  const selected=collection.workIds.filter(id=>id!==collection.starWorkId).slice(0,3).map(id=>works.find(work=>work.id===id)).filter(Boolean);
+function collectionSelection(collection) {
+  const selected=collection.workIds.map(id=>works.find(work=>work.id===id)).filter(Boolean);
   if(!selected.length)return null;
-  const preview=el('section','hos-supporting-preview');preview.dataset.reveal='';preview.setAttribute('aria-label','More from '+collection.name);
-  const heading=el('div','hos-supporting-preview-heading');heading.append(el('h3','','Also in '+collection.name));
-  const grid=el('div','hos-supporting-preview-grid');grid.tabIndex=0;grid.setAttribute('role','group');grid.setAttribute('aria-label',collection.name+' supporting works');
-  selected.forEach(work=>grid.append(workCard(work,{compact:true})));
-  const controls=el('div','hos-supporting-preview-controls'),previous=el('button','cursor-interaction','Previous'),next=el('button','cursor-interaction','Next'),count=el('span');
-  previous.type=next.type='button';previous.setAttribute('aria-label','Previous supporting work');next.setAttribute('aria-label','Next supporting work');count.setAttribute('aria-live','polite');
-  const position=()=>Math.max(0,Math.min(selected.length-1,Math.round(grid.scrollLeft/Math.max(1,(grid.children[1]?.offsetLeft || 0)-grid.children[0].offsetLeft))));
-  const update=()=>{const index=position();previous.disabled=index===0;next.disabled=grid.scrollLeft+grid.clientWidth>=grid.scrollWidth-2;count.textContent=(index+1)+' / '+selected.length;};
-  const move=direction=>{const step=(grid.children[1]?.offsetLeft || 0)-grid.children[0].offsetLeft;grid.scrollTo({left:Math.max(0,position()+direction)*step,behavior:motionPreference?.matches?'instant':'smooth'});};
-  previous.addEventListener('click',()=>move(-1));next.addEventListener('click',()=>move(1));grid.addEventListener('scroll',update,{passive:true});
-  previous.disabled=true;count.textContent='1 / '+selected.length;controls.append(previous,count,next);heading.append(controls);preview.append(heading,grid);return preview;
+  const section=el('section','hos-collection-selection');section.dataset.reveal='';section.setAttribute('aria-label','Works in '+collection.name);
+  const heading=el('div','hos-selection-heading');heading.append(el('h3','','The works'),el('span','',selected.length+' sculptures'));
+  const grid=workGrid(selected);grid.classList.add('hos-equal-works');
+  section.append(heading,grid);return section;
 }
 function collectionChapter(collection, {heading = true} = {}) {
-  const work=works.find(work=>work.id===collection.starWorkId), section=el('section','hos-collection-chapter');
+  const work=works.find(work=>work.id===collection.starWorkId),section=el('section','hos-collection-chapter hos-collection-editorial');
   section.dataset.collectionSection=collection.id;if(heading)section.id='hos-home-'+collection.id;
-  section.classList.add('hos-collection-editorial');
   if(!work)return section;
   const introduction=el('div','hos-collection-introduction');introduction.dataset.reveal='';
-  introduction.append(el('div','hos-eyebrow','THE FOUNDING COLLECTION'),el(heading?'h2':'h1','',collection.name),el('p','hos-collection-tagline',collection.description));
-  const feature=el('div','hos-collection-feature');
-  const visual=collectionVisual(work);
-  const copy=el('div','hos-collection-copy');copy.dataset.reveal='';
-  copy.append(el('div','hos-eyebrow','THE FEATURED WORK'));
-  const badge=availabilityLabel(work);if(badge)copy.append(badge);
-  const featuredTitle=el('h2','hos-star-title'),featuredLink=photoLink('hos-feature-title',{work:work.id},`View ${workLabel(work)}`);featuredLink.textContent=work.title;featuredTitle.append(featuredLink);copy.append(featuredTitle);
-  const artist=artistFor(work);if(artist){const author=credit(work);author.classList.add('hos-collection-credit');copy.append(author);}
-  if(work.material || work.dimensions)copy.append(el('p','hos-card-specs',[work.material,work.dimensions].filter(Boolean).join(' · ')));
-  const actions=el('div','hos-collection-actions');
-  if(heading){const primary=link(work.availability==='sold'?'Explore available works':'Explore the collection',{collection:collection.id,...(work.availability==='sold'?{available:'true'}:{})});primary.classList.add('hos-collection-primary');actions.append(primary);}
-  else if(work.availability==='sold'){const primary=link('Explore available works',{scrollSupporting:collection.id});primary.classList.add('hos-collection-primary');actions.append(primary);}
-  if(!heading && work.availability!=='sold'){
-    const detail=link('Discover this work',{work:work.id});detail.classList.add('hos-collection-primary');actions.append(detail);
-  }
-  if(collection.introduction)copy.append(el('p','hos-feature-story',collection.introduction));
-  copy.append(actions);
-  feature.append(visual,copy);section.append(introduction,feature);if(heading){const supporting=supportingPreview(collection);if(supporting)section.append(supporting);}return section;
+  introduction.append(el('div','hos-eyebrow','THE FOUNDING COLLECTION'),el(heading?'h2':'h1','',collection.name));
+  const description=el('div','hos-collection-description');description.append(el('p','hos-collection-tagline',collection.description));
+  if(collection.introduction)description.append(el('p','hos-collection-story',collection.introduction));
+  introduction.append(description);
+  const feature=el('div','hos-collection-feature'),visual=collectionVisual(work,collection);
+  const copy=el('div','hos-collection-copy');
+  const caption=el('div','hos-poster-caption'),featuredTitle=el('h2','hos-star-title'),featuredLink=photoLink('hos-feature-title',{work:work.id},`View ${workLabel(work)}`);
+  featuredLink.textContent=work.title;featuredTitle.append(featuredLink);caption.append(featuredTitle);
+  const artist=artistFor(work);if(artist){const author=credit(work);author.classList.add('hos-collection-credit');caption.append(author);}
+  const badge=availabilityLabel(work);if(badge && work.availability!=='available')caption.append(badge);
+  copy.append(caption);
+  if(heading){const action=link('Explore '+collection.name,{collection:collection.id});action.classList.add('hos-collection-route');copy.append(action);}
+  feature.append(visual,copy);section.append(introduction,feature);
+  if(heading){const selection=collectionSelection(collection);if(selection)section.append(selection);}
+  return section;
 }
 function filteredWorks(container, selected, label = 'Browse works') {
   const section=el('section','hos-collection-browser');section.setAttribute('aria-label',label);
@@ -231,15 +225,15 @@ function filteredWorks(container, selected, label = 'Browse works') {
     select.addEventListener('change',()=>{state[key]=select.value;update();});wrapper.append(select);filters.append(wrapper);
   }
   const reset=el('button','hos-text-link','Reset filters');reset.type='button';reset.addEventListener('click',()=>{for(const key of Object.keys(state))delete state[key];filters.querySelectorAll('select').forEach(select=>select.value='');update();});filters.append(reset);if(!filters.querySelector('select'))filters.hidden=true;
-  function update(){const result=selected.filter(work=>Object.entries(state).every(([key,value])=>!value || (value==='__unknown'?!work[key]:work[key]===value)));counter.textContent=`${result.length} ${result.length===1?'work':'works'}${label==='Supporting sculptures'?' beyond the featured sculpture':''}`;gridHost.replaceChildren(result.length?workGrid(result):el('p','hos-empty-results','No works match these filters. Try another selection.'));refreshLinks(section);observeReveals(section);}
+  function update(){const result=selected.filter(work=>Object.entries(state).every(([key,value])=>!value || (value==='__unknown'?!work[key]:work[key]===value)));counter.textContent=`${result.length} ${result.length===1?'work':'works'}`;gridHost.replaceChildren(result.length?workGrid(result):el('p','hos-empty-results','No works match these filters. Try another selection.'));refreshLinks(section);observeReveals(section);}
   section.append(filters,counter,gridHost);container.append(section);update();
 }
 function renderCollection(collection) {
   const container=$('#hos-category-content');container.replaceChildren(collectionChapter(collection,{heading:false}));
   const supporting=el('section','hos-supporting-works');supporting.id='hos-supporting-'+collection.id;
-  supporting.append(el('h2','','More from '+collection.name));
-  const selected=collection.workIds.filter(id=>id!==collection.starWorkId).map(id=>works.find(work=>work.id===id)).filter(Boolean);
-  filteredWorks(supporting,selected,'Supporting sculptures');container.append(supporting);watchModels(container);
+  supporting.append(el('h2','','The works in '+collection.name));
+  const selected=collection.workIds.map(id=>works.find(work=>work.id===id)).filter(Boolean);
+  filteredWorks(supporting,selected,'Collection sculptures');container.append(supporting);watchModels(container);
 }
 function relatedRail(selected,label) {
   const container=el('section','hos-related-rail');container.setAttribute('aria-label',label);
@@ -323,7 +317,7 @@ function modelPanel(work) {
   const poster=image(work.image,'',true,'(max-width: 700px) 90vw, 750px');poster.className='hos-3d-poster';poster.setAttribute('aria-hidden','true');
   const snapshot=el('canvas','hos-3d-snapshot');snapshot.hidden=true;snapshot.setAttribute('aria-hidden','true');
   stage.append(poster,snapshot);
-  const hint=el('div','hos-3d-hint',motionPreference?.matches?'Explore the form in 3D':'Scroll to rotate');hint.setAttribute('role','status');
+  const hint=el('div','hos-3d-hint',motionPreference?.matches?'Drag to rotate':'Drag or scroll to rotate');hint.setAttribute('role','status');
   panel.append(top,stage,hint);
   if(previewMode && modelDefinition(work).reconstruction)panel.append(el('p','hos-model-review-note','Reference-based reconstruction. Depth and unseen surfaces are inferred.'));
   return panel;
@@ -576,6 +570,8 @@ root.addEventListener('keydown', event => { if (event.key === 'Escape') { if (!m
 root.addEventListener('click', event => {
   if (!catalog || submitting) return;
   const anchor=event.target.closest('a');if(anchor){if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||anchor.target==='_blank'||anchor.hasAttribute('download'))return;if(anchor.getAttribute('aria-disabled')==='true'){event.preventDefault();return;}if(anchor.matches('[data-view],[data-work],[data-artist],[data-collection],[data-scroll-supporting],[data-scroll-collection],[data-jump-collection]'))event.preventDefault();}
+  const motionToggle=event.target.closest('[data-motion-toggle]');
+  if(motionToggle){const paused=motionToggle.getAttribute('aria-pressed')!=='true';motionToggle.setAttribute('aria-pressed',String(paused));motionToggle.textContent=paused?'Play motion':'Pause motion';$('.hos-hero').dataset.motionPaused=String(paused);return;}
   const jump=event.target.closest('[data-jump-collection]');if(jump){const target=document.getElementById(jump.dataset.jumpCollection);target?.scrollIntoView({behavior:motionPreference?.matches?'instant':'smooth',block:'start'});return;}
   const mode=event.target.closest('[data-visual-mode]');
   if(mode){

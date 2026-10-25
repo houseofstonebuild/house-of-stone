@@ -60,7 +60,8 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
   const loader=new GLTFLoader(manager);
   let renderer,scene,camera,sculpture,active,pending=0,unavailable=false,contextLost=false,trigger,dialogWork,interactionCounted=false;
   let yaw=-.3,pitch=0,zoom=1,lastView='',loadingHost,activationGeneration=0,dialogCleaned=true;
-  const pointers=new Map();let pinchDistance=0;
+  const pointers=new Map(),inlineViews=new WeakMap(),countedInteractions=new Set();let pinchDistance=0;
+  const inlineView=host=>{if(!inlineViews.has(host))inlineViews.set(host,{yaw:0,pitch:0,zoom:1});return inlineViews.get(host);};
   const controls=[...dialog.querySelectorAll('[data-model-control]')];
   const statusFor=host=>host===dialogHost?dialogStatus:host.parentElement.querySelector('.hos-3d-hint');
   function fallback(host,message) {
@@ -96,7 +97,7 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
         if(active!==dialogHost)return;event.preventDefault();zoom=clamp(zoom*Math.exp(-event.deltaY*.001),.65,1.8);interacted();refresh();
       },{passive:false});
       canvas.addEventListener('keydown',event=>{
-        if(active!==dialogHost)return;
+        if(!active)return;
         const keyMap={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down','+':'in','=':'in','-':'out',Home:'reset','0':'reset'};
         if(keyMap[event.key]){event.preventDefault();control(keyMap[event.key]);}
       });
@@ -130,6 +131,7 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
   }
   function chooseHost() {
     if(dialog.open)return dialogHost;
+    if(pointers.size && active?.getClientRects().length)return active;
     let best=null,distance=Infinity;
     for(const host of hosts) {
       if(!host.getClientRects().length)continue;
@@ -141,7 +143,7 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
   async function activate(host) {
     if(host===active&&host.dataset.modelId===active.dataset.loadedModel)return;
     const generation=++activationGeneration,id=host.dataset.modelId;
-    saveFrame();if(renderer?.domElement.parentElement)renderer.domElement.remove();
+    saveFrame();pointers.clear();if(renderer?.domElement.parentElement)renderer.domElement.remove();
     active=null;lastView='';loadingHost=host;
     if(!makeRenderer()||contextLost){fallback(host,'3D is unavailable in this browser. You can still explore the sculpture photos.');loadingHost=null;return;}
     host.dataset.modelState='loading';statusFor(host).textContent='Loading 3D view…';
@@ -150,12 +152,12 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
       if(generation!==activationGeneration||loadingHost!==host||host.dataset.modelId!==id||chooseHost()!==host)return;
       if(sculpture)scene.remove(sculpture);sculpture=object;scene.add(sculpture);active=host;loadingHost=null;
       host.dataset.loadedModel=id;host.append(renderer.domElement);
-      renderer.domElement.tabIndex=host===dialogHost?0:-1;
-      renderer.domElement.setAttribute('aria-label',host===dialogHost?`${dialogTitle.textContent}. Arrow keys rotate, plus and minus zoom, Home resets.`:`3D view of ${models[host.dataset.modelId].title}`);
-      renderer.domElement.style.touchAction=host===dialogHost?'none':'auto';
+      renderer.domElement.tabIndex=0;
+      renderer.domElement.setAttribute('aria-label',host===dialogHost?`${dialogTitle.textContent}. Arrow keys rotate, plus and minus zoom, Home resets.`:`3D view of ${models[host.dataset.modelId].title}. Drag or use arrow keys to rotate. Home resets.`);
+      renderer.domElement.style.touchAction=host===dialogHost?'none':'pan-y pinch-zoom';
       host.querySelector('.hos-3d-poster').hidden=true;const snapshot=host.querySelector('.hos-3d-snapshot');if(snapshot)snapshot.hidden=true;
       host.dataset.modelState='ready';
-      statusFor(host).textContent=host===dialogHost?'Drag to rotate · Pinch or use the controls to zoom':reduced.matches?'Explore the form in 3D':'Scroll to rotate';
+      statusFor(host).textContent=host===dialogHost?'Drag to rotate · Pinch or use the controls to zoom':reduced.matches?'Drag to rotate':'Drag or scroll to rotate';
       if(host===dialogHost)controls.forEach(button=>button.disabled=false);
       refresh();
     } catch {
@@ -169,37 +171,54 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
     if(host!==active||host.dataset.loadedModel!==host.dataset.modelId){if(loadingHost!==host&&host.dataset.modelState!=='unavailable')void activate(host);return;}
     if(contextLost)return;
     const rect=host.getBoundingClientRect();if(!rect.width||!rect.height)return;
-    const rotation=host===dialogHost?yaw:reduced.matches?-.3:((innerHeight-rect.top)/(innerHeight+rect.height)-.5)*Math.PI*2-.3;
-    const view=[Math.round(rect.width),Math.round(rect.height),rotation,pitch,zoom,host===dialogHost].join(':');if(view===lastView)return;lastView=view;
+    const inline=inlineView(host),scrollRotation=reduced.matches?-.3:((innerHeight-rect.top)/(innerHeight+rect.height)-.5)*Math.PI*2-.3;
+    const rotation=host===dialogHost?yaw:scrollRotation+inline.yaw,currentPitch=host===dialogHost?pitch:inline.pitch,currentZoom=host===dialogHost?zoom:inline.zoom;
+    const view=[Math.round(rect.width),Math.round(rect.height),rotation,currentPitch,currentZoom,host===dialogHost].join(':');if(view===lastView)return;lastView=view;
     renderer.setPixelRatio(Math.min(devicePixelRatio||1,2,2048/Math.max(rect.width,rect.height)));renderer.setSize(rect.width,rect.height,false);
     camera.aspect=rect.width/rect.height;
-    const distance=Math.max(6.8,3.8/camera.aspect)/(host===dialogHost?zoom:1),elevation=host===dialogHost?pitch:0;
+    const distance=Math.max(6.8,3.8/camera.aspect)/currentZoom,elevation=currentPitch;
     camera.position.set(0,1.62+Math.sin(elevation)*distance,Math.cos(elevation)*distance);camera.lookAt(0,1.62,0);camera.updateProjectionMatrix();
     sculpture.rotation.set(0,rotation,0);renderer.render(scene,camera);
     const textureWidths=[];sculpture.traverse(node=>{if(node.isMesh)for(const material of Array.isArray(node.material)?node.material:[node.material])if(material.map?.image)textureWidths.push(material.map.image.width);});
     host.dataset.modelTextureWidth=String(textureWidths.length?Math.min(...textureWidths):0);
     host.dataset.modelFrames=String(Number(host.dataset.modelFrames || 0)+1);
-    host.dataset.modelRotation=String(rotation);host.dataset.modelPitch=String(host===dialogHost?pitch:0);host.dataset.modelZoom=String(host===dialogHost?zoom:1);host.dataset.modelTriangles=String(renderer.info.render.triangles);
+    host.dataset.modelRotation=String(rotation);host.dataset.modelPitch=String(currentPitch);host.dataset.modelZoom=String(currentZoom);host.dataset.modelTriangles=String(renderer.info.render.triangles);
   }
   function refresh(){if(!pending)pending=requestAnimationFrame(paint);}
-  function interacted(){if(!interactionCounted){interactionCounted=true;onInteraction?.(dialogWork.id);}}
+  function interacted(){const id=active?.dataset.modelId;if(id&&!countedInteractions.has(id)){countedInteractions.add(id);onInteraction?.(id);}}
   function pointerDown(event) {
-    if(active!==dialogHost||event.button!==0)return;
-    renderer.domElement.setPointerCapture(event.pointerId);pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
-    if(pointers.size===2){const [a,b]=[...pointers.values()];pinchDistance=Math.hypot(a.x-b.x,a.y-b.y);}interacted();
+    if(!active||contextLost||event.button!==0)return;
+    if(active!==dialogHost && pointers.size)return;
+    renderer.domElement.setPointerCapture(event.pointerId);
+    pointers.set(event.pointerId,{x:event.clientX,y:event.clientY,startX:event.clientX,startY:event.clientY,dragging:false});
+    if(active===dialogHost && pointers.size===2){const [a,b]=[...pointers.values()];pinchDistance=Math.hypot(a.x-b.x,a.y-b.y);}
   }
   function pointerMove(event) {
-    if(active!==dialogHost||!pointers.has(event.pointerId))return;
-    const previous=pointers.get(event.pointerId);pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
-    if(pointers.size===2){const [a,b]=[...pointers.values()],distance=Math.hypot(a.x-b.x,a.y-b.y);if(pinchDistance>0)zoom=clamp(zoom*distance/pinchDistance,.65,1.8);pinchDistance=distance;}
-    else if(pointers.size===1){yaw+=(event.clientX-previous.x)*.009;pitch=clamp(pitch+(event.clientY-previous.y)*.006,-.18,.9);}
-    refresh();
+    if(!active||!pointers.has(event.pointerId))return;
+    const previous=pointers.get(event.pointerId),dx=event.clientX-previous.x,dy=event.clientY-previous.y;
+    const touchInline=active!==dialogHost && event.pointerType==='touch';
+    if(touchInline && !previous.dragging){
+      const x=Math.abs(event.clientX-previous.startX),y=Math.abs(event.clientY-previous.startY);
+      if(x<6 || x<=y)return;
+    }
+    pointers.set(event.pointerId,{...previous,x:event.clientX,y:event.clientY,dragging:true});
+    if(active===dialogHost){
+      if(pointers.size===2){const [a,b]=[...pointers.values()],distance=Math.hypot(a.x-b.x,a.y-b.y);if(pinchDistance>0)zoom=clamp(zoom*distance/pinchDistance,.65,1.8);pinchDistance=distance;}
+      else {yaw+=dx*.009;pitch=clamp(pitch+dy*.006,-.18,.9);}
+    }else{
+      const view=inlineView(active);view.yaw+=dx*.009;
+      if(!touchInline)view.pitch=clamp(view.pitch+dy*.006,-.18,.9);
+    }
+    if(Math.abs(dx)+Math.abs(dy)>0)interacted();refresh();
   }
-  function pointerUp(event){pointers.delete(event.pointerId);pinchDistance=0;}
+  function pointerUp(event){pointers.delete(event.pointerId);pinchDistance=0;refresh();}
   function control(action) {
-    if(active!==dialogHost||contextLost)return;
-    if(action==='left')yaw-=.24;if(action==='right')yaw+=.24;if(action==='up')pitch=clamp(pitch+.14,-.18,.9);if(action==='down')pitch=clamp(pitch-.14,-.18,.9);
-    if(action==='in')zoom=clamp(zoom*1.16,.65,1.8);if(action==='out')zoom=clamp(zoom/1.16,.65,1.8);if(action==='reset'){yaw=-.3;pitch=0;zoom=1;}
+    if(!active||contextLost)return;
+    const view=active===dialogHost?{yaw,pitch,zoom}:inlineView(active);
+    if(action==='left')view.yaw-=.24;if(action==='right')view.yaw+=.24;if(action==='up')view.pitch=clamp(view.pitch+.14,-.18,.9);if(action==='down')view.pitch=clamp(view.pitch-.14,-.18,.9);
+    if(action==='in')view.zoom=clamp(view.zoom*1.16,.65,1.8);if(action==='out')view.zoom=clamp(view.zoom/1.16,.65,1.8);
+    if(action==='reset'){view.yaw=active===dialogHost?-.3:0;view.pitch=0;view.zoom=1;}
+    if(active===dialogHost){yaw=view.yaw;pitch=view.pitch;zoom=view.zoom;}
     interacted();refresh();
   }
   function finishClose() {
@@ -214,7 +233,7 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
   dialog.addEventListener('click',event=>{if(event.target!==dialog)return;const b=dialog.getBoundingClientRect();if(event.clientX<b.left||event.clientX>b.right||event.clientY<b.top||event.clientY>b.bottom)close();});
   root.querySelector('#hos-model-close').addEventListener('click',close);
   controls.forEach(button=>button.addEventListener('click',()=>control(button.dataset.modelControl)));
-  reduced.addEventListener('change',()=>{lastView='';if(active&&active!==dialogHost)statusFor(active).textContent=reduced.matches?'Explore the form in 3D':'Scroll to rotate';refresh();});
+  reduced.addEventListener('change',()=>{lastView='';if(active&&active!==dialogHost)statusFor(active).textContent=reduced.matches?'Drag to rotate':'Drag or scroll to rotate';refresh();});
   addEventListener('scroll',refresh,{passive:true});addEventListener('resize',refresh,{passive:true});document.addEventListener('visibilitychange',refresh);
   new ResizeObserver(refresh).observe(dialogHost);
   const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(!unavailable&&entry.isIntersecting&&models[entry.target.dataset.modelId]&&makeRenderer())void model(entry.target.dataset.modelId).catch(()=>{});refresh();},{rootMargin:'200px',threshold:[0,.1,.5,1]});hosts.forEach(host=>observer.observe(host));
@@ -229,4 +248,3 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
     dialogCleaned=false;dialog.showModal();root.querySelector('#hos-model-close').focus({preventScroll:true});refresh();
   }};
 }
-

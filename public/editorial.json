@@ -149,5 +149,42 @@
         }
       ]
     }
+  },
+  "collectionPortraits": {
+    "rhythm": {
+      "workId": "zsa-013",
+      "artistId": "farai",
+      "workSource": "/assets/zsa-page-13.jpg",
+      "portraitSource": "/assets/farai.jpg",
+      "source": "/assets/collection-rhythm-portrait-v1.webp"
+    },
+    "elemental": {
+      "workId": "zsa-028",
+      "artistId": "tariro",
+      "workSource": "/assets/zsa-page-28.jpg",
+      "portraitSource": "/assets/tariro.jpg",
+      "source": "/assets/collection-elemental-portrait-v1.webp"
+    },
+    "presence": {
+      "workId": "zsa-001",
+      "artistId": "ruvimbo",
+      "workSource": "/assets/zsa-page-01.jpg",
+      "portraitSource": "/assets/ruvimbo.jpg",
+      "source": "/assets/collection-presence-portrait-v1.webp"
+    },
+    "kinship": {
+      "workId": "zsa-020",
+      "artistId": "tendai",
+      "workSource": "/assets/zsa-page-20.jpg",
+      "portraitSource": "/assets/tendai.jpg",
+      "source": "/assets/collection-kinship-portrait-v1.webp"
+    },
+    "wild-grace": {
+      "workId": "zsa-005",
+      "artistId": "ruvimbo",
+      "workSource": "/assets/zsa-page-05.jpg",
+      "portraitSource": "/assets/ruvimbo.jpg",
+      "source": "/assets/collection-wild-grace-portrait-v1.webp"
+    }
   }
 }

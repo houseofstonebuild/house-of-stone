@@ -37,7 +37,7 @@ try{
  if(process.env.HOS_BASELINE_REF){
   const baseline=execFileSync('git',['-c','safe.directory='+process.cwd(),'show',process.env.HOS_BASELINE_REF+':public/editorial-layout.css'],{encoding:'utf8'});
   await page.route('**/editorial-layout.css',route=>route.fulfill({status:200,contentType:'text/css',body:baseline}));
-  await ready('/');const button=page.locator('.hos-collection-primary').first();await button.scrollIntoViewIfNeeded();
+  await ready('/');const button=page.locator('.hos-collection-route').first();await button.scrollIntoViewIfNeeded();
   report.baseline.push({...await measure(button),state:'normal'});await button.hover();await page.waitForTimeout(250);report.baseline.push({...await measure(button),state:'hover'});
   await page.unroute('**/editorial-layout.css');console.log('Baseline action contrast: '+JSON.stringify(report.baseline));
  }

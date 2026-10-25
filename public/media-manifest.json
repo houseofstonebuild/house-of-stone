@@ -308,5 +308,30 @@
     "width": 1536,
     "height": 1024,
     "srcset": "/assets/zsa-005-interior-480.webp 480w, /assets/zsa-005-interior-960.webp 960w, /assets/zsa-005-interior-1536.webp 1536w"
+  },
+  "/assets/collection-rhythm-portrait-v1.webp": {
+    "width": 1672,
+    "height": 941,
+    "srcset": "/assets/collection-rhythm-portrait-v1.webp 1672w"
+  },
+  "/assets/collection-elemental-portrait-v1.webp": {
+    "width": 1672,
+    "height": 941,
+    "srcset": "/assets/collection-elemental-portrait-v1.webp 1672w"
+  },
+  "/assets/collection-presence-portrait-v1.webp": {
+    "width": 1672,
+    "height": 941,
+    "srcset": "/assets/collection-presence-portrait-v1.webp 1672w"
+  },
+  "/assets/collection-kinship-portrait-v1.webp": {
+    "width": 1672,
+    "height": 941,
+    "srcset": "/assets/collection-kinship-portrait-v1.webp 1672w"
+  },
+  "/assets/collection-wild-grace-portrait-v1.webp": {
+    "width": 1672,
+    "height": 941,
+    "srcset": "/assets/collection-wild-grace-portrait-v1.webp 1672w"
   }
 }

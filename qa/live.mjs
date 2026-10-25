@@ -84,7 +84,7 @@ try{
         const chapter=page.locator(`#hos-home-chapters [data-collection-section="${collection.id}"]`);
         assert.equal(await chapter.locator('.hos-star-title [data-work]').getAttribute('data-work'),work.id);
         assert.equal(await chapter.locator('[data-model-fallback]').count(),matchingModel(work)?0:1);if(!matchingModel(work))fallbacks++;
-        if(work.availability==='sold')assert.equal(await chapter.locator('.hos-collection-copy > .hos-availability').textContent(),'Sold');
+        if(work.availability==='sold')assert.equal(await chapter.locator('.hos-poster-caption > .hos-availability').textContent(),'Sold');
         await chapter.locator('.hos-star-title [data-work]').click();await page.locator('#hos-work-title').waitFor();await inquire(page.locator('#hos-work-inquiry'),work,viewport.width);await page.goto(origin+'/');await page.locator('#hos-concept[data-ready="true"]').waitFor();
       }
       report.photoFallbacks=fallbacks;
