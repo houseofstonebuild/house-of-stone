@@ -570,8 +570,6 @@ root.addEventListener('keydown', event => { if (event.key === 'Escape') { if (!m
 root.addEventListener('click', event => {
   if (!catalog || submitting) return;
   const anchor=event.target.closest('a');if(anchor){if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||anchor.target==='_blank'||anchor.hasAttribute('download'))return;if(anchor.getAttribute('aria-disabled')==='true'){event.preventDefault();return;}if(anchor.matches('[data-view],[data-work],[data-artist],[data-collection],[data-scroll-supporting],[data-scroll-collection],[data-jump-collection]'))event.preventDefault();}
-  const motionToggle=event.target.closest('[data-motion-toggle]');
-  if(motionToggle){const paused=motionToggle.getAttribute('aria-pressed')!=='true';motionToggle.setAttribute('aria-pressed',String(paused));motionToggle.textContent=paused?'Play motion':'Pause motion';$('.hos-hero').dataset.motionPaused=String(paused);return;}
   const jump=event.target.closest('[data-jump-collection]');if(jump){const target=document.getElementById(jump.dataset.jumpCollection);target?.scrollIntoView({behavior:motionPreference?.matches?'instant':'smooth',block:'start'});return;}
   const mode=event.target.closest('[data-visual-mode]');
   if(mode){
