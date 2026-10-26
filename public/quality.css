@@ -1,8 +1,8 @@
 /* Refinements retain the approved ivory, proportions and type scale. */
 #hos-concept a {color:inherit;text-decoration:none;cursor:pointer;}
 #hos-concept a[aria-disabled="true"] {cursor:default;color:var(--hos-muted);}
-#hos-concept .hos-collection-jumps {display:flex;justify-content:center;flex-wrap:wrap;gap:8px 30px;margin:0 0 40px;padding:10px 0 22px;border-bottom:1px solid var(--hos-line);}
-#hos-concept .hos-collection-jumps a {min-height:44px;display:inline-flex;align-items:center;font-size:14px;border-bottom:1px solid transparent;}
+#hos-concept .hos-collection-jumps {display:flex;justify-content:center;flex-wrap:nowrap;gap:clamp(8px,2.4vw,30px);overflow-x:auto;margin:0 0 40px;padding:10px 0 22px;border-bottom:1px solid var(--hos-line);}
+#hos-concept .hos-collection-jumps a {min-height:44px;display:inline-flex;align-items:center;flex:0 0 auto;white-space:nowrap;font-size:clamp(10px,3vw,14px);border-bottom:1px solid transparent;}
 #hos-concept .hos-collection-jumps a:hover {border-color:currentColor;}
 #hos-concept .hos-collection-chapter {scroll-margin-top:110px;}
 #hos-concept .hos-collection-index {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:24px;padding-bottom:48px;border-bottom:1px solid var(--hos-line);}
@@ -70,7 +70,7 @@ body.hos-photo-open {overflow:hidden;}
 }
 @media(max-width:1000px){#hos-concept .hos-collection-index {grid-template-columns:repeat(3,minmax(0,1fr));}}
 @media(max-width:700px){
- #hos-concept .hos-collection-jumps {gap:4px 20px;justify-content:flex-start;margin-bottom:30px;}
+ #hos-concept .hos-collection-jumps {gap:clamp(8px,2.4vw,16px);justify-content:space-between;margin-bottom:30px;}
  #hos-concept .hos-collection-index {display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:68%;overflow-x:auto;scroll-snap-type:x proximity;gap:20px;padding-bottom:24px;}
  #hos-concept .hos-collection-index-card {scroll-snap-align:start;}
  #hos-concept .hos-collection-index-card h2 {font-size:22px;}
