@@ -22,6 +22,12 @@ try{
  for(const width of [320,390,1440]){
   await page.setViewportSize({width,height:1000});await page.goto(origin);
   await page.locator('#hos-concept[data-ready="true"]').waitFor();
+  const jumps=page.locator('#hos-home-collection-index .hos-collection-jumps');
+  const row=await jumps.locator('a').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {top:r.top,left:r.left,right:r.right};}));
+  assert.equal(row.length,5);
+  assert(Math.max(...row.map(n=>n.top))-Math.min(...row.map(n=>n.top))<1,'All collection links share one line');
+  assert(await jumps.evaluate(n=>n.scrollWidth<=n.clientWidth+1),'All five links fit without horizontal scrolling');
+  await jumps.screenshot({path:new URL(width+'-collection-links.jpg',out).pathname,type:'jpeg',quality:90});
   for(const c of catalog.collections){
    const chapter=page.locator('[data-collection-section="'+c.id+'"]');
    const title=chapter.locator('.hos-campaign-heading'),banner=chapter.locator('.hos-collection-photo.hos-collection-interior'),img=banner.locator(':scope > img');
