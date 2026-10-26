@@ -2,7 +2,7 @@ name: Interior banner review
 on:
   push:
     branches: [main]
-    paths: ['public/assets/*campaign-v2*', 'public/editorial.json', 'public/app.js', 'public/editorial-layout.css', 'qa/interior-banners.mjs', '.github/workflows/interior-banners.yml']
+    paths: ['public/assets/*campaign-v2*', 'public/editorial.json', 'public/app.js', 'public/editorial-layout.css', 'public/quality.css', 'qa/interior-banners.mjs', '.github/workflows/interior-banners.yml']
   workflow_dispatch:
 permissions:
   contents: read
