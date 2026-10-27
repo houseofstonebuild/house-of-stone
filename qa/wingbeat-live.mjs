@@ -23,7 +23,7 @@ for(let attempt=0;attempt<48;attempt++){
 }
 assert(deployed,lastError);
 const catalog=await(await fetch(origin+'/content.json')).json();
-const work=catalog.works.find(work=>work.id==='zsa-016');assert(work);assert.equal(catalog.assets[work.image],'/assets/wingbeat-shoot-front-v1.webp');
+const work=catalog.works.find(work=>work.id==='zsa-016');assert(work);
 const browser=await chromium.launch({args:['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 const report={origin,modelSha256:expectedModel,workId:work.id,viewports:[],failures:[]};
 try{
@@ -37,6 +37,7 @@ try{
   const response=await page.goto(origin+'/works/'+work.slug);assert(response.ok());
   await page.locator('#hos-concept[data-ready="true"]').waitFor();
   report.url=page.url();assert.equal(await page.locator('#hos-work-title').innerText(),'Wingbeat');
+  assert((await page.locator('#hos-work-image').getAttribute('src')).includes('wingbeat-shoot-front-v1'));
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   const button=page.locator('#hos-work-model');assert(await button.isVisible());await button.click();
   const stage=page.locator('#hos-model-stage');
