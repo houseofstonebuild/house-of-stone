@@ -358,5 +358,25 @@
     "width": 1536,
     "height": 1024,
     "srcset": "/assets/wild-grace-campaign-v2.webp 1536w"
+  },
+  "/assets/wingbeat-shoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/wingbeat-shoot-front-v1-480.webp 480w, /assets/wingbeat-shoot-front-v1-800.webp 800w, /assets/wingbeat-shoot-front-v1-1200.webp 1200w, /assets/wingbeat-shoot-front-v1.webp 1600w"
+  },
+  "/assets/wingbeat-shoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2321,
+    "srcset": "/assets/wingbeat-shoot-left-v1-480.webp 480w, /assets/wingbeat-shoot-left-v1-800.webp 800w, /assets/wingbeat-shoot-left-v1-1200.webp 1200w, /assets/wingbeat-shoot-left-v1.webp 1600w"
+  },
+  "/assets/wingbeat-shoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/wingbeat-shoot-right-v1-480.webp 480w, /assets/wingbeat-shoot-right-v1-800.webp 800w, /assets/wingbeat-shoot-right-v1-1200.webp 1200w, /assets/wingbeat-shoot-right-v1.webp 1600w"
+  },
+  "/assets/wingbeat-shoot-back-v1.webp": {
+    "width": 1024,
+    "height": 1536,
+    "srcset": "/assets/wingbeat-shoot-back-v1-480.webp 480w, /assets/wingbeat-shoot-back-v1-800.webp 800w, /assets/wingbeat-shoot-back-v1.webp 1024w"
   }
 }

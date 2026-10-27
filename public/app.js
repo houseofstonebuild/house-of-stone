@@ -1,5 +1,6 @@
 import { presentationFor, pageDescriptions } from './presentation.js';
 import { initializeGallery } from './gallery.js';
+import { applyWorkPhotography } from './work-photography.js';
 const root = document.getElementById('hos-concept');
 const previewMode = location.pathname === '/admin/preview' || location.pathname.startsWith('/admin/preview/');
 const routePath = () => previewMode ? location.pathname.slice('/admin/preview'.length) || '/' : location.pathname;
@@ -663,7 +664,7 @@ async function start() {
   if (mediaResponse.ok) media = await mediaResponse.json();
   if (editorialResponse.ok) editorial = await editorialResponse.json();
   if (modelResponse.ok) models = await modelResponse.json();
-  catalog = await response.json(); ({artists,works,assets} = catalog);collections=catalog.collections || [];
+  catalog = await response.json(); applyWorkPhotography(catalog, editorial.workPhotography); ({artists,works,assets} = catalog);collections=catalog.collections || [];
   catalog.site.description = catalog.site.description.replace(/\benquir/gi, word => word[0] === 'E' ? 'Inquir' : 'inquir');
   $('#hos-copyright').textContent = `© ${new Date().getFullYear()} House of Stone`;
   $('#hos-location').textContent = catalog.site.location;

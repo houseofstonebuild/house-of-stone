@@ -1,0 +1,26 @@
+name: Wingbeat photoshoot review
+on:
+  push:
+    branches: [main]
+    paths: ['public/assets/wingbeat-shoot-*', 'public/work-photography.js', 'qa/wingbeat-photos.mjs', '.github/workflows/wingbeat-photos.yml']
+permissions:
+  contents: read
+jobs:
+  photos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+      - run: npm install --prefix qa --no-package-lock
+      - run: node qa/wingbeat-photos.mjs
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: wingbeat-photos
+          path: test-results/interiors/

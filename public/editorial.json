@@ -186,5 +186,16 @@
       "portraitSource": "/assets/ruvimbo.jpg",
       "source": "/assets/collection-wild-grace-portrait-v1.webp"
     }
+  },
+  "workPhotography": {
+    "zsa-016": {
+      "source": "/assets/zsa-page-16.jpg",
+      "front": "/assets/wingbeat-shoot-front-v1.webp",
+      "views": {
+        "left": "/assets/wingbeat-shoot-left-v1.webp",
+        "right": "/assets/wingbeat-shoot-right-v1.webp",
+        "back": "/assets/wingbeat-shoot-back-v1.webp"
+      }
+    }
   }
 }
