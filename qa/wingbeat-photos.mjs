@@ -14,7 +14,7 @@ const api=async(path,data)=>{const r=await fetch(origin+'/api/admin/'+path,{meth
 let browser;
 try{
  const current=await api('content'),state=await api('content',{revision:current.revision,catalog:prepareOwnerPublication(current.draft)});await api('publish',{revision:state.revision});
- browser=await chromium.launch({args:['--no-sandbox']});
+ browser=await chromium.launch({args:['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  const page=await browser.newPage({reducedMotion:'reduce'});
  await page.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
  const out=new URL('../test-results/interiors/',import.meta.url);mkdirSync(out,{recursive:true});
@@ -39,7 +39,16 @@ try{
   await page.getByRole('button',{name:'Show front',exact:true}).click();await image.evaluate(n=>n.decode());
   await page.locator('[data-page="work"]').screenshot({path:new URL(width+'-wingbeat-front.jpg',out).pathname,type:'jpeg',quality:90});
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
-  assert(await page.locator('#hos-work-model').isHidden());
+  assert(await page.locator('#hos-work-model').isVisible());
+  await page.locator('#hos-work-model').click();
+  const stage=page.locator('#hos-model-stage');
+  await page.waitForFunction(()=>document.querySelector('#hos-model-stage').dataset.modelState==='ready',null,{timeout:60000});
+  const canvas=stage.locator('canvas.hos-3d-canvas');const before=await canvas.screenshot();
+  const box=await canvas.boundingBox();
+  await page.mouse.move(box.x+box.width*.4,box.y+box.height*.5);await page.mouse.down();await page.mouse.move(box.x+box.width*.7,box.y+box.height*.5,{steps:10});await page.mouse.up();
+  const after=await canvas.screenshot();assert(!before.equals(after),'Dragging must rotate the rendered model');
+  await page.locator('#hos-model-dialog').screenshot({path:new URL(width+'-wingbeat-model.jpg',out).pathname,type:'jpeg',quality:94});
+  await page.locator('#hos-model-close').click();
  }
- console.log('Wingbeat photos passed: homepage, four gallery angles, contain fit, mobile and desktop, no unverified model.');
+ console.log('Wingbeat photos passed: homepage, four gallery angles, contain fit, mobile and desktop, owner-approved 3D loads and rotates.');
 }finally{await browser?.close();await new Promise(r=>app.server.close(r));rmSync(dataDir,{recursive:true,force:true});}

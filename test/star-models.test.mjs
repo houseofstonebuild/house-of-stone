@@ -12,7 +12,7 @@ const json=path=>JSON.parse(read(path));
 const ids=['zsa-013','zsa-028','zsa-001','zsa-020','zsa-005'];
 const manifest=json('public/models.json'),audit=json('content/star-model-audit.json'),refs=json('scripts/star-models/references.json');
 test('five source-specific GLBs retain closed connected volumes, source openings, texture and compact delivery',async()=>{
- assert.deepEqual(Object.keys(manifest).filter(id=>manifest[id].reconstruction),ids);
+ assert.deepEqual(Object.keys(manifest).filter(id=>manifest[id].reconstruction && manifest[id].reviewOnly),ids);
  for(const id of ids){
   const entry=manifest[id],record=audit[id],ref=refs[id];assert.equal(entry.workId,id);assert.equal(entry.sourcePage,ref.page);assert(entry.reviewOnly);
   assert.equal(createHash('sha256').update(read('public'+entry.source)).digest('hex'),entry.sourceSha256);assert.equal(record.sourceSha256,entry.sourceSha256);

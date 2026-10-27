@@ -311,7 +311,7 @@ function editorialImage(source, alt, sizes) {
 function modelDefinition(work) {
   const entry=models[work.id];
   if(!entry || entry.source!==assets[work.image])return null;
-  if(entry.reconstruction)return entry.workId===work.id && (previewMode || work.modelVerified===true) && (!work.sourcePage || entry.sourcePage===work.sourcePage) ? entry : null;
+  if(entry.reconstruction)return entry.workId===work.id && (previewMode || work.modelVerified===true || entry.ownerApproved===true) && (!work.sourcePage || entry.sourcePage===work.sourcePage) ? entry : null;
   return entry.title===work.title ? entry : null;
 }
 function loadViewer() {

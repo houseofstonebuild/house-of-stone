@@ -2,13 +2,13 @@ name: Wingbeat photoshoot review
 on:
   push:
     branches: [main]
-    paths: ['public/assets/wingbeat-shoot-*', 'public/work-photography.js', 'qa/wingbeat-photos.mjs', '.github/workflows/wingbeat-photos.yml']
+    paths: ['public/models/wingbeat-v1.glb', 'public/models.json', 'public/app.js', 'public/assets/wingbeat-shoot-*', 'public/work-photography.js', 'qa/wingbeat-photos.mjs', '.github/workflows/wingbeat-photos.yml']
 permissions:
   contents: read
 jobs:
   photos:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 5
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --ipc=host

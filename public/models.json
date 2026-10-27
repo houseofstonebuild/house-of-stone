@@ -173,5 +173,16 @@
       1
     ],
     "stonePolish": 0.78
+  },
+  "zsa-016": {
+    "workId": "zsa-016",
+    "title": "Wingbeat",
+    "source": "/assets/wingbeat-shoot-front-v1.webp",
+    "sourcePage": 16,
+    "file": "/models/wingbeat-v1.glb",
+    "reconstruction": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
   }
 }

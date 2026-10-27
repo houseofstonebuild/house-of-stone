@@ -1,0 +1,50 @@
+name: Assemble and verify Wingbeat model
+on:
+  push:
+    branches: [recovery/wingbeat-model-transfer]
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - name: Reassemble exact owner-approved model
+        run: |
+          node --input-type=module <<'JS'
+          import {readFileSync,readdirSync,writeFileSync} from 'node:fs';
+          import {gunzipSync} from 'node:zlib';
+          import {createHash} from 'node:crypto';
+          const dir='.transfer/wingbeat';
+          const encoded=readdirSync(dir).sort().map(name=>readFileSync(dir+'/'+name,'utf8')).join('');
+          const model=gunzipSync(Buffer.from(encoded,'base64'));
+          if(model.length!==10238088 || createHash('sha256').update(model).digest('hex')!=='e9bfd1aad83936170d945126df5c3ec966ff0bd7ca2cb3f94997e3fcfe12e03d')throw Error('Model checksum mismatch');
+          writeFileSync('public/models/wingbeat-v1.glb',model);
+          console.log('Exact model verified: '+model.length+' bytes');
+          JS
+      - run: npm run check
+      - run: npm test
+      - run: npm install --prefix qa --no-package-lock
+      - name: Desktop and phone viewer verification
+        run: node qa/wingbeat-photos.mjs
+      - name: Store verified model in the same private repository
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/models/wingbeat-v1.glb
+          git commit -m 'Store verified Wingbeat model'
+          git push origin HEAD:recovery/wingbeat-model-transfer
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: wingbeat-model-verification
+          path: test-results/interiors/
