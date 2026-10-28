@@ -179,10 +179,11 @@
     "title": "Wingbeat",
     "source": "/assets/wingbeat-shoot-front-v1.webp",
     "sourcePage": 16,
-    "file": "/models/wingbeat-v1.glb",
+    "file": "/models/wingbeat-v2.glb",
     "reconstruction": true,
     "ownerApproved": true,
     "referenceSurface": false,
-    "stoneGrain": false
+    "stoneGrain": false,
+    "geometryVersion": 2
   }
 }
