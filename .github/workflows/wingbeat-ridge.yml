@@ -1,0 +1,54 @@
+name: Review Wingbeat shoulder ridge removal
+on:
+  pull_request:
+    branches: [main]
+    paths: ['scripts/remove-wingbeat-ridge.mjs', 'qa/wingbeat-ridge.mjs', '.github/workflows/wingbeat-ridge.yml']
+permissions:
+  contents: write
+jobs:
+  shape:
+    if: github.head_ref == 'fix/wingbeat-shoulder-ridge'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - name: Build corrected mesh while preserving the original
+        run: |
+          node scripts/remove-wingbeat-ridge.mjs public/models/wingbeat-v2.glb public/models/wingbeat-v3.glb 1
+          node scripts/remove-wingbeat-ridge.mjs public/models/wingbeat-v2.glb public/models/wingbeat-v3-flat.glb 1.25
+          node --input-type=module <<'JS'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          const manifest=JSON.parse(readFileSync('public/models.json'));
+          manifest['zsa-016'].file='/models/wingbeat-v3.glb';
+          manifest['zsa-016'].geometryVersion=3;
+          writeFileSync('public/models.json',JSON.stringify(manifest,null,2)+'\n');
+          JS
+      - run: npm run check
+      - run: npm test
+      - run: npm install --prefix qa --no-package-lock
+      - name: Render original and corrected model at matched angles
+        run: node qa/wingbeat-ridge.mjs
+      - name: Store the checked model on the review branch
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/models/wingbeat-v3.glb public/models.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Store checked Wingbeat with continuous shoulder surface'
+            git push origin HEAD:fix/wingbeat-shoulder-ridge
+          fi
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: wingbeat-ridge-review
+          path: test-results/interiors/
