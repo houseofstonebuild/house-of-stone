@@ -8,22 +8,18 @@ const jl=source.readUInt32LE(12),doc=JSON.parse(source.subarray(20,20+jl)),bin=B
 const count=doc.accessors[0].count,positions=doc.bufferViews[0].byteOffset,normals=doc.bufferViews[1].byteOffset,indices=doc.bufferViews[3].byteOffset;
 const oldScale=node.scale,oldTranslation=node.translation,points=new Float64Array(count*3),sums=new Float64Array(count*3);
 const smooth=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
-// The sampled envelope excludes the narrow carved groove around y=1.95.
-// Correct the broad shoulder's depth step rather than flattening the groove.
-const before=[[1.4,.084],[1.5,.088],[1.6,.09],[1.65,.085],[1.7,.077],[1.75,.105],[1.8,.158],[1.85,.173],[1.9,.17],[2,.178],[2.1,.179],[2.2,.178],[2.3,.17]];
-const after=[[1.4,.084],[1.5,.088],[1.6,.094],[1.65,.098],[1.7,.103],[1.75,.110],[1.8,.117],[1.85,.125],[1.9,.136],[1.95,.15],[2,.164],[2.05,.175],[2.1,.179],[2.2,.178],[2.3,.17]];
-function curve(data,t){
- let j=0;while(j<data.length-2&&t>data[j+1][0])j++;
- const [x0,y0]=data[j],[x1,y1]=data[j+1],dx=x1-x0,u=Math.max(0,Math.min(1,(t-x0)/dx));
- const slope=i=>{const l=Math.max(0,i-1),r=Math.min(data.length-1,i+1);return (data[r][1]-data[l][1])/(data[r][0]-data[l][0]);};
- return (2*u**3-3*u*u+1)*y0+(u**3-2*u*u+u)*dx*slope(j)+(-2*u**3+3*u*u)*y1+(u**3-u*u)*dx*slope(j+1);
-}
 let changed=0,maxDisplacement=0;
 for(let i=0;i<count;i++){
  const p=[0,1,2].map(a=>bin.readUInt16LE(positions+i*8+a*2)/65535*oldScale[a]+oldTranslation[a]);
  const [x,y,z]=p;
- const weight=smooth(1.4,1.52,y)*(1-smooth(2.12,2.24,y))*(1-smooth(.2,.55,x))*smooth(-.02,.07,z);
- const dz=z*(curve(after,y)/curve(before,y)-1)*weight*strength;
+ // Compress the broad face onto a continuous shallow plane. The mapping
+ // retains 5% of depth variation, so the mesh remains volumetric and ordered.
+ const weight=smooth(1.46,1.60,y)*(1-smooth(2.0,2.12,y))*(1-smooth(.2,.55,x))*smooth(.015,.075,z);
+ const grooveFade=smooth(-.72,-.64,x)*(1-smooth(-.02,.08,x));
+ const grooveCenter=1.95+.012*(x+.3);
+ const groove=.014*Math.exp(-(((y-grooveCenter)/.009)**2))*grooveFade;
+ const plane=.09+.16*(y-1.55)-groove;
+ const dz=(plane-z)*weight*Math.min(.95,.95*strength);
  p[2]+=dz;if(Math.abs(dz)>1e-7)changed++;maxDisplacement=Math.max(maxDisplacement,Math.abs(dz));
  for(let a=0;a<3;a++)points[i*3+a]=p[a];
 }
