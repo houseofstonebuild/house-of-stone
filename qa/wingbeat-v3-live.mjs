@@ -7,7 +7,7 @@ import {chromium} from 'playwright';
 const origin='https://house-of-stone-production.up.railway.app';
 const out=new URL('../test-results/wingbeat-v3-live/',import.meta.url);mkdirSync(out,{recursive:true});
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
-const expectedModel='3a39885bbe085ed182c8d4e26926abf2dbed1605aca25705745b039d08db6d34';
+const expectedModel='ecafc25a36a9a9b2b50322aea50ef58ed9d610136817ce3d5514c923647779aa';
 const expectedApp=sha(readFileSync(new URL('../public/app.js',import.meta.url)));
 let deployed=false,lastError;
 for(let attempt=0;attempt<48;attempt++){
