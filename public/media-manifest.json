@@ -378,5 +378,365 @@
     "width": 1024,
     "height": 1536,
     "srcset": "/assets/wingbeat-shoot-back-v1-480.webp 480w, /assets/wingbeat-shoot-back-v1-800.webp 800w, /assets/wingbeat-shoot-back-v1.webp 1024w"
+  },
+  "/assets/zsa-025-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-025-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-025-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-025-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-025-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-025-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-025-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-025-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-009-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-009-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-009-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-009-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-009-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-009-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-009-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-009-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-014-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-014-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-014-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-014-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-014-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-014-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-014-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-014-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-027-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-027-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-027-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-027-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-027-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-027-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-027-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-027-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-012-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-012-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-012-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-012-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-012-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-012-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-012-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-012-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-031-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-031-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-031-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-031-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-031-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2095,
+    "srcset": "/assets/zsa-031-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-031-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-031-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-023-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-023-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-023-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-023-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-023-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-023-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-023-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-023-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-006-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-006-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-006-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-006-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-006-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-006-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-006-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-006-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-002-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2183,
+    "srcset": "/assets/zsa-002-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-002-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-002-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-002-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-002-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-002-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-002-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-010-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-010-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-010-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-010-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-010-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-010-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-010-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-010-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-026-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-026-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-026-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-026-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-026-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2284,
+    "srcset": "/assets/zsa-026-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-026-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2593,
+    "srcset": "/assets/zsa-026-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-024-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-024-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-024-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-024-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-024-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-024-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-024-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-024-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-007-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-007-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-007-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2232,
+    "srcset": "/assets/zsa-007-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-007-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2245,
+    "srcset": "/assets/zsa-007-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-007-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2442,
+    "srcset": "/assets/zsa-007-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-020-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-020-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-020-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-020-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-020-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-020-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-020-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-020-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-005-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-005-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-005-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-005-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-005-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2421,
+    "srcset": "/assets/zsa-005-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-005-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-005-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-029-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-029-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-029-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-029-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-029-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-029-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-029-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-029-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-028-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-028-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-028-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-028-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-028-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-028-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-028-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-028-photoshoot-right-v1.webp 1600w"
+  },
+  "/assets/zsa-018-photoshoot-front-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-018-photoshoot-front-v1.webp 1600w"
+  },
+  "/assets/zsa-018-photoshoot-back-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-018-photoshoot-back-v1.webp 1600w"
+  },
+  "/assets/zsa-018-photoshoot-left-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-018-photoshoot-left-v1.webp 1600w"
+  },
+  "/assets/zsa-018-photoshoot-right-v1.webp": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/zsa-018-photoshoot-right-v1.webp 1600w"
   }
 }
