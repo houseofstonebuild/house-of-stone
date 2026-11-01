@@ -458,11 +458,20 @@
 #hos-concept .hos-work-banner {width:100%;margin:14px 0 0;background:var(--hos-studio-mat);overflow:hidden;}
 #hos-concept .hos-work-banner img {display:block;width:100%;height:clamp(520px,62vw,880px);}
 #hos-concept .hos-work-banner-scene img {object-fit:cover;}
-#hos-concept .hos-work-banner-studio img {object-fit:contain;background:var(--hos-studio-mat);}
+#hos-concept .hos-work-banner-studio {display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);align-items:center;height:clamp(520px,62vw,880px);}
+#hos-concept .hos-work-banner-studio img {grid-column:2;grid-row:1;height:100%;object-fit:contain;background:var(--hos-studio-mat);}
+#hos-concept .hos-work-banner-caption {display:none;}
+#hos-concept .hos-work-banner-studio .hos-work-banner-caption {grid-column:1;grid-row:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;margin:0;padding:0 clamp(28px,6vw,120px);color:var(--hos-fg);}
+#hos-concept .hos-work-banner-caption span:first-child {font-size:11px;letter-spacing:.16em;text-transform:uppercase;}
+#hos-concept .hos-work-banner-caption strong {font-size:clamp(40px,5vw,84px);line-height:1.08;font-weight:300;letter-spacing:-.035em;margin:20px 0 16px;}
+#hos-concept .hos-work-banner-caption span:last-child {font-size:14px;color:var(--hos-muted);}
 #hos-concept .hos-work-banner[data-work-record="zsa-012"] img {transform:rotate(-2.5deg);}
 @media(max-width:700px){
  #hos-concept .hos-work-banner {margin-top:10px;}
  #hos-concept .hos-work-banner img {height:min(76svh,720px);}
  #hos-concept .hos-work-banner-scene img {object-fit:cover;}
- #hos-concept .hos-work-banner-studio img {object-fit:contain;}
+ #hos-concept .hos-work-banner-studio {display:flex;flex-direction:column;height:auto;}
+ #hos-concept .hos-work-banner-studio img {height:min(68svh,680px);object-fit:contain;}
+ #hos-concept .hos-work-banner-studio .hos-work-banner-caption {width:100%;padding:18px var(--hos-gutter) 26px;}
+ #hos-concept .hos-work-banner-caption strong {font-size:32px;margin:6px 0;}
 }

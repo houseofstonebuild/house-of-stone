@@ -454,6 +454,9 @@ function renderWork(work) {
   const bannerImage = $('#hos-work-banner-image');
   applyImage(bannerImage,campaign?.source || assets[work.image],'100vw');
   bannerImage.alt = campaign ? `${work.title} in an interior setting` : `Front photograph of ${work.title}`;
+  $('#hos-work-banner-collection').textContent = collectionFor(work)?.name || 'THE COLLECTION';
+  $('#hos-work-banner-title').textContent = work.title;
+  $('#hos-work-banner-artist').textContent = activeArtist?.name || '';
   const modelLink=$('#hos-work-model');modelLink.hidden=!modelDefinition(work);modelLink.dataset.model=work.id;
   const artistLink=$('#hos-work-artist');artistLink.textContent=activeArtist?.name || 'Artist details on inquiry';artistLink.dataset.artist=activeArtist?.id || '';artistLink.toggleAttribute('aria-disabled',!activeArtist);
   for(const [id,value] of [['year',work.yearMade],['dimensions',work.dimensions],['material',work.material],['acquisition',work.acquisitionMethod]]) {
