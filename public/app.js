@@ -97,25 +97,9 @@ function applyImage(img, source, sizes = '(max-width: 650px) 100vw, 55vw') {
     img.sizes = sizes; img.srcset = info.srcset;
   }
   img.src = source;
-  // Fill letterboxing with the studio photograph's own edge colours.
-  // The sculpture bitmap stays at its natural aspect ratio and is never cropped.
-  if (/^\/assets\/zsa-\d+-studio-(?:front|back|left|right)-v2\.webp$/.test(source)) {
-    img.style.backgroundColor = '#f7f7f7';
-    const extendEdges = () => {
-      if (img.getAttribute('src') !== source || !img.naturalWidth) return;
-      try {
-        const canvas = document.createElement('canvas'); canvas.width = 1; canvas.height = 2;
-        const context = canvas.getContext('2d', {willReadFrequently: true});
-        if (!context) return;
-        context.drawImage(img, 0, 0, 1, 1, 0, 0, 1, 1);
-        context.drawImage(img, 0, img.naturalHeight - 1, 1, 1, 0, 1, 1, 1);
-        const pixels = context.getImageData(0, 0, 1, 2).data;
-        img.style.backgroundImage = `linear-gradient(rgb(${pixels[0]} ${pixels[1]} ${pixels[2]}), rgb(${pixels[4]} ${pixels[5]} ${pixels[6]}))`;
-      } catch {}
-    };
-    if (img.complete && img.naturalWidth) extendEdges();
-    else img.addEventListener('load', extendEdges, {once: true});
-  }
+  // A single studio mat fills the aspect-ratio space around the original photo.
+  // It does not sample edge pixels or alter the sculpture bitmap.
+  img.classList.toggle('hos-studio-photo', /^\/assets\/zsa-\d+-(?:studio-(?:front|back|left|right)-v[23]|photoshoot-(?:front|back|left|right)-v1)\.webp$/.test(source));
 }
 function image(key, alt, lazy = true, sizes) {
   const img = el('img'); applyImage(img, assets[key], sizes); img.alt = alt;
@@ -462,6 +446,14 @@ let workActionObserver;
 function renderWork(work) {
   activeWork = work; activeArtist = artistFor(work);
   $('#hos-work-title').textContent = work.title;
+  const campaign = workScenes(work)[0] || (assets[work.views?.interior] ? {source:assets[work.views.interior]} : null);
+  const banner = $('#hos-work-banner');
+  banner.dataset.workRecord = work.id;
+  banner.classList.toggle('hos-work-banner-scene',Boolean(campaign));
+  banner.classList.toggle('hos-work-banner-studio',!campaign);
+  const bannerImage = $('#hos-work-banner-image');
+  applyImage(bannerImage,campaign?.source || assets[work.image],'100vw');
+  bannerImage.alt = campaign ? `${work.title} in an interior setting` : `Front photograph of ${work.title}`;
   const modelLink=$('#hos-work-model');modelLink.hidden=!modelDefinition(work);modelLink.dataset.model=work.id;
   const artistLink=$('#hos-work-artist');artistLink.textContent=activeArtist?.name || 'Artist details on inquiry';artistLink.dataset.artist=activeArtist?.id || '';artistLink.toggleAttribute('aria-disabled',!activeArtist);
   for(const [id,value] of [['year',work.yearMade],['dimensions',work.dimensions],['material',work.material],['acquisition',work.acquisitionMethod]]) {
@@ -489,7 +481,9 @@ function renderWork(work) {
   $('#hos-work-delivery-note').hidden=Boolean(serviceDetails.childElementCount);
   $('#hos-work-specifications').hidden=$('#hos-work-core-specs').hidden && !details.childElementCount;
   for(const id of ['#hos-work-specifications','#hos-work-delivery','#hos-work-provenance'])$(id).open=false;
-  gallery?.setWork(work,assets,workScenes(work));
+  // A campaign photograph leads the page once, instead of recurring at the
+  // end of the sculpture's angle gallery.
+  gallery?.setWork(work,assets,[],campaign?.source);
   const mobileAction=$('#hos-mobile-work-action'),mobileButton=$('#hos-mobile-work-inquiry');mobileButton.textContent=button.textContent;Object.assign(mobileButton.dataset,button.dataset);mobileButton.setAttribute('aria-label',(sold?'Inquire about alternatives to ':'Inquire about ')+work.title);mobileAction.hidden=true;
   workActionObserver?.disconnect();
   if('IntersectionObserver' in window && !previewMode){let originalVisible=false,footerVisible=false;workActionObserver=new window.IntersectionObserver(entries=>{for(const entry of entries){if(entry.target===button)originalVisible=entry.isIntersecting;else footerVisible=entry.isIntersecting;}mobileAction.hidden=originalVisible||footerVisible;});workActionObserver.observe(button);workActionObserver.observe($('.hos-footer'));}

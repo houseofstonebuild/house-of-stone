@@ -435,3 +435,34 @@
  #hos-concept .hos-collection-campaign .hos-equal-works .hos-work-card-photo img {max-height:none;}
  #hos-concept .hos-collection-campaign .hos-equal-works:focus-visible {outline:1px solid var(--hos-fg);outline-offset:4px;}
 }
+
+/* One measured white studio mat across collection cards, angle galleries and
+   thumbnails. Keep the photograph contained, with its sculpture pixels intact. */
+#hos-concept {
+ --hos-studio-mat:#fafafa;
+ --hos-studio-border:#ebeae7;
+}
+#hos-concept :is(.hos-work-card-photo,.hos-collection-index-card img,.hos-collection-photo:not(.hos-collection-interior),.hos-work-photo-open,.hos-gallery-image button,.hos-photo-thumbnail img,.hos-photo-stage) {
+ box-sizing:border-box;
+ background:var(--hos-studio-mat);
+ border:1px solid var(--hos-studio-border);
+}
+#hos-concept .hos-studio-photo {background:var(--hos-studio-mat);object-fit:contain;}
+#hos-concept .hos-work-card-photo img,#hos-concept .hos-supporting-preview-grid .hos-work-card-photo img {max-height:none;}
+#hos-concept .hos-work-card[data-work-record="zsa-012"] .hos-work-card-photo img {transform:rotate(-2.5deg);}
+#hos-concept .hos-work-card[data-work-record="zsa-012"] .hos-work-card-photo:is(:hover,:focus-visible) img {transform:rotate(-2.5deg) scale(1.025);}
+
+/* The introductory photograph occupies the full width before the object
+   gallery. Existing interior campaigns stay intact; other works lead with
+   their owner-supplied studio photograph on the same quiet gallery ground. */
+#hos-concept .hos-work-banner {width:100%;margin:14px 0 0;background:var(--hos-studio-mat);overflow:hidden;}
+#hos-concept .hos-work-banner img {display:block;width:100%;height:clamp(520px,62vw,880px);}
+#hos-concept .hos-work-banner-scene img {object-fit:cover;}
+#hos-concept .hos-work-banner-studio img {object-fit:contain;background:var(--hos-studio-mat);}
+#hos-concept .hos-work-banner[data-work-record="zsa-012"] img {transform:rotate(-2.5deg);}
+@media(max-width:700px){
+ #hos-concept .hos-work-banner {margin-top:10px;}
+ #hos-concept .hos-work-banner img {height:min(76svh,720px);}
+ #hos-concept .hos-work-banner-scene img {object-fit:cover;}
+ #hos-concept .hos-work-banner-studio img {object-fit:contain;}
+}

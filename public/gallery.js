@@ -2,11 +2,12 @@
 export function initializeGallery({root,document,applyImage,motionPreference,onView}) {
   const dialog=root.querySelector('#hos-photo-dialog'),stage=dialog.querySelector('.hos-photo-stage'),large=dialog.querySelector('img'),title=dialog.querySelector('h2'),status=dialog.querySelector('[role="status"]');
   const main=root.querySelector('#hos-work-image'),opener=root.querySelector('#hos-work-photo-open'),thumbs=root.querySelector('#hos-work-additional-images'),story=root.querySelector('#hos-work-gallery-story'),count=root.querySelector('#hos-gallery-count');
-  let photos=[],index=0,scale=1,lastTrigger,touchStart,suppressUntil=0;
+  let photos=[],index=0,scale=1,lastTrigger,touchStart,suppressUntil=0,selectedWorkId='';
   const labels={left:'Left',right:'Right',back:'Back',detail:'Surface detail',detail2:'Carved detail',signature:'Signature',scale:'Scale',interior:'In a residence',gallery:'In a gallery',office:'In an office'};
   function select(i){
     if(!photos.length)return;index=(i+photos.length)%photos.length;const photo=photos[index];
-    applyImage(main,photo.source,'(max-width:700px) 90vw, 65vw');main.alt=photo.label+' of '+title.textContent;main.style.transform=photo.zoom?'scale('+photo.zoom+')':'';
+    applyImage(main,photo.source,'(max-width:700px) 90vw, 65vw');main.alt=photo.label+' of '+title.textContent;
+    main.style.transform=[photo.zoom?'scale('+photo.zoom+')':'',selectedWorkId==='zsa-012'&&index===0?'rotate(-2.5deg)':''].filter(Boolean).join(' ');
     opener.setAttribute('aria-label','Inspect '+photo.label.toLowerCase()+' of '+title.textContent);opener.dataset.detailCrop=String(Boolean(photo.zoom));
     thumbs.querySelectorAll('button').forEach((button,n)=>button.setAttribute('aria-pressed',String(n===index)));
     root.querySelector('#hos-work-photo-caption').textContent=photo.label;count.textContent=(index+1)+' / '+photos.length;
@@ -31,11 +32,11 @@ export function initializeGallery({root,document,applyImage,motionPreference,onV
   dialog.querySelectorAll('[data-photo-zoom]').forEach(button=>button.addEventListener('click',()=>{scale=Math.min(3,Math.max(1,scale+Number(button.dataset.photoZoom)));large.style.width=scale===1?'':stage.clientWidth*scale+'px';large.style.maxHeight=scale===1?'':'none';}));
   dialog.querySelector('[data-photo-reset]').addEventListener('click',()=>{scale=1;large.style.width='';large.style.maxHeight='';stage.scrollTo({left:0,top:0,behavior:'instant'});});
   dialog.addEventListener('keydown',event=>{if(event.target.tagName==='INPUT')return;if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();step(event.key==='ArrowRight'?1:-1);}});
-  return {close,setWork(work,assets,scenes=[]){
-    close();index=0;photos=[{source:assets[work.image],label:'Front'}];
-    for(const [key,label] of Object.entries(labels))if(assets[work.views?.[key]])photos.push({source:assets[work.views[key]],label,kind:['detail','detail2'].includes(key)?'detail':['interior','gallery','office'].includes(key)?'interior':'angle'});
+  return {close,setWork(work,assets,scenes=[],heroSource=''){
+    close();index=0;selectedWorkId=work.id;photos=[{source:assets[work.image],label:'Front'}];
+    for(const [key,label] of Object.entries(labels))if(assets[work.views?.[key]] && assets[work.views[key]]!==heroSource)photos.push({source:assets[work.views[key]],label,kind:['detail','detail2'].includes(key)?'detail':['interior','gallery','office'].includes(key)?'interior':'angle'});
     if(!work.views?.detail && assets[work.image])photos.push({source:assets[work.image],label:'Stone detail',kind:'detail',zoom:1.8});
-    if(!work.views?.interior)for(const scene of scenes)photos.push({...scene,kind:'interior'});
+    if(!work.views?.interior)for(const scene of scenes)if(scene.source!==heroSource)photos.push({...scene,kind:'interior'});
     for(const [n,key] of (work.additionalImages||[]).entries())if(assets[key]&&!photos.some(photo=>photo.source===assets[key]))photos.push({source:assets[key],label:'Additional view '+(n+1),kind:'angle'});
     photos=photos.filter(photo=>photo.source);title.textContent=work.title;thumbs.replaceChildren();story.replaceChildren();
     photos.forEach((photo,i)=>{
