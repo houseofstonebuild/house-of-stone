@@ -800,9 +800,9 @@
     "srcset": "/assets/zsa-014-studio-right-v2.webp 1200w"
   },
   "/assets/zsa-027-studio-front-v2.webp": {
-    "width": 962,
-    "height": 2600,
-    "srcset": "/assets/zsa-027-studio-front-v2.webp 962w"
+    "width": 1080,
+    "height": 2920,
+    "srcset": "/assets/zsa-027-studio-front-v2.webp 1080w"
   },
   "/assets/zsa-027-studio-back-v2.webp": {
     "width": 1200,
@@ -870,9 +870,9 @@
     "srcset": "/assets/zsa-023-studio-back-v2.webp 1181w"
   },
   "/assets/zsa-023-studio-left-v2.webp": {
-    "width": 976,
-    "height": 2600,
-    "srcset": "/assets/zsa-023-studio-left-v2.webp 976w"
+    "width": 1080,
+    "height": 2878,
+    "srcset": "/assets/zsa-023-studio-left-v2.webp 1080w"
   },
   "/assets/zsa-023-studio-right-v2.webp": {
     "width": 1052,
