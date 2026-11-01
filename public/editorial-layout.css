@@ -457,7 +457,7 @@
    their owner-supplied studio photograph on the same quiet gallery ground. */
 #hos-concept .hos-work-banner {width:100%;margin:14px 0 0;background:var(--hos-studio-mat);overflow:hidden;}
 #hos-concept .hos-work-banner img {display:block;width:100%;height:clamp(520px,62vw,880px);}
-#hos-concept .hos-work-banner-scene img {object-fit:cover;}
+#hos-concept .hos-work-banner-scene img {height:auto;aspect-ratio:3/2;object-fit:contain;}
 #hos-concept .hos-work-banner-studio {display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);align-items:center;height:clamp(520px,62vw,880px);}
 #hos-concept .hos-work-banner-studio img {grid-column:2;grid-row:1;height:100%;object-fit:contain;background:var(--hos-studio-mat);}
 #hos-concept .hos-work-banner-caption {display:none;}
@@ -469,7 +469,7 @@
 @media(max-width:700px){
  #hos-concept .hos-work-banner {margin-top:10px;}
  #hos-concept .hos-work-banner img {height:min(76svh,720px);}
- #hos-concept .hos-work-banner-scene img {object-fit:cover;}
+ #hos-concept .hos-work-banner-scene img {height:auto;aspect-ratio:3/2;object-fit:contain;}
  #hos-concept .hos-work-banner-studio {display:flex;flex-direction:column;height:auto;}
  #hos-concept .hos-work-banner-studio img {height:min(68svh,680px);object-fit:contain;}
  #hos-concept .hos-work-banner-studio .hos-work-banner-caption {width:100%;padding:18px var(--hos-gutter) 26px;}
