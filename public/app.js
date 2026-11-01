@@ -97,6 +97,25 @@ function applyImage(img, source, sizes = '(max-width: 650px) 100vw, 55vw') {
     img.sizes = sizes; img.srcset = info.srcset;
   }
   img.src = source;
+  // Fill letterboxing with the studio photograph's own edge colours.
+  // The sculpture bitmap stays at its natural aspect ratio and is never cropped.
+  if (/^\/assets\/zsa-\d+-studio-(?:front|back|left|right)-v2\.webp$/.test(source)) {
+    img.style.backgroundColor = '#f7f7f7';
+    const extendEdges = () => {
+      if (img.getAttribute('src') !== source || !img.naturalWidth) return;
+      try {
+        const canvas = document.createElement('canvas'); canvas.width = 1; canvas.height = 2;
+        const context = canvas.getContext('2d', {willReadFrequently: true});
+        if (!context) return;
+        context.drawImage(img, 0, 0, 1, 1, 0, 0, 1, 1);
+        context.drawImage(img, 0, img.naturalHeight - 1, 1, 1, 0, 1, 1, 1);
+        const pixels = context.getImageData(0, 0, 1, 2).data;
+        img.style.backgroundImage = `linear-gradient(rgb(${pixels[0]} ${pixels[1]} ${pixels[2]}), rgb(${pixels[4]} ${pixels[5]} ${pixels[6]}))`;
+      } catch {}
+    };
+    if (img.complete && img.naturalWidth) extendEdges();
+    else img.addEventListener('load', extendEdges, {once: true});
+  }
 }
 function image(key, alt, lazy = true, sizes) {
   const img = el('img'); applyImage(img, assets[key], sizes); img.alt = alt;

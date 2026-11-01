@@ -105,7 +105,7 @@
   },
   "workScenes": {
     "zsa-028": {
-      "source": "/assets/zsa-028-photoshoot-front-v1.webp",
+      "source": "/assets/zsa-028-studio-front-v2.webp",
       "scenes": [
         {
           "source": "/assets/elemental-campaign-v2.webp",
@@ -132,7 +132,7 @@
       ]
     },
     "zsa-020": {
-      "source": "/assets/zsa-020-photoshoot-front-v1.webp",
+      "source": "/assets/zsa-020-studio-front-v2.webp",
       "scenes": [
         {
           "source": "/assets/kinship-campaign-v2.webp",
@@ -141,7 +141,7 @@
       ]
     },
     "zsa-005": {
-      "source": "/assets/zsa-005-photoshoot-front-v1.webp",
+      "source": "/assets/zsa-005-studio-front-v2.webp",
       "scenes": [
         {
           "source": "/assets/wild-grace-campaign-v2.webp",
@@ -161,7 +161,7 @@
     "elemental": {
       "workId": "zsa-028",
       "artistId": "tariro",
-      "workSource": "/assets/zsa-028-photoshoot-front-v1.webp",
+      "workSource": "/assets/zsa-028-studio-front-v2.webp",
       "portraitSource": "/assets/tariro.jpg",
       "source": "/assets/collection-elemental-portrait-v1.webp"
     },
@@ -175,14 +175,14 @@
     "kinship": {
       "workId": "zsa-020",
       "artistId": "tendai",
-      "workSource": "/assets/zsa-020-photoshoot-front-v1.webp",
+      "workSource": "/assets/zsa-020-studio-front-v2.webp",
       "portraitSource": "/assets/tendai.jpg",
       "source": "/assets/collection-kinship-portrait-v1.webp"
     },
     "wild-grace": {
       "workId": "zsa-005",
       "artistId": "ruvimbo",
-      "workSource": "/assets/zsa-005-photoshoot-front-v1.webp",
+      "workSource": "/assets/zsa-005-studio-front-v2.webp",
       "portraitSource": "/assets/ruvimbo.jpg",
       "source": "/assets/collection-wild-grace-portrait-v1.webp"
     }
