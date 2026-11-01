@@ -199,74 +199,74 @@
     },
     "zsa-025": {
       "source": "/assets/zsa-page-25.jpg",
-      "front": "/assets/zsa-025-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-025-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-025-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-025-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-025-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-025-studio-back-v2.webp",
+        "left": "/assets/zsa-025-studio-left-v2.webp",
+        "right": "/assets/zsa-025-studio-right-v2.webp"
       }
     },
     "zsa-009": {
       "source": "/assets/zsa-page-09.jpg",
-      "front": "/assets/zsa-009-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-009-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-009-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-009-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-009-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-009-studio-back-v2.webp",
+        "left": "/assets/zsa-009-studio-left-v2.webp",
+        "right": "/assets/zsa-009-studio-right-v2.webp"
       }
     },
     "zsa-014": {
       "source": "/assets/zsa-page-14.jpg",
-      "front": "/assets/zsa-014-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-014-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-014-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-014-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-014-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-014-studio-back-v2.webp",
+        "left": "/assets/zsa-014-studio-left-v2.webp",
+        "right": "/assets/zsa-014-studio-right-v2.webp"
       }
     },
     "zsa-027": {
       "source": "/assets/zsa-page-27.jpg",
-      "front": "/assets/zsa-027-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-027-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-027-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-027-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-027-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-027-studio-back-v2.webp",
+        "left": "/assets/zsa-027-studio-left-v2.webp",
+        "right": "/assets/zsa-027-studio-right-v2.webp"
       }
     },
     "zsa-012": {
       "source": "/assets/zsa-page-12.jpg",
-      "front": "/assets/zsa-012-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-012-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-012-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-012-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-012-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-012-studio-back-v2.webp",
+        "left": "/assets/zsa-012-studio-left-v2.webp",
+        "right": "/assets/zsa-012-studio-right-v2.webp"
       }
     },
     "zsa-031": {
       "source": "/assets/zsa-page-31.jpg",
-      "front": "/assets/zsa-031-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-031-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-031-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-031-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-031-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-031-studio-back-v2.webp",
+        "left": "/assets/zsa-031-studio-left-v2.webp",
+        "right": "/assets/zsa-031-studio-right-v2.webp"
       }
     },
     "zsa-023": {
       "source": "/assets/zsa-page-23.jpg",
-      "front": "/assets/zsa-023-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-023-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-023-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-023-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-023-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-023-studio-back-v2.webp",
+        "left": "/assets/zsa-023-studio-left-v2.webp",
+        "right": "/assets/zsa-023-studio-right-v2.webp"
       }
     },
     "zsa-006": {
       "source": "/assets/zsa-page-06.jpg",
-      "front": "/assets/zsa-006-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-006-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-006-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-006-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-006-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-006-studio-back-v2.webp",
+        "left": "/assets/zsa-006-studio-left-v2.webp",
+        "right": "/assets/zsa-006-studio-right-v2.webp"
       }
     },
     "zsa-002": {
@@ -280,83 +280,83 @@
     },
     "zsa-010": {
       "source": "/assets/zsa-page-10.jpg",
-      "front": "/assets/zsa-010-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-010-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-010-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-010-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-010-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-010-studio-back-v2.webp",
+        "left": "/assets/zsa-010-studio-left-v2.webp",
+        "right": "/assets/zsa-010-studio-right-v2.webp"
       }
     },
     "zsa-026": {
       "source": "/assets/zsa-page-26.jpg",
-      "front": "/assets/zsa-026-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-026-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-026-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-026-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-026-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-026-studio-back-v2.webp",
+        "left": "/assets/zsa-026-studio-left-v2.webp",
+        "right": "/assets/zsa-026-studio-right-v2.webp"
       }
     },
     "zsa-024": {
       "source": "/assets/zsa-page-24.jpg",
-      "front": "/assets/zsa-024-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-024-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-024-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-024-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-024-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-024-studio-back-v2.webp",
+        "left": "/assets/zsa-024-studio-left-v2.webp",
+        "right": "/assets/zsa-024-studio-right-v2.webp"
       }
     },
     "zsa-007": {
       "source": "/assets/zsa-page-07.jpg",
-      "front": "/assets/zsa-007-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-007-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-007-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-007-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-007-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-007-studio-back-v2.webp",
+        "left": "/assets/zsa-007-studio-left-v2.webp",
+        "right": "/assets/zsa-007-studio-right-v2.webp"
       }
     },
     "zsa-020": {
       "source": "/assets/zsa-page-20.jpg",
-      "front": "/assets/zsa-020-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-020-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-020-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-020-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-020-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-020-studio-back-v2.webp",
+        "left": "/assets/zsa-020-studio-left-v2.webp",
+        "right": "/assets/zsa-020-studio-right-v2.webp"
       }
     },
     "zsa-005": {
       "source": "/assets/zsa-page-05.jpg",
-      "front": "/assets/zsa-005-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-005-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-005-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-005-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-005-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-005-studio-back-v2.webp",
+        "left": "/assets/zsa-005-studio-left-v2.webp",
+        "right": "/assets/zsa-005-studio-right-v2.webp"
       }
     },
     "zsa-029": {
       "source": "/assets/zsa-page-29.jpg",
-      "front": "/assets/zsa-029-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-029-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-029-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-029-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-029-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-029-studio-back-v2.webp",
+        "left": "/assets/zsa-029-studio-left-v2.webp",
+        "right": "/assets/zsa-029-studio-right-v2.webp"
       }
     },
     "zsa-028": {
       "source": "/assets/zsa-page-28.jpg",
-      "front": "/assets/zsa-028-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-028-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-028-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-028-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-028-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-028-studio-back-v2.webp",
+        "left": "/assets/zsa-028-studio-left-v2.webp",
+        "right": "/assets/zsa-028-studio-right-v2.webp"
       }
     },
     "zsa-018": {
       "source": "/assets/zsa-page-18.jpg",
-      "front": "/assets/zsa-018-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-018-studio-front-v2.webp",
       "views": {
-        "back": "/assets/zsa-018-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-018-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-018-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-018-studio-back-v2.webp",
+        "left": "/assets/zsa-018-studio-left-v2.webp",
+        "right": "/assets/zsa-018-studio-right-v2.webp"
       }
     }
   }
