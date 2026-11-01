@@ -1078,5 +1078,25 @@
     "width": 1200,
     "height": 2391,
     "srcset": "/assets/zsa-018-studio-right-v2.webp 1200w"
+  },
+  "/assets/zsa-002-studio-front-v3.webp": {
+    "width": 1616,
+    "height": 2154,
+    "srcset": "/assets/zsa-002-studio-front-v3.webp 1616w"
+  },
+  "/assets/zsa-002-studio-back-v3.webp": {
+    "width": 1196,
+    "height": 1594,
+    "srcset": "/assets/zsa-002-studio-back-v3.webp 1196w"
+  },
+  "/assets/zsa-002-studio-left-v3.webp": {
+    "width": 1152,
+    "height": 1536,
+    "srcset": "/assets/zsa-002-studio-left-v3.webp 1152w"
+  },
+  "/assets/zsa-002-studio-right-v3.webp": {
+    "width": 1196,
+    "height": 1594,
+    "srcset": "/assets/zsa-002-studio-right-v3.webp 1196w"
   }
 }

@@ -449,8 +449,8 @@
 }
 #hos-concept .hos-studio-photo {background:var(--hos-studio-mat);object-fit:contain;}
 #hos-concept .hos-work-card-photo img,#hos-concept .hos-supporting-preview-grid .hos-work-card-photo img {max-height:none;}
-#hos-concept .hos-work-card[data-work-record="zsa-012"] .hos-work-card-photo img {transform:rotate(-2.5deg);}
-#hos-concept .hos-work-card[data-work-record="zsa-012"] .hos-work-card-photo:is(:hover,:focus-visible) img {transform:rotate(-2.5deg) scale(1.025);}
+#hos-concept .hos-work-card[data-work-record="zsa-012"] .hos-work-card-photo img {transform:rotate(5deg);}
+#hos-concept .hos-work-card[data-work-record="zsa-012"] .hos-work-card-photo:is(:hover,:focus-visible) img {transform:rotate(5deg) scale(1.025);}
 
 /* The introductory photograph occupies the full width before the object
    gallery. Existing interior campaigns stay intact; other works lead with
@@ -465,7 +465,7 @@
 #hos-concept .hos-work-banner-caption span:first-child {font-size:11px;letter-spacing:.16em;text-transform:uppercase;}
 #hos-concept .hos-work-banner-caption strong {font-size:clamp(40px,5vw,84px);line-height:1.08;font-weight:300;letter-spacing:-.035em;margin:20px 0 16px;}
 #hos-concept .hos-work-banner-caption span:last-child {font-size:14px;color:var(--hos-muted);}
-#hos-concept .hos-work-banner[data-work-record="zsa-012"] img {transform:rotate(-2.5deg);}
+#hos-concept .hos-work-banner[data-work-record="zsa-012"] img {transform:rotate(5deg);}
 @media(max-width:700px){
  #hos-concept .hos-work-banner {margin-top:10px;}
  #hos-concept .hos-work-banner img {height:min(76svh,720px);}

@@ -7,7 +7,7 @@ export function initializeGallery({root,document,applyImage,motionPreference,onV
   function select(i){
     if(!photos.length)return;index=(i+photos.length)%photos.length;const photo=photos[index];
     applyImage(main,photo.source,'(max-width:700px) 90vw, 65vw');main.alt=photo.label+' of '+title.textContent;
-    main.style.transform=[photo.zoom?'scale('+photo.zoom+')':'',selectedWorkId==='zsa-012'&&index===0?'rotate(-2.5deg)':''].filter(Boolean).join(' ');
+    main.style.transform=[photo.zoom?'scale('+photo.zoom+')':'',selectedWorkId==='zsa-012'&&index===0?'rotate(5deg)':''].filter(Boolean).join(' ');
     opener.setAttribute('aria-label','Inspect '+photo.label.toLowerCase()+' of '+title.textContent);opener.dataset.detailCrop=String(Boolean(photo.zoom));
     thumbs.querySelectorAll('button').forEach((button,n)=>button.setAttribute('aria-pressed',String(n===index)));
     root.querySelector('#hos-work-photo-caption').textContent=photo.label;count.textContent=(index+1)+' / '+photos.length;

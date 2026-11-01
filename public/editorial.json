@@ -271,11 +271,11 @@
     },
     "zsa-002": {
       "source": "/assets/zsa-page-02.jpg",
-      "front": "/assets/zsa-002-photoshoot-front-v1.webp",
+      "front": "/assets/zsa-002-studio-front-v3.webp",
       "views": {
-        "back": "/assets/zsa-002-photoshoot-back-v1.webp",
-        "left": "/assets/zsa-002-photoshoot-left-v1.webp",
-        "right": "/assets/zsa-002-photoshoot-right-v1.webp"
+        "back": "/assets/zsa-002-studio-back-v3.webp",
+        "left": "/assets/zsa-002-studio-left-v3.webp",
+        "right": "/assets/zsa-002-studio-right-v3.webp"
       }
     },
     "zsa-010": {
