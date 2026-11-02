@@ -440,6 +440,9 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         const {publishOwnerRelease}=await import('./scripts/publish-owner-release.mjs');
         const result=await publishOwnerRelease({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
         console.log('Owner-requested catalogue publication:',JSON.stringify(result));
+        const {publishVerifiedMetadata}=await import('./scripts/publish-verified-metadata.mjs');
+        const verified=await publishVerifiedMetadata({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
+        console.log('Owner-requested verified metadata:',JSON.stringify(verified));
       } catch(error) { console.error('Owner-requested publication did not complete:',error.message); }
     }
   });
