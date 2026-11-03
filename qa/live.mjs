@@ -13,10 +13,12 @@ const models=JSON.parse(readFileSync(new URL('../public/models.json',import.meta
 const output=new URL(process.env.HOS_LIVE_OUTPUT || '../test-results/live/',import.meta.url);mkdirSync(output,{recursive:true});
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const paths=new Set(['/app.js','/styles.css','/light-theme.css','/collections.css','/quality.css','/editorial-layout.css','/editorial.json','/gallery.js','/work-photography.js','/presentation.js','/media-upload.js','/models.json','/sculpture-viewer.js','/stone-surface.js']);
+const vertexColorOnlyFiles=new Set();
 for(const entry of Object.values(models)){
   paths.add(entry.file);
   const bytes=readFileSync(new URL('../public'+entry.file,import.meta.url));
   const doc=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)).toString());
+  if(!(doc.images||[]).length && (doc.meshes||[]).some(mesh=>(mesh.primitives||[]).some(primitive=>primitive.attributes?.COLOR_0!==undefined)))vertexColorOnlyFiles.add(entry.file);
   for(const image of doc.images || [])if(image.uri)paths.add(new URL(image.uri,'https://house.invalid'+entry.file).pathname);
 }
 const files=[...paths],expected=new Map(files.map(path=>[path,hash(readFileSync(new URL('../public'+path,import.meta.url)))]));
@@ -127,7 +129,7 @@ try{
     await inquire(page.locator('#hos-work-inquiry'),work,1440);
     if(!matchingModel(work))continue;
     await page.locator('#hos-work-model').click();const stage=page.locator('#hos-model-stage');await page.waitForFunction(()=>document.querySelector('#hos-model-stage').dataset.modelState==='ready');
-    assert.equal(await stage.getAttribute('data-model-id'),work.id);assert(Number(await stage.getAttribute('data-model-triangles'))>500);assert(Number(await stage.getAttribute('data-model-texture-width'))>=1000);
+    assert.equal(await stage.getAttribute('data-model-id'),work.id);assert(Number(await stage.getAttribute('data-model-triangles'))>500);if(!vertexColorOnlyFiles.has(models[work.id].file))assert(Number(await stage.getAttribute('data-model-texture-width'))>=1000);
     await stage.screenshot({path:new URL(work.id+'-desktop.jpg',output).pathname,type:'jpeg',quality:94});
     for(let turn=1;turn<=13;turn++)await page.getByRole('button',{name:'Rotate right',exact:true}).click();
     await page.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelRotation)>2.8);
