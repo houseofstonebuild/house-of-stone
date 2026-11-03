@@ -40,8 +40,8 @@
 #hos-concept .hos-photo-carousel-heading h2 {margin:0 auto 0 0;font-size:20px;}
 #hos-concept .hos-photo-carousel-heading button {width:44px;height:44px;border:1px solid var(--hos-line);border-radius:50%;cursor:pointer;}
 #hos-concept .hos-photo-carousel .hos-work-gallery-story {display:grid;grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:calc((100% - 24px)/2);gap:24px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding:0 0 14px;scrollbar-width:thin;overscroll-behavior-x:contain;align-items:start;}
-#hos-concept .hos-photo-carousel .hos-gallery-image {margin:0;min-width:0;scroll-snap-align:start;}
-#hos-concept .hos-photo-carousel .hos-gallery-image button {width:100%;aspect-ratio:3/4;display:block;}
+#hos-concept .hos-photo-carousel .hos-gallery-image {margin:0;min-width:0;max-width:none;width:auto;grid-column:auto;grid-row:auto;scroll-snap-align:start;}
+#hos-concept .hos-photo-carousel .hos-gallery-image button {width:100%;height:auto;aspect-ratio:3/4;display:block;}
 #hos-concept .hos-photo-carousel .hos-gallery-image img {position:absolute;inset:0;width:100%;height:100%;object-fit:contain;}
 @media(max-width:700px){
  #hos-concept .hos-photo-carousel .hos-work-gallery-story {grid-auto-columns:86%;gap:16px;}
