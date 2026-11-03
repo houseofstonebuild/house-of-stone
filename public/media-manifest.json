@@ -819,6 +819,11 @@
     "height": 2100,
     "srcset": "/assets/zsa-027-studio-right-v2.webp 1600w"
   },
+  "/assets/zsa-012-studio-front-v3.webp": {
+    "width": 1200,
+    "height": 1600,
+    "srcset": "/assets/zsa-012-studio-front-v3.webp 1200w"
+  },
   "/assets/zsa-012-studio-front-v2.webp": {
     "width": 1198,
     "height": 2600,
