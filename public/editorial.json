@@ -271,9 +271,9 @@
     },
     "zsa-002": {
       "source": "/assets/zsa-page-02.jpg",
-      "front": "/assets/zsa-002-studio-front-v3.webp",
+      "front": "/assets/zsa-002-studio-front-v4.webp",
       "views": {
-        "back": "/assets/zsa-002-studio-back-v3.webp",
+        "back": "/assets/zsa-002-studio-back-v4.webp",
         "left": "/assets/zsa-002-studio-left-v3.webp",
         "right": "/assets/zsa-002-studio-right-v3.webp"
       }
