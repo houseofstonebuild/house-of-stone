@@ -49,7 +49,10 @@ export function initializeGallery({root,document,applyImage,motionPreference,onV
   stage.addEventListener('pointermove',event=>{if(!pan||event.pointerId!==pan.id)return;stage.scrollLeft=pan.left-(event.clientX-pan.x);stage.scrollTop=pan.top-(event.clientY-pan.y);});
   const endPan=()=>{pan=null;delete stage.dataset.dragging;};
   stage.addEventListener('pointerup',endPan);stage.addEventListener('pointercancel',endPan);stage.addEventListener('lostpointercapture',endPan);
-  new ResizeObserver(()=>{if(dialog.open&&large.naturalWidth)zoom(scale);}).observe(stage);
+  const resize=()=>{if(dialog.open&&large.naturalWidth)zoom(scale);};
+  const view=document.defaultView || globalThis;
+  if(typeof view.ResizeObserver==='function')new view.ResizeObserver(resize).observe(stage);
+  else view.addEventListener?.('resize',resize,{passive:true});
   dialog.addEventListener('keydown',event=>{if(event.target.tagName==='INPUT')return;if(event.key==='+'||event.key==='='){event.preventDefault();zoom(scale+.5);}else if(event.key==='-'){event.preventDefault();zoom(scale-.5);}else if(event.key==='0'){event.preventDefault();zoom(1,false);}else if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();if(scale>1)stage.scrollBy({left:event.key==='ArrowRight'?100:-100});else step(event.key==='ArrowRight'?1:-1);}else if(scale>1&&(event.key==='ArrowUp'||event.key==='ArrowDown')){event.preventDefault();stage.scrollBy({top:event.key==='ArrowDown'?100:-100});}});
   return {close,setWork(work,assets,scenes=[],heroSource=''){
     close();index=0;selectedWorkId=work.id;photos=[{source:assets[work.image],label:'Front'}];
@@ -66,5 +69,6 @@ export function initializeGallery({root,document,applyImage,motionPreference,onV
     thumbs.hidden=photos.length<2;story.hidden=!story.childElementCount;if(photos.length)select(0);
   }};
 }
+
 
 

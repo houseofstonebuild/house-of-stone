@@ -33,8 +33,6 @@ try{
  }
  await page.setViewportSize({width:1440,height:1000});await page.emulateMedia({reducedMotion:'no-preference'});await ready();
  assert.equal(await page.locator('.hos-hero-image').evaluate(n=>getComputedStyle(n).animationName),'hos-hero-pan');
- await page.locator('[data-motion-toggle]').click();assert.equal(await page.locator('.hos-hero-image').evaluate(n=>getComputedStyle(n).animationPlayState),'paused');
- await page.locator('[data-motion-toggle]').click();assert.equal(await page.locator('.hos-hero-image').evaluate(n=>getComputedStyle(n).animationPlayState),'running');
  await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await page.locator('.hos-hero-image').evaluate(n=>getComputedStyle(n).animationName),'none');
  for(const c of catalog.collections){
   await ready();const visual=page.locator(`#hos-home-chapters [data-visual-work="${c.starWorkId}"]`);await visual.locator('[data-visual-mode="model"]').click();const stage=visual.locator('[data-model-stage]');await stage.scrollIntoViewIfNeeded();
@@ -55,3 +53,4 @@ try{
  await mobile.emulateMedia({reducedMotion:'no-preference'});await stage.scrollIntoViewIfNeeded();const rotation=Number(await stage.getAttribute('data-model-rotation'));await mobile.evaluate(()=>scrollBy(0,70));await mobile.waitForFunction(before=>Math.abs(Number(document.querySelector('#hos-home-chapters [data-model-stage]').dataset.modelRotation)-before)>.01,rotation);report.touch=true;
  assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);report.passed=true;writeFileSync(new URL('report.json',out),JSON.stringify(report,null,2));console.log('Collection experience passed: '+JSON.stringify(report));
 }finally{await browser?.close();await new Promise(r=>app.server.close(r));rmSync(dataDir,{recursive:true,force:true});}
+

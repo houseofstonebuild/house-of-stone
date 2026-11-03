@@ -40,11 +40,11 @@ try{
       for(const id of collection.workIds){
         const work=catalog.works.find(work=>work.id===id),card=chapter.locator('[data-work-record="'+id+'"]');
         assert.equal(await card.locator('h3').innerText(),work.title);
-        assert.equal(await card.locator('.hos-card-stone').innerText(),work.material);
+        assert.equal(await card.locator('.hos-card-stone').evaluate(node=>[...node.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.textContent).join('').trim()),work.material);
         assert(await card.locator('.hos-card-stone').evaluate(node=>parseFloat(getComputedStyle(node).fontSize)>=11));
         assert.equal(await card.locator('[data-artist]').innerText(),catalog.artists.find(artist=>artist.id===work.artistId).name);
         assert.equal(await card.locator('img').getAttribute('src'),catalog.assets[work.image]);
-        if(work.availability==='sold')assert.equal(await card.locator('.hos-availability').innerText(),'Sold');
+        if(work.availability==='sold')assert.equal(await card.locator('.hos-availability').textContent(),'Sold');
         report.homeTiles++;
       }
     }
@@ -65,7 +65,8 @@ try{
     await ready('/works/'+work.slug);
     const sources=await page.locator('#hos-work-photo-open img,.hos-photo-thumbnail img,#hos-work-gallery-story img').evaluateAll(images=>images.map(image=>image.getAttribute('src')));
     assert(sources.length>0);
-    for(const source of sources)assert.match(source,/(?:studio-(?:front|back|left|right)-v[234]|wingbeat-shoot-(?:front|back|left|right)-v1)(?:-\d+)?\.webp$/);
+    const allowed=new Set([catalog.assets[work.image],...Object.values(work.views||{}).map(key=>catalog.assets[key]),...(editorial.workScenes?.[work.id]?.scenes||[]).map(scene=>scene.source)]);
+    for(const source of sources)assert(allowed.has(source),'Unexpected gallery source '+source);
     if(corrections.some(fix=>fix.id===work.id)){
       await page.locator('#hos-work-image').evaluate(image=>image.decode());
       await page.locator('#hos-work-photo-open').click();
@@ -83,3 +84,4 @@ try{
   writeFileSync(new URL('report.json',out),JSON.stringify(report,null,2));
   await browser?.close();await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});
 }
+

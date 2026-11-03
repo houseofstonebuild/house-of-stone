@@ -40,8 +40,9 @@ try{
         assert(b.width<=width*.6+1,work.title+': image must occupy right column');assert((await banner.boundingBox()).height<=701);
       }
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),work.title+': overflow at '+width);
+      assert.equal(await banner.isVisible(),width>700,'Sculpture intro visibility at '+width);
       if(work.id==='zsa-012')assert.equal(await photo.evaluate(image=>getComputedStyle(image).transform),'none');
-      if([390,1440].includes(width)&&(additions.some(item=>item.id===work.id)||['zsa-001','zsa-013','zsa-026','zsa-031','zsa-012','zsa-024'].includes(work.id)))await banner.screenshot({path:new URL(width+'-'+work.id+'-intro.jpg',out).pathname,type:'jpeg',quality:88});
+      if([390,1440].includes(width)&&(additions.some(item=>item.id===work.id)||['zsa-001','zsa-013','zsa-026','zsa-031','zsa-012','zsa-024'].includes(work.id)))await (width>700?banner:page.locator('.hos-work-layout')).screenshot({path:new URL(width+'-'+work.id+'-intro.jpg',out).pathname,type:'jpeg',quality:88});
       report.intros++;
     }
     await ready('/artists');
@@ -73,3 +74,4 @@ try{
   console.log(verification.stdout);report.liveVerifier=true;
   report.passed=true;console.log(JSON.stringify(report));
 }finally{writeFileSync(new URL('report.json',out),JSON.stringify(report,null,2));await browser?.close();await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});}
+

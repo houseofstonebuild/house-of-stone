@@ -11,11 +11,11 @@
 #hos-concept .hos-work-card-copy>.hos-card-stone {display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 8px;color:#746f65;font-size:11px;margin-top:6px;}
 #hos-concept .hos-meta-label {font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#746f65;}
 #hos-concept .hos-collection-carousel {min-width:0;width:100%;}
-#hos-concept .hos-carousel-controls {display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 12px;}
-#hos-concept .hos-carousel-controls[hidden] {display:none;}
-#hos-concept .hos-carousel-controls span {margin-right:auto;font-size:11px;color:var(--hos-muted);}
-#hos-concept .hos-carousel-controls button {width:44px;height:44px;border:1px solid var(--hos-line);border-radius:50%;font-size:20px;cursor:pointer;}
-#hos-concept .hos-carousel-controls button:disabled {opacity:.3;cursor:default;}
+#hos-concept .hos-collection-carousel>.hos-carousel-controls {display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 12px;}
+#hos-concept .hos-collection-carousel>.hos-carousel-controls[hidden] {display:none;}
+#hos-concept .hos-collection-carousel>.hos-carousel-controls span {margin-right:auto;font-size:11px;color:var(--hos-muted);}
+#hos-concept .hos-collection-carousel>.hos-carousel-controls button {width:44px;height:44px;border:1px solid var(--hos-line);border-radius:50%;font-size:20px;cursor:pointer;}
+#hos-concept .hos-collection-carousel>.hos-carousel-controls button:disabled {opacity:.3;cursor:default;}
 #hos-concept .hos-carousel-track,#hos-concept .hos-collection-campaign .hos-equal-works[data-count] {display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:calc((100% - 60px)/4);gap:20px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-padding:0;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#c7c2b8 #f5f4f1;width:100%;padding:0 0 14px;max-width:100%;}
 #hos-concept .hos-carousel-track>.hos-work-card {min-width:0;scroll-snap-align:start;}
 #hos-concept .hos-carousel-track:focus-visible {outline:1px solid var(--hos-fg);outline-offset:4px;}
@@ -44,3 +44,4 @@
  #hos-concept .hos-photo-stage {height:calc(100% - 190px);}
 }
 @media(prefers-reduced-motion:reduce){#hos-concept .hos-carousel-track {scroll-behavior:auto;}}
+

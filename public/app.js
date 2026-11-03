@@ -203,7 +203,9 @@ function collectionCarousel(grid,label){
   const sync=()=>{previous.disabled=grid.scrollLeft<2;next.disabled=grid.scrollLeft+grid.clientWidth>=grid.scrollWidth-2;controls.hidden=grid.scrollWidth<=grid.clientWidth+2;};
   grid.addEventListener('scroll',sync,{passive:true});
   grid.addEventListener('keydown',event=>{if(event.target!==grid || !['ArrowLeft','ArrowRight'].includes(event.key))return;event.preventDefault();(event.key==='ArrowLeft'?previous:next).click();});
-  const observer=new ResizeObserver(sync);observer.observe(grid);grid.addEventListener('load',sync,true);
+  if(typeof window.ResizeObserver==='function')new window.ResizeObserver(sync).observe(grid);
+  else window.addEventListener('resize',sync,{passive:true});
+  grid.addEventListener('load',sync,true);
   controls.append(hint,previous,next);rail.append(controls,grid);return rail;
 }
 function collectionChapter(collection, {heading = true} = {}) {
@@ -726,6 +728,7 @@ async function start() {
 start().catch(error => {
   const notice = el('p','hos-form-note',error.message || 'The collection could not load. Please refresh the page.'); notice.setAttribute('role','alert'); $('.hos-hero-copy').append(notice);
 });
+
 
 
 
