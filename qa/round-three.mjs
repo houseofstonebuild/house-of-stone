@@ -14,10 +14,13 @@ try{
    const rows=await cards.evaluateAll(nodes=>nodes.map(n=>Math.round(n.getBoundingClientRect().top)));assert(rows.every(y=>y===rows[0]),'Each collection stays in one row at '+width);
    assert.equal(await cards.count(),collection.workIds.length);const overflow=await track.evaluate(n=>n.scrollWidth>n.clientWidth+2);
    // Lazy catalogue photography must actually load when the rail enters view.
-   await cards.first().scrollIntoViewIfNeeded();
-   const firstPhoto=cards.first().locator('img');
-   await firstPhoto.evaluate(async image=>{if(!image.complete)await new Promise((resolve,reject)=>{image.addEventListener('load',resolve,{once:true});image.addEventListener('error',reject,{once:true});});await image.decode();});
-   assert(await firstPhoto.evaluate(image=>image.naturalWidth>0),'Collection photograph did not render: '+collection.name);
+   const visibleCount=Math.min(await cards.count(),width>1100?4:width>700?3:1);
+   for(let photoIndex=0;photoIndex<visibleCount;photoIndex++){
+    const photo=cards.nth(photoIndex).locator('img');await photo.scrollIntoViewIfNeeded();
+    await photo.evaluate(async image=>{if(!image.complete)await new Promise((resolve,reject)=>{image.addEventListener('load',resolve,{once:true});image.addEventListener('error',reject,{once:true});});await image.decode();});
+    assert(await photo.evaluate(image=>image.naturalWidth>0),'Collection photograph did not render: '+collection.name+' / '+photoIndex);
+   }
+   await track.evaluate(node=>node.scrollTo({left:0,behavior:'instant'}));
    if(overflow){const next=chapter.getByRole('button',{name:'Next works in '+collection.name,exact:true});await next.click();await page.waitForFunction(el=>el.scrollLeft>10,await track.elementHandle());await track.focus();await page.keyboard.press('ArrowLeft');await page.waitForFunction(el=>el.scrollLeft<2,await track.elementHandle());}
    if(collection.id==='presence'&&[390,1440].includes(width))await chapter.screenshot({path:new URL(width+'-presence.jpg',out).pathname,type:'jpeg',quality:88});report.rails++;
   }
