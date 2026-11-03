@@ -436,7 +436,7 @@ function renderArtist(artist) {
   studio.hidden=!studio.childElementCount;
   const more = $('#hos-artist-works'); more.replaceChildren();
   if (selected.length) {
-    more.append(el('h2', '', 'Works by ' + artist.name), workGrid(selected));
+    more.append(el('h2', '', artist.id==='artist-unconfirmed'?'Works awaiting attribution':'Works by ' + artist.name), workGrid(selected));
   }
 }
 let workActionObserver;
@@ -689,7 +689,7 @@ async function start() {
   root.querySelectorAll('[data-artist-grid]').forEach(grid => {
     [...artists].sort((a,b)=>(a.name==='Artist to be confirmed')-(b.name==='Artist to be confirmed') || a.name.localeCompare(b.name)).forEach(artist => {
       const card=photoLink('hos-portrait-card cursor-interaction',{artist:artist.id},'About '+artist.name);card.dataset.reveal='';
-      card.append(image(artist.portrait,artistLeadAlt(artist),true,'(max-width: 700px) 90vw, 29vw'),el('h3','',artist.name),el('p','',artist.style || 'Stone sculpture · Zimbabwe'));grid.append(card);
+      card.append(image(artist.portrait,artistLeadAlt(artist),true,'(max-width: 700px) 90vw, 29vw'),el('h3','',artist.name),el('p','hos-artist-style',artist.style || 'Stone sculpture · Zimbabwe'));grid.append(card);
     });
   });
   gallery=initializeGallery({root,document,applyImage,motionPreference,onView:()=>track('photo_view',{workId:activeWork?.id || '',artistId:activeArtist?.id || ''})});
