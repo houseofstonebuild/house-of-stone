@@ -14,7 +14,8 @@ export function initializeGallery({root,document,applyImage,motionPreference,onV
     if(selected)thumbs.scrollTo({left:selected.offsetLeft-thumbs.offsetLeft-(thumbs.clientWidth-selected.clientWidth)/2,behavior:motionPreference?.matches?'instant':'smooth'});
     root.querySelector('#hos-work-photo-caption').textContent=photo.label;count.textContent=(index+1)+' / '+photos.length;
     if(!motionPreference?.matches && main.decode)main.decode().then(()=>{if(photos[index]===photo)main.animate?.([{opacity:.35},{opacity:1}],{duration:320,easing:'ease-out'});}).catch(()=>{});
-    root.querySelectorAll('[data-gallery-step]').forEach(button=>button.disabled=photos.length<2);
+    root.querySelectorAll('[data-story-step]').forEach(button=>button.addEventListener('click',()=>story.scrollBy({left:Number(button.dataset.storyStep)*(story.children[0]?.offsetWidth+24||story.clientWidth*.85),behavior:motionPreference?.matches?'instant':'smooth'})));
+  root.querySelectorAll('[data-gallery-step]').forEach(button=>button.disabled=photos.length<2);
   }
   function zoom(value,center=true){
     const oldWidth=large.offsetWidth,oldHeight=large.offsetHeight,cx=(stage.scrollLeft+stage.clientWidth/2-Math.max(0,(stage.clientWidth-oldWidth)/2))/Math.max(oldWidth,1),cy=(stage.scrollTop+stage.clientHeight/2)/Math.max(oldHeight,1);
@@ -67,7 +68,7 @@ export function initializeGallery({root,document,applyImage,motionPreference,onV
       const img=document.createElement('img');applyImage(img,photo.source,'120px');img.alt='';img.loading='lazy';const label=document.createElement('span');label.textContent=photo.label;button.append(img,label);button.addEventListener('click',()=>select(i));thumbs.append(button);
       if(i){const figure=document.createElement('figure');figure.className='hos-gallery-image hos-gallery-'+photo.kind;const inspectButton=document.createElement('button');inspectButton.type='button';inspectButton.setAttribute('aria-label','Inspect '+photo.label.toLowerCase());const image=document.createElement('img');applyImage(image,photo.source,'(max-width:700px) 90vw, 60vw');image.alt=photo.label+' of '+work.title;image.loading='lazy';if(photo.zoom)image.style.transform='scale('+photo.zoom+')';inspectButton.append(image);inspectButton.addEventListener('click',()=>inspect(inspectButton,i));const caption=document.createElement('figcaption');caption.textContent=photo.label;figure.append(inspectButton,caption);story.append(figure);}
     });
-    thumbs.hidden=photos.length<2;story.hidden=!story.childElementCount;if(photos.length)select(0);
+    thumbs.hidden=photos.length<2;story.hidden=!story.childElementCount;story.scrollTo({left:0,behavior:'instant'});if(photos.length)select(0);
   }};
 }
 

@@ -150,7 +150,7 @@ function workCard(work, {compact = false} = {}) {
   const copy = el('div','hos-work-card-copy'), badge=availabilityLabel(work);
   if(badge && work.availability!=='available')photo.append(badge);
   const heading=el('h3'),titleLink=photoLink('hos-card-title',{work:work.id},`View ${workLabel(work)}`);titleLink.textContent=work.title;heading.append(titleLink);
-  const artist=artistFor(work),author=artist?photoLink('hos-text-link',{artist:artist.id},'About '+artist.name):el('p','hos-credit','Artist details on inquiry');if(artist)author.textContent=artist.name;
+  const artist=artistFor(work),author=artist?photoLink('hos-text-link',{artist:artist.id},'About '+artist.name):el('p','hos-credit','Artist details on inquiry');if(artist)author.append(el('span','hos-meta-label','Artist'),document.createTextNode(artist.name));
   copy.append(heading,author);
   if(work.material){const stone=el('p','hos-card-stone');stone.append(el('span','hos-meta-label','Stone'),document.createTextNode(work.material));copy.append(stone);}
   card.append(photo,copy);return card;
@@ -189,25 +189,7 @@ function collectionSelection(collection) {
   const section=el('section','hos-collection-selection');section.dataset.reveal='';section.setAttribute('aria-label','Works in '+collection.name);
   const heading=el('div','hos-selection-heading');heading.append(el('h3','','The works'),el('span','',selected.length+' sculptures'));
   const grid=workGrid(selected);grid.classList.add('hos-equal-works');grid.tabIndex=0;grid.setAttribute('aria-label',collection.name+' sculptures');
-  section.append(heading,collectionCarousel(grid,collection.name));return section;
-}
-function collectionCarousel(grid,label){
-  const rail=el('div','hos-collection-carousel');
-  const controls=el('div','hos-carousel-controls'),hint=el('span','','Explore the works'),previous=el('button','','←'),next=el('button','','→');
-  grid.classList.add('hos-carousel-track');grid.tabIndex=0;
-  grid.id='hos-carousel-'+Math.random().toString(36).slice(2);
-  for(const [button,direction,name] of [[previous,-1,'Previous'],[next,1,'Next']]){
-    button.type='button';button.setAttribute('aria-label',name+' works in '+label);button.setAttribute('aria-controls',grid.id);
-    button.addEventListener('click',()=>move(direction));
-  }
-  const move=direction=>{const step=(grid.children[1]?.offsetLeft-grid.children[0]?.offsetLeft)||grid.clientWidth*.7;grid.scrollBy({left:direction*step,behavior:motionPreference?.matches?'instant':'smooth'});sync();};
-  const sync=()=>{previous.disabled=grid.scrollLeft<2;next.disabled=grid.scrollLeft+grid.clientWidth>=grid.scrollWidth-2;controls.hidden=grid.scrollWidth<=grid.clientWidth+2;};
-  grid.addEventListener('scroll',sync,{passive:true});
-  grid.addEventListener('keydown',event=>{if(event.target!==grid || !['ArrowLeft','ArrowRight'].includes(event.key))return;event.preventDefault();move(event.key==='ArrowLeft'?-1:1);});
-  if(typeof window.ResizeObserver==='function')new window.ResizeObserver(sync).observe(grid);
-  else window.addEventListener('resize',sync,{passive:true});
-  grid.addEventListener('load',sync,true);
-  controls.append(hint,previous,next);rail.append(controls,grid);return rail;
+  section.append(heading,grid);return section;
 }
 function collectionChapter(collection, {heading = true} = {}) {
   const work=works.find(work=>work.id===collection.starWorkId),section=el('section','hos-collection-chapter hos-collection-editorial');
@@ -257,7 +239,7 @@ function filteredWorks(container, selected, label = 'Browse works') {
     select.addEventListener('change',()=>{state[key]=select.value;update();});wrapper.append(select);filters.append(wrapper);
   }
   const reset=el('button','hos-text-link','Reset filters');reset.type='button';reset.addEventListener('click',()=>{for(const key of Object.keys(state))delete state[key];filters.querySelectorAll('select').forEach(select=>select.value='');update();});filters.append(reset);if(!filters.querySelector('select'))filters.hidden=true;
-  function update(){const result=selected.filter(work=>Object.entries(state).every(([key,value])=>!value || (value==='__unknown'?!work[key]:work[key]===value)));counter.textContent=`${result.length} ${result.length===1?'work':'works'}`;gridHost.replaceChildren(result.length?(container.classList.contains('hos-supporting-works')?collectionCarousel(workGrid(result),label):workGrid(result)):el('p','hos-empty-results','No works match these filters. Try another selection.'));refreshLinks(section);observeReveals(section);}
+  function update(){const result=selected.filter(work=>Object.entries(state).every(([key,value])=>!value || (value==='__unknown'?!work[key]:work[key]===value)));counter.textContent=`${result.length} ${result.length===1?'work':'works'}`;gridHost.replaceChildren(result.length?workGrid(result):el('p','hos-empty-results','No works match these filters. Try another selection.'));refreshLinks(section);observeReveals(section);}
   toggle.hidden=!filters.querySelector('select');toolbar.append(counter,toggle);
   section.append(toolbar,filters,gridHost);container.append(section);update();
 }

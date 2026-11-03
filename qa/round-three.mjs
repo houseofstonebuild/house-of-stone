@@ -10,9 +10,10 @@ try{
  for(const width of [320,390,768,1440]){
   await page.setViewportSize({width,height:1000});await ready('/');
   for(const collection of catalog.collections){
-   const chapter=page.locator('#hos-home-chapters [data-collection-section="'+collection.id+'"]'),track=chapter.locator('.hos-carousel-track'),cards=track.locator('.hos-work-card');
-   const rows=await cards.evaluateAll(nodes=>nodes.map(n=>Math.round(n.getBoundingClientRect().top)));assert(rows.every(y=>y===rows[0]),'Each collection stays in one row at '+width);
-   assert.equal(await cards.count(),collection.workIds.length);const overflow=await track.evaluate(n=>n.scrollWidth>n.clientWidth+2);
+   const chapter=page.locator('#hos-home-chapters [data-collection-section="'+collection.id+'"]'),track=chapter.locator('.hos-work-grid'),cards=track.locator('.hos-work-card');
+   assert.equal(await chapter.locator('.hos-carousel-track').count(),0);
+   assert.equal(await cards.count(),collection.workIds.length);
+   assert.equal(await cards.first().locator('[data-artist] .hos-meta-label').textContent(),'Artist');
    // Lazy catalogue photography must actually load when the rail enters view.
    const visibleCount=Math.min(await cards.count(),width>1100?4:width>700?3:1);
    for(let photoIndex=0;photoIndex<visibleCount;photoIndex++){
@@ -20,12 +21,14 @@ try{
     await photo.evaluate(async image=>{if(!image.complete)await new Promise((resolve,reject)=>{image.addEventListener('load',resolve,{once:true});image.addEventListener('error',reject,{once:true});});await image.decode();});
     assert(await photo.evaluate(image=>image.naturalWidth>0),'Collection photograph did not render: '+collection.name+' / '+photoIndex);
    }
-   await track.evaluate(node=>node.scrollTo({left:0,behavior:'instant'}));
-   if(overflow){const next=chapter.getByRole('button',{name:'Next works in '+collection.name,exact:true});await next.click();await page.waitForFunction(el=>el.scrollLeft>10,await track.elementHandle());await track.focus();await page.keyboard.press('ArrowLeft');await page.waitForFunction(el=>el.scrollLeft<2,await track.elementHandle());}
    if(collection.id==='presence'&&[390,1440].includes(width))await chapter.screenshot({path:new URL(width+'-presence.jpg',out).pathname,type:'jpeg',quality:88});report.rails++;
   }
   for(const id of ['zsa-012','zsa-016','hos-queen-mother']){
    const work=catalog.works.find(w=>w.id===id);await ready('/works/'+work.slug);assert.equal(await page.locator('#hos-work-banner').isVisible(),width>700);if(id==='zsa-012'&&[390,1440].includes(width)){await page.locator('#hos-work-image').evaluate(image=>image.decode());await page.locator('#hos-work-photo-open').screenshot({path:new URL(width+'-chief.jpg',out).pathname,type:'jpeg',quality:90});}
+   const rail=page.locator('#hos-work-gallery-story');
+   const rows=await rail.locator('figure').evaluateAll(nodes=>nodes.map(n=>Math.round(n.getBoundingClientRect().top)));assert(rows.length>1&&rows.every(y=>y===rows[0]),'Sculpture photos stay in one horizontal row');
+   await page.getByRole('button',{name:'Scroll photographs right',exact:true}).click();await page.waitForFunction(el=>el.scrollLeft>10,await rail.elementHandle());
+   if(id==='zsa-012'&&[390,1440].includes(width))await page.locator('.hos-photo-carousel').screenshot({path:new URL(width+'-sculpture-carousel.jpg',out).pathname,type:'jpeg',quality:90});
    const thumbs=page.locator('.hos-photo-thumbnail');assert(await thumbs.count()>1);await thumbs.nth(1).click();assert.equal(await thumbs.nth(1).getAttribute('aria-pressed'),'true');
    await page.locator('#hos-work-photo-open').click();const dialog=page.locator('#hos-photo-dialog'),stage=dialog.locator('.hos-photo-stage');await dialog.locator('img').evaluate(i=>i.decode());
    for(let n=0;n<8;n++)await page.getByRole('button',{name:'Zoom in photograph',exact:true}).click();assert.equal(await dialog.locator('.hos-zoom-status').textContent(),'500%');

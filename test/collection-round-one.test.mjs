@@ -48,7 +48,7 @@ test('all 23 sculpture fronts use studio photos and all five approved campaign p
   for(const [index,collection] of catalog.collections.entries()){
     const work=catalog.works.find(work=>work.id===collection.starWorkId),scene=editorial.workScenes[work.id];
     assert.equal(scene.source,catalog.assets[work.image]);
-    assert.equal(scene.scenes[0].source,'/assets/'+campaigns[index]+'-campaign-v'+(campaigns[index]==='elemental'?3:2)+'.webp');
+    assert.equal(scene.scenes[0].source,'/assets/'+campaigns[index]+'-campaign-v2.webp');
     for(const id of collection.workIds){
       const work=catalog.works.find(work=>work.id===id);
       assert.match(catalog.assets[work.image],/(?:studio-front-v[234]|wingbeat-shoot-front-v1)\.webp$/);

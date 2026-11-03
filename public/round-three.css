@@ -10,15 +10,6 @@
 #hos-concept .hos-work-card-copy>.hos-text-link[data-artist] {color:#504e48;font-size:12px;}
 #hos-concept .hos-work-card-copy>.hos-card-stone {display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 8px;color:#746f65;font-size:11px;margin-top:6px;}
 #hos-concept .hos-meta-label {font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#746f65;}
-#hos-concept .hos-collection-carousel {min-width:0;width:100%;}
-#hos-concept .hos-collection-carousel>.hos-carousel-controls {display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 12px;}
-#hos-concept .hos-collection-carousel>.hos-carousel-controls[hidden] {display:none;}
-#hos-concept .hos-collection-carousel>.hos-carousel-controls span {margin-right:auto;font-size:11px;color:var(--hos-muted);}
-#hos-concept .hos-collection-carousel>.hos-carousel-controls button {width:44px;height:44px;border:1px solid var(--hos-line);border-radius:50%;font-size:20px;cursor:pointer;}
-#hos-concept .hos-collection-carousel>.hos-carousel-controls button:disabled {opacity:.3;cursor:default;}
-#hos-concept .hos-carousel-track,#hos-concept .hos-collection-campaign .hos-equal-works[data-count] {display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:calc((100% - 60px)/4);gap:20px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-padding:0;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#c7c2b8 #f5f4f1;width:100%;padding:0 0 14px;max-width:100%;}
-#hos-concept .hos-carousel-track>.hos-work-card {min-width:0;scroll-snap-align:start;}
-#hos-concept .hos-carousel-track:focus-visible {outline:1px solid var(--hos-fg);outline-offset:4px;}
 #hos-concept .hos-work-photo .hos-work-additional-images {display:flex;width:100%;gap:10px;overflow:auto;scroll-snap-type:x proximity;scrollbar-width:thin;padding:3px 2px 12px;margin:0;}
 #hos-concept .hos-work-photo .hos-photo-thumbnail {flex:0 0 76px;width:76px;scroll-snap-align:center;padding:0 0 6px;}
 #hos-concept .hos-work-photo .hos-photo-thumbnail img {width:76px;height:90px;}
@@ -32,16 +23,28 @@
 #hos-concept .hos-zoom-status {min-width:3.5em;text-align:center;font-size:11px;font-variant-numeric:tabular-nums;}
 #hos-concept .hos-photo-pan-hint {font-size:11px;color:var(--hos-muted);text-align:center;margin:4px 0 0;}
 @media (max-width:1100px) and (min-width:701px) {
- #hos-concept .hos-carousel-track,#hos-concept .hos-collection-campaign .hos-equal-works[data-count] {grid-auto-columns:calc((100% - 40px)/3);}
 }
 @media(max-width:700px){
  #hos-concept #hos-work-banner {display:none;}
  #hos-concept .hos-work-layout {padding-top:20px;}
- #hos-concept .hos-carousel-track,#hos-concept .hos-collection-campaign .hos-equal-works[data-count] {grid-auto-columns:76%;gap:16px;}
  #hos-concept .hos-work-card-photo .hos-availability {inset:10px 10px auto auto;}
  #hos-concept .hos-photo-dialog {padding:14px;width:calc(100% - 16px);height:calc(100dvh - 16px);}
  #hos-concept .hos-photo-top h2 {font-size:20px;}
  #hos-concept .hos-photo-stage {height:calc(100% - 190px);}
 }
-@media(prefers-reduced-motion:reduce){#hos-concept .hos-carousel-track {scroll-behavior:auto;}}
 
+
+#hos-concept .hos-work-card-copy>.hos-text-link[data-artist] {display:flex;flex-wrap:wrap;gap:5px 8px;align-items:baseline;}
+#hos-concept .hos-photo-carousel {grid-column:1/-1;min-width:0;max-width:100%;margin-top:36px;}
+#hos-concept .hos-photo-carousel-heading {display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+#hos-concept .hos-photo-carousel-heading h2 {margin:0 auto 0 0;font-size:20px;}
+#hos-concept .hos-photo-carousel-heading button {width:44px;height:44px;border:1px solid var(--hos-line);border-radius:50%;cursor:pointer;}
+#hos-concept .hos-photo-carousel .hos-work-gallery-story {display:grid;grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:calc((100% - 24px)/2);gap:24px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding:0 0 14px;scrollbar-width:thin;overscroll-behavior-x:contain;}
+#hos-concept .hos-photo-carousel .hos-gallery-image {margin:0;min-width:0;scroll-snap-align:start;}
+#hos-concept .hos-photo-carousel .hos-gallery-image button {width:100%;aspect-ratio:3/4;display:block;}
+#hos-concept .hos-photo-carousel .hos-gallery-image img {width:100%;height:100%;object-fit:contain;}
+@media(max-width:700px){
+ #hos-concept .hos-photo-carousel .hos-work-gallery-story {grid-auto-columns:86%;gap:16px;}
+ #hos-concept .hos-collection-photo:has(>img[src*="elemental-campaign"]) {aspect-ratio:3/2;height:auto;}
+ #hos-concept .hos-collection-photo>img[src*="elemental-campaign"] {object-fit:contain;height:100%;}
+}
