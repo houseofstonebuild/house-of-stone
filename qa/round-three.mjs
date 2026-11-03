@@ -25,7 +25,7 @@ try{
    if(collection.id==='presence'&&[390,1440].includes(width))await chapter.screenshot({path:new URL(width+'-presence.jpg',out).pathname,type:'jpeg',quality:88});report.rails++;
   }
   for(const id of ['zsa-012','zsa-016','hos-queen-mother']){
-   const work=catalog.works.find(w=>w.id===id);await ready('/works/'+work.slug);assert.equal(await page.locator('#hos-work-banner').isVisible(),width>700);
+   const work=catalog.works.find(w=>w.id===id);await ready('/works/'+work.slug);assert.equal(await page.locator('#hos-work-banner').isVisible(),width>700);if(id==='zsa-012'&&[390,1440].includes(width)){await page.locator('#hos-work-image').evaluate(image=>image.decode());await page.locator('#hos-work-photo-open').screenshot({path:new URL(width+'-chief.jpg',out).pathname,type:'jpeg',quality:90});}
    const thumbs=page.locator('.hos-photo-thumbnail');assert(await thumbs.count()>1);await thumbs.nth(1).click();assert.equal(await thumbs.nth(1).getAttribute('aria-pressed'),'true');
    await page.locator('#hos-work-photo-open').click();const dialog=page.locator('#hos-photo-dialog'),stage=dialog.locator('.hos-photo-stage');await dialog.locator('img').evaluate(i=>i.decode());
    for(let n=0;n<8;n++)await page.getByRole('button',{name:'Zoom in photograph',exact:true}).click();assert.equal(await dialog.locator('.hos-zoom-status').textContent(),'500%');
