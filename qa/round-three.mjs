@@ -24,7 +24,7 @@ try{
    if(overflow){const next=chapter.getByRole('button',{name:'Next works in '+collection.name,exact:true});await next.click();await page.waitForFunction(el=>el.scrollLeft>10,await track.elementHandle());await track.focus();await page.keyboard.press('ArrowLeft');await page.waitForFunction(el=>el.scrollLeft<2,await track.elementHandle());}
    if(collection.id==='presence'&&[390,1440].includes(width))await chapter.screenshot({path:new URL(width+'-presence.jpg',out).pathname,type:'jpeg',quality:88});report.rails++;
   }
-  for(const id of ['zsa-002','zsa-012','zsa-016','hos-queen-mother']){
+  for(const id of ['zsa-012','zsa-016','hos-queen-mother']){
    const work=catalog.works.find(w=>w.id===id);await ready('/works/'+work.slug);assert.equal(await page.locator('#hos-work-banner').isVisible(),width>700);
    const thumbs=page.locator('.hos-photo-thumbnail');assert(await thumbs.count()>1);await thumbs.nth(1).click();assert.equal(await thumbs.nth(1).getAttribute('aria-pressed'),'true');
    await page.locator('#hos-work-photo-open').click();const dialog=page.locator('#hos-photo-dialog'),stage=dialog.locator('.hos-photo-stage');await dialog.locator('img').evaluate(i=>i.decode());
@@ -35,5 +35,6 @@ try{
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  }
  for(const [route,filename] of [['designers','designers-queen-mother-v1.webp'],['collectors','collectors-birds-v1.webp']]){await ready('/'+route);const image=page.locator('[data-page="'+route+'"] .hos-editorial-image img');assert((await image.getAttribute('src')).endsWith(filename));await image.evaluate(i=>i.decode());await page.screenshot({path:new URL(route+'.jpg',out).pathname,type:'jpeg',quality:88,fullPage:true});}
+ for(const side of ['front','back']){const src='/assets/zsa-002-studio-'+side+'-v4.webp';assert(await page.evaluate(async src=>{const image=new Image();image.src=src;try{await image.decode();return image.naturalWidth===1200&&image.naturalHeight===1600;}catch{return false;}},src),'Archived source photo must decode: '+src);}
  assert.deepEqual(errors,[]);assert.equal(app.db.prepare('SELECT count(*) AS n FROM inquiries').get().n,0);report.passed=true;console.log(JSON.stringify(report));
 }finally{writeFileSync(new URL('report.json',out),JSON.stringify({...report,errors},null,2));await browser?.close();await new Promise(r=>app.server.close(r));rmSync(dataDir,{recursive:true,force:true});}
