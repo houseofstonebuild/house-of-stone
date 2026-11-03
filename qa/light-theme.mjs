@@ -46,9 +46,9 @@ try {
     await page.screenshot({path:new URL(`light-${engineName}-${viewport.width}-hero.jpg`,output).pathname,type:'jpeg',quality:90});
     await page.locator('.hos-hero-copy [data-scroll-collection]').click();assert.equal(new URL(page.url()).search,'');
     const collectionLed=!!catalog.collections?.length;
-    const chapter=page.locator(collectionLed?'#hos-home-chapters [data-collection-section]':'#hos-home-chapters .hos-artist-chapter').first();await chapter.locator(collectionLed?'.hos-collection-copy':'.hos-chapter-details').scrollIntoViewIfNeeded();
+    const chapter=page.locator(collectionLed?'#hos-home-chapters [data-collection-section]':'#hos-home-chapters .hos-artist-chapter').first();await chapter.locator(collectionLed?'.hos-collection-photo':'.hos-chapter-details').scrollIntoViewIfNeeded();
     await page.screenshot({path:new URL(`light-${engineName}-${viewport.width}-artist.jpg`,output).pathname,type:'jpeg',quality:90});
-    await chapter.locator(collectionLed?'.hos-star-title [data-work]':'[data-work]').first().click();assert.equal(new URL(page.url()).search,'');
+    await chapter.locator(collectionLed?'.hos-card-title[data-work]':'[data-work]').first().click();assert.equal(new URL(page.url()).search,'');
     await page.reload();await page.locator('#hos-concept[data-ready="true"]').waitFor();assert.equal(await page.locator('html').getAttribute('data-theme'),'light');
     await page.locator('#hos-work-inquiry').click();assert(await page.locator('#hos-inquiry-form').isVisible());
     assert.equal(await page.locator('#hos-inquiry-form input[name="email"]').evaluate(el=>getComputedStyle(el).color),'rgb(40, 37, 31)');
@@ -65,5 +65,6 @@ try {
   await browser?.close();if(app)await new Promise(resolve=>app.server.close(resolve));if(dataDir)rmSync(dataDir,{recursive:true,force:true});
   writeFileSync(new URL(`light-${engineName}-report.json`,output),JSON.stringify(report,null,2)+'\n');
 }
+
 
 
