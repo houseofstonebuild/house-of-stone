@@ -198,11 +198,12 @@ function collectionCarousel(grid,label){
   grid.id='hos-carousel-'+Math.random().toString(36).slice(2);
   for(const [button,direction,name] of [[previous,-1,'Previous'],[next,1,'Next']]){
     button.type='button';button.setAttribute('aria-label',name+' works in '+label);button.setAttribute('aria-controls',grid.id);
-    button.addEventListener('click',()=>grid.scrollBy({left:direction*(grid.firstElementChild?.getBoundingClientRect().width+20 || grid.clientWidth*.7),behavior:motionPreference?.matches?'instant':'smooth'}));
+    button.addEventListener('click',()=>move(direction));
   }
+  const move=direction=>{const step=(grid.children[1]?.offsetLeft-grid.children[0]?.offsetLeft)||grid.clientWidth*.7;grid.scrollBy({left:direction*step,behavior:motionPreference?.matches?'instant':'smooth'});sync();};
   const sync=()=>{previous.disabled=grid.scrollLeft<2;next.disabled=grid.scrollLeft+grid.clientWidth>=grid.scrollWidth-2;controls.hidden=grid.scrollWidth<=grid.clientWidth+2;};
   grid.addEventListener('scroll',sync,{passive:true});
-  grid.addEventListener('keydown',event=>{if(event.target!==grid || !['ArrowLeft','ArrowRight'].includes(event.key))return;event.preventDefault();(event.key==='ArrowLeft'?previous:next).click();});
+  grid.addEventListener('keydown',event=>{if(event.target!==grid || !['ArrowLeft','ArrowRight'].includes(event.key))return;event.preventDefault();move(event.key==='ArrowLeft'?-1:1);});
   if(typeof window.ResizeObserver==='function')new window.ResizeObserver(sync).observe(grid);
   else window.addEventListener('resize',sync,{passive:true});
   grid.addEventListener('load',sync,true);
