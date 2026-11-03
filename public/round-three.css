@@ -45,6 +45,6 @@
 #hos-concept .hos-photo-carousel .hos-gallery-image img {width:100%;height:100%;object-fit:contain;}
 @media(max-width:700px){
  #hos-concept .hos-photo-carousel .hos-work-gallery-story {grid-auto-columns:86%;gap:16px;}
- #hos-concept .hos-collection-photo:has(>img[src*="elemental-campaign"]) {aspect-ratio:3/2;height:auto;}
- #hos-concept .hos-collection-photo>img[src*="elemental-campaign"] {object-fit:contain;height:100%;}
+ #hos-concept .hos-collection-photo.hos-collection-interior:has(>img[src*="elemental-campaign"]) {aspect-ratio:3/2;height:auto;}
+ #hos-concept .hos-collection-photo.hos-collection-interior>img[src*="elemental-campaign"] {object-fit:contain;height:100%;}
 }
