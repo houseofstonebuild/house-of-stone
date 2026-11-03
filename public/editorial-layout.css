@@ -515,3 +515,7 @@
 #hos-concept :is(.hos-photo-stage,.hos-gallery-image,.hos-photo-thumbnail) img {background:#fff;}
 
 #hos-concept .hos-artist-profile {align-items:center;}
+
+/* Crop the spare white canvas around a paired artist lead, keeping both subjects. */
+#hos-concept .hos-portrait-card img[src*="hos-artist-"][src*="-with-"] {object-fit:cover;}
+#hos-concept #hos-artist-image[src*="hos-artist-"][src*="-with-"] {aspect-ratio:4/5;object-fit:cover;}
