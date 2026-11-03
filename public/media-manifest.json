@@ -1118,5 +1118,140 @@
     "width": 1086,
     "height": 1448,
     "srcset": "/assets/zsa-021-studio-front-v4-480.webp 480w, /assets/zsa-021-studio-front-v4-800.webp 800w, /assets/zsa-021-studio-front-v4.webp 1086w"
+  },
+  "/assets/hos-queen-mother-front-v1.webp": {
+    "width": 1200,
+    "height": 1800,
+    "srcset": "/assets/hos-queen-mother-front-v1.webp 1200w"
+  },
+  "/assets/hos-queen-mother-left-v1.webp": {
+    "width": 1200,
+    "height": 1800,
+    "srcset": "/assets/hos-queen-mother-left-v1.webp 1200w"
+  },
+  "/assets/hos-queen-mother-right-v1.webp": {
+    "width": 1200,
+    "height": 1800,
+    "srcset": "/assets/hos-queen-mother-right-v1.webp 1200w"
+  },
+  "/assets/hos-queen-mother-back-v1.webp": {
+    "width": 1200,
+    "height": 1800,
+    "srcset": "/assets/hos-queen-mother-back-v1.webp 1200w"
+  },
+  "/assets/hos-celebration-front-v1.webp": {
+    "width": 1200,
+    "height": 1800,
+    "srcset": "/assets/hos-celebration-front-v1.webp 1200w"
+  },
+  "/assets/hos-celebration-left-v1.webp": {
+    "width": 1200,
+    "height": 1800,
+    "srcset": "/assets/hos-celebration-left-v1.webp 1200w"
+  },
+  "/assets/hos-celebration-right-v1.webp": {
+    "width": 1200,
+    "height": 1800,
+    "srcset": "/assets/hos-celebration-right-v1.webp 1200w"
+  },
+  "/assets/hos-celebration-back-v1.webp": {
+    "width": 1200,
+    "height": 1800,
+    "srcset": "/assets/hos-celebration-back-v1.webp 1200w"
+  },
+  "/assets/hos-belonging-front-v1.webp": {
+    "width": 1200,
+    "height": 1800,
+    "srcset": "/assets/hos-belonging-front-v1.webp 1200w"
+  },
+  "/assets/hos-belonging-left-v1.webp": {
+    "width": 1200,
+    "height": 1800,
+    "srcset": "/assets/hos-belonging-left-v1.webp 1200w"
+  },
+  "/assets/hos-belonging-right-v1.webp": {
+    "width": 1200,
+    "height": 1800,
+    "srcset": "/assets/hos-belonging-right-v1.webp 1200w"
+  },
+  "/assets/hos-belonging-back-v1.webp": {
+    "width": 1200,
+    "height": 1800,
+    "srcset": "/assets/hos-belonging-back-v1.webp 1200w"
+  },
+  "/assets/hos-inner-beauty-front-v1.webp": {
+    "width": 1200,
+    "height": 1800,
+    "srcset": "/assets/hos-inner-beauty-front-v1.webp 1200w"
+  },
+  "/assets/hos-inner-beauty-left-v1.webp": {
+    "width": 1200,
+    "height": 1800,
+    "srcset": "/assets/hos-inner-beauty-left-v1.webp 1200w"
+  },
+  "/assets/hos-inner-beauty-right-v1.webp": {
+    "width": 1200,
+    "height": 1800,
+    "srcset": "/assets/hos-inner-beauty-right-v1.webp 1200w"
+  },
+  "/assets/hos-inner-beauty-back-v1.webp": {
+    "width": 1200,
+    "height": 1800,
+    "srcset": "/assets/hos-inner-beauty-back-v1.webp 1200w"
+  },
+  "/assets/hos-artist-chamu-rumano-v1.webp": {
+    "width": 1024,
+    "height": 1536,
+    "srcset": "/assets/hos-artist-chamu-rumano-v1.webp 1024w"
+  },
+  "/assets/hos-artist-thomas-nyasoka-v1.webp": {
+    "width": 1024,
+    "height": 1536,
+    "srcset": "/assets/hos-artist-thomas-nyasoka-v1.webp 1024w"
+  },
+  "/assets/hos-artist-douglas-musekiwa-v1.webp": {
+    "width": 1024,
+    "height": 1536,
+    "srcset": "/assets/hos-artist-douglas-musekiwa-v1.webp 1024w"
+  },
+  "/assets/hos-artist-philip-mlimu-v1.webp": {
+    "width": 1024,
+    "height": 1536,
+    "srcset": "/assets/hos-artist-philip-mlimu-v1.webp 1024w"
+  },
+  "/assets/hos-artist-batsirai-chikukwa-v1.webp": {
+    "width": 1114,
+    "height": 1412,
+    "srcset": "/assets/hos-artist-batsirai-chikukwa-v1.webp 1114w"
+  },
+  "/assets/hos-artist-thomas-nyasoka-with-happy-times-v1.webp": {
+    "width": 1523,
+    "height": 1032,
+    "srcset": "/assets/hos-artist-thomas-nyasoka-with-happy-times-v1.webp 1523w"
+  },
+  "/assets/hos-artist-chamu-rumano-with-birds-v1.webp": {
+    "width": 1024,
+    "height": 1536,
+    "srcset": "/assets/hos-artist-chamu-rumano-with-birds-v1.webp 1024w"
+  },
+  "/assets/hos-artist-philip-mlimu-with-reflection-v1.webp": {
+    "width": 1024,
+    "height": 1536,
+    "srcset": "/assets/hos-artist-philip-mlimu-with-reflection-v1.webp 1024w"
+  },
+  "/assets/hos-artist-douglas-musekiwa-with-coil-v1.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/hos-artist-douglas-musekiwa-with-coil-v1.webp 1536w"
+  },
+  "/assets/hos-artist-batsirai-chikukwa-with-celebration-v1.webp": {
+    "width": 1024,
+    "height": 1536,
+    "srcset": "/assets/hos-artist-batsirai-chikukwa-with-celebration-v1.webp 1024w"
+  },
+  "/assets/hos-artist-tinodashe-mangenda-with-queen-mother-v1.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/hos-artist-tinodashe-mangenda-with-queen-mother-v1.webp 1536w"
   }
 }

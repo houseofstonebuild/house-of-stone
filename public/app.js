@@ -128,6 +128,7 @@ function link(text, data) {
   button.append(arrow);return button;
 }
 function photoLink(className,data,label){const node=el('a',className);Object.assign(node.dataset,data);node.href=routeURL(destination(data));node.setAttribute('aria-label',label);return node;}
+function artistLeadAlt(artist) { return /\/hos-artist-/.test(assets[artist.portrait] || '') ? artist.name : 'Sculpture by '+artist.name; }
 const artistFor = work => artists.find(artist => artist.id === work.artistId);
 const collectionFor = work => collections.find(collection => collection.workIds.includes(work.id));
 const workLabel = work => `${work.title}${artistFor(work) ? ' by ' + artistFor(work).name : ''}`;
@@ -155,7 +156,7 @@ function workCard(work, {compact = false} = {}) {
 function artistContext(work) {
   const artist=artistFor(work);if(!artist)return null;
   const context=el('section','hos-artist-context');context.setAttribute('aria-label','About '+artist.name);
-  if(assets[artist.portrait])context.append(image(artist.portrait,'Portrait of '+artist.name,true,'96px'));
+  if(assets[artist.portrait])context.append(image(artist.portrait,artistLeadAlt(artist),true,'96px'));
   const copy=el('div');copy.append(el('div','hos-eyebrow','THE ARTIST'),el('h3','',artist.name));
   const biography=artistBiography(artist);
   if(biography){const sentence=biography.match(/^.*?[.!?](?:\s|$)/)?.[0]?.trim() || biography;copy.append(el('p','',sentence.length>190?sentence.slice(0,187).replace(/\s+\S*$/,'')+'…':sentence));}
@@ -282,7 +283,7 @@ function renderPresentation(){
   const steps=process.querySelector('.hos-process-steps');steps.replaceChildren();making.steps.forEach((step,i)=>{const card=el('div');card.dataset.reveal='';card.append(el('span','',String(i+1).padStart(2,'0')),el('h2','',step.title),el('p','',step.text));steps.append(card);});
   const processGallery=$('#hos-process-gallery');processGallery.replaceChildren();
   const configured=making.gallery.filter(photo=>assets[photo.image]);
-  const galleryPhotos=configured.length?configured.map(photo=>({source:assets[photo.image],caption:photo.caption})):[{source:'/assets/tariro-studio.jpg',caption:'In the studio'},{source:'/assets/process.jpg',caption:'Carving the stone'},{source:'/assets/kuda-studio.jpg',caption:'Form and surface'}];
+  const galleryPhotos=configured.length?configured.map(photo=>({source:assets[photo.image],caption:photo.caption})):[{source:assets.process || '/assets/process.jpg',caption:'Carving the stone'}];
   galleryPhotos.forEach(photo=>{const figure=el('figure');figure.dataset.reveal='';figure.append(editorialImage(photo.source,photo.caption,'(max-width:700px) 90vw, 45vw'),el('figcaption','',photo.caption));processGallery.append(figure);});
   const contact=$('#hos-contact-email');contact.hidden=!catalog.site.contactEmail;if(catalog.site.contactEmail){contact.href='mailto:'+catalog.site.contactEmail;contact.textContent=catalog.site.contactEmail;}
 }
@@ -409,7 +410,7 @@ function artistChapter(artist, selected, withInquiry = false) {
   }
   const chapter=el('section','hos-artist-chapter');chapter.id='hos-home-artist-'+artist.id;const intro=el('div','hos-artist-intro');intro.dataset.reveal='';
   const portrait=photoLink('hos-artist-intro-photo cursor-interaction',{artist:artist.id},`Read about ${artist.name}`);portrait.setAttribute('aria-label',`Read about ${artist.name}`);
-  portrait.append(image(artist.portrait,'Portrait of '+artist.name,true,'(max-width: 700px) 90vw, 420px'));
+  portrait.append(image(artist.portrait,artistLeadAlt(artist),true,'(max-width: 700px) 90vw, 420px'));
   const copy=el('div','hos-artist-intro-copy');copy.append(el('div','hos-eyebrow','THE ARTIST'),el('h2','',artist.name),el('p','hos-artist-style',artist.style),el('p','',artistBiography(artist)),link('About the artist',{artist:artist.id}));
   intro.append(portrait,copy);chapter.append(intro,workGrid(selected));
   if(withInquiry){const action=el('div','hos-setting-action');action.append(link('Inquire',{inquiry:`Works by ${artist.name}`,inquiryArtist:artist.id}));chapter.append(action);}
@@ -423,14 +424,14 @@ function renderArtist(artist) {
   $('#hos-artist-story').textContent = artist.story;
   $('#hos-artist-practice-section').hidden = !artist.story;
   $('#hos-artist-biography').textContent = artistBiography(artist);
-  applyImage($('#hos-artist-image'), assets[artist.portrait]); $('#hos-artist-image').alt = `Portrait of ${artist.name}`;
+  applyImage($('#hos-artist-image'), assets[artist.portrait]); $('#hos-artist-image').alt = artistLeadAlt(artist);
   const selected = works.filter(w => w.artistId === artist.id);
   $('#hos-artist-work-link').hidden = selected.length === 0;
   if (selected.length) $('#hos-artist-work-link').dataset.work = selected[0].id;
   const studio=$('#hos-artist-studio');studio.replaceChildren();
   const legacyStudio=editorial.chapters?.[artist.id];
   const studioSource=assets[artist.studioImage] || (legacyStudio?.artistName===artist.name && legacyStudio.portraitSource===assets[artist.portrait]?legacyStudio.landscape:'');
-  if(studioSource){const figure=el('figure');figure.append(editorialImage(studioSource,artist.name+' in the studio','90vw'));const caption=el('figcaption','',artist.name+' · In the studio');figure.append(caption);studio.append(figure);}
+  if(studioSource && studioSource!==assets[artist.portrait]){const figure=el('figure');figure.append(editorialImage(studioSource,artist.name+' with a sculpture from the collection','90vw'));const caption=el('figcaption','',artist.name+' · With the work');figure.append(caption);studio.append(figure);}
   if(artist.quote){const quote=el('blockquote','',artist.quote);studio.append(quote);}
   studio.hidden=!studio.childElementCount;
   const more = $('#hos-artist-works'); more.replaceChildren();
@@ -453,6 +454,7 @@ function renderWork(work) {
   $('#hos-work-banner-collection').textContent = collectionFor(work)?.name || 'THE COLLECTION';
   $('#hos-work-banner-title').textContent = work.title;
   $('#hos-work-banner-artist').textContent = activeArtist?.name || '';
+  $('#hos-work-banner-stone').textContent = work.material || 'Stone details on inquiry';
   const modelLink=$('#hos-work-model');modelLink.hidden=!modelDefinition(work);modelLink.dataset.model=work.id;
   const artistLink=$('#hos-work-artist');artistLink.textContent=activeArtist?.name || 'Artist details on inquiry';artistLink.dataset.artist=activeArtist?.id || '';artistLink.toggleAttribute('aria-disabled',!activeArtist);
   for(const [id,value] of [['year',work.yearMade],['dimensions',work.dimensions],['material',work.material],['acquisition',work.acquisitionMethod]]) {
@@ -685,9 +687,9 @@ async function start() {
   applyImage($('.hos-hero-image'),heroSource(),'100vw');$('.hos-hero-image').alt=heroDescription();
   root.querySelectorAll('.hos-editorial-image img,.hos-summary-photo img[src]').forEach(img=>applyImage(img,img.getAttribute('src'),'90vw'));
   root.querySelectorAll('[data-artist-grid]').forEach(grid => {
-    artists.forEach(artist => {
+    [...artists].sort((a,b)=>(a.name==='Artist to be confirmed')-(b.name==='Artist to be confirmed') || a.name.localeCompare(b.name)).forEach(artist => {
       const card=photoLink('hos-portrait-card cursor-interaction',{artist:artist.id},'About '+artist.name);card.dataset.reveal='';
-      card.append(image(artist.portrait,'Portrait of '+artist.name,true,'(max-width: 700px) 90vw, 29vw'),el('h3','',artist.name),el('p','',artist.style));grid.append(card);
+      card.append(image(artist.portrait,artistLeadAlt(artist),true,'(max-width: 700px) 90vw, 29vw'),el('h3','',artist.name),el('p','',artist.style || 'Stone sculpture · Zimbabwe'));grid.append(card);
     });
   });
   gallery=initializeGallery({root,document,applyImage,motionPreference,onView:()=>track('photo_view',{workId:activeWork?.id || '',artistId:activeArtist?.id || ''})});

@@ -113,7 +113,8 @@ export function publicCatalog(catalog, {preview = false} = {}) {
   const visible = catalog.works.filter(w => !w.archived && ids.has(w.artistId));
   const collections = (catalog.collections || []).filter(c => !c.archived).map(c => ({...c,workIds:c.workIds.filter(id => visible.some(w => w.id === id))})).filter(c => c.workIds.includes(c.starWorkId));
   const works = visible.map(work => {
-    if (!work.sourcePage || preview) return work;
+    if (preview) return work;
+    if (!work.sourcePage) { const {internalNotes,verification,workingContent,workingModel,...publicWork}=work; return publicWork; }
     const collection = collections.find(c => c.workIds.includes(work.id)), v = work.verification || {};
     // Owner-authorized working copy is separate from factual verification. It
     // never authorizes availability, provenance, signatures or delivery claims.
@@ -132,4 +133,5 @@ export function publicCatalog(catalog, {preview = false} = {}) {
   return { site: catalog.site, assets: Object.fromEntries(Object.entries(catalog.assets).filter(([key]) => keys.has(key))), artists, works, collections };
 }
 export function homepageImage(catalog) { return catalog.assets[catalog.site.heroImage] || '/assets/designer-apartment.jpg'; }
+
 

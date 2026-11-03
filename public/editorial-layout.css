@@ -449,8 +449,6 @@
 }
 #hos-concept .hos-studio-photo {background:var(--hos-studio-mat);object-fit:contain;}
 #hos-concept .hos-work-card-photo img,#hos-concept .hos-supporting-preview-grid .hos-work-card-photo img {max-height:none;}
-#hos-concept .hos-work-card[data-work-record="zsa-012"] .hos-work-card-photo img {transform:rotate(5deg);}
-#hos-concept .hos-work-card[data-work-record="zsa-012"] .hos-work-card-photo:is(:hover,:focus-visible) img {transform:rotate(5deg) scale(1.025);}
 
 /* The introductory photograph occupies the full width before the object
    gallery. Existing interior campaigns stay intact; other works lead with
@@ -465,7 +463,6 @@
 #hos-concept .hos-work-banner-caption span:first-child {font-size:11px;letter-spacing:.16em;text-transform:uppercase;}
 #hos-concept .hos-work-banner-caption strong {font-size:clamp(40px,5vw,84px);line-height:1.08;font-weight:300;letter-spacing:-.035em;margin:20px 0 16px;}
 #hos-concept .hos-work-banner-caption span:last-child {font-size:14px;color:var(--hos-muted);}
-#hos-concept .hos-work-banner[data-work-record="zsa-012"] img {transform:rotate(5deg);}
 @media(max-width:700px){
  #hos-concept .hos-work-banner {margin-top:10px;}
  #hos-concept .hos-work-banner img {height:min(76svh,720px);}
@@ -487,3 +484,32 @@
 @media(max-width:700px){
  #hos-concept .hos-category-campaign > .hos-collection-introduction {margin:24px 0;}
 }
+
+/* One artwork introduction: details left, photograph right, for every work. */
+#hos-concept .hos-work-banner {display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);align-items:center;height:clamp(440px,48vw,700px);background:#fafafa;}
+#hos-concept .hos-work-banner img {grid-column:2;grid-row:1;width:100%;height:100%;max-height:700px;min-width:0;object-fit:contain;aspect-ratio:auto;}
+#hos-concept .hos-work-banner-scene img {padding:clamp(16px,2vw,32px);box-sizing:border-box;}
+#hos-concept .hos-work-banner .hos-work-banner-caption {grid-column:1;grid-row:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-width:0;padding:32px clamp(24px,6vw,100px);margin:0;color:var(--hos-fg);}
+#hos-concept .hos-work-banner-caption strong {font-size:clamp(36px,4.5vw,72px);overflow-wrap:anywhere;}
+#hos-concept .hos-work-banner-caption #hos-work-banner-stone {font-size:14px;line-height:1.6;color:var(--hos-muted);margin-top:8px;}
+/* Aligned artist cards accommodate both real portraits and sculpture leads. */
+#hos-concept .hos-all-artists {grid-template-columns:repeat(3,minmax(0,1fr));gap:40px 28px;align-items:start;}
+#hos-concept .hos-portrait-card img {display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:contain;background:#fff;box-sizing:border-box;border:1px solid var(--hos-line);}
+#hos-concept .hos-portrait-card h3 {margin:14px 0 4px;font-size:18px;line-height:1.4;}
+#hos-concept .hos-portrait-card p {margin:0;font-size:13px;line-height:1.6;color:var(--hos-muted);}
+#hos-concept .hos-artist-studio figure {margin:0;}
+#hos-concept .hos-artist-studio img {width:100%;height:auto;max-height:760px;object-fit:contain;background:#fff;}
+@media(max-width:700px){
+ #hos-concept .hos-work-banner {display:flex;flex-direction:column;height:auto;}
+ #hos-concept .hos-work-banner img {height:min(65svh,620px);max-height:none;object-fit:contain;}
+ #hos-concept .hos-work-banner .hos-work-banner-caption {order:-1;width:100%;box-sizing:border-box;padding:24px var(--hos-gutter) 12px;}
+ #hos-concept .hos-work-banner-caption strong {font-size:34px;margin:10px 0;}
+ #hos-concept .hos-all-artists {grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 16px;}
+ #hos-concept .hos-portrait-card h3 {font-size:16px;}
+}
+
+#hos-concept .hos-gallery-artist {grid-column:1/-1;width:100%;max-width:960px;margin-inline:auto;}
+#hos-concept .hos-work-card-photo img,#hos-concept .hos-work-photo-open img {background:#fff;}
+
+#hos-concept .hos-all-artists .hos-portrait-card h3 {min-height:2.8em;}
+#hos-concept :is(.hos-photo-stage,.hos-gallery-image,.hos-photo-thumbnail) img {background:#fff;}

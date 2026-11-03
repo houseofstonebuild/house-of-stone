@@ -7,7 +7,7 @@ export function initializeGallery({root,document,applyImage,motionPreference,onV
   function select(i){
     if(!photos.length)return;index=(i+photos.length)%photos.length;const photo=photos[index];
     applyImage(main,photo.source,'(max-width:700px) 90vw, 65vw');main.alt=photo.label+' of '+title.textContent;
-    main.style.transform=[photo.zoom?'scale('+photo.zoom+')':'',selectedWorkId==='zsa-012'&&index===0?'rotate(5deg)':''].filter(Boolean).join(' ');
+    main.style.transform=photo.zoom?'scale('+photo.zoom+')':'';
     opener.setAttribute('aria-label','Inspect '+photo.label.toLowerCase()+' of '+title.textContent);opener.dataset.detailCrop=String(Boolean(photo.zoom));
     thumbs.querySelectorAll('button').forEach((button,n)=>button.setAttribute('aria-pressed',String(n===index)));
     root.querySelector('#hos-work-photo-caption').textContent=photo.label;count.textContent=(index+1)+' / '+photos.length;
@@ -37,7 +37,7 @@ export function initializeGallery({root,document,applyImage,motionPreference,onV
     for(const [key,label] of Object.entries(labels))if(assets[work.views?.[key]] && assets[work.views[key]]!==heroSource)photos.push({source:assets[work.views[key]],label,kind:['detail','detail2'].includes(key)?'detail':['interior','gallery','office'].includes(key)?'interior':'angle'});
     if(!work.views?.detail && assets[work.image])photos.push({source:assets[work.image],label:'Stone detail',kind:'detail',zoom:1.8});
     if(!work.views?.interior)for(const scene of scenes)if(scene.source!==heroSource)photos.push({...scene,kind:'interior'});
-    for(const [n,key] of (work.additionalImages||[]).entries())if(assets[key]&&!photos.some(photo=>photo.source===assets[key]))photos.push({source:assets[key],label:'Additional view '+(n+1),kind:'angle'});
+    for(const [n,key] of (work.additionalImages||[]).entries())if(assets[key]&&!photos.some(photo=>photo.source===assets[key]))photos.push({source:assets[key],label:assets[key].includes('/hos-artist-')?'With the artist':'Additional view '+(n+1),kind:assets[key].includes('/hos-artist-')?'artist':'angle'});
     photos=photos.filter(photo=>photo.source);title.textContent=work.title;thumbs.replaceChildren();story.replaceChildren();
     photos.forEach((photo,i)=>{
       const button=document.createElement('button');button.type='button';button.className='hos-photo-thumbnail';button.setAttribute('aria-label','Show '+photo.label.toLowerCase());button.setAttribute('aria-pressed',String(i===0));
@@ -47,4 +47,5 @@ export function initializeGallery({root,document,applyImage,motionPreference,onV
     thumbs.hidden=photos.length<2;story.hidden=!story.childElementCount;if(photos.length)select(0);
   }};
 }
+
 
