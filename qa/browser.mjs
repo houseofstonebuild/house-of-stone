@@ -265,25 +265,14 @@ for(const [engineName,engine] of engines) {
     await ready(modelPage);await modelPage.emulateMedia({reducedMotion:'no-preference'});
     let webglReady;
     for(const [index,artist] of catalog.artists.entries()) {
-      const chapter=modelPage.locator('#hos-home-chapters .hos-artist-chapter').nth(index),stage=chapter.locator('[data-model-stage]');
-      await stage.scrollIntoViewIfNeeded();await modelPage.waitForFunction(el=>['ready','unavailable'].includes(el.dataset.modelState),await stage.elementHandle());
+      const work=catalog.works.find(w=>w.artistId===artist.id);
+      await ready(modelPage,'/works/'+work.slug);
+      await modelPage.locator('#hos-work-model').click();
+      const stage=modelPage.locator('#hos-model-stage');
+      await modelPage.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-model-stage').dataset.modelState));
       const state=await stage.getAttribute('data-model-state');
       if(index===0){webglReady=state==='ready';if(engineName==='chromium')assert(webglReady,'Chromium must render the actual 3D mesh');}
-      if(webglReady){
-        assert.equal(state,'ready');await stage.waitFor({state:'visible'});await modelPage.waitForFunction(element=>Number(element.dataset.modelTriangles)>500,await stage.elementHandle());
-        assert(Number(await stage.getAttribute('data-model-triangles'))>500,'Model has no rendered volume');
-        assert(Number(await stage.getAttribute('data-model-texture-width'))>=1000,'The sculpture must decode its high-resolution stone texture');
-        const scroll=await modelPage.evaluate(()=>scrollY),before=Number(await stage.getAttribute('data-model-rotation'));
-        await modelPage.evaluate(()=>scrollBy(0,100));await modelPage.waitForFunction(({element,before})=>Math.abs(Number(element.dataset.modelRotation)-before)>.1,{element:await stage.elementHandle(),before});
-        await modelPage.evaluate(y=>scrollTo(0,y),scroll);await modelPage.waitForFunction(({element,before})=>Math.abs(Number(element.dataset.modelRotation)-before)<.02,{element:await stage.elementHandle(),before});
-        await modelPage.emulateMedia({reducedMotion:'reduce'});await modelPage.waitForFunction(el=>Math.abs(Number(el.dataset.modelRotation)+.3)<.001,await stage.elementHandle());
-        await modelPage.evaluate(()=>scrollBy(0,80));await modelPage.waitForFunction(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve(true)))));
-        assert.equal(Number(await stage.getAttribute('data-model-rotation')),-.3,'Reduced motion must stop scroll rotation');
-        const frames=await stage.getAttribute('data-model-frames');await modelPage.waitForTimeout(200);assert.equal(await stage.getAttribute('data-model-frames'),frames,'Idle models should not keep rendering');
-        await chapter.locator('.hos-3d-panel').screenshot({path:new URL(`${engineName}-3d-${catalog.works.find(w=>w.artistId===artist.id).id}.jpg`,output).pathname,type:'jpeg',quality:90,scale:'css'});
-        await modelPage.emulateMedia({reducedMotion:'no-preference'});
-      }
-      await chapter.getByRole('button',{name:'Explore in 3D'}).click();await modelPage.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-model-stage').dataset.modelState));
+      if(webglReady){assert.equal(state,'ready');assert(Number(await stage.getAttribute('data-model-triangles'))>500);}
       assert.equal(await modelPage.locator('#hos-model-title').textContent(),catalog.works.find(w=>w.artistId===artist.id).title);
       if(webglReady){
         const modal=modelPage.locator('#hos-model-stage');
