@@ -1,0 +1,46 @@
+/* A single white canvas and one quiet frame around each photograph. */
+#hos-concept {--hos-studio-mat:#fff;--hos-studio-border:#e5e3df;}
+#hos-concept :is(.hos-work-card-photo,.hos-work-photo-open,.hos-photo-thumbnail img,.hos-gallery-image button,.hos-photo-stage) {background:#fff;border:1px solid var(--hos-studio-border);border-radius:0;box-sizing:border-box;}
+#hos-concept :is(.hos-work-card-photo,.hos-work-photo-open,.hos-gallery-image button) {position:relative;overflow:hidden;}
+#hos-concept .hos-work-card-photo img {aspect-ratio:3/4;object-fit:contain;background:#fff;border:0;padding:0;}
+#hos-concept .hos-work-card-photo:is(:hover,:focus-visible) img {transform:none;}
+#hos-concept .hos-work-card-photo .hos-availability {position:absolute;inset:14px 14px auto auto;z-index:1;pointer-events:none;}
+#hos-concept .hos-availability[data-availability="sold"] {display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:5px 12px;margin:0;background:#34332e;color:#fff;border:1px solid #34332e;font-size:10px;font-weight:600;letter-spacing:.14em;line-height:1.4;text-transform:uppercase;}
+#hos-concept .hos-work-card-copy>h3 {font-weight:500;}
+#hos-concept .hos-work-card-copy>.hos-text-link[data-artist] {color:#504e48;font-size:12px;}
+#hos-concept .hos-work-card-copy>.hos-card-stone {display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 8px;color:#746f65;font-size:11px;margin-top:6px;}
+#hos-concept .hos-meta-label {font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#746f65;}
+#hos-concept .hos-collection-carousel {min-width:0;width:100%;}
+#hos-concept .hos-carousel-controls {display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 12px;}
+#hos-concept .hos-carousel-controls[hidden] {display:none;}
+#hos-concept .hos-carousel-controls span {margin-right:auto;font-size:11px;color:var(--hos-muted);}
+#hos-concept .hos-carousel-controls button {width:44px;height:44px;border:1px solid var(--hos-line);border-radius:50%;font-size:20px;cursor:pointer;}
+#hos-concept .hos-carousel-controls button:disabled {opacity:.3;cursor:default;}
+#hos-concept .hos-carousel-track,#hos-concept .hos-collection-campaign .hos-equal-works[data-count] {display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:calc((100% - 60px)/4);gap:20px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-padding:0;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#c7c2b8 #f5f4f1;width:100%;padding:0 0 14px;max-width:100%;}
+#hos-concept .hos-carousel-track>.hos-work-card {min-width:0;scroll-snap-align:start;}
+#hos-concept .hos-carousel-track:focus-visible {outline:1px solid var(--hos-fg);outline-offset:4px;}
+#hos-concept .hos-work-photo .hos-work-additional-images {display:flex;width:100%;gap:10px;overflow:auto;scroll-snap-type:x proximity;scrollbar-width:thin;padding:3px 2px 12px;margin:0;}
+#hos-concept .hos-work-photo .hos-photo-thumbnail {flex:0 0 76px;width:76px;scroll-snap-align:center;padding:0 0 6px;}
+#hos-concept .hos-work-photo .hos-photo-thumbnail img {width:76px;height:90px;}
+#hos-concept .hos-work-photo .hos-photo-thumbnail span {display:block;font-size:10px;line-height:1.5;}
+#hos-concept .hos-photo-thumbnail[aria-pressed="true"] {border-bottom:2px solid var(--hos-fg);}
+#hos-concept .hos-photo-zoom-invite {position:absolute;right:14px;bottom:14px;padding:9px 12px;border:1px solid #d8d5cd;background:rgba(255,255,255,.94);font-size:11px;color:#34332e;pointer-events:none;}
+#hos-concept .hos-photo-stage {touch-action:pan-x pan-y;cursor:default;}
+#hos-concept .hos-photo-stage[data-zoomed="true"] {cursor:grab;touch-action:none;}
+#hos-concept .hos-photo-stage[data-dragging="true"] {cursor:grabbing;}
+#hos-concept .hos-photo-stage img {max-height:none;max-width:none;object-fit:fill;user-select:none;-webkit-user-drag:none;}
+#hos-concept .hos-zoom-status {min-width:3.5em;text-align:center;font-size:11px;font-variant-numeric:tabular-nums;}
+#hos-concept .hos-photo-pan-hint {font-size:11px;color:var(--hos-muted);text-align:center;margin:4px 0 0;}
+@media (max-width:1100px) and (min-width:701px) {
+ #hos-concept .hos-carousel-track,#hos-concept .hos-collection-campaign .hos-equal-works[data-count] {grid-auto-columns:calc((100% - 40px)/3);}
+}
+@media(max-width:700px){
+ #hos-concept #hos-work-banner {display:none;}
+ #hos-concept .hos-work-layout {padding-top:20px;}
+ #hos-concept .hos-carousel-track,#hos-concept .hos-collection-campaign .hos-equal-works[data-count] {grid-auto-columns:76%;gap:16px;}
+ #hos-concept .hos-work-card-photo .hos-availability {inset:10px 10px auto auto;}
+ #hos-concept .hos-photo-dialog {padding:14px;width:calc(100% - 16px);height:calc(100dvh - 16px);}
+ #hos-concept .hos-photo-top h2 {font-size:20px;}
+ #hos-concept .hos-photo-stage {height:calc(100% - 190px);}
+}
+@media(prefers-reduced-motion:reduce){#hos-concept .hos-carousel-track {scroll-behavior:auto;}}
