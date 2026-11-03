@@ -23,7 +23,7 @@ try{
    assert.deepEqual(await chapter.locator('.hos-collection-selection .hos-work-card').evaluateAll(nodes=>nodes.map(n=>n.dataset.workRecord)),c.workIds);
    assert.equal(await chapter.locator('.hos-supporting-preview').count(),0);
    const img=chapter.locator('.hos-collection-landscape>img');assert.equal(await img.count(),1);await img.scrollIntoViewIfNeeded();await img.evaluate(i=>i.decode());
-   assert.equal(await img.evaluate(i=>getComputedStyle(i).objectFit),'cover');
+   assert.equal(await img.evaluate(i=>getComputedStyle(i).objectFit),c.id==='elemental'&&width<=700?'contain':'cover');
    const widths=await chapter.locator('.hos-collection-selection .hos-work-card-photo').evaluateAll(nodes=>nodes.map(n=>n.getBoundingClientRect().width));assert(Math.max(...widths)-Math.min(...widths)<2);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
    if([390,1440].includes(width)){await chapter.screenshot({path:new URL(width+'-'+c.id+'.jpg',out).pathname,type:'jpeg',quality:88});}

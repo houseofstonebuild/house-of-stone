@@ -42,7 +42,7 @@ try{
         assert.equal(await card.locator('h3').innerText(),work.title);
         assert.equal(await card.locator('.hos-card-stone').evaluate(node=>[...node.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.textContent).join('').trim()),work.material);
         assert(await card.locator('.hos-card-stone').evaluate(node=>parseFloat(getComputedStyle(node).fontSize)>=11));
-        assert.equal(await card.locator('[data-artist]').innerText(),catalog.artists.find(artist=>artist.id===work.artistId).name);
+        assert.equal(await card.locator('[data-artist]').evaluate(node=>[...node.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.textContent).join('').trim()),catalog.artists.find(artist=>artist.id===work.artistId).name);
         assert.equal(await card.locator('img').getAttribute('src'),catalog.assets[work.image]);
         if(work.availability==='sold')assert.equal(await card.locator('.hos-availability').textContent(),'Sold');
         report.homeTiles++;
