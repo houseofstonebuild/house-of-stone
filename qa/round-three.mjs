@@ -21,6 +21,7 @@ try{
     await photo.evaluate(async image=>{if(!image.complete)await new Promise((resolve,reject)=>{image.addEventListener('load',resolve,{once:true});image.addEventListener('error',reject,{once:true});});await image.decode();});
     assert(await photo.evaluate(image=>image.naturalWidth>0),'Collection photograph did not render: '+collection.name+' / '+photoIndex);
    }
+   if(collection.id==='elemental'&&width===390){const banner=chapter.locator('.hos-collection-photo.hos-collection-interior');await banner.locator('img').evaluate(image=>image.decode());const bounds=await banner.boundingBox();assert(bounds.width/bounds.height>1.4,'Elemental mobile banner preserves landscape composition');await banner.screenshot({path:new URL('390-elemental.jpg',out).pathname,type:'jpeg',quality:90});}
    if(collection.id==='presence'&&[390,1440].includes(width))await chapter.screenshot({path:new URL(width+'-presence.jpg',out).pathname,type:'jpeg',quality:88});report.rails++;
   }
   for(const id of ['zsa-012','zsa-016','hos-queen-mother']){
