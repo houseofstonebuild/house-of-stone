@@ -57,7 +57,7 @@ for(const [engineName,engine] of engines) {
           const layout=await page.evaluate(()=>{
             const rect=s=>{const r=document.querySelector(s).getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,height:r.height};};
             const visible=selector=>[...document.querySelectorAll(selector)].filter(el=>el.getClientRects().length);
-            return {viewport:innerWidth,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,root:rect('#hos-concept'),header:rect('.hos-header'),footer:rect('.hos-footer'),footerPosition:getComputedStyle(document.querySelector('.hos-footer')).position,main:rect('#hos-main'),hero:rect('.hos-hero-image'),images:visible('#hos-concept img').map(img=>({src:img.currentSrc,naturalWidth:img.naturalWidth,fit:getComputedStyle(img).objectFit,hero:img.classList.contains('hos-hero-image'),campaign:!!img.closest('.hos-artist-campaign')})),text:visible('#hos-main p').filter(el=>!el.classList.contains('hos-artist-style')&&!el.matches('.hos-card-specs,.hos-filter-count,.hos-work-short-specs,.hos-photo-caption')&&!el.classList.contains('hos-photo-caption')&&!el.classList.contains('hos-work-short-specs')).map(el=>({size:parseFloat(getComputedStyle(el).fontSize),text:el.textContent.slice(0,60)}))};
+            return {viewport:innerWidth,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,root:rect('#hos-concept'),header:rect('.hos-header'),footer:rect('.hos-footer'),footerPosition:getComputedStyle(document.querySelector('.hos-footer')).position,main:rect('#hos-main'),hero:rect('.hos-hero-image'),images:visible('#hos-concept img').map(img=>({src:img.currentSrc,naturalWidth:img.naturalWidth,fit:getComputedStyle(img).objectFit,hero:img.classList.contains('hos-hero-image'),campaign:!!img.closest('.hos-artist-campaign')})),text:visible('#hos-main p').filter(el=>!el.classList.contains('hos-artist-style')&&!el.matches('.hos-card-specs,.hos-card-stone,.hos-filter-count,.hos-work-short-specs,.hos-photo-caption')&&!el.classList.contains('hos-photo-caption')&&!el.classList.contains('hos-work-short-specs')).map(el=>({size:parseFloat(getComputedStyle(el).fontSize),text:el.textContent.slice(0,60)}))};
           });
           assert(layout.scrollWidth<=layout.clientWidth+1,`Horizontal overflow ${JSON.stringify(layout)}`);
           assert(Math.abs(layout.root.left)<1&&Math.abs(layout.root.right-layout.clientWidth)<2,`Root does not fill the page width ${JSON.stringify(layout)}`);
@@ -67,6 +67,7 @@ for(const [engineName,engine] of engines) {
           assert(layout.main.top>=layout.header.bottom-1,'Header covers content');
           assert(layout.images.every(i=>i.naturalWidth>0&&i.fit===(i.hero||(i.campaign&&width<=700)?'cover':'contain')),'Broken image or wrong framing');
           assert(layout.text.every(t=>t.size>=15),`Reading text is too small: ${JSON.stringify(layout.text.filter(t=>t.size<15))}`);
+          assert(await page.locator('.hos-view:visible .hos-card-stone').evaluateAll(nodes=>nodes.every(node=>parseFloat(getComputedStyle(node).fontSize)>=11)),'Stone captions are too small');
           if(path==='/') {
             assert(Math.abs(layout.hero.left)<1&&Math.abs(layout.hero.right-layout.clientWidth)<2,'Hero has side gaps');
             assert(Math.abs(layout.hero.top-layout.header.bottom)<2&&Math.abs(layout.hero.bottom-height)<2,'Hero does not fill the visible screen');
@@ -401,6 +402,7 @@ for(const [engineName,engine] of engines) {
 writeFileSync(new URL('report.json',output),JSON.stringify(report,null,2));
 assert.equal(report.errors.length,0,report.errors.join('\n'));
 console.log(`Browser QA passed: ${routes.length*sizes.length*engines.length} route/viewport checks, ${engines.length} engine(s), real inquiries, navigation, motion, measurement, 3D and owner editing.`);
+
 
 
 
