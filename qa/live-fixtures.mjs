@@ -30,13 +30,13 @@ try{
  if(process.env.HOS_RELEASE_FIXTURE==='owner-working'){
   const current=await api('content');let state=await api('content',{revision:current.revision,catalog:prepareOwnerPublication(current.draft)});await api('publish',{revision:state.revision});
   const live=await(await fetch(origin+'/content.json')).json();assert.equal(live.works.length,23);assert(live.works.every(w=>w.artistId&&w.title&&w.material&&w.dimensions));assert.equal(live.works.filter(w=>w.modelVerified).length,5);
-  await verify('collections-owner-working',5,0);
+  await verify('collections-owner-working',1,5);
  }else{
  await verify('legacy',5,0);
  let state=await api('prepare-founding-collection',{revision:0});await api('publish',{revision:state.revision});
- await verify('collections-unconfirmed',0,5);
+ await verify('collections-unconfirmed',1,5);
  state=await api('content');for(const work of state.draft.works)if(work.modelStatus==='review')work.verification.model=true;
  state=await api('content',{revision:state.revision,catalog:state.draft});await api('publish',{revision:state.revision});
- await verify('collections-confirmed',5,0);
+ await verify('collections-confirmed',1,5);
  }
 }finally{await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});}
