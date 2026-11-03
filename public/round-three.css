@@ -48,3 +48,6 @@
  #hos-concept .hos-collection-photo.hos-collection-interior:has(>img[src*="elemental-campaign"]) {aspect-ratio:3/2;height:auto;}
  #hos-concept .hos-collection-photo.hos-collection-interior>img[src*="elemental-campaign"] {object-fit:contain;height:100%;}
 }
+
+#hos-concept img[data-artist-original="true"] {object-fit:contain!important;background:transparent!important;}
+#hos-concept :is([data-page="designers"],[data-page="collectors"]) .hos-editorial-image img {width:100%;height:auto;aspect-ratio:3/2;object-fit:contain;}

@@ -12,7 +12,7 @@ const origin=new URL(process.env.HOS_LIVE_URL || 'https://house-of-stone-product
 const models=JSON.parse(readFileSync(new URL('../public/models.json',import.meta.url),'utf8'));
 const output=new URL(process.env.HOS_LIVE_OUTPUT || '../test-results/live/',import.meta.url);mkdirSync(output,{recursive:true});
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
-const paths=new Set(['/app.js','/styles.css','/light-theme.css','/collections.css','/quality.css','/editorial-layout.css','/editorial.json','/gallery.js','/work-photography.js','/presentation.js','/media-upload.js','/models.json','/sculpture-viewer.js','/stone-surface.js']);
+const paths=new Set(['/app.js','/styles.css','/light-theme.css','/collections.css','/quality.css','/editorial-layout.css','/editorial.json','/gallery.js','/work-photography.js','/studio-frame.js','/presentation.js','/media-upload.js','/models.json','/sculpture-viewer.js','/stone-surface.js']);
 const vertexColorOnlyFiles=new Set();
 for(const entry of Object.values(models)){
   paths.add(entry.file);

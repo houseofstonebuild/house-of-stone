@@ -379,5 +379,15 @@
       "front": "/assets/zsa-021-studio-front-v4.webp",
       "views": {}
     }
+  },
+  "pageBanners": {
+    "designers": {
+      "source": "/assets/designers-coil-v2.webp",
+      "caption": "Coil by Douglas Musekiwa in a residential setting."
+    },
+    "collectors": {
+      "source": "/assets/collectors-red-stone-v2.webp",
+      "caption": "Stone sculpture from the House of Stone collection in a gallery setting."
+    }
   }
 }

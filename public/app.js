@@ -1,3 +1,4 @@
+import { frameStudioImage } from './studio-frame.js';
 import { presentationFor, pageDescriptions } from './presentation.js';
 import { initializeGallery } from './gallery.js';
 import { applyWorkPhotography } from './work-photography.js';
@@ -88,6 +89,10 @@ function setMenu(open) {
 }
 function statusMessage(text, error = false) { status.textContent = text; status.setAttribute('role', error ? 'alert' : 'status'); }
 function applyImage(img, source, sizes = '(max-width: 650px) 100vw, 55vw') {
+  const artistPhoto=editorial.artistPhotography?.[source];
+  if(artistPhoto)source=artistPhoto.original;
+  if(artistPhoto){img.dataset.artistOriginal='true';img.style.maskImage=img.style.webkitMaskImage='url(\"'+artistPhoto.mask+'\")';img.style.maskSize=img.style.webkitMaskSize='contain';img.style.maskPosition=img.style.webkitMaskPosition='center';img.style.maskRepeat=img.style.webkitMaskRepeat='no-repeat';const backdrop=()=>{if(img.parentElement)img.parentElement.style.backgroundColor=artistPhoto.background;};img.addEventListener('load',backdrop,{once:true});Promise.resolve().then(backdrop);}
+  else{delete img.dataset.artistOriginal;img.style.maskImage=img.style.webkitMaskImage='';if(img.parentElement)img.parentElement.style.backgroundColor='';}
   if(!source){img.removeAttribute('src');img.removeAttribute('srcset');return;}
   img.decoding = 'async';
   const info = media[source];
@@ -97,6 +102,8 @@ function applyImage(img, source, sizes = '(max-width: 650px) 100vw, 55vw') {
     img.sizes = sizes; img.srcset = info.srcset;
   }
   img.src = source;
+  const studio=/^\/assets\/(?:zsa-.*(?:studio|photoshoot).*|wingbeat-shoot-.*|hos-(?:queen-mother|celebration|belonging|inner-beauty)-.*)\.webp$/.test(source);
+  frameStudioImage(img,studio?source:'');
   // A single studio mat fills the aspect-ratio space around the original photo.
   // It does not sample edge pixels or alter the sculpture bitmap.
   img.classList.toggle('hos-studio-photo', /^\/assets\/zsa-\d+-(?:studio-(?:front|back|left|right)-v[234]|photoshoot-(?:front|back|left|right)-v1)\.webp$/.test(source));
@@ -273,7 +280,7 @@ function renderPresentation(){
   for(const key of ['designers','collectors']){
     const page=$(`[data-page="${key}"]`),content=presentationFor(catalog.site,key);
     page.querySelector('h1').textContent=content.title;page.querySelector('.hos-page-heading p').textContent=content.intro;
-    const img=page.querySelector('.hos-editorial-image img');if(assets[content.image]){applyImage(img,assets[content.image],'90vw');img.alt=content.caption;}page.querySelector('figcaption').textContent=content.caption;
+    const img=page.querySelector('.hos-editorial-image img'),campaign=editorial.pageBanners?.[key],bannerSource=campaign?.source||assets[content.image],caption=campaign?.caption||content.caption;if(bannerSource){applyImage(img,bannerSource,'90vw');img.alt=caption;}page.querySelector('figcaption').textContent=caption;
     const steps=page.querySelector('.hos-service-grid');steps.replaceChildren();content.steps.forEach((step,i)=>{const card=el('div');card.dataset.reveal='';card.append(el('div','hos-eyebrow',String(i+1).padStart(2,'0')),el('h2','',step.title),el('p','',step.text));steps.append(card);});
     const faq=page.querySelector('.hos-service-questions');faq.replaceChildren(el('h2','','A few practical questions'));
     for(const question of content.questions){const item=el('details'),summary=el('summary','',question.title);item.append(summary,el('p','',question.text));faq.append(item);}

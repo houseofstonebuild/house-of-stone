@@ -20,6 +20,7 @@ try{
     const photo=cards.nth(photoIndex).locator('img');await photo.scrollIntoViewIfNeeded();
     await photo.evaluate(async image=>{if(!image.complete)await new Promise((resolve,reject)=>{image.addEventListener('load',resolve,{once:true});image.addEventListener('error',reject,{once:true});});await image.decode();});
     assert(await photo.evaluate(image=>image.naturalWidth>0),'Collection photograph did not render: '+collection.name+' / '+photoIndex);
+    if(/(?:studio|photoshoot|wingbeat-shoot)/.test(await photo.getAttribute('src')))await page.waitForFunction(image=>image.dataset.studioFramed==='true',await photo.elementHandle());
    }
    if(collection.id==='elemental'&&width===390){const banner=chapter.locator('.hos-collection-photo.hos-collection-interior');await banner.locator('img').evaluate(image=>image.decode());const bounds=await banner.boundingBox();assert(bounds.width/bounds.height>1.4,'Elemental mobile banner preserves landscape composition');await banner.screenshot({path:new URL('390-elemental.jpg',out).pathname,type:'jpeg',quality:90});}
    if(collection.id==='presence'&&[390,1440].includes(width))await chapter.screenshot({path:new URL(width+'-presence.jpg',out).pathname,type:'jpeg',quality:88});report.rails++;
@@ -38,7 +39,7 @@ try{
   }
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  }
- for(const [route,filename] of [['designers','designers-queen-mother-v1.webp'],['collectors','collectors-birds-v1.webp']]){await ready('/'+route);const image=page.locator('[data-page="'+route+'"] .hos-editorial-image img');assert((await image.getAttribute('src')).endsWith(filename));await image.evaluate(i=>i.decode());await page.screenshot({path:new URL(route+'.jpg',out).pathname,type:'jpeg',quality:88,fullPage:true});}
+ for(const [route,filename] of [['designers','designers-coil-v2.webp'],['collectors','collectors-red-stone-v2.webp']]){await ready('/'+route);const image=page.locator('[data-page="'+route+'"] .hos-editorial-image img');assert((await image.getAttribute('src')).endsWith(filename));await image.evaluate(i=>i.decode());await page.screenshot({path:new URL(route+'.jpg',out).pathname,type:'jpeg',quality:88,fullPage:true});}
  for(const side of ['front','back']){const src='/assets/zsa-002-studio-'+side+'-v4.webp';assert(await page.evaluate(async src=>{const image=new Image();image.src=src;try{await image.decode();return image.naturalWidth===1200&&image.naturalHeight===1600;}catch{return false;}},src),'Archived source photo must decode: '+src);}
  assert.deepEqual(errors,[]);assert.equal(app.db.prepare('SELECT count(*) AS n FROM inquiries').get().n,0);report.passed=true;console.log(JSON.stringify(report));
 }finally{writeFileSync(new URL('report.json',out),JSON.stringify({...report,errors},null,2));await browser?.close();await new Promise(r=>app.server.close(r));rmSync(dataDir,{recursive:true,force:true});}

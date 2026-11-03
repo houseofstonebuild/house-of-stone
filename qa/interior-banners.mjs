@@ -35,7 +35,7 @@ try{
    assert((await img.getAttribute('src')).includes('campaign-v'));
    const geometry=await banner.evaluate(n=>{const r=n.getBoundingClientRect();return {left:r.left,width:r.width,height:r.height,viewport:innerWidth};});
    assert(Math.abs(geometry.left)<2);assert(Math.abs(geometry.width-geometry.viewport)<2);
-   assert(Math.abs(geometry.width/geometry.height-(width<700?.75:1.5))<.02);
+   assert(Math.abs(geometry.width/geometry.height-(width<700&&c.id!=='elemental'?.75:1.5))<.02);
    const heading=await title.evaluate(n=>n.getBoundingClientRect().bottom),top=await banner.evaluate(n=>n.getBoundingClientRect().top);assert(heading<=top);
    assert.equal(await chapter.locator('.hos-visual-modes,[data-model-stage]').count(),0);
    const grid=chapter.locator('.hos-equal-works');
