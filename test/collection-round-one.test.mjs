@@ -48,7 +48,7 @@ test('all 23 sculpture fronts use studio photos and all five approved campaign p
   for(const [index,collection] of catalog.collections.entries()){
     const work=catalog.works.find(work=>work.id===collection.starWorkId),scene=editorial.workScenes[work.id];
     assert.equal(scene.source,catalog.assets[work.image]);
-    assert.equal(scene.scenes[0].source,'/assets/'+campaigns[index]+'-campaign-v2.webp');
+    assert.equal(scene.scenes[0].source,'/assets/'+campaigns[index]+'-campaign-v'+(campaigns[index]==='elemental'?3:2)+'.webp');
     for(const id of collection.workIds){
       const work=catalog.works.find(work=>work.id===id);
       assert.match(catalog.assets[work.image],/(?:studio-front-v[234]|wingbeat-shoot-front-v1)\.webp$/);
@@ -94,3 +94,4 @@ test('an existing unpublished draft is left intact and never published as part o
   const result=await publishCollectionRoundOne({db:{prepare:()=>({get:()=>undefined})},origin:'http://127.0.0.1:8000',password:'test-only',publicOrigin:releaseOrigin,fetchImpl:async(url,options)=>{requests.push({url:String(url),options});return {ok:true,json:async()=>({revision:9,unpublished:true,draft})};}});
   assert.deepEqual(result,{skipped:'unpublished-draft-present'});assert.equal(requests.length,1);assert.equal(requests[0].options.method,undefined);
 });
+

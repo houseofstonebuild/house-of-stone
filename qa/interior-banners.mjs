@@ -32,7 +32,7 @@ try{
    const chapter=page.locator('[data-collection-section="'+c.id+'"]');
    const title=chapter.locator('.hos-campaign-heading'),banner=chapter.locator('.hos-collection-photo.hos-collection-interior'),img=banner.locator(':scope > img');
    await banner.scrollIntoViewIfNeeded();await img.evaluate(n=>n.decode());
-   assert((await img.getAttribute('src')).includes('campaign-v2'));
+   assert((await img.getAttribute('src')).includes('campaign-v'));
    const geometry=await banner.evaluate(n=>{const r=n.getBoundingClientRect();return {left:r.left,width:r.width,height:r.height,viewport:innerWidth};});
    assert(Math.abs(geometry.left)<2);assert(Math.abs(geometry.width-geometry.viewport)<2);
    assert(Math.abs(geometry.width/geometry.height-(width<700?.75:1.5))<.02);
@@ -59,3 +59,4 @@ try{
  const star=catalog.works.find(w=>w.id===catalog.collections[0].starWorkId);await page.goto(origin+'/works/'+star.slug);await page.locator('#hos-concept[data-ready="true"]').waitFor();assert(await page.locator('#hos-work-model').isVisible(),'3D remains on sculpture pages');
  console.log('Interior banners and mobile carousel passed: five sources, title-first order, landscape desktop and edge-to-edge portrait mobile.');
 }finally{await browser?.close();await new Promise(r=>app.server.close(r));rmSync(dataDir,{recursive:true,force:true});}
+

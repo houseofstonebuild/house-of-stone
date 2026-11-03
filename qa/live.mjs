@@ -105,7 +105,7 @@ try{
         const bannerSource=await chapter.locator('.hos-collection-photo img').getAttribute('src');
         assert.equal(bannerSource,editorial.workScenes[work.id].scenes[0].source);
         if(!matchingModel(work))fallbacks++;
-        if(work.availability==='sold')assert.equal(await chapter.locator('[data-work-record="'+work.id+'"] .hos-availability').innerText(),'Sold');
+        if(work.availability==='sold')assert.equal(await chapter.locator('[data-work-record="'+work.id+'"] .hos-availability').textContent(),'Sold');
         await titleLink.click();await page.locator('#hos-work-title').waitFor();await inquire(page.locator('#hos-work-inquiry'),work,viewport.width);await page.goto(origin+'/');await page.locator('#hos-concept[data-ready="true"]').waitFor();
       }
       report.photoFallbacks=fallbacks;
@@ -142,5 +142,6 @@ try{
   assert.deepEqual(failures,[]);report.passed=true;
 }finally{await browser.close();writeFileSync(new URL('report.json',output),JSON.stringify({...report,failures},null,2)+'\n');}
 console.log('Live verification passed: '+JSON.stringify(report));
+
 
 

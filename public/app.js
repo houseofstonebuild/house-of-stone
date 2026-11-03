@@ -422,6 +422,7 @@ function artistChapter(artist, selected, withInquiry = false) {
     specs.append(el('p','',featured.material),el('p','',featured.dimensions));
     workCopy.append(workHeading, specs);
     details.append(artistCopy,workCopy);chapter.append(campaign,details);
+    const model=modelPanel(featured);if(model)chapter.append(model);
     chapter.append(sculptureSettings(artist,featured,entry,withInquiry));
     const additional = selected.filter(work => work.id !== featured.id);
     if (additional.length) { const more = el('div','hos-chapter-additional');more.append(el('h3','','More works by '+artist.name),workGrid(additional));chapter.append(more); }

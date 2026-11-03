@@ -34,23 +34,24 @@ try{
  await page.setViewportSize({width:1440,height:1000});await page.emulateMedia({reducedMotion:'no-preference'});await ready();
  assert.equal(await page.locator('.hos-hero-image').evaluate(n=>getComputedStyle(n).animationName),'hos-hero-pan');
  await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await page.locator('.hos-hero-image').evaluate(n=>getComputedStyle(n).animationName),'none');
- for(const c of catalog.collections){
-  await ready();const visual=page.locator(`#hos-home-chapters [data-visual-work="${c.starWorkId}"]`);await visual.locator('[data-visual-mode="model"]').click();const stage=visual.locator('[data-model-stage]');await stage.scrollIntoViewIfNeeded();
-  await page.waitForFunction(id=>document.querySelector(`#hos-home-chapters [data-model-id="${id}"]`)?.dataset.modelState==='ready',c.starWorkId,{timeout:45000});
-  const canvas=stage.locator('.hos-3d-canvas'),b=await canvas.boundingBox(),before=Number(await stage.getAttribute('data-model-rotation'));
-  await page.mouse.move(b.x+b.width*.45,b.y+b.height*.5);await page.mouse.down();await page.mouse.move(b.x+b.width*.45+100,b.y+b.height*.5,{steps:8});await page.mouse.up();
-  await page.waitForFunction(({id,before})=>Number(document.querySelector(`#hos-home-chapters [data-model-id="${id}"]`).dataset.modelRotation)>before+.5,{id:c.starWorkId,before});
-  assert(await page.locator('#hos-model-dialog').isHidden());await canvas.focus();await page.keyboard.press('Home');await page.waitForFunction(id=>Math.abs(Number(document.querySelector(`#hos-home-chapters [data-model-id="${id}"]`).dataset.modelRotation)+.3)<.001,c.starWorkId);
-  await stage.screenshot({path:new URL(c.id+'-inline-3d.jpg',out).pathname,type:'jpeg',quality:88});report.models.push(c.starWorkId);
- }
- const touch=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true,reducedMotion:'reduce'});await touch.addInitScript(()=>localStorage.setItem('hos-measurement','off'));const mobile=await touch.newPage();mobile.on('pageerror',e=>errors.push(e.message));await mobile.goto(origin);await mobile.locator('#hos-concept[data-ready="true"]').waitFor();
- const visual=mobile.locator('#hos-home-chapters [data-visual-work]').first();await visual.locator('[data-visual-mode="model"]').click();const stage=visual.locator('[data-model-stage]');await stage.scrollIntoViewIfNeeded();await mobile.waitForFunction(()=>document.querySelector('#hos-home-chapters [data-model-stage]').dataset.modelState==='ready');
- const canvas=stage.locator('.hos-3d-canvas');assert.equal(await canvas.evaluate(n=>getComputedStyle(n).touchAction),'pan-y pinch-zoom');const session=await touch.newCDPSession(mobile);let b=await canvas.boundingBox();let x=b.x+b.width*.35,y=b.y+b.height*.5;
+ // Collection campaigns stay photographs; 3D is opened from a work page.
+ assert.equal(await page.locator('#hos-home-chapters [data-model-stage]').count(),0);
+ const work=catalog.works.find(w=>w.id==='zsa-016');assert(work);
+ await ready('/works/'+work.slug);await page.locator('#hos-work-model').click();
+ const stage=page.locator('#hos-model-stage');
+ await page.waitForFunction(()=>document.querySelector('#hos-model-stage').dataset.modelState==='ready',null,{timeout:45000});
+ const canvas=stage.locator('.hos-3d-canvas'),b=await canvas.boundingBox(),before=Number(await stage.getAttribute('data-model-rotation'));
+ await page.mouse.move(b.x+b.width*.45,b.y+b.height*.5);await page.mouse.down();await page.mouse.move(b.x+b.width*.45+100,b.y+b.height*.5,{steps:8});await page.mouse.up();
+ await page.waitForFunction(before=>Number(document.querySelector('#hos-model-stage').dataset.modelRotation)>before+.5,before);
+ await canvas.focus();await page.keyboard.press('Home');await page.waitForFunction(()=>Math.abs(Number(document.querySelector('#hos-model-stage').dataset.modelRotation)+.3)<.001);
+ await stage.screenshot({path:new URL('happy-times-3d.jpg',out).pathname,type:'jpeg',quality:88});report.models.push(work.id);
+ await page.keyboard.press('Escape');assert(await page.locator('#hos-model-dialog').isHidden());
+ const touch=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true,reducedMotion:'reduce'});await touch.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
+ const mobile=await touch.newPage();mobile.on('pageerror',e=>errors.push(e.message));await mobile.goto(origin+'/works/'+work.slug);await mobile.locator('#hos-concept[data-ready="true"]').waitFor();
+ await mobile.locator('#hos-work-model').click();await mobile.waitForFunction(()=>document.querySelector('#hos-model-stage').dataset.modelState==='ready');
+ const mobileCanvas=mobile.locator('#hos-model-stage .hos-3d-canvas'),session=await touch.newCDPSession(mobile),bounds=await mobileCanvas.boundingBox(),x=bounds.x+bounds.width*.35,y=bounds.y+bounds.height*.5;
  await session.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y,id:1}]});for(let step=1;step<=6;step++)await session.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+step*15,y,id:1}]});await session.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
- await mobile.waitForFunction(()=>Number(document.querySelector('#hos-home-chapters [data-model-stage]').dataset.modelRotation)>.2);assert(await mobile.locator('#hos-model-dialog').isHidden());
- await stage.scrollIntoViewIfNeeded();b=await canvas.boundingBox();x=b.x+b.width*.5;y=b.y+b.height*.75;const scrollBefore=await mobile.evaluate(()=>scrollY);
- await session.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y,id:2}]});for(let step=1;step<=8;step++){await session.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y-step*18,id:2}]});await mobile.waitForTimeout(20);}await session.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await mobile.waitForFunction(before=>scrollY>before+30,scrollBefore);
- await mobile.emulateMedia({reducedMotion:'no-preference'});await stage.scrollIntoViewIfNeeded();const rotation=Number(await stage.getAttribute('data-model-rotation'));await mobile.evaluate(()=>scrollBy(0,70));await mobile.waitForFunction(before=>Math.abs(Number(document.querySelector('#hos-home-chapters [data-model-stage]').dataset.modelRotation)-before)>.01,rotation);report.touch=true;
+ await mobile.waitForFunction(()=>Number(document.querySelector('#hos-model-stage').dataset.modelRotation)>.2);report.touch=true;
  assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);report.passed=true;writeFileSync(new URL('report.json',out),JSON.stringify(report,null,2));console.log('Collection experience passed: '+JSON.stringify(report));
 }finally{await browser?.close();await new Promise(r=>app.server.close(r));rmSync(dataDir,{recursive:true,force:true});}
 

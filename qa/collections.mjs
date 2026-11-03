@@ -28,12 +28,12 @@ try {
  await page.goto(base+'/admin/preview');await page.locator('#hos-concept[data-ready="true"]').waitFor();
  assert.equal(await page.locator('#hos-home-chapters [data-collection-section]').count(),5);
  assert.equal(await page.locator('#hos-home-chapters [data-model-fallback]').count(),0);
- assert.equal(await page.locator('#hos-home-chapters [data-model-stage]').count(),5,'All five source-matched reconstructions are reviewable privately');
- assert.equal(await page.locator('#hos-home-chapters .hos-poster-caption .hos-collection-credit').count(),5,'Proposed artist profiles remain reviewable privately');
+ assert.equal(await page.locator('#hos-home-chapters [data-model-stage]').count(),0,'Collection banners remain photographic');
+ assert.equal(await page.locator('#hos-home-chapters .hos-collection-selection [data-artist]').count(),23,'Artist credits stay with the sculpture cards');
  assert.equal(await page.locator('#hos-home-chapters .hos-collection-selection').count(),5);
  assert.equal(await page.locator('#hos-home-chapters .hos-collection-selection .hos-work-card').count(),23);
  assert.equal(await page.locator('#hos-home-chapters .hos-collection-reversed').count(),0);
- assert.equal(await page.locator('#hos-home-chapters [data-visual-mode="photo"][aria-pressed="true"]').count(),5);
+ assert.equal(await page.locator('#hos-home-chapters .hos-collection-photo').count(),5);
  for(const collection of staged.draft.collections){
   assert.deepEqual(await page.locator(`#hos-home-chapters [data-collection-section="${collection.id}"] .hos-collection-selection .hos-work-card`).evaluateAll(cards=>cards.map(card=>card.dataset.workRecord)),collection.workIds);
  }
@@ -62,7 +62,7 @@ try {
    await page.evaluate(async()=>{const images=[...document.querySelectorAll('main img')].filter(img=>img.getClientRects().length);images.forEach(img=>img.loading='eager');await Promise.all(images.map(img=>img.decode()));});
    const layout=await page.evaluate(()=>({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,header:document.querySelector('.hos-header').getBoundingClientRect().top,footer:getComputedStyle(document.querySelector('.hos-footer')).position,images:[...document.querySelectorAll('main img')].filter(img=>img.getClientRects().length).map(img=>({fit:getComputedStyle(img).objectFit,hero:img.classList.contains('hos-hero-image')||img.parentElement.classList.contains('hos-collection-landscape')}))}));
    assert(layout.scroll<=layout.width+1,`${route} overflows at ${width}`);assert.equal(layout.header,0);assert.equal(layout.footer,'static');assert(layout.images.every(img=>img.fit===(img.hero?'cover':'contain')),`Cropping ${route}`);
-   if(route==='/'){assert.equal(await page.locator('#hos-home-chapters [data-collection-section]').count(),5);assert.equal(await page.locator('#hos-home-chapters .hos-poster-caption .hos-availability').allTextContents().then(v=>v.join()),'Sold');assert.equal(await page.locator('.hos-hero-copy h1 span').last().evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');}
+   if(route==='/'){assert.equal(await page.locator('#hos-home-chapters [data-collection-section]').count(),5);assert.equal(await page.locator('#hos-home-chapters .hos-work-card .hos-availability').allTextContents().then(v=>v.join()),'Sold');assert.equal(await page.locator('.hos-hero-copy h1 span').last().evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');}
    if(route.includes('/collections/')){const collection=content.collections.find(c=>route.endsWith('/'+c.slug));assert.deepEqual(await page.locator('#hos-category-content .hos-work-card').evaluateAll(nodes=>nodes.map(node=>node.dataset.workRecord)),collection.workIds);}
    checked++;
   }
@@ -86,12 +86,11 @@ try {
  restored=await api('content',{revision:restored.revision,catalog:restored.draft});await api('publish',{revision:restored.revision});
  const viewerContext=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});await viewerContext.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
  const viewerPage=await viewerContext.newPage();viewerPage.on('pageerror',error=>errors.push(error.message));
- await viewerPage.goto(base+'/');await viewerPage.locator('#hos-concept[data-ready="true"]').waitFor();await viewerPage.locator('#hos-home-chapters [data-visual-mode="model"]').click();await viewerPage.locator('#hos-home-chapters [data-model-stage]').scrollIntoViewIfNeeded();
- await viewerPage.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-home-chapters [data-model-stage]').dataset.modelState));
- await viewerPage.locator('#hos-home-chapters [data-collection="viewer-fixture"]').click();await viewerPage.waitForURL('**/collections/viewer-fixture');
- await viewerPage.locator('#hos-category-content [data-visual-mode="model"]').click();
- await viewerPage.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-category-content [data-model-stage]').dataset.modelState));
- await viewerPage.locator('#hos-category-content [data-model="folded-light"]').click();await viewerPage.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-model-stage').dataset.modelState));
+ await viewerPage.goto(base+'/collections/viewer-fixture');await viewerPage.locator('#hos-concept[data-ready="true"]').waitFor();
+ assert.equal(await viewerPage.locator('#hos-category-content [data-model-stage]').count(),0);
+ await viewerPage.locator('#hos-category-content .hos-card-title[data-work="folded-light"]').click();
+ await viewerPage.locator('#hos-work-model').click();await viewerPage.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-model-stage').dataset.modelState));
  assert(await viewerPage.locator('#hos-model-dialog').isVisible());await viewerPage.keyboard.press('Escape');assert(await viewerPage.locator('#hos-model-dialog').isHidden());await viewerContext.close();
  assert.deepEqual(errors,[]);assert.deepEqual(failedResponses,[]);writeFileSync(new URL(`collections-${engineName}-report.json`,out),JSON.stringify({engine:engineName,routes:routes.length,sizes:6,checks:checked,errors,inquiries:2,matchingStarModels:0,photoFallbacks:5},null,2));console.log(`Collection QA passed: ${checked} route/viewport checks, private draft, filters, links, sold alternatives, inquiries and session logging (${engineName}).`);
 } finally {await browser?.close();await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});}
+

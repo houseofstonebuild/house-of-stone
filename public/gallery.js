@@ -17,7 +17,7 @@ export function initializeGallery({root,document,applyImage,motionPreference,onV
     root.querySelectorAll('[data-gallery-step]').forEach(button=>button.disabled=photos.length<2);
   }
   function zoom(value,center=true){
-    const oldWidth=large.offsetWidth,oldHeight=large.offsetHeight,cx=(stage.scrollLeft+stage.clientWidth/2)/Math.max(oldWidth,1),cy=(stage.scrollTop+stage.clientHeight/2)/Math.max(oldHeight,1);
+    const oldWidth=large.offsetWidth,oldHeight=large.offsetHeight,cx=(stage.scrollLeft+stage.clientWidth/2-Math.max(0,(stage.clientWidth-oldWidth)/2))/Math.max(oldWidth,1),cy=(stage.scrollTop+stage.clientHeight/2)/Math.max(oldHeight,1);
     scale=Math.min(5,Math.max(1,value));
     const fit=Math.min(stage.clientWidth/(large.naturalWidth||1),stage.clientHeight/(large.naturalHeight||1));
     large.style.width=Math.round(large.naturalWidth*fit*scale)+'px';large.style.height=Math.round(large.naturalHeight*fit*scale)+'px';large.style.maxHeight='none';
@@ -27,9 +27,10 @@ export function initializeGallery({root,document,applyImage,motionPreference,onV
     else stage.scrollTo({left:Math.max(0,(large.offsetWidth-stage.clientWidth)/2),top:Math.max(0,(large.offsetHeight-stage.clientHeight)/2),behavior:'instant'});
   }
   function display(){
+    stage.scrollTo({left:0,top:0,behavior:'instant'});
     scale=photos[index].zoom || 1;large.onload=()=>zoom(scale,false);large.src=photos[index].source;large.alt=photos[index].label+' of '+title.textContent;
     if(large.complete&&large.naturalWidth)zoom(scale,false);
-    status.textContent=photos[index].label+' · '+(index+1)+' / '+photos.length;stage.scrollTo({left:0,top:0,behavior:'instant'});for(const node of dialog.querySelectorAll('[data-photo-step]'))node.disabled=photos.length<2;
+    status.textContent=photos[index].label+' · '+(index+1)+' / '+photos.length;for(const node of dialog.querySelectorAll('[data-photo-step]'))node.disabled=photos.length<2;
   }
   function close(){document.body.classList.remove('hos-photo-open');if(dialog.open){dialog.close();lastTrigger?.focus({preventScroll:true});}large.removeAttribute('src');}
   function inspect(trigger,i=index){if(!photos.length)return;select(i);lastTrigger=trigger;dialog.showModal();display();document.body.classList.add('hos-photo-open');onView?.();}
