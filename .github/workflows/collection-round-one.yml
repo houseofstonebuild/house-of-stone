@@ -1,0 +1,27 @@
+name: Collection round one
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  collection-round-one:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - run: npm install --prefix qa --no-package-lock
+      - run: node qa/collection-round-one.mjs
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: collection-round-one
+          path: test-results/collection-round-one/

@@ -444,10 +444,16 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         const verified=await publishVerifiedMetadata({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
         console.log('Owner-requested verified metadata:',JSON.stringify(verified));
       } catch(error) { console.error('Owner-requested publication did not complete:',error.message); }
+      try {
+        const {publishCollectionRoundOne}=await import('./scripts/publish-collection-round-one.mjs');
+        const result=await publishCollectionRoundOne({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
+        console.log('Owner-requested collection corrections:',JSON.stringify(result));
+      } catch(error) { console.error('Collection corrections did not complete:',error.message); }
     }
   });
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(() => process.exit(0)));
 }
+
 
 
 

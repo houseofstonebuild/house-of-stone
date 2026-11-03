@@ -99,7 +99,7 @@ function applyImage(img, source, sizes = '(max-width: 650px) 100vw, 55vw') {
   img.src = source;
   // A single studio mat fills the aspect-ratio space around the original photo.
   // It does not sample edge pixels or alter the sculpture bitmap.
-  img.classList.toggle('hos-studio-photo', /^\/assets\/zsa-\d+-(?:studio-(?:front|back|left|right)-v[23]|photoshoot-(?:front|back|left|right)-v1)\.webp$/.test(source));
+  img.classList.toggle('hos-studio-photo', /^\/assets\/zsa-\d+-(?:studio-(?:front|back|left|right)-v[234]|photoshoot-(?:front|back|left|right)-v1)\.webp$/.test(source));
 }
 function image(key, alt, lazy = true, sizes) {
   const img = el('img'); applyImage(img, assets[key], sizes); img.alt = alt;
@@ -148,7 +148,9 @@ function workCard(work, {compact = false} = {}) {
   if(badge && work.availability!=='available')copy.append(badge);
   const heading=el('h3'),titleLink=photoLink('hos-card-title',{work:work.id},`View ${workLabel(work)}`);titleLink.textContent=work.title;heading.append(titleLink);
   const artist=artistFor(work),author=artist?photoLink('hos-text-link',{artist:artist.id},'About '+artist.name):el('p','hos-credit','Artist details on inquiry');if(artist)author.textContent=artist.name;
-  copy.append(heading,author);card.append(photo,copy);return card;
+  copy.append(heading,author);
+  if(work.material)copy.append(el('p','hos-card-stone',work.material));
+  card.append(photo,copy);return card;
 }
 function artistContext(work) {
   const artist=artistFor(work);if(!artist)return null;
@@ -203,21 +205,15 @@ function collectionChapter(collection, {heading = true} = {}) {
     section.append(title,visual,selection,footer);
     return section;
   }
-  const introduction=el('div','hos-collection-introduction');introduction.dataset.reveal='';
-  introduction.append(el('div','hos-eyebrow','THE FOUNDING COLLECTION'),el(heading?'h2':'h1','',collection.name));
-  const description=el('div','hos-collection-description');description.append(el('p','hos-collection-tagline',collection.description));
+  section.classList.add('hos-collection-campaign','hos-category-campaign');
+  const visual=collectionVisual(work,collection,{interior:true});
+  const introduction=el('div','hos-collection-introduction');
+  introduction.append(el('h1','',collection.name));
+  const description=el('div','hos-collection-description');
+  description.append(el('p','hos-collection-tagline',collection.description));
   if(collection.introduction)description.append(el('p','hos-collection-story',collection.introduction));
   introduction.append(description);
-  const feature=el('div','hos-collection-feature'),visual=collectionVisual(work,collection);
-  const copy=el('div','hos-collection-copy');
-  const caption=el('div','hos-poster-caption'),featuredTitle=el('h2','hos-star-title'),featuredLink=photoLink('hos-feature-title',{work:work.id},`View ${workLabel(work)}`);
-  featuredLink.textContent=work.title;featuredTitle.append(featuredLink);caption.append(featuredTitle);
-  const artist=artistFor(work);if(artist){const author=credit(work);author.classList.add('hos-collection-credit');caption.append(author);}
-  const badge=availabilityLabel(work);if(badge && work.availability!=='available')caption.append(badge);
-  copy.append(caption);
-  if(heading){const action=link('Explore '+collection.name,{collection:collection.id});action.classList.add('hos-collection-route');copy.append(action);}
-  feature.append(visual,copy);section.append(introduction,feature);
-  if(heading){const selection=collectionSelection(collection);if(selection)section.append(selection);}
+  section.append(visual,introduction);
   return section;
 }
 function filteredWorks(container, selected, label = 'Browse works') {
@@ -711,6 +707,7 @@ async function start() {
 start().catch(error => {
   const notice = el('p','hos-form-note',error.message || 'The collection could not load. Please refresh the page.'); notice.setAttribute('role','alert'); $('.hos-hero-copy').append(notice);
 });
+
 
 
 

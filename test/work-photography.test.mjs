@@ -19,3 +19,11 @@ test('an owner replacement takes precedence over the photoshoot configuration', 
   applyWorkPhotography(catalog,{'zsa-016':{source:'/old.jpg',front:'/front.webp'}});
   assert.deepEqual(catalog,before);
 });
+
+test('a sculpture used as an artist lead image follows its white photograph while a real portrait stays intact', () => {
+  const catalog={works:[{id:'work',image:'old'}],artists:[{id:'maker',portrait:'old'},{id:'other',portrait:'portrait'}],assets:{old:'/outdoors.jpg',portrait:'/portrait.jpg'}};
+  applyWorkPhotography(catalog,{work:{source:'/outdoors.jpg',front:'/white.webp'}});
+  assert.equal(catalog.assets[catalog.artists[0].portrait],'/white.webp');
+  assert.equal(catalog.assets[catalog.artists[1].portrait],'/portrait.jpg');
+});
+

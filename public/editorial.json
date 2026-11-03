@@ -114,7 +114,7 @@
       ]
     },
     "zsa-013": {
-      "source": "/assets/zsa-page-13.jpg",
+      "source": "/assets/zsa-013-studio-front-v4.webp",
       "scenes": [
         {
           "source": "/assets/rhythm-campaign-v2.webp",
@@ -123,7 +123,7 @@
       ]
     },
     "zsa-001": {
-      "source": "/assets/zsa-page-01.jpg",
+      "source": "/assets/zsa-001-studio-front-v4.webp",
       "scenes": [
         {
           "source": "/assets/presence-campaign-v2.webp",
@@ -358,6 +358,26 @@
         "left": "/assets/zsa-018-studio-left-v2.webp",
         "right": "/assets/zsa-018-studio-right-v2.webp"
       }
+    },
+    "zsa-001": {
+      "source": "/assets/zsa-page-01.jpg",
+      "front": "/assets/zsa-001-studio-front-v4.webp",
+      "views": {}
+    },
+    "zsa-013": {
+      "source": "/assets/zsa-page-13.jpg",
+      "front": "/assets/zsa-013-studio-front-v4.webp",
+      "views": {}
+    },
+    "zsa-017": {
+      "source": "/assets/zsa-page-17.jpg",
+      "front": "/assets/zsa-017-studio-front-v4.webp",
+      "views": {}
+    },
+    "zsa-021": {
+      "source": "/assets/zsa-page-21.jpg",
+      "front": "/assets/zsa-021-studio-front-v4.webp",
+      "views": {}
     }
   }
 }

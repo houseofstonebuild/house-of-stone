@@ -1098,5 +1098,25 @@
     "width": 1196,
     "height": 1594,
     "srcset": "/assets/zsa-002-studio-right-v3.webp 1196w"
+  },
+  "/assets/zsa-001-studio-front-v4.webp": {
+    "width": 1086,
+    "height": 1448,
+    "srcset": "/assets/zsa-001-studio-front-v4-480.webp 480w, /assets/zsa-001-studio-front-v4-800.webp 800w, /assets/zsa-001-studio-front-v4.webp 1086w"
+  },
+  "/assets/zsa-013-studio-front-v4.webp": {
+    "width": 1086,
+    "height": 1448,
+    "srcset": "/assets/zsa-013-studio-front-v4-480.webp 480w, /assets/zsa-013-studio-front-v4-800.webp 800w, /assets/zsa-013-studio-front-v4.webp 1086w"
+  },
+  "/assets/zsa-017-studio-front-v4.webp": {
+    "width": 1086,
+    "height": 1448,
+    "srcset": "/assets/zsa-017-studio-front-v4-480.webp 480w, /assets/zsa-017-studio-front-v4-800.webp 800w, /assets/zsa-017-studio-front-v4.webp 1086w"
+  },
+  "/assets/zsa-021-studio-front-v4.webp": {
+    "width": 1086,
+    "height": 1448,
+    "srcset": "/assets/zsa-021-studio-front-v4-480.webp 480w, /assets/zsa-021-studio-front-v4-800.webp 800w, /assets/zsa-021-studio-front-v4.webp 1086w"
   }
 }
