@@ -44,6 +44,7 @@ try{
     }
     await ready('/artists');
     const cards=page.locator('[data-artist-grid="all"] .hos-portrait-card');assert.equal(await cards.count(),catalog.artists.length);
+    await cards.locator('img').evaluateAll(images=>Promise.all(images.map(image=>{image.loading='eager';return image.decode();}))); 
     const boxes=await cards.locator('img').evaluateAll(images=>images.map(image=>{const r=image.getBoundingClientRect();return{width:r.width,height:r.height};}));
     assert(Math.max(...boxes.map(box=>box.height))-Math.min(...boxes.map(box=>box.height))<2,'Artist frames must align');
     assert(!/Tariro Mavhunga|Kudakwashe Nyamudeza|Ruvimbo Chikore|Farai Munetsi|Tendai Nyakudya/.test(await page.locator('[data-page="artists"]').innerText()));
@@ -56,6 +57,7 @@ try{
     assert.match(await page.locator('#hos-artist-image').getAttribute('src'),/\/hos-artist-/);
     assert.equal(await page.locator('#hos-artist-works [data-work-record="'+work.id+'"]').count(),1);
     assert(await page.locator('#hos-artist-biography').innerText());
+    await page.locator('[data-page="artist"] img').evaluateAll(images=>Promise.all(images.map(image=>{image.loading='eager';return image.decode();})));
     if(['Chamu Rumano','Philip Mlimu','Tinodashe Mangenda'].includes(artist.name))await page.screenshot({path:new URL('artist-'+artist.slug+'.jpg',out).pathname,type:'jpeg',quality:88,fullPage:true});
     report.artistPages++;
     await ready('/works/'+work.slug);const images=page.locator('#hos-work-gallery-story img');
