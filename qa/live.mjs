@@ -3,6 +3,8 @@ import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
 import {chromium} from 'playwright';
+import {applyWorkPhotography} from '../public/work-photography.js';
+import {additions,artistPhotos} from '../scripts/publish-collection-round-two.mjs';
 
 // Production verification is read-only. Discover routes from the published
 // catalogue, not the seed: a code release must preserve the owner's database.
@@ -10,7 +12,7 @@ const origin=new URL(process.env.HOS_LIVE_URL || 'https://house-of-stone-product
 const models=JSON.parse(readFileSync(new URL('../public/models.json',import.meta.url),'utf8'));
 const output=new URL(process.env.HOS_LIVE_OUTPUT || '../test-results/live/',import.meta.url);mkdirSync(output,{recursive:true});
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
-const paths=new Set(['/app.js','/styles.css','/light-theme.css','/collections.css','/quality.css','/editorial-layout.css','/editorial.json','/gallery.js','/presentation.js','/media-upload.js','/models.json','/sculpture-viewer.js','/stone-surface.js']);
+const paths=new Set(['/app.js','/styles.css','/light-theme.css','/collections.css','/quality.css','/editorial-layout.css','/editorial.json','/gallery.js','/work-photography.js','/presentation.js','/media-upload.js','/models.json','/sculpture-viewer.js','/stone-surface.js']);
 for(const entry of Object.values(models)){
   paths.add(entry.file);
   const bytes=readFileSync(new URL('../public'+entry.file,import.meta.url));
@@ -34,16 +36,29 @@ for(let attempt=0;attempt<attempts;attempt++){
 }
 assert(deployed,lastError);
 const response=await fetch(origin+'/content.json');assert(response.ok);const catalog=await response.json();
+const editorial=JSON.parse(readFileSync(new URL('../public/editorial.json',import.meta.url),'utf8'));
+applyWorkPhotography(catalog,editorial.workPhotography);
 const collections=catalog.collections || [],works=new Map(catalog.works.map(work=>[work.id,work]));
+const roundTwo=works.has('hos-queen-mother');
 if(process.env.HOS_EXPECT_FOUNDING_RELEASE==='true'){
   const expected=JSON.parse(readFileSync(new URL('../content/founding-collection.json',import.meta.url),'utf8'));
-  assert.deepEqual(collections.map(c=>({id:c.id,star:c.starWorkId,works:c.workIds})),expected.collections.map(c=>({id:c.id,star:c.starWorkId,works:c.workIds})),'The full collection renovation must be public.');
-  assert.equal(catalog.works.length,23);assert(catalog.works.every(w=>w.title && w.artistId && w.material && w.dimensions));
-  assert.equal(works.get('zsa-013').availability,'sold');assert.equal(catalog.works.filter(w=>w.modelVerified).length,5);
+  if(roundTwo){
+    const presence=expected.collections.find(collection=>collection.id==='presence');
+    presence.workIds=presence.workIds.map(id=>id==='zsa-002'?'hos-inner-beauty':id);
+    presence.workIds.push('hos-queen-mother','hos-celebration');
+    expected.collections.find(collection=>collection.id==='kinship').workIds.push('hos-belonging');
+    assert(!works.has('zsa-002'),'Philip’s replaced Lovers must be archived');
+    assert(!catalog.artists.some(artist=>['tariro','kuda','ruvimbo','farai','tendai'].includes(artist.id)),'Fictional artist profiles must be archived');
+    for(const item of additions){const work=works.get(item.id);assert.equal(work?.title,item.title);assert.equal(work.material,item.material);assert.equal(catalog.artists.find(artist=>artist.id===work.artistId)?.name,item.artist);}
+    for(const photo of artistPhotos){const artist=catalog.artists.find(artist=>artist.name===photo.name),work=works.get(photo.workId);assert(artist&&work?.artistId===artist.id);assert.match(catalog.assets[artist.portrait],/\/hos-artist-/);assert(work.additionalImages.includes(artist.studioImage));}
+  }
+  assert.deepEqual(collections.map(c=>({id:c.id,star:c.starWorkId,works:c.workIds})),expected.collections.map(c=>({id:c.id,star:c.starWorkId,works:c.workIds})),'The current collection release must be public.');
+  assert.equal(catalog.works.length,roundTwo?26:23);assert(catalog.works.every(w=>w.title && w.artistId && w.material && w.dimensions));
+  assert.equal(works.get('zsa-013').availability,'sold');
 }
 const matchingModel=work=>{
   const entry=models[work?.id];if(!entry || entry.source!==catalog.assets[work.image])return false;
-  return entry.reconstruction?entry.workId===work.id && work.modelVerified===true && (!work.sourcePage || entry.sourcePage===work.sourcePage):entry.title===work.title;
+  return entry.reconstruction?entry.workId===work.id && (work.modelVerified===true || entry.ownerApproved===true) && (!work.sourcePage || entry.sourcePage===work.sourcePage):entry.title===work.title;
 };
 const browser=await chromium.launch({args:['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 const failures=[],report={origin,sha:process.env.GITHUB_SHA,assets:files.length,routes:0,collections:collections.map(c=>c.name),headers:[],inquiries:[],models:[],photoFallbacks:0,relatedCardsChecked:0};
@@ -82,10 +97,14 @@ try{
       for(const collection of collections){
         const work=works.get(collection.starWorkId);assert(work,'A collection must have a published star');
         const chapter=page.locator(`#hos-home-chapters [data-collection-section="${collection.id}"]`);
-        assert.equal(await chapter.locator('.hos-star-title [data-work]').getAttribute('data-work'),work.id);
-        assert.equal(await chapter.locator('[data-model-fallback]').count(),matchingModel(work)?0:1);if(!matchingModel(work))fallbacks++;
-        if(work.availability==='sold')assert.equal(await chapter.locator('.hos-poster-caption > .hos-availability').textContent(),'Sold');
-        await chapter.locator('.hos-star-title [data-work]').click();await page.locator('#hos-work-title').waitFor();await inquire(page.locator('#hos-work-inquiry'),work,viewport.width);await page.goto(origin+'/');await page.locator('#hos-concept[data-ready="true"]').waitFor();
+        const titleLink=chapter.locator('.hos-card-title[data-work="'+work.id+'"]');
+        assert.equal(await titleLink.count(),1);
+        assert.deepEqual(await chapter.locator('.hos-work-card').evaluateAll(cards=>cards.map(card=>card.dataset.workRecord)),collection.workIds);
+        const bannerSource=await chapter.locator('.hos-collection-photo img').getAttribute('src');
+        assert.equal(bannerSource,editorial.workScenes[work.id].scenes[0].source);
+        if(!matchingModel(work))fallbacks++;
+        if(work.availability==='sold')assert.equal(await chapter.locator('[data-work-record="'+work.id+'"] .hos-availability').innerText(),'Sold');
+        await titleLink.click();await page.locator('#hos-work-title').waitFor();await inquire(page.locator('#hos-work-inquiry'),work,viewport.width);await page.goto(origin+'/');await page.locator('#hos-concept[data-ready="true"]').waitFor();
       }
       report.photoFallbacks=fallbacks;
     }else{
@@ -121,4 +140,5 @@ try{
   assert.deepEqual(failures,[]);report.passed=true;
 }finally{await browser.close();writeFileSync(new URL('report.json',output),JSON.stringify({...report,failures},null,2)+'\n');}
 console.log('Live verification passed: '+JSON.stringify(report));
+
 

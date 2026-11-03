@@ -4,6 +4,8 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {chromium} from 'playwright';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
 import {createApp} from '../server.mjs';
 import {prepareOwnerPublication} from '../scripts/publish-owner-release.mjs';
 import {prepareVerifiedMetadata} from '../scripts/publish-verified-metadata.mjs';
@@ -66,5 +68,8 @@ try{
   }
   const editorial=JSON.parse(readFileSync(new URL('../public/editorial.json',import.meta.url),'utf8'));
   for(const collection of catalog.collections){const work=catalog.works.find(work=>work.id===collection.starWorkId);await ready('/');const source=await page.locator('#hos-home-chapters [data-collection-section="'+collection.id+'"] .hos-collection-photo img').getAttribute('src');assert.equal(source,editorial.workScenes[work.id].scenes[0].source);}
-  assert.deepEqual(errors,[]);assert.equal(app.db.prepare('SELECT count(*) AS n FROM inquiries').get().n,0);report.passed=true;console.log(JSON.stringify(report));
+  assert.deepEqual(errors,[]);assert.equal(app.db.prepare('SELECT count(*) AS n FROM inquiries').get().n,0);await browser.close();browser=undefined;
+  const verification=await promisify(execFile)(process.execPath,['qa/live.mjs'],{env:{...process.env,HOS_LIVE_URL:origin,HOS_LIVE_ATTEMPTS:'1',HOS_LIVE_RETRY_MS:'0',HOS_EXPECT_FOUNDING_RELEASE:'true',HOS_LIVE_OUTPUT:new URL('live/',out).href},maxBuffer:4*1024*1024});
+  console.log(verification.stdout);report.liveVerifier=true;
+  report.passed=true;console.log(JSON.stringify(report));
 }finally{writeFileSync(new URL('report.json',out),JSON.stringify(report,null,2));await browser?.close();await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});}
