@@ -194,8 +194,19 @@ function collectionSelection(collection) {
   if(!selected.length)return null;
   const section=el('section','hos-collection-selection');section.dataset.reveal='';section.setAttribute('aria-label','Works in '+collection.name);
   const heading=el('div','hos-selection-heading');heading.append(el('h3','','The works'),el('span','',selected.length+' sculptures'));
-  const grid=workGrid(selected);grid.classList.add('hos-equal-works');grid.tabIndex=0;grid.setAttribute('aria-label',collection.name+' sculptures');
-  section.append(heading,grid);return section;
+  const grid=workGrid(selected);grid.classList.add('hos-equal-works');
+  section.append(heading,collectionRail(grid,collection.name+' sculptures'));return section;
+}
+function collectionRail(grid,label) {
+  const rail=el('div','hos-collection-rail');grid.classList.add('hos-horizontal-works');grid.tabIndex=0;grid.setAttribute('aria-label',label);
+  const controls=el('div','hos-collection-rail-controls');controls.append(el('span','','Scroll to explore'));
+  for(const [step,text] of [[-1,'Previous sculptures'],[1,'Next sculptures']]){
+    const button=el('button','',step<0?'←':'→');button.type='button';button.setAttribute('aria-label',text+' in '+label);
+    button.addEventListener('click',()=>grid.scrollBy({left:step*grid.clientWidth*.8,behavior:motionPreference?.matches?'instant':'smooth'}));controls.append(button);
+  }
+  const update=()=>{const overflow=grid.scrollWidth>grid.clientWidth+2;controls.hidden=!overflow;const buttons=controls.querySelectorAll('button');buttons[0].disabled=grid.scrollLeft<=1;buttons[1].disabled=grid.scrollLeft+grid.clientWidth>=grid.scrollWidth-2;};
+  grid.addEventListener('scroll',update,{passive:true});if(typeof ResizeObserver==='function')new ResizeObserver(update).observe(grid);
+  controls.hidden=true;rail.append(controls,grid);return rail;
 }
 function collectionChapter(collection, {heading = true} = {}) {
   const work=works.find(work=>work.id===collection.starWorkId),section=el('section','hos-collection-chapter hos-collection-editorial');
@@ -215,14 +226,13 @@ function collectionChapter(collection, {heading = true} = {}) {
     return section;
   }
   section.classList.add('hos-collection-campaign','hos-category-campaign');
-  const visual=collectionVisual(work,collection,{interior:true});
   const introduction=el('div','hos-collection-introduction');
   introduction.append(el('h1','',collection.name));
   const description=el('div','hos-collection-description');
   description.append(el('p','hos-collection-tagline',collection.description));
   if(collection.introduction)description.append(el('p','hos-collection-story',collection.introduction));
   introduction.append(description);
-  section.append(visual,introduction);
+  section.append(introduction);
   return section;
 }
 function filteredWorks(container, selected, label = 'Browse works') {
@@ -245,7 +255,7 @@ function filteredWorks(container, selected, label = 'Browse works') {
     select.addEventListener('change',()=>{state[key]=select.value;update();});wrapper.append(select);filters.append(wrapper);
   }
   const reset=el('button','hos-text-link','Reset filters');reset.type='button';reset.addEventListener('click',()=>{for(const key of Object.keys(state))delete state[key];filters.querySelectorAll('select').forEach(select=>select.value='');update();});filters.append(reset);if(!filters.querySelector('select'))filters.hidden=true;
-  function update(){const result=selected.filter(work=>Object.entries(state).every(([key,value])=>!value || (value==='__unknown'?!work[key]:work[key]===value)));counter.textContent=`${result.length} ${result.length===1?'work':'works'}`;gridHost.replaceChildren(result.length?workGrid(result):el('p','hos-empty-results','No works match these filters. Try another selection.'));refreshLinks(section);observeReveals(section);}
+  function update(){const result=selected.filter(work=>Object.entries(state).every(([key,value])=>!value || (value==='__unknown'?!work[key]:work[key]===value)));counter.textContent=`${result.length} ${result.length===1?'work':'works'}`;const grid=result.length?workGrid(result):null;gridHost.replaceChildren(grid?(container.classList.contains('hos-supporting-works')?collectionRail(grid,label):grid):el('p','hos-empty-results','No works match these filters. Try another selection.'));refreshLinks(section);observeReveals(section);}
   toggle.hidden=!filters.querySelector('select');toolbar.append(counter,toggle);
   section.append(toolbar,filters,gridHost);container.append(section);update();
 }
@@ -480,9 +490,9 @@ function renderWork(work) {
   const collection=collectionFor(work);if(collection)context.append(link(collection.name,{collection:collection.id}));
   if(sold)context.append(el('p','','This work is sold. Explore related works or ask us about alternatives.'));
   const details=$('#hos-work-extra-specs'),serviceDetails=$('#hos-work-service-specs'),provenanceDetails=$('#hos-work-provenance-specs');details.replaceChildren();serviceDetails.replaceChildren();provenanceDetails.replaceChildren();
-  const units = work.dimensions?.match(/([\d.]+)\s*×\s*([\d.]+)\s*×\s*([\d.]+)\s*cm/i);
+  const units = work.dimensions?.match(/([\d.]+)\s*×\s*([\d.]+)(?:\s*×\s*([\d.]+))?\s*cm/i);
   const values={...(work.details || {})};
-  if(units)values.inches=units.slice(1).map(n=>(Number(n)/2.54).toFixed(1)).join(' × ')+' in';
+  if(units)values.inches=units.slice(1).filter(Boolean).map(n=>(Number(n)/2.54).toFixed(1)).join(' × ')+' in';
   if(values.weightKg)values.weightKg=`${values.weightKg} kg / ${(Number(values.weightKg)*2.20462262).toFixed(1)} lb`;
   const labels={inches:'Dimensions in inches',finish:'Finish',signature:'Signature',weightKg:'Weight',base:'Base & inclusion',location:'Current location',delivery:'Delivery estimate',shipping:'Shipping',installation:'Installation',care:'Care',authenticity:'Authenticity',provenance:'Provenance'};
   for(const [key,label] of Object.entries(labels))if(values[key]){const row=el('div');row.append(el('span','',label),el('span','',values[key]));(['delivery','shipping','installation','care'].includes(key)?serviceDetails:['authenticity','provenance'].includes(key)?provenanceDetails:details).append(row);}
@@ -700,7 +710,7 @@ async function start() {
       card.append(image(artist.portrait,artistLeadAlt(artist),true,'(max-width: 700px) 90vw, 29vw'),el('h3','',artist.name),el('p','hos-artist-style',artist.style || 'Stone sculpture · Zimbabwe'));grid.append(card);
     });
   });
-  gallery=initializeGallery({root,document,applyImage,motionPreference,onView:()=>track('photo_view',{workId:activeWork?.id || '',artistId:activeArtist?.id || ''})});
+  gallery=initializeGallery({root,document,applyImage,resolveSource:source=>editorial.artistPhotography?.[source]?.original||source,motionPreference,onView:()=>track('photo_view',{workId:activeWork?.id || '',artistId:activeArtist?.id || ''})});
   renderPresentation();
   const chapters=$('#hos-home-chapters');chapters.replaceChildren();
   if(collections.length){collectionIndex($('#hos-home-collection-index'),{home:true});collections.forEach(collection=>chapters.append(collectionChapter(collection)));}

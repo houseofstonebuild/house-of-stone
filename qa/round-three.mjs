@@ -1,17 +1,18 @@
 import assert from 'node:assert/strict';import {mkdtempSync,rmSync,mkdirSync,writeFileSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';import {randomUUID} from 'node:crypto';import {chromium} from 'playwright';
+import {prepareOwnerMeasurements,measurements} from '../scripts/publish-owner-measurements.mjs';
 import {createApp} from '../server.mjs';import {prepareOwnerPublication} from '../scripts/publish-owner-release.mjs';import {prepareVerifiedMetadata} from '../scripts/publish-verified-metadata.mjs';import {prepareCollectionRoundOne} from '../scripts/publish-collection-round-one.mjs';import {prepareCollectionRoundTwo} from '../scripts/publish-collection-round-two.mjs';
 const dataDir=mkdtempSync(join(tmpdir(),'hos-round-three-')),password=randomUUID(),app=createApp({dataDir,env:{ADMIN_PASSWORD:password},backgroundNotifications:false});await new Promise(r=>app.server.listen(0,'127.0.0.1',r));
 const base='http://127.0.0.1:'+app.server.address().port,out=new URL('../test-results/round-three/',import.meta.url);mkdirSync(out,{recursive:true});let browser;const errors=[],report={passed:false,rails:0,galleries:0};
 try{
  const api=async(path,data)=>{const r=await fetch(base+'/api/admin/'+path,{headers:{Authorization:'Basic '+Buffer.from('admin:'+password).toString('base64'),'Content-Type':'application/json',Origin:base},...(data?{method:'POST',body:JSON.stringify(data)}:{})});assert(r.ok);return r.json();};
- let state=await api('content');const catalog=prepareCollectionRoundTwo(prepareCollectionRoundOne(prepareVerifiedMetadata(prepareOwnerPublication(state.draft))));state=await api('content',{revision:state.revision,catalog});await api('publish',{revision:state.revision});
+ let state=await api('content');const catalog=prepareOwnerMeasurements(prepareCollectionRoundTwo(prepareCollectionRoundOne(prepareVerifiedMetadata(prepareOwnerPublication(state.draft)))));state=await api('content',{revision:state.revision,catalog});await api('publish',{revision:state.revision});
  browser=await chromium.launch({args:['--no-sandbox']});const page=await browser.newPage({reducedMotion:'reduce'});page.on('pageerror',e=>errors.push(e.message));await page.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
  const ready=async path=>{await page.goto(base+path);await page.locator('#hos-concept[data-ready="true"]').waitFor();await page.evaluate(()=>document.fonts.ready);};
  for(const width of [320,390,768,1440]){
   await page.setViewportSize({width,height:1000});await ready('/');
   for(const collection of catalog.collections){
    const chapter=page.locator('#hos-home-chapters [data-collection-section="'+collection.id+'"]'),track=chapter.locator('.hos-work-grid'),cards=track.locator('.hos-work-card');
-   assert.equal(await chapter.locator('.hos-carousel-track').count(),0);
+   if(width>700){const rows=await cards.evaluateAll(nodes=>nodes.map(n=>Math.round(n.getBoundingClientRect().top)));assert(rows.every(y=>y===rows[0]),'Desktop sculptures stay in one row');if(await track.evaluate(n=>n.scrollWidth>n.clientWidth+2)){await chapter.getByRole('button',{name:'Next sculptures in '+collection.name+' sculptures',exact:true}).click();await page.waitForFunction(n=>n.scrollLeft>10,await track.elementHandle());}}
    assert.equal(await cards.count(),collection.workIds.length);
    assert.equal(await cards.first().locator('[data-artist] .hos-meta-label').textContent(),'Artist');
    // Lazy catalogue photography must actually load when the rail enters view.
@@ -40,6 +41,10 @@ try{
   }
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  }
+ for(const collection of catalog.collections){await page.setViewportSize({width:1440,height:1000});await ready('/collections/'+collection.slug);assert.equal(await page.locator('#hos-category-content .hos-collection-visual').count(),0);const track=page.locator('#hos-category-content .hos-horizontal-works');const rows=await track.locator('.hos-work-card').evaluateAll(nodes=>nodes.map(n=>Math.round(n.getBoundingClientRect().top)));assert(rows.every(y=>y===rows[0]));await page.screenshot({path:new URL(collection.id+'-without-banner.jpg',out).pathname,type:'jpeg',quality:88});}
+ for(const [id,values] of Object.entries(measurements)){const work=catalog.works.find(w=>w.id===id);await ready('/works/'+work.slug);assert.equal(await page.locator('#hos-work-dimensions').textContent(),values.join(' × ')+' cm');if(id==='zsa-031')assert.equal(await page.locator('#hos-work-title').textContent(),'Protection Spirit');}
+ const paired=catalog.works.filter(w=>(w.additionalImages||[]).some(key=>catalog.assets[key]?.includes('/hos-artist-')));
+ for(const work of paired){await ready('/works/'+work.slug);const artistPhoto=page.locator('#hos-work-gallery-story .hos-gallery-artist img');assert((await artistPhoto.getAttribute('src')).includes('-owner-v4.jpg'));await artistPhoto.evaluate(i=>i.decode());await page.locator('#hos-work-gallery-story .hos-gallery-artist button').click();const enlarged=page.locator('#hos-photo-dialog img');await enlarged.evaluate(i=>i.decode());assert((await enlarged.getAttribute('src')).includes('-owner-v4.jpg'));await page.keyboard.press('Escape');}
  for(const [route,filename] of [['designers','designers-coil-v2.webp'],['collectors','collectors-red-stone-v2.webp']]){await ready('/'+route);const image=page.locator('[data-page="'+route+'"] .hos-editorial-image img');assert((await image.getAttribute('src')).endsWith(filename));await image.evaluate(i=>i.decode());await page.screenshot({path:new URL(route+'.jpg',out).pathname,type:'jpeg',quality:88,fullPage:true});}
  for(const side of ['front','back']){const src='/assets/zsa-002-studio-'+side+'-v4.webp';assert(await page.evaluate(async src=>{const image=new Image();image.src=src;try{await image.decode();return image.naturalWidth===1200&&image.naturalHeight===1600;}catch{return false;}},src),'Archived source photo must decode: '+src);}
  assert.deepEqual(errors,[]);assert.equal(app.db.prepare('SELECT count(*) AS n FROM inquiries').get().n,0);report.passed=true;console.log(JSON.stringify(report));

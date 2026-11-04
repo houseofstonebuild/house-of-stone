@@ -1,0 +1,38 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync,mkdtempSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {randomUUID} from 'node:crypto';
+import {createApp} from '../server.mjs';
+import {prepareOwnerPublication} from '../scripts/publish-owner-release.mjs';
+import {prepareVerifiedMetadata} from '../scripts/publish-verified-metadata.mjs';
+import {prepareCollectionRoundOne} from '../scripts/publish-collection-round-one.mjs';
+import {prepareCollectionRoundTwo} from '../scripts/publish-collection-round-two.mjs';
+import {prepareOwnerMeasurements,publishOwnerMeasurements,measurements,releaseOrigin} from '../scripts/publish-owner-measurements.mjs';
+const fixture=()=>prepareCollectionRoundTwo(prepareCollectionRoundOne(prepareVerifiedMetadata(prepareOwnerPublication(JSON.parse(readFileSync(new URL('../content/catalog.json',import.meta.url),'utf8'))))));
+test('supplier dimensions are public, excluded objects stay unchanged, and Protection Spirit keeps its address',()=>{
+ const original=fixture(),next=prepareOwnerMeasurements(original);
+ assert.equal(Object.keys(measurements).length,22);
+ assert.equal(next.works.find(w=>w.id==='zsa-027').dimensions,'125 × 119 cm');
+ assert.equal(next.works.find(w=>w.id==='zsa-005').dimensions,'68 × 22 cm');
+ assert.equal(next.works.find(w=>w.id==='hos-belonging').dimensions,'68 × 80 cm');
+ for(const id of ['zsa-017','zsa-002','hos-queen-mother','hos-inner-beauty','zsa-001'])assert.deepEqual(next.works.find(w=>w.id===id),original.works.find(w=>w.id===id));
+ assert.equal(next.works.find(w=>w.id==='zsa-031').slug,original.works.find(w=>w.id==='zsa-031').slug);
+ assert.deepEqual(next.artists,original.artists);assert.deepEqual(next.collections,original.collections);assert.deepEqual(next.assets,original.assets);
+ assert.deepEqual(prepareOwnerMeasurements(next),next);
+ const edited=structuredClone(next);edited.works.find(w=>w.id==='zsa-005').dimensions='99 × 22 cm';assert.throws(()=>prepareOwnerMeasurements(edited),/Newer verified dimensions/);
+});
+test('revision-checked publication persists measurements and name and never publishes an unrelated draft',async t=>{
+ const dataDir=mkdtempSync(join(tmpdir(),'hos-measurements-')),password=randomUUID(),app=createApp({dataDir,env:{ADMIN_PASSWORD:password,SITE_URL:releaseOrigin},backgroundNotifications:false});
+ await new Promise(r=>app.server.listen(0,'127.0.0.1',r));t.after(async()=>{await new Promise(r=>app.server.close(r));rmSync(dataDir,{recursive:true,force:true});});
+ const origin='http://127.0.0.1:'+app.server.address().port;
+ const api=async(path,data)=>{const r=await fetch(origin+'/api/admin/'+path,{headers:{Authorization:'Basic '+Buffer.from('admin:'+password).toString('base64'),'Content-Type':'application/json',Origin:releaseOrigin},...(data?{method:'POST',body:JSON.stringify(data)}:{})});assert(r.ok);return r.json();};
+ let state=await api('content');state=await api('content',{revision:state.revision,catalog:fixture()});
+ const params={db:app.db,origin,password,publicOrigin:releaseOrigin};assert.deepEqual(await publishOwnerMeasurements(params),{skipped:'unpublished-draft-present'});
+ await api('publish',{revision:state.revision});const history=app.db.prepare('SELECT count(*) AS n FROM collection_history').get().n;
+ assert((await publishOwnerMeasurements(params)).published);assert.equal(app.db.prepare('SELECT count(*) AS n FROM collection_history').get().n,history+1);
+ const live=await (await fetch(origin+'/content.json')).json();
+ for(const [id,value] of Object.entries(measurements))assert.equal(live.works.find(w=>w.id===id).dimensions,value.join(' × ')+' cm');
+ assert.equal(live.works.find(w=>w.id==='zsa-031').title,'Protection Spirit');assert.deepEqual(await publishOwnerMeasurements(params),{skipped:'already-published'});
+});

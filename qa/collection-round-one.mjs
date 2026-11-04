@@ -50,11 +50,9 @@ try{
     }
     for(const collection of catalog.collections){
       await ready('/collections/'+collection.slug);
-      const campaign=page.locator('#hos-category-content > .hos-category-campaign'),banner=campaign.locator('.hos-collection-photo img');
-      assert.equal(await campaign.locator(':scope > :first-child').getAttribute('class'),'hos-collection-visual');
-      assert.equal(await banner.getAttribute('src'),banners.get(collection.id));
-      await banner.evaluate(image=>image.decode());
-      assert.equal(await banner.evaluate(image=>getComputedStyle(image).objectFit),collection.id==='elemental'&&width<=700?'contain':'cover');
+      const campaign=page.locator('#hos-category-content > .hos-category-campaign');
+      assert.equal(await campaign.locator('.hos-collection-visual,.hos-collection-photo').count(),0);
+      assert.equal(await campaign.locator('h1').textContent(),collection.name);
       assert.deepEqual(await page.locator('#hos-category-content .hos-work-card').evaluateAll(cards=>cards.map(card=>card.dataset.workRecord)),collection.workIds);
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
       if([390,1440].includes(width))await page.screenshot({path:new URL(width+'-'+collection.id+'.jpg',out).pathname,type:'jpeg',quality:88});

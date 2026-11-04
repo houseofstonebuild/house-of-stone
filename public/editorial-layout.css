@@ -477,7 +477,7 @@
 /* Stone accompanies the title and artist wherever a sculpture tile appears. */
 #hos-concept .hos-work-card-copy > .hos-card-stone {margin:2px 0 0;font-size:12px;line-height:1.6;color:var(--hos-muted);}
 #hos-concept .hos-collection-campaign .hos-work-card-copy > .hos-card-stone {grid-column:1 / -1;grid-row:3;font-size:11px;}
-/* Collection routes reuse the homepage campaign before the sculpture grid. */
+/* Collection routes open directly with the title and works. */
 #hos-concept .hos-category-content {padding-top:0;}
 #hos-concept .hos-category-content > .hos-category-campaign {padding:0;margin:0;border:0;}
 #hos-concept .hos-category-campaign > .hos-collection-introduction {margin:32px 0 24px;}
@@ -519,3 +519,23 @@
 /* Crop the spare white canvas around a paired artist lead, keeping both subjects. */
 #hos-concept .hos-portrait-card img[src*="hos-artist-"][src*="-with-"] {object-fit:cover;}
 #hos-concept #hos-artist-image[src*="hos-artist-"][src*="-with-"] {aspect-ratio:4/5;object-fit:cover;}
+
+/* Each desktop collection stays in one row, with controls and a visible scroll bar. */
+#hos-concept .hos-collection-rail {min-width:0;max-width:100%;}
+#hos-concept .hos-collection-rail-controls {display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:8px 0;}
+#hos-concept .hos-collection-rail-controls[hidden] {display:none;}
+#hos-concept .hos-collection-rail-controls span {font-size:12px;color:var(--hos-muted);margin-right:6px;}
+#hos-concept .hos-collection-rail-controls button {width:40px;height:40px;border:1px solid var(--hos-line);border-radius:50%;background:white;color:var(--hos-fg);cursor:pointer;}
+#hos-concept .hos-collection-rail-controls button:disabled {opacity:.35;cursor:default;}
+#hos-concept .hos-collection-rail-controls button:focus-visible,#hos-concept .hos-horizontal-works:focus-visible {outline:2px solid var(--hos-fg);outline-offset:3px;}
+#hos-concept .hos-category-campaign > .hos-collection-introduction {margin-top:36px;}
+@media(min-width:701px){
+ #hos-concept .hos-collection-rail .hos-horizontal-works[data-count] {display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:clamp(200px,calc((100% - 80px)/5),300px);gap:20px;width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;overscroll-behavior-x:contain;padding-bottom:16px;scrollbar-width:auto;scrollbar-color:#b7b4ad #f1f0ee;}
+ #hos-concept .hos-horizontal-works > .hos-work-card {display:block;min-width:0;scroll-snap-align:start;}
+ #hos-concept .hos-horizontal-works::-webkit-scrollbar {height:8px;}
+ #hos-concept .hos-horizontal-works::-webkit-scrollbar-thumb {background:#b7b4ad;border-radius:4px;}
+ #hos-concept .hos-horizontal-works::-webkit-scrollbar-track {background:#f1f0ee;}
+}
+@media(max-width:700px){
+ #hos-concept .hos-supporting-works .hos-collection-rail-controls {display:none;}
+}

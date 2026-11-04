@@ -454,6 +454,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         const result=await publishCollectionRoundTwo({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
         console.log('Owner-requested collection additions and artist photography:',JSON.stringify(result));
       } catch(error) { console.error('Collection additions did not complete:',error.message); }
+      try {
+        const {publishOwnerMeasurements}=await import('./scripts/publish-owner-measurements.mjs');
+        const result=await publishOwnerMeasurements({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
+        console.log('Owner-requested measurements and sculpture name:',JSON.stringify(result));
+      } catch(error) { console.error('Owner measurements did not complete:',error.message); }
     }
   });
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(() => process.exit(0)));

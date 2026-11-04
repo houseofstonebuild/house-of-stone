@@ -1,5 +1,5 @@
 // Original photographs are fetched for inspection; responsive images lead browsing.
-export function initializeGallery({root,document,applyImage,motionPreference,onView}) {
+export function initializeGallery({root,document,applyImage,resolveSource=source=>source,motionPreference,onView}) {
   const dialog=root.querySelector('#hos-photo-dialog'),stage=dialog.querySelector('.hos-photo-stage'),large=dialog.querySelector('img'),title=dialog.querySelector('h2'),status=dialog.querySelector('[role="status"]');
   const main=root.querySelector('#hos-work-image'),opener=root.querySelector('#hos-work-photo-open'),thumbs=root.querySelector('#hos-work-additional-images'),story=root.querySelector('#hos-work-gallery-story'),count=root.querySelector('#hos-gallery-count');
   let photos=[],index=0,scale=1,lastTrigger,touchStart,suppressUntil=0,selectedWorkId='',pan;
@@ -62,7 +62,7 @@ export function initializeGallery({root,document,applyImage,motionPreference,onV
     if(!work.views?.detail && assets[work.image])photos.push({source:assets[work.image],label:'Stone detail',kind:'detail',zoom:1.8});
     if(!work.views?.interior)for(const scene of scenes)if(scene.source!==heroSource)photos.push({...scene,kind:'interior'});
     for(const [n,key] of (work.additionalImages||[]).entries())if(assets[key]&&!photos.some(photo=>photo.source===assets[key]))photos.push({source:assets[key],label:assets[key].includes('/hos-artist-')?'With the artist':'Additional view '+(n+1),kind:assets[key].includes('/hos-artist-')?'artist':'angle'});
-    photos=photos.filter(photo=>photo.source);title.textContent=work.title;thumbs.replaceChildren();story.replaceChildren();
+    photos=photos.filter(photo=>photo.source).map(photo=>({...photo,source:resolveSource(photo.source)}));title.textContent=work.title;thumbs.replaceChildren();story.replaceChildren();
     photos.forEach((photo,i)=>{
       const button=document.createElement('button');button.type='button';button.className='hos-photo-thumbnail';button.setAttribute('aria-label','Show '+photo.label.toLowerCase());button.setAttribute('aria-pressed',String(i===0));
       const img=document.createElement('img');applyImage(img,photo.source,'120px');img.alt='';img.loading='lazy';const label=document.createElement('span');label.textContent=photo.label;button.append(img,label);button.addEventListener('click',()=>select(i));thumbs.append(button);

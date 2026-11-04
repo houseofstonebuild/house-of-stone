@@ -41,14 +41,14 @@ test('newer owner titles and photographs require review instead of being overwri
   }
 });
 
-test('all 23 sculpture fronts use studio photos and all five approved campaign paths remain unchanged',()=>{
+test('all 23 sculpture fronts use studio photos and the current approved campaign paths are used',()=>{
   const editorial=read('public/editorial.json'),catalog=prepareCollectionRoundOne(fixtureCatalog());
   applyWorkPhotography(catalog,editorial.workPhotography);
   const campaigns=['rhythm','elemental','presence','kinship','wild-grace'];
   for(const [index,collection] of catalog.collections.entries()){
     const work=catalog.works.find(work=>work.id===collection.starWorkId),scene=editorial.workScenes[work.id];
     assert.equal(scene.source,catalog.assets[work.image]);
-    assert.equal(scene.scenes[0].source,'/assets/'+campaigns[index]+'-campaign-v2.webp');
+    assert.equal(scene.scenes[0].source,'/assets/'+campaigns[index]+'-campaign-v'+(collection.id==='elemental'?'3':'2')+'.webp');
     for(const id of collection.workIds){
       const work=catalog.works.find(work=>work.id===id);
       assert.match(catalog.assets[work.image],/(?:studio-front-v[234]|wingbeat-shoot-front-v1)\.webp$/);

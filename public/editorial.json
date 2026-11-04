@@ -108,8 +108,8 @@
       "source": "/assets/zsa-028-studio-front-v2.webp",
       "scenes": [
         {
-          "source": "/assets/elemental-campaign-v2.webp",
-          "label": "Light filled interior"
+          "source": "/assets/elemental-campaign-v3.webp",
+          "label": "Daylight residence"
         }
       ]
     },
@@ -392,37 +392,37 @@
   },
   "artistPhotography": {
     "/assets/hos-artist-chamu-rumano-v1.webp": {
-      "original": "/assets/hos-artist-chamu-rumano-original-v3.jpg"
+      "original": "/assets/hos-artist-chamu-rumano-owner-v4.jpg"
     },
     "/assets/hos-artist-thomas-nyasoka-v1.webp": {
-      "original": "/assets/hos-artist-thomas-nyasoka-original-v3.jpg"
+      "original": "/assets/hos-artist-thomas-nyasoka-owner-v4.jpg"
     },
     "/assets/hos-artist-douglas-musekiwa-v1.webp": {
-      "original": "/assets/hos-artist-douglas-musekiwa-original-v3.jpg"
+      "original": "/assets/hos-artist-douglas-musekiwa-owner-v4.jpg"
     },
     "/assets/hos-artist-philip-mlimu-v1.webp": {
-      "original": "/assets/hos-artist-philip-mlimu-original-v3.jpg"
+      "original": "/assets/hos-artist-philip-mlimu-owner-v4.jpg"
     },
     "/assets/hos-artist-batsirai-chikukwa-v1.webp": {
-      "original": "/assets/hos-artist-batsirai-chikukwa-original-v3.jpg"
+      "original": "/assets/hos-artist-batsirai-chikukwa-owner-v4.jpg"
     },
     "/assets/hos-artist-chamu-rumano-with-birds-v1.webp": {
-      "original": "/assets/hos-artist-chamu-rumano-with-birds-original-v3.jpg"
+      "original": "/assets/hos-artist-chamu-rumano-with-birds-owner-v4.jpg"
     },
     "/assets/hos-artist-thomas-nyasoka-with-happy-times-v1.webp": {
-      "original": "/assets/hos-artist-thomas-nyasoka-with-happy-times-original-v3.jpg"
+      "original": "/assets/hos-artist-thomas-nyasoka-with-happy-times-owner-v4.jpg"
     },
     "/assets/hos-artist-douglas-musekiwa-with-coil-v1.webp": {
-      "original": "/assets/hos-artist-douglas-musekiwa-with-coil-original-v3.jpg"
+      "original": "/assets/hos-artist-douglas-musekiwa-with-coil-owner-v4.jpg"
     },
     "/assets/hos-artist-philip-mlimu-with-reflection-v1.webp": {
-      "original": "/assets/hos-artist-philip-mlimu-with-reflection-original-v3.jpg"
+      "original": "/assets/hos-artist-philip-mlimu-with-reflection-owner-v4.jpg"
     },
     "/assets/hos-artist-batsirai-chikukwa-with-celebration-v1.webp": {
-      "original": "/assets/hos-artist-batsirai-chikukwa-with-celebration-original-v3.jpg"
+      "original": "/assets/hos-artist-batsirai-chikukwa-with-celebration-owner-v4.jpg"
     },
     "/assets/hos-artist-tinodashe-mangenda-with-queen-mother-v1.webp": {
-      "original": "/assets/hos-artist-tinodashe-mangenda-with-queen-mother-original-v3.jpg"
+      "original": "/assets/hos-artist-tinodashe-mangenda-with-queen-mother-owner-v4.jpg"
     }
   }
 }
