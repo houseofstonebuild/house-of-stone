@@ -389,5 +389,40 @@
       "source": "/assets/collectors-red-stone-v2.webp",
       "caption": "Stone sculpture from the House of Stone collection in a gallery setting."
     }
+  },
+  "artistPhotography": {
+    "/assets/hos-artist-chamu-rumano-v1.webp": {
+      "original": "/assets/hos-artist-chamu-rumano-original-v3.jpg"
+    },
+    "/assets/hos-artist-thomas-nyasoka-v1.webp": {
+      "original": "/assets/hos-artist-thomas-nyasoka-original-v3.jpg"
+    },
+    "/assets/hos-artist-douglas-musekiwa-v1.webp": {
+      "original": "/assets/hos-artist-douglas-musekiwa-original-v3.jpg"
+    },
+    "/assets/hos-artist-philip-mlimu-v1.webp": {
+      "original": "/assets/hos-artist-philip-mlimu-original-v3.jpg"
+    },
+    "/assets/hos-artist-batsirai-chikukwa-v1.webp": {
+      "original": "/assets/hos-artist-batsirai-chikukwa-original-v3.jpg"
+    },
+    "/assets/hos-artist-chamu-rumano-with-birds-v1.webp": {
+      "original": "/assets/hos-artist-chamu-rumano-with-birds-original-v3.jpg"
+    },
+    "/assets/hos-artist-thomas-nyasoka-with-happy-times-v1.webp": {
+      "original": "/assets/hos-artist-thomas-nyasoka-with-happy-times-original-v3.jpg"
+    },
+    "/assets/hos-artist-douglas-musekiwa-with-coil-v1.webp": {
+      "original": "/assets/hos-artist-douglas-musekiwa-with-coil-original-v3.jpg"
+    },
+    "/assets/hos-artist-philip-mlimu-with-reflection-v1.webp": {
+      "original": "/assets/hos-artist-philip-mlimu-with-reflection-original-v3.jpg"
+    },
+    "/assets/hos-artist-batsirai-chikukwa-with-celebration-v1.webp": {
+      "original": "/assets/hos-artist-batsirai-chikukwa-with-celebration-original-v3.jpg"
+    },
+    "/assets/hos-artist-tinodashe-mangenda-with-queen-mother-v1.webp": {
+      "original": "/assets/hos-artist-tinodashe-mangenda-with-queen-mother-original-v3.jpg"
+    }
   }
 }

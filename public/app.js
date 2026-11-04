@@ -91,8 +91,7 @@ function statusMessage(text, error = false) { status.textContent = text; status.
 function applyImage(img, source, sizes = '(max-width: 650px) 100vw, 55vw') {
   const artistPhoto=editorial.artistPhotography?.[source];
   if(artistPhoto)source=artistPhoto.original;
-  if(artistPhoto){img.dataset.artistOriginal='true';img.style.maskImage=img.style.webkitMaskImage='url(\"'+artistPhoto.mask+'\")';img.style.maskSize=img.style.webkitMaskSize='contain';img.style.maskPosition=img.style.webkitMaskPosition='center';img.style.maskRepeat=img.style.webkitMaskRepeat='no-repeat';const backdrop=()=>{if(img.parentElement)img.parentElement.style.backgroundColor=artistPhoto.background;};img.addEventListener('load',backdrop,{once:true});Promise.resolve().then(backdrop);}
-  else{delete img.dataset.artistOriginal;img.style.maskImage=img.style.webkitMaskImage='';if(img.parentElement)img.parentElement.style.backgroundColor='';}
+  img.toggleAttribute('data-artist-original', Boolean(artistPhoto));
   if(!source){img.removeAttribute('src');img.removeAttribute('srcset');return;}
   img.decoding = 'async';
   const info = media[source];
