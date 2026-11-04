@@ -42,8 +42,12 @@ for(let attempt=0;attempt<attempts;attempt++){
 }
 assert(deployed,lastError);
 const response=await fetch(origin+'/content.json');assert(response.ok);const catalog=await response.json();
-for(const [id,values] of Object.entries(measurements))assert.equal(catalog.works.find(work=>work.id===id)?.dimensions,values.join(' × ')+' cm','Published owner measurements: '+id);
-assert.equal(catalog.works.find(work=>work.id==='zsa-031')?.title,'Protection Spirit');
+// Historical release fixtures also reuse this verifier against loopback.
+// These new publication requirements apply to the production catalogue.
+if(origin==='https://house-of-stone-production.up.railway.app'){
+ for(const [id,values] of Object.entries(measurements))assert.equal(catalog.works.find(work=>work.id===id)?.dimensions,values.join(' × ')+' cm','Published owner measurements: '+id);
+ assert.equal(catalog.works.find(work=>work.id==='zsa-031')?.title,'Protection Spirit');
+}
 const editorial=JSON.parse(readFileSync(new URL('../public/editorial.json',import.meta.url),'utf8'));
 applyWorkPhotography(catalog,editorial.workPhotography);
 const collections=catalog.collections || [],works=new Map(catalog.works.map(work=>[work.id,work]));
