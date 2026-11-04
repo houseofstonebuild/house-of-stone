@@ -5,6 +5,7 @@ import {setTimeout as delay} from 'node:timers/promises';
 import {chromium} from 'playwright';
 import {applyWorkPhotography} from '../public/work-photography.js';
 import {additions,artistPhotos} from '../scripts/publish-collection-round-two.mjs';
+import {measurements} from '../scripts/publish-owner-measurements.mjs';
 
 // Production verification is read-only. Discover routes from the published
 // catalogue, not the seed: a code release must preserve the owner's database.
@@ -13,6 +14,9 @@ const models=JSON.parse(readFileSync(new URL('../public/models.json',import.meta
 const output=new URL(process.env.HOS_LIVE_OUTPUT || '../test-results/live/',import.meta.url);mkdirSync(output,{recursive:true});
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const paths=new Set(['/app.js','/styles.css','/light-theme.css','/collections.css','/quality.css','/editorial-layout.css','/editorial.json','/gallery.js','/work-photography.js','/studio-frame.js','/presentation.js','/media-upload.js','/models.json','/sculpture-viewer.js','/stone-surface.js']);
+const approvedEditorial=JSON.parse(readFileSync(new URL('../public/editorial.json',import.meta.url),'utf8'));
+for(const photo of Object.values(approvedEditorial.artistPhotography||{}))paths.add(photo.original);
+paths.add(approvedEditorial.workScenes['zsa-028'].scenes[0].source);
 const vertexColorOnlyFiles=new Set();
 for(const entry of Object.values(models)){
   paths.add(entry.file);
@@ -38,6 +42,8 @@ for(let attempt=0;attempt<attempts;attempt++){
 }
 assert(deployed,lastError);
 const response=await fetch(origin+'/content.json');assert(response.ok);const catalog=await response.json();
+for(const [id,values] of Object.entries(measurements))assert.equal(catalog.works.find(work=>work.id===id)?.dimensions,values.join(' × ')+' cm','Published owner measurements: '+id);
+assert.equal(catalog.works.find(work=>work.id==='zsa-031')?.title,'Protection Spirit');
 const editorial=JSON.parse(readFileSync(new URL('../public/editorial.json',import.meta.url),'utf8'));
 applyWorkPhotography(catalog,editorial.workPhotography);
 const collections=catalog.collections || [],works=new Map(catalog.works.map(work=>[work.id,work]));
