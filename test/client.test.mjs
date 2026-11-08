@@ -85,8 +85,9 @@ test('Back restores the visitor route and scroll position through work and artis
 });
 test('editorial copy loads with sculpture detail and process sections',async t=>{
   const f=await clientFixture(t);
-  assert.equal(f.get('[data-page="making"]').querySelector('.hos-process-steps').children.length,8);
-  assert.match(f.get('[data-page="home"]').querySelector('.hos-home-mission p').textContent,/Zimbabwean artists/);
+  assert.equal(f.get('[data-page="making"]').querySelector('.hos-process-steps').children.length,5);
+  // Approved homepage copy remains in place rather than being overwritten by story.json.
+  assert.match(f.get('[data-page="home"]').querySelector('.hos-home-mission p').textContent,/House of Mabwe presents handcrafted sculpture/);
   await f.delegated({work:'folded-light'});
   assert.equal(f.get('#hos-work-story').hidden,true); // legacy seed has no matched editorial essay
 });
