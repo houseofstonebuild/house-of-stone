@@ -262,8 +262,6 @@ function filteredWorks(container, selected, label = 'Browse works') {
 }
 function renderCollection(collection) {
   const container=$('#hos-category-content');container.replaceChildren(collectionChapter(collection,{heading:false}));
-  const closer=story.collections?.[collection.id]?.closer;
-  if(closer){const note=el('section','hos-story-note');note.append(el('h2','','Look closer'),el('p','',closer));container.append(note);}
   const supporting=el('section','hos-supporting-works');supporting.id='hos-supporting-'+collection.id;
   supporting.append(el('h2','','The works in '+collection.name));
   const selected=collection.workIds.map(id=>works.find(work=>work.id===id)).filter(Boolean);
@@ -296,50 +294,30 @@ function storySection(section){
   return article;
 }
 function renderStory(){
-  const pages=story.pages;if(!pages)return;
-  const home=pages.home,hero=$('[data-page="home"]');
-  hero.querySelector('.hos-hero-copy h1').replaceChildren(el('span','',home.heroTitle),el('span','',home.eyebrow));
-  hero.querySelector('.hos-discover span').textContent=home.heroCTA;
-  hero.querySelector('.hos-home-mission p').textContent=home.heroBody;
-  const byEyebrow=Object.fromEntries(home.sections.map(section=>[section.eyebrow,section]));
-  const collection=byEyebrow['THE COLLECTION'];hero.querySelector('.hos-founding-heading h2').textContent=collection.heading;
-  const introduction=el('p','hos-home-story-intro',collection.body);hero.querySelector('.hos-founding-heading').after(introduction);
-  const makingStory=byEyebrow['THE MAKING'],makingHost=hero.querySelector('.hos-home-making');
-  makingHost.querySelector('h2').textContent=makingStory.heading;makingHost.querySelector('p').textContent=makingStory.body;
-  const houseStory=byEyebrow['THE HOUSE'],houseHost=hero.querySelector('.hos-home-house');
-  houseHost.querySelector('h2').textContent=houseStory.heading;houseHost.querySelector('div:last-child p').textContent=houseStory.body;
-  const makingImage=hero.querySelector('.hos-home-making img');makingImage.removeAttribute('data-asset');applyImage(makingImage,'/assets/'+byEyebrow['THE MAKING'].image);
-  for(const [key,index] of [['FOR DESIGNERS',0],['FOR COLLECTORS',1]]){
-    const section=byEyebrow[key],host=hero.querySelector(`.hos-home-spaces article:nth-child(${index+1})`);host.querySelector('h2').textContent=section.heading;host.querySelector('p').textContent=section.body;
+  // Preserve the approved homepage hero and For Designers / For Collectors copy.
+  // Editorial depth belongs on The Making; do not inject extra homepage sections.
+  const makingImage=$('.hos-home-making img');
+  if(makingImage){
+    makingImage.removeAttribute('data-asset');
+    applyImage(makingImage,'/assets/making-chisel-at-work.webp');
+    makingImage.alt='A sculptor carving stone with a hammer and chisel';
   }
-  const artistsPanel=el('section','hos-story-note hos-home-artists');artistsPanel.append(el('span','hos-eyebrow','THE ARTISTS'),el('h2','',byEyebrow['THE ARTISTS'].heading),el('p','',byEyebrow['THE ARTISTS'].body),link('Explore the artists',{view:'artists'}));hero.querySelector('.hos-home-making').after(artistsPanel);
-  const homeClosing=el('p','hos-story-closing',home.closing);hero.querySelector('.hos-home-house').after(homeClosing);
-  for(const key of ['collection','artists','making','house','designers','collectors']){
-    const page=$(`[data-page="${key}"]`),copy=pages[key];page.querySelector('.hos-page-heading .hos-eyebrow').textContent=copy.eyebrow;
-    page.querySelector('.hos-page-heading h1').textContent=copy.heroTitle;page.querySelector('.hos-page-heading p').textContent=copy.heroBody;
-    if(key==='making'){
-      const process=page.querySelector('.hos-process-steps');process.replaceChildren(...copy.sections.map(storySection));
-      page.querySelector('.hos-process-image').hidden=true;
-      page.querySelector('#hos-process-gallery').replaceChildren();
-      const end=page.querySelector('.hos-page-end'),closing=el('div','hos-story-end');closing.append(el('h2','',copy.interludeTitle),el('p','',copy.interludeBody),el('h2','',copy.closingTitle),el('p','',copy.closingBody),el('p','hos-documentary-note',copy.documentaryNote));end.before(closing);
-      const action=end.querySelector('a');action.dataset.view='collection';action.href=routeURL('/collection');action.textContent=copy.cta;
-    }else if(key==='house'){
-      page.querySelectorAll('.hos-editorial-story').forEach(section=>section.hidden=true);
-      const host=el('div','hos-story-stack');host.append(...copy.sections.map(storySection),storySection({eyebrow:copy.foundersAttribution,heading:copy.foundersHeading,body:copy.foundersBody}));page.querySelector('.hos-page-heading').after(host);
-    }else if(key==='designers'||key==='collectors'){
-      page.querySelector('.hos-editorial-story').hidden=true;
-      const host=el('div','hos-story-stack');host.append(...copy.sections.map(storySection));page.querySelector('.hos-editorial-image').after(host);
-      const grid=page.querySelector('.hos-service-grid');grid.replaceChildren(...copy.steps.map((step,i)=>{const card=el('div');card.append(el('span','hos-eyebrow',String(i+1).padStart(2,'0')),el('h2','',step.heading||step.title),el('p','',step.body||step.text));return card;}));
-      page.querySelector('.hos-invitation h2').textContent=copy.ctaHeading;
-      page.querySelector('.hos-invitation h2').after(el('p','',copy.ctaBody));
-      if(key==='collectors'){
-        const faq=page.querySelector('.hos-service-questions');faq.replaceChildren(el('h2','','Questions about the work'));
-        for(const item of story.faq||[]){const details=el('details');details.append(el('summary','',item.q),el('p','',item.a));faq.append(details);}
-      }
-    }else{
-      const host=el('div','hos-story-stack');host.append(...copy.sections.map(storySection));page.querySelector('.hos-page-heading').after(host);
-      if(copy.closing){const end=el('p','hos-story-closing',copy.closing);host.after(end);}
-    }
+  const making=story.pages?.making,process=$('[data-page="making"]');
+  if(making?.sections?.length && process){
+    process.querySelector('.hos-page-heading p').textContent=making.intro;
+    process.querySelector('.hos-process-steps').replaceChildren(...making.sections.map(storySection));
+    process.querySelector('.hos-process-image').hidden=true;
+    process.querySelector('#hos-process-gallery').replaceChildren();
+    process.querySelector('#hos-process-gallery').hidden=true;
+    const end=process.querySelector('.hos-page-end');
+    if(making.closing)end.before(el('p','hos-story-closing',making.closing));
+  }
+  // Use the original House page's three editorial fields, not a six-section essay.
+  const house=story.pages?.house;
+  if(house){
+    $('#hos-house-vision').textContent=house.vision;
+    $('#hos-house-founders').textContent=house.founders;
+    $('#hos-house-approach').textContent=house.approach;
   }
 }
 function renderPresentation(){
@@ -537,10 +515,15 @@ function renderWork(work) {
     const node=$('#hos-work-'+id);node.textContent=value || '';if(node.parentElement)node.parentElement.hidden=!value;
   }
   $('#hos-work-core-specs').hidden=![work.yearMade,work.dimensions,work.material,work.acquisitionMethod].some(Boolean);
-  $('#hos-work-description').textContent = story.works?.[work.id]?.editorialShort || work.description || '';
-  const essay=story.works?.[work.id],essayHost=$('#hos-work-story');essayHost.replaceChildren();
-  if(essay?.editorialLong){essayHost.hidden=false;essayHost.append(el('h2','','Details worth noticing'),el('p','',essay.editorialLong));if(essay.placementNote)essayHost.append(el('h3','','Looking at the work'),el('p','',essay.placementNote));}
-  else essayHost.hidden=true;
+  const description=$('#hos-work-description');
+  description.textContent=story.works?.[work.id]?.editorialShort || work.description || '';
+  // One artwork-specific paragraph, followed by an unobtrusive route to the deeper process story.
+  const essayHost=$('#hos-work-story');essayHost.replaceChildren();essayHost.hidden=true;
+  if(!$('#hos-work-making-link')){
+    const makingLink=link('How the sculptures are made',{view:'making'});
+    makingLink.id='hos-work-making-link';
+    description.after(makingLink);
+  }
   $('#hos-work-short-specs').textContent=[stoneLabel(work),work.dimensions].filter(Boolean).join(' · ');
   const button = $('#hos-work-inquiry'),sold=work.availability==='sold';
   button.textContent=sold?'Inquire about related works':'Inquire about this work';
