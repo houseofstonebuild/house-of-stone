@@ -528,7 +528,7 @@ function route(path, shouldFocus = true) {
   main.hidden = false; inquiry.hidden = true; setMenu(false);
   modelViewer?.close();modelViewer?.refresh();gallery?.close();refreshLinks();
   const labels = {home:'Zimbabwean stone sculpture',collection:'The collection',artists:'The artists',making:'The making',designers:'For designers',collectors:'For collectors',house:'The house',privacy:'Privacy',notfound:'Page not found'};
-  document.title = `${item?.title || item?.name || labels[page] || 'House of Stone'} | House of Stone`;
+  document.title = `${item?.title || item?.name || labels[page] || 'House of Mabwe'} | House of Mabwe`;
   const canonical = document.querySelector('link[rel="canonical"]'); if (canonical) canonical.href = location.origin + (previewMode ? '/admin/preview' : '') + path;
   const description = item?.description || pageDescriptions[page] || catalog.site.description;
   const collectionImage=page==='category'?works.find(work=>work.id===item.starWorkId)?.image:'';
@@ -577,7 +577,7 @@ function openInquiry(topic, trigger) {
   $('#hos-inquiry-discard').hidden=false;title.textContent = 'Your inquiry'; statusMessage(''); $('#hos-inquiry-context').textContent = topic;
   if (['Designer project','Corporate project'].includes(topic))form.elements.interest.value='Sourcing for a project';
   if(saved)for(const [key,value] of Object.entries(saved.values))form.elements[key].value=value;
-  $('#hos-inquiry-response-note').textContent=catalog.site.inquiryNote || 'Your inquiry starts a direct conversation with House of Stone. We will respond by email.';
+  $('#hos-inquiry-response-note').textContent=catalog.site.inquiryNote || 'Your inquiry starts a direct conversation with House of Mabwe. We will respond by email.';
   main.hidden = true; inquiry.hidden = false; setMenu(false);
   window.scrollTo({top:0,behavior:'instant'}); form.elements.name.focus({preventScroll:true});
   pageAnimation?.cancel();pageAnimation=animateSurface(inquiry);
@@ -699,7 +699,7 @@ async function start() {
   if (modelResponse.ok) models = await modelResponse.json();
   catalog = await response.json(); applyWorkPhotography(catalog, editorial.workPhotography); ({artists,works,assets} = catalog);collections=catalog.collections || [];
   catalog.site.description = catalog.site.description.replace(/\benquir/gi, word => word[0] === 'E' ? 'Inquir' : 'inquir');
-  $('#hos-copyright').textContent = `© ${new Date().getFullYear()} House of Stone`;
+  $('#hos-copyright').textContent = `© ${new Date().getFullYear()} House of Mabwe`;
   $('#hos-location').textContent = catalog.site.location;
   $('.hos-founding-heading p').textContent = collections.length ? `${collections.length} collections. ${collections.reduce((sum,c)=>sum+c.workIds.length,0)} sculptures.` : `${artists.length} artists. Selected works.`;
   root.querySelectorAll('[data-asset]').forEach(img => { if(!assets[img.dataset.asset])return;applyImage(img,assets[img.dataset.asset]); if (!img.classList.contains('hos-brand-mark')) img.loading = 'lazy'; });

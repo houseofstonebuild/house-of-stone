@@ -199,7 +199,7 @@ export function createApp(options = {}) {
             method: 'POST', signal: AbortSignal.timeout(10000),
             headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json', 'Idempotency-Key': `hos-${row.id}` },
             body: JSON.stringify({ from: env.INQUIRY_EMAIL_FROM, to: env.INQUIRY_EMAIL_TO.split(',').map(v => v.trim()).filter(Boolean), reply_to: row.email,
-              subject: `House of Stone inquiry: ${row.topic}`,
+              subject: `House of Mabwe inquiry: ${row.topic}`,
               text: `Reference: ${row.id}\nReceived: ${row.created_at}\nName: ${row.name}\nEmail: ${row.email}\nInterest: ${row.interest}\nTopic: ${row.topic}\n\n${row.message}\n\nInbox: ${siteURL?.origin ?? ''}/admin` })
           });
           if (!response.ok) throw new Error('Notification request failed.');
@@ -234,13 +234,13 @@ export function createApp(options = {}) {
   }
   function pageMeta(path, content = catalog) {
     const labels = { '/':'Zimbabwean stone sculpture', '/collection':'The collection', '/artists':'The artists', '/making':'The making', '/designers':'For designers', '/collectors':'For collectors', '/house':'The house', '/privacy':'Privacy' };
-    if (labels[path]) return { title: `${labels[path]} | House of Stone`, description: pageDescriptions[path==='/'?'home':path.slice(1)] || content.site.description, image: homepageImage(content) };
+    if (labels[path]) return { title: `${labels[path]} | House of Mabwe`, description: pageDescriptions[path==='/'?'home':path.slice(1)] || content.site.description, image: homepageImage(content) };
     const collection = (content.collections || []).find(c => `/collections/${c.slug}` === path);
-    if (collection) { const star = content.works.find(w => w.id === collection.starWorkId); return {title:`${collection.name} | House of Stone`,description:collection.description,image:content.assets[star?.image] || homepageImage(content)}; }
+    if (collection) { const star = content.works.find(w => w.id === collection.starWorkId); return {title:`${collection.name} | House of Mabwe`,description:collection.description,image:content.assets[star?.image] || homepageImage(content)}; }
     const work = content.works.find(w => `/works/${w.slug}` === path);
-    if (work) return { title: `${work.title} | House of Stone`, description: work.description, image: content.assets[work.image] || content.assets.hero };
+    if (work) return { title: `${work.title} | House of Mabwe`, description: work.description, image: content.assets[work.image] || content.assets.hero };
     const artist = content.artists.find(a => `/artists/${a.slug}` === path);
-    if (artist) return { title: `${artist.name} | House of Stone`, description: artist.description, image: content.assets[artist.portrait] || content.assets.hero };
+    if (artist) return { title: `${artist.name} | House of Mabwe`, description: artist.description, image: content.assets[artist.portrait] || content.assets.hero };
     return null;
   }
 
@@ -260,7 +260,7 @@ export function createApp(options = {}) {
         res.setHeader('Cache-Control', 'no-store');
         res.setHeader('X-Robots-Tag', 'noindex, nofollow');
         rateLimit('admin:' + clientHash(req), 150, 60000);
-        if (!authenticated(req)) { res.setHeader('WWW-Authenticate', 'Basic realm="House of Stone private", charset="UTF-8"'); return send(res, 401, 'Sign in to House of Stone.', 'text/plain; charset=utf-8'); }
+        if (!authenticated(req)) { res.setHeader('WWW-Authenticate', 'Basic realm="House of Mabwe private", charset="UTF-8"'); return send(res, 401, 'Sign in to House of Mabwe.', 'text/plain; charset=utf-8'); }
       }
       if (req.method === 'GET' && path === '/health') return send(res, 200, { ok: true });
       if (req.method === 'GET' && path === '/content.json') return send(res, 200, catalog);
@@ -368,13 +368,13 @@ export function createApp(options = {}) {
       if (req.method === 'GET' && path === '/api/admin/export/inquiries.csv') {
         const rows = db.prepare('SELECT id,created_at,name,email,interest,message,topic,work_id,artist_id,source,medium,campaign,notification FROM inquiries ORDER BY created_at DESC').all();
         const keys = ['id','created_at','name','email','interest','message','topic','work_id','artist_id','source','medium','campaign','notification'];
-        res.setHeader('Content-Disposition', 'attachment; filename="house-of-stone-inquiries.csv"');
+        res.setHeader('Content-Disposition', 'attachment; filename="house-of-mabwe-inquiries.csv"');
         return send(res, 200, csv([keys, ...rows.map(row => keys.map(k => row[k]))]), 'text/csv; charset=utf-8');
       }
       if (req.method === 'GET' && path === '/api/admin/export/events.csv') {
         const rows = db.prepare('SELECT created_at,name,page,work_id,artist_id,source,medium,campaign,referrer FROM events ORDER BY created_at DESC').all();
         const keys = ['created_at','name','page','work_id','artist_id','source','medium','campaign','referrer'];
-        res.setHeader('Content-Disposition', 'attachment; filename="house-of-stone-activity.csv"');
+        res.setHeader('Content-Disposition', 'attachment; filename="house-of-mabwe-activity.csv"');
         return send(res, 200, csv([keys, ...rows.map(row => keys.map(k => row[k]))]), 'text/csv; charset=utf-8');
       }
       if (req.method === 'GET' && path === '/robots.txt') return send(res, 200, `User-agent: *\nDisallow: ${indexing ? '/admin\nDisallow: /api/' : '/'}\n${siteURL ? `Sitemap: ${siteURL.origin}/sitemap.xml\n` : ''}`, 'text/plain; charset=utf-8');
@@ -412,7 +412,7 @@ export function createApp(options = {}) {
       res.end(req.method === 'HEAD' ? '' : bytes || readFileSync(filePath));
     } catch (error) {
       if(!res.headersSent && error.status===404 && ['GET','HEAD'].includes(req.method) && !req.url.startsWith('/api/') && !extname(req.url.split('?')[0]) && !req.url.startsWith('/media/')){
-        const replacements={TITLE:'Page not found | House of Stone',DESCRIPTION:'Explore the House of Stone collections or contact us about a sculpture.',URL:origin(req)+req.url.split('?')[0],IMAGE:origin(req)+homepageImage(catalog),ROBOTS:'noindex,nofollow'};
+        const replacements={TITLE:'Page not found | House of Mabwe',DESCRIPTION:'Explore the House of Mabwe collections or contact us about a sculpture.',URL:origin(req)+req.url.split('?')[0],IMAGE:origin(req)+homepageImage(catalog),ROBOTS:'noindex,nofollow'};
         res.setHeader('X-Robots-Tag','noindex,nofollow');return send(res,404,req.method==='HEAD'?'':template.replace(/\{\{(TITLE|DESCRIPTION|URL|IMAGE|ROBOTS)\}\}/g,(_,key)=>esc(replacements[key])),'text/html; charset=utf-8');
       }
       if (!res.headersSent) send(res, error.status ?? 500, { error: error.status ? error.message : 'We could not complete that request. Please try again.' });
@@ -434,8 +434,8 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const { server, db } = createApp();
   const port = Number(process.env.PORT) || 8000;
   server.listen(port, process.env.HOST || '127.0.0.1', async () => {
-    console.log(`House of Stone running on port ${port}. Private inbox: /admin (username admin).`);
-    if(process.env.NODE_ENV==='production' && new URL(process.env.SITE_URL).origin==='https://house-of-stone-production.up.railway.app') {
+    console.log(`House of Mabwe running on port ${port}. Private inbox: /admin (username admin).`);
+    if(process.env.NODE_ENV==='production' && ['https://house-of-stone-production.up.railway.app','https://houseofmabwe.com'].includes(new URL(process.env.SITE_URL).origin)) {
       try {
         const {publishOwnerRelease}=await import('./scripts/publish-owner-release.mjs');
         const result=await publishOwnerRelease({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
@@ -469,6 +469,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         const result=await publishOwnerRoundFive({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
         console.log('Owner-requested sculpture titles:',JSON.stringify(result));
       } catch(error) { console.error('Owner sculpture titles did not complete:',error.message); }
+      try {
+        const {publishOwnerRoundSix}=await import('./scripts/publish-owner-round-six.mjs');
+        const result=await publishOwnerRoundSix({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
+        console.log('Owner-requested artist and brand:',JSON.stringify(result));
+      } catch(error) { console.error('Owner artist and brand did not complete:',error.message); }
     }
   });
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(() => process.exit(0)));

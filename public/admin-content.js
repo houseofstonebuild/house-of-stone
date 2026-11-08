@@ -210,7 +210,7 @@ $('#add-work').addEventListener('click',()=>{
   const id='work-'+crypto.randomUUID();draft.works.push({id,slug:id,artistId:artist.id,title:'New sculpture',image:'',dimensions:'',material:'',acquisitionMethod:'',description:'',objectPosition:'50% center',archived:false,_automaticAddress:true});selection={kind:'work',id};edited();render();
 });
 $('#download').addEventListener('click',()=>{
-  const url=URL.createObjectURL(new Blob([JSON.stringify(draft,null,2)],{type:'application/json'})),link=element('a');link.href=url;link.download='house-of-stone-my-edits.json';link.click();URL.revokeObjectURL(url);
+  const url=URL.createObjectURL(new Blob([JSON.stringify(draft,null,2)],{type:'application/json'})),link=element('a');link.href=url;link.download='house-of-mabwe-my-edits.json';link.click();URL.revokeObjectURL(url);
 });
 $('#reload').addEventListener('click',()=>operation(async()=>{accept(await api('content'));message('Latest collection loaded.');}));
 window.addEventListener('beforeunload',event=>{if(dirty||busy){event.preventDefault();event.returnValue='';}});

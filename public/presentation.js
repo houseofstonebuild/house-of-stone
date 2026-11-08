@@ -6,22 +6,22 @@ export const defaultPresentation = {
   collectors:{title:'Collecting stone sculpture',intro:'Get to know a work through its maker, its material and the details that make it individual.',image:'',caption:'Sculpture in a gallery setting',
     steps:[{title:'Find a work',text:'Browse the collections and artists. Look closely at the complete form, the surface and the relationship between polished and natural stone.'},{title:'Ask the questions that matter',text:'Inquire from the sculpture page so the work is identified. Ask about its status, dimensions, condition, signature, base and the information available about its history.'},{title:'Agree the next steps',text:'Discuss the individual work and delivery destination with us. Confirm the sculpture details, documentation, delivery arrangements and care before making a decision.'}],
     questions:[{title:'How do I begin an acquisition?',text:'Open the sculpture page and select Inquire about this work. Your inquiry includes the selected sculpture, and starts a direct conversation about its status and the next steps.'},{title:'What information accompanies a sculpture?',text:'Ask for the documented artist attribution, material, dimensions, condition and any available signature or provenance information. Documentation is specific to each work.'},{title:'What if the work I like is sold?',text:'Sold works remain part of the collection story. Explore related sculptures or inquire about alternatives; an inquiry about a sold work is a request for other works.'}]},
-  house:{title:'House of Stone',intro:'A contemporary art house for Zimbabwean stone sculpture, founded by Bradley and Milton.',image:'',caption:'Bradley and Milton',
-    vision:'We want the people who make the work to be as visible as the work itself. House of Stone brings Zimbabwean stone sculpture to collectors, designers and thoughtfully considered spaces.',
-    foundersTitle:'Bradley & Milton',founders:'House of Stone is our shared project. We are building a collection around individual artists and the sculptures they create, with a focus on clear information, careful presentation and direct conversations.',
+  house:{title:'House of Mabwe',intro:'A contemporary art house for Zimbabwean stone sculpture, founded by Bradley and Milton.',image:'',caption:'Bradley and Milton',
+    vision:'We want the people who make the work to be as visible as the work itself. House of Mabwe brings Zimbabwean stone sculpture to collectors, designers and thoughtfully considered spaces.',
+    foundersTitle:'Bradley & Milton',founders:'House of Mabwe is our shared project. We are building a collection around individual artists and the sculptures they create, with a focus on clear information, careful presentation and direct conversations.',
     approach:'We consider the character of the stone, the strength of the form and the artist behind it. Our aim is to give each work the attention it deserves, from its first photograph to the conversation about where it will live.'},
   making:{title:'Making the sculpture',intro:'A stone is selected, a form is carved, and the surface is refined by hand. Each artist brings a different eye to the process.',
     steps:[{title:'Choosing the stone',text:'The artist considers the block’s shape, grain and condition before beginning. A curve, an opening or a change in texture can develop from what the material allows.'},{title:'Shaping the form',text:'Carving establishes the main volumes and negative spaces. Finer tools refine the lines, transitions and edges as the sculpture takes shape.'},{title:'Finishing the surface',text:'Sanding and polishing reveal the stone’s color. Selected areas may retain their natural texture; the contrast becomes part of the finished work.'}],
     gallery:[]}
 };
 export const pageDescriptions = {
-  home:'Handcrafted Zimbabwean stone sculpture. Explore House of Stone’s collections, meet the artists and inquire about individual works.',
-  collection:'Browse the Founding Collection by collection, artist, stone, color and size. Discover individual Zimbabwean stone sculptures at House of Stone.',
-  artists:'Meet the artists behind House of Stone. Explore their sculptural practices, biographies and works across the collections.',
+  home:'Handcrafted Zimbabwean stone sculpture. Explore House of Mabwe’s collections, meet the artists and inquire about individual works.',
+  collection:'Browse the Founding Collection by collection, artist, stone, color and size. Discover individual Zimbabwean stone sculptures at House of Mabwe.',
+  artists:'Meet the artists behind House of Mabwe. Explore their sculptural practices, biographies and works across the collections.',
   making:'Follow the making of Zimbabwean stone sculpture, from choosing the stone and carving the form to refining and polishing its surface.',
-  designers:'Explore stone sculpture for residential interiors, hospitality and corporate spaces. Discuss scale, material and placement with House of Stone.',
-  collectors:'Explore collecting Zimbabwean stone sculpture with House of Stone, including artwork details, documentation and the inquiry process.',
-  house:'Meet House of Stone, founded by Bradley and Milton to connect Zimbabwean sculptors with collectors and thoughtfully designed spaces.',
-  privacy:'How House of Stone handles inquiries and measures website activity, and how to manage your privacy preferences.'
+  designers:'Explore stone sculpture for residential interiors, hospitality and corporate spaces. Discuss scale, material and placement with House of Mabwe.',
+  collectors:'Explore collecting Zimbabwean stone sculpture with House of Mabwe, including artwork details, documentation and the inquiry process.',
+  house:'Meet House of Mabwe, founded by Bradley and Milton to connect Zimbabwean sculptors with collectors and thoughtfully designed spaces.',
+  privacy:'How House of Mabwe handles inquiries and measures website activity, and how to manage your privacy preferences.'
 };
 export function presentationFor(site, key) { return {...defaultPresentation[key],...site.presentation?.[key]}; }

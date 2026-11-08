@@ -61,7 +61,7 @@ export function validateCatalog(input, { publicDir, mediaDir, publish = false, p
       if (!({artists,works}[key]).some(next => next.id === item.id)) fail('Archive existing records instead of removing them, so their history is kept.');
     }
   }
-  const site = { name: 'House of Stone', description: field(input.site.description, 'the website description', 400, true),
+  const site = { name: 'House of Mabwe', description: field(input.site.description, 'the website description', 400, true),
     location: field(input.site.location, 'the location', 120), featuredWorkId: field(input.site.featuredWorkId, 'the featured sculpture', 80),
     catalogueEdition: field(input.site.catalogueEdition, 'the catalogue edition', 80), heroImage: photo(input.site.heroImage, 'the homepage hero', false), contactEmail:field(input.site.contactEmail,'the contact email',254),inquiryNote:field(input.site.inquiryNote,'the inquiry response note',400),
     presentation:normalizePresentation(input.site.presentation,{field,photo,fail}),heroAlt: field(input.site.heroAlt, 'the hero image description', 300, true) };

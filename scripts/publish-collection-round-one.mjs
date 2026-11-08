@@ -46,7 +46,7 @@ export function prepareCollectionRoundOne(current){
 }
 
 export async function publishCollectionRoundOne({db,origin,password,publicOrigin,fetchImpl=fetch}){
-  if(publicOrigin!==releaseOrigin)return {skipped:'different-service'};
+  if(![releaseOrigin,'https://houseofmabwe.com'].includes(publicOrigin))return {skipped:'different-service'};
   if(db.prepare('SELECT value FROM settings WHERE key=?').get(releaseId))return {skipped:'already-published'};
   const local=new URL(origin);
   assert(['127.0.0.1','localhost','[::1]'].includes(local.hostname));
