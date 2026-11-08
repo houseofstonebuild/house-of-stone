@@ -15,13 +15,13 @@ export const defaultPresentation = {
     gallery:[]}
 };
 export const pageDescriptions = {
-  home:'Handcrafted Zimbabwean stone sculpture. Explore House of Mabwe’s collections, meet the artists and inquire about individual works.',
-  collection:'Browse the Founding Collection by collection, artist, stone, color and size. Discover individual Zimbabwean stone sculptures at House of Mabwe.',
-  artists:'Meet the artists behind House of Mabwe. Explore their sculptural practices, biographies and works across the collections.',
-  making:'Follow the making of Zimbabwean stone sculpture, from choosing the stone and carving the form to refining and polishing its surface.',
-  designers:'Explore stone sculpture for residential interiors, hospitality and corporate spaces. Discuss scale, material and placement with House of Mabwe.',
-  collectors:'Explore collecting Zimbabwean stone sculpture with House of Mabwe, including artwork details, documentation and the inquiry process.',
-  house:'Meet House of Mabwe, founded by Bradley and Milton to connect Zimbabwean sculptors with collectors and thoughtfully designed spaces.',
+  home:"Explore Zimbabwean stone sculpture, meet the artists and learn how the works are made. Inquire about individual sculptures.",
+  collection:"Browse Zimbabwean stone sculptures grouped by movement, material, portraiture, relationships and animal subjects.",
+  artists:"Explore artists represented in the House of Mabwe collection and view individual works. Artist information is checked before publication.",
+  making:"See documentary workshop photographs and learn about carving, tools, surface finishing and the decisions involved in making stone sculpture.",
+  designers:"Explore original Zimbabwean stone sculpture for interiors, with photographs, dimensions and individual acquisition inquiries.",
+  collectors:"Learn what to look for when collecting stone sculpture, from the artist and material to condition, scale and delivery.",
+  house:"Learn why House of Mabwe was started, how we present Zimbabwean sculptures and what information we share about each artist and work.",
   privacy:'How House of Mabwe handles inquiries and measures website activity, and how to manage your privacy preferences.'
 };
 export function presentationFor(site, key) { return {...defaultPresentation[key],...site.presentation?.[key]}; }

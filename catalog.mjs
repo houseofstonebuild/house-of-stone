@@ -85,8 +85,7 @@ export function validateCatalog(input, { publicDir, mediaDir, publish = false, p
   if (works.some(work => work.sourcePage && !work.archived && !membership.has(work.id))) fail('Assign each sourced sculpture to one primary collection.');
   for (const work of works) {
     if (work.additionalImages?.some(key => !assets[key])) fail('An additional sculpture photograph is missing.');
-    // The one confirmed sold record must never silently revert to available.
-    if (work.sourcePage === 13 && work.availability !== 'sold') fail('Original page 13 is confirmed sold. Keep its Sold status.');
+    // Owner-confirmed status can change; require an explicit verification before availability is published.
     if (work.sourcePage && work.availability === 'available' && !work.verification.availability) fail('Confirm availability before marking a sourced work available.');
   }
   return { site, assets, artists, works, collections };
@@ -114,14 +113,14 @@ export function publicCatalog(catalog, {preview = false} = {}) {
   const collections = (catalog.collections || []).filter(c => !c.archived).map(c => ({...c,workIds:c.workIds.filter(id => visible.some(w => w.id === id))})).filter(c => c.workIds.includes(c.starWorkId));
   const works = visible.map(work => {
     if (preview) return work;
-    if (!work.sourcePage) { const {internalNotes,verification,workingContent,workingModel,...publicWork}=work; return publicWork; }
+    if (!work.sourcePage) { const {internalNotes,verification,workingContent,workingModel,...publicWork}=work; return {...publicWork,materialEstimated:Boolean(work.material && verification?.material !== true)}; }
     const collection = collections.find(c => c.workIds.includes(work.id)), v = work.verification || {};
     // Owner-authorized working copy is separate from factual verification. It
     // never authorizes availability, provenance, signatures or delivery claims.
     const workingFields=new Set(['title','artist','material','dimensions','yearMade','description','size','finish']);
     const show=key=>v[key]===true || work.workingContent===true && workingFields.has(key);
     const result = {id:work.id,slug:work.slug,image:work.image,objectPosition:work.objectPosition,
-      modelVerified:v.model===true || work.workingModel===true,title:show('title') ? work.title : `${collection?.name || 'Sculpture'} ${String((collection?.workIds.indexOf(work.id) ?? 0)+1).padStart(2,'0')}`,
+      modelVerified:v.model===true || work.workingModel===true,materialEstimated:Boolean(work.material && v.material !== true),title:show('title') ? work.title : `${collection?.name || 'Sculpture'} ${String((collection?.workIds.indexOf(work.id) ?? 0)+1).padStart(2,'0')}`,
       artistId:show('artist') ? work.artistId : '',availability:work.availability === 'sold' || v.availability ? work.availability : 'unknown',
       description:show('description') ? work.description : work.visualDescription,colour:work.colour,size:show('size') && show('dimensions') ? work.size : '',additionalImages:work.additionalImages || [],views:work.views || {},details:{}};
     for (const key of ['material','dimensions','yearMade','acquisitionMethod']) result[key] = show(key) ? work[key] : '';

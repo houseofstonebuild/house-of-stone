@@ -1,0 +1,518 @@
+{
+  "pages": {
+    "home": {
+      "route": "/",
+      "eyebrow": "ZIMBABWEAN STONE SCULPTURE",
+      "heroTitle": "Contemporary stone sculpture from Zimbabwe",
+      "heroBody": "Explore works shaped by Zimbabwean artists, from their choice of stone to the final carved and polished form. Learn who made each sculpture, what makes it distinct, and how to bring it into your space.",
+      "heroCTA": "Explore the collection",
+      "sections": [
+        {
+          "eyebrow": "THE COLLECTION",
+          "heading": "The Founding Collection",
+          "body": "Every sculpture begins with an artist deciding what to make from a particular piece of stone. Our founding collection includes abstract forms, figures and animals, each with its own choices of shape, proportion and finish. Explore the works and look more closely at the skill behind them.",
+          "cta": "View the sculptures"
+        },
+        {
+          "eyebrow": "THE MAKING",
+          "heading": "From quarry to finished sculpture",
+          "body": "Before a sculpture reaches a home or gallery, someone has to find the stone, move it, carve away the excess, refine the form, and sand and finish the surface. This can take weeks or months. See how the work is done and why no two finished pieces are exactly the same.",
+          "cta": "See the process",
+          "image": "making-chisel-at-work.webp"
+        },
+        {
+          "eyebrow": "THE ARTISTS",
+          "heading": "The artists behind the work",
+          "body": "A stone sculpture is not the product of a method alone. Each sculptor develops a way of seeing form, working the material and deciding when a piece is complete. Get to know the people who make the work and the differences in their approaches.",
+          "cta": "Explore the artists"
+        },
+        {
+          "eyebrow": "THE HOUSE",
+          "heading": "Why we are building the House",
+          "body": "We started House of Mabwe because Zimbabwean sculpture deserves to be understood as contemporary art made by individual artists. We want people to see the talent, work and choices behind a finished piece, then have the information and confidence to collect it.",
+          "cta": "About the House"
+        },
+        {
+          "eyebrow": "FOR DESIGNERS",
+          "heading": "Original sculpture for thoughtful spaces",
+          "body": "These are individual artworks, not interchangeable decorative objects. We help designers consider the artist, scale, stone, surface and viewing angles so each piece has the space it needs.",
+          "cta": "For designers"
+        },
+        {
+          "eyebrow": "FOR COLLECTORS",
+          "heading": "Collect with a fuller understanding",
+          "body": "Learn how a sculpture was made, what distinguishes its artist, and why its shape and finish require skill. We can discuss the individual work, its documentation and its place in a collection.",
+          "cta": "For collectors"
+        }
+      ],
+      "closing": "Interested in a work? Ask us about the artist, the stone, the details of the sculpture and how to acquire it."
+    },
+    "collection": {
+      "route": "/collection",
+      "eyebrow": "THE FOUNDING COLLECTION",
+      "heroTitle": "Explore the collection",
+      "heroBody": "The Founding Collection brings together different approaches to Zimbabwean stone sculpture. In some pieces the artist has carved deep openings from a single mass; in others, small changes in form create a recognizable expression or figure. The differences are worth exploring closely: each shape represents decisions made over many stages of carving.",
+      "sections": [
+        {
+          "heading": "Look at what the artist had to achieve",
+          "body": "A thin stone bridge, an even curve, a deep recess or a carefully balanced base is easy to overlook when you see only the final polish. On each sculpture page we draw attention to those details and to the artist behind the work. A closer view helps explain why two pieces of similar size can involve very different levels of skill and effort."
+        }
+      ],
+      "closing": "For individual works, we can discuss the artist, stone, available documentation and acquisition details."
+    },
+    "artists": {
+      "route": "/artists",
+      "eyebrow": "THE ARTISTS",
+      "heroTitle": "The artists",
+      "heroBody": "The way a sculptor chooses a block, develops a form and finishes a surface is personal. A collector can learn to recognize an artist through recurring proportions, subjects and treatment of stone. Meet the makers behind the collection and see how their work differs.",
+      "sections": [
+        {
+          "heading": "Skill takes years to develop",
+          "body": "Knowing how to use a chisel is only the beginning. Artists learn how different stones respond, how thin a section can safely become, how a form balances and how to create a surface that works with light. They develop their own judgment through repeated work. That experience is visible in the finished sculpture and is one reason an artist’s name matters."
+        }
+      ],
+      "closing": "We verify biographical details and use direct artist accounts where available; unconfirmed histories should not be published as fact."
+    },
+    "making": {
+      "route": "/making",
+      "eyebrow": "THE MAKING",
+      "heroTitle": "How a stone sculpture is made",
+      "heroBody": "A finished sculpture rarely shows how much work went into it. Before a sculptor can begin polishing, they have to obtain a suitable block of stone, move it to a working space, work out how the form can be carved, remove the unwanted material, refine the details, and smooth the surfaces. Depending on the stone, size and complexity, this work can take weeks or months. The process is part of what makes each sculpture valuable.",
+      "heroImage": "making-artist-and-block.webp",
+      "sections": [
+        {
+          "eyebrow": "01 / SOURCING",
+          "heading": "Finding the right stone",
+          "body": "The work often begins at a quarry, not in a studio. Zimbabwean sculptors use stones that differ greatly in hardness, colour, markings and availability. The artist looks for a block large and sound enough to hold the intended design. Natural fractures may limit where an opening can be cut; a vein or change in colour may become a feature of the finished piece. Finding an appropriate stone can take time and repeated visits. Some artists quarry the material themselves, while others buy it from quarry operators or suppliers. Access, cost and travel vary by artist and location. The choice matters: a beautiful idea cannot survive if the selected stone cannot support it.",
+          "image": "making-rough-stone.webp",
+          "caption": "Unfinished stone at a Zimbabwean sculpture workshop. The block shown has not been linked to a work in our collection."
+        },
+        {
+          "eyebrow": "02 / TRANSPORT",
+          "heading": "Getting the stone to the workshop",
+          "body": "A block can weigh far more than the sculpture eventually carved from it. Before the creative work begins, it may need to be freed from surrounding material, lifted, loaded and moved over a considerable distance. Larger stones can require help, suitable vehicles and careful handling. This is real work and real expense before a single finished surface exists. The distance is not the same for every artist: some work near quarries and others must travel much farther. For some artists, sourcing stone can take most of a day before the return journey even begins. We do not assign one travel time to every workshop or quarry.",
+          "image": "making-artist-and-block.webp",
+          "caption": "A large working block in the workshop, with the sculptor beside it."
+        },
+        {
+          "eyebrow": "03 / DESIGN",
+          "heading": "Deciding what the stone can become",
+          "body": "The artist must make a series of decisions before removing much material: where the widest part will be, how the piece will balance, how deep an opening can be, and which surfaces need enough stone to remain strong. Some sculptors sketch an outline in charcoal; others develop the design directly as they work. The existing shape of the block can change the plan. A sculpture that looks effortless when finished may depend on carefully judged thicknesses and transitions. This is artistic work as much as physical work: the artist has to imagine a three-dimensional form inside a solid mass and keep that form in mind throughout carving.",
+          "image": "making-marked-stone.webp",
+          "caption": "Early marks and worked areas on an unfinished block."
+        },
+        {
+          "eyebrow": "04 / ROUGH CARVING",
+          "heading": "Removing the bulk of the stone",
+          "body": "The first stage of carving often uses a hammer and pointed chisel or punch to break away the excess rock. The artist works around the block, removing larger pieces and repeatedly checking the developing shape. Some sculptors also use grinders or other power tools where the stone and available equipment allow; hand tools remain central to many practices. The labor is demanding. Every blow has to remove enough stone to make progress without cutting into a feature that must remain. Unlike clay, stone cannot be added back after it has been broken away. An error can force a redesign or ruin a piece.",
+          "image": "making-carving-scene.webp",
+          "caption": "Hammer-and-chisel carving in the workshop."
+        },
+        {
+          "eyebrow": "05 / REFINEMENT",
+          "heading": "Carving the curves and openings",
+          "body": "Once the main outline is established, the work becomes slower and more exacting. The sculptor uses smaller chisels, files and rasps to define edges, deepen recesses, and bring surfaces into proportion. Open forms require particular control. To make a loop or a narrow bridge appear light, the artist has to remove stone around it while keeping enough material in the right places for the whole sculpture to remain stable. The same attention applies to a face, a folded figure or a carved animal: small changes in a line or angle can change the entire expression. Difficult areas may be reached only from certain directions, which limits how quickly they can be worked.",
+          "image": "making-chisel-at-work.webp",
+          "caption": "Fine carving around an opening, with a hammer and chisel."
+        },
+        {
+          "eyebrow": "06 / SANDING",
+          "heading": "Hours of work after the carving is finished",
+          "body": "A recognisable sculpture is not yet a finished sculpture. Chisels and rasps leave tool marks, scratches and uneven surfaces. Where the artist wants a smooth finish, those marks are gradually removed with abrasives. Sanding commonly moves from coarser papers to successively finer grades, often with water. Each stage removes the scratches from the preceding one. The artist has to repeat the process across curves, corners and difficult recesses, not just the broad surfaces facing the viewer. A fine polish will reveal imperfections left behind, so rushing this stage compromises the result. Other areas may be deliberately left raw or textured, making the contrast part of the composition.",
+          "image": "making-texture-closeup.webp",
+          "caption": "Tool marks on stone before the final stages of finishing."
+        },
+        {
+          "eyebrow": "07 / FINISHING",
+          "heading": "Revealing the colour and polish",
+          "body": "The light, dusty surface seen during carving can be very different from the final colour. For many Zimbabwean serpentine sculptures, the artist washes and heats the smoothed stone, then applies a clear wax such as beeswax or carnauba wax. More than one coat may be applied as the stone cools, followed by buffing with a cloth. The treatment deepens the appearance of the stone's natural colours and produces a sheen; it is not the same as painting a black or green colour onto the object. Some artists polish only selected areas and leave others rough. Methods vary with the type of stone and the finish the artist wants, so the exact treatment of an individual work should be confirmed rather than assumed.",
+          "image": "making-fine-detail.webp",
+          "caption": "Detailed handwork before the final polish. This footage does not show the heating or waxing stage."
+        },
+        {
+          "eyebrow": "08 / FINISHED WORK",
+          "heading": "What you are paying for",
+          "body": "The price of a sculpture is not a price per kilogram of rock. It reflects the artist's ideas and experience, the quality and suitability of the stone, the difficulty of the form, the time required to carve and finish it, and the work's individual character. Reputation, rarity, provenance and demand also matter. A small sculpture with difficult openings or unusually precise surfaces can require more skill than a larger, simpler form. The value is not only in the hours spent, but in the judgment developed over years that makes those hours produce something worth living with. When the work is complete, it must also be documented, protected and transported so that it arrives in the condition the artist intended.",
+          "image": "making-lion-workshop.webp",
+          "caption": "A carved lion in the workshop. Its artist and completion status have not been verified."
+        }
+      ],
+      "interludeTitle": "How long does it take?",
+      "interludeBody": "There is no fixed number of days. SFO Museum notes that carving can take weeks or months, depending on the size and hardness of the stone. Complexity matters too: a sculpture with deep openings, narrow connections and a highly polished surface can demand more careful work than its dimensions suggest. We will only state a precise production time for a work when the artist has confirmed it.",
+      "closingTitle": "Understanding the finished sculpture",
+      "closingBody": "The next time you look at a polished curve or a narrow opening, consider the sequence behind it: a block chosen and transported, material broken away, shape checked and refined, surfaces sanded again and again, and a finish applied with care. None of that guarantees a compelling sculpture. It is the artist's decisions throughout the process that make one piece different from another. That combination of artistic judgment, physical work and technical control is what we want visitors to understand before acquiring a work.",
+      "cta": "Explore the collection",
+      "documentaryNote": "Workshop images were extracted from footage supplied to House of Mabwe. The sculptor in the footage is not yet identified for publication; these are general process illustrations and must not be presented as documentation of any particular sculpture in our catalog. The footage does not show a quarry visit or final waxing. Use other cleared documentary images for those stages if obtained."
+    },
+    "house": {
+      "route": "/house",
+      "eyebrow": "THE HOUSE",
+      "heroTitle": "About House of Mabwe",
+      "heroBody": "House of Mabwe was founded to bring more attention to Zimbabwean sculptors and the work behind their finished sculptures. We curate their work and help buyers understand its artistic, technical and human value.",
+      "sections": [
+        {
+          "eyebrow": "OUR STARTING POINT",
+          "heading": "Why this work matters to us",
+          "body": "Zimbabwe has an important contemporary stone sculpture movement, developed over generations of artists and workshops. Its artists work in different styles, from expressive figures to complex abstract forms. Yet a person seeing a finished polished sculpture may know little about the artist, the stone or the time involved in making it. We want that information to be part of the experience, because the sculpture is more interesting when the person considering it knows what they are looking at."
+        },
+        {
+          "eyebrow": "THE NAME",
+          "heading": "Why House of Mabwe",
+          "body": "The name is connected to Zimbabwe, whose name is widely understood to refer to 'houses of stone' and is associated with the stone architecture of Great Zimbabwe. We chose it to reflect where this work comes from. Our purpose is to present living Zimbabwean artists and their contemporary work to collectors and designers outside Zimbabwe."
+        },
+        {
+          "eyebrow": "THE COLLECTION",
+          "heading": "How we present the work",
+          "body": "We select works for the strength of their form and the individuality of the artist's approach. We pay attention to the proportions of the sculpture, the quality of its carving and the way its polished and unpolished surfaces have been handled. We also want accurate information: artist, title, stone, measurements and the work's history where documented. We do not make up artist stories or manufacturing details to support a price."
+        },
+        {
+          "eyebrow": "THE EXPERIENCE",
+          "heading": "Seeing sculpture online",
+          "body": "A sculpture is three-dimensional and often changes significantly when viewed from another side. Our photographs, detail images and available 3D views help people assess the complexity of the work before an in-person viewing. We also explain the carving process, because a finished polished piece can conceal weeks of physical labor and fine judgment."
+        },
+        {
+          "eyebrow": "THE ARTISTS",
+          "heading": "Giving artists proper credit",
+          "body": "The artist's name is central to the value of the work. We want to document individual methods, influences and decisions in the artist's own words whenever possible. A sculpture by one artist should not be presented as interchangeable with a similar-looking work by another."
+        },
+        {
+          "eyebrow": "LOOKING AHEAD",
+          "heading": "What we are building",
+          "body": "We are starting with a focused group of sculptures and a digital platform for discovering them. Our ambition is to develop long-term relationships with artists, improve documentation, and make their work accessible to collectors and designers through informed guidance and carefully arranged viewings."
+        }
+      ],
+      "foundersHeading": "From the founders",
+      "foundersBody": "House of Mabwe was founded by Bradley and Milton to introduce collectors and designers to Zimbabwean stone sculpture, with clear information about the artists and their work.",
+      "foundersAttribution": "Bradley & Milton · founders",
+      "closing": "Browse the collection or contact us about a particular work."
+    },
+    "designers": {
+      "route": "/designers",
+      "eyebrow": "FOR DESIGNERS & ARCHITECTS",
+      "heroTitle": "Sourcing sculpture for interiors",
+      "heroBody": "Original Zimbabwean stone sculpture offers more than material, colour and scale. Each work is an artist’s individual design, achieved through demanding carving and finishing. We help designers identify pieces that suit a project while giving clients the story and authorship behind what they are acquiring.",
+      "sections": [
+        {
+          "heading": "Choosing a work for a room",
+          "body": "The placement should make the most of what the sculptor has done. A carved opening needs light or space behind it; a piece with polished and rough areas may change character as natural light moves across it. Consider the viewing angles and the amount of space around the work. Its dimensions matter, but so does its particular form."
+        },
+        {
+          "heading": "The information you need",
+          "body": "We can discuss the available measurements and images for a piece, along with material, condition, location and acquisition questions. If you share a plan, site photograph or dimensioned brief, we can identify works that may suit the setting. Information that has not yet been confirmed will be clearly identified."
+        },
+        {
+          "heading": "Using 3D and room visualizations",
+          "body": "Where available, our 3D models offer another way to understand the overall shape and relative scale of a sculpture. Some hidden surfaces may be reconstructed from photographs and should not replace inspection of the actual object. Interior visualizations help with placement discussions; they are not photographs of completed installations."
+        },
+        {
+          "heading": "Presenting the artist to your client",
+          "body": "The value of an original sculpture is not only that it completes a room. Your client is acquiring the work of a named artist with a distinct practice. We can help explain the stone, the carving and finishing decisions, and the available provenance information so the artwork retains its identity within the design project."
+        }
+      ],
+      "steps": [
+        {
+          "title": "Send the brief",
+          "body": "Tell us the project type, approximate size, location, budget range and when you need the work."
+        },
+        {
+          "title": "Review suitable pieces",
+          "body": "We will discuss available works and share the most relevant photographs and details."
+        },
+        {
+          "title": "Confirm acquisition details",
+          "body": "We will clarify availability, pricing, delivery and handling arrangements before you commit."
+        }
+      ],
+      "ctaHeading": "Tell us about the project",
+      "ctaBody": "Send the site details and any sculptures you are considering. We can start with the practical questions.",
+      "cta": "Discuss a project"
+    },
+    "collectors": {
+      "route": "/collectors",
+      "eyebrow": "FOR COLLECTORS",
+      "heroTitle": "Collecting Zimbabwean stone sculpture",
+      "heroBody": "A compelling sculpture rewards attention beyond the first impression. Learn how its material was selected and worked, how the artist developed its form, and what distinguishes this particular piece from other work of a similar size or subject.",
+      "sections": [
+        {
+          "heading": "Begin by looking carefully",
+          "body": "Start with the form, then look at how it was made. An opening, a fine edge, an intricate figure or a finely polished surface may represent weeks of careful labor. An individual artist’s experience also shapes the result. The most useful questions are not only “Do I like it?” but “What did the artist have to solve to make this?” and “Why is this work distinctive?”"
+        },
+        {
+          "heading": "Learn about the maker",
+          "body": "Stone type, carving difficulty, scale and finish affect the work involved, but the market value of an artwork also reflects authorship, originality, quality, provenance, reputation and demand. A smaller sculpture is not necessarily less accomplished or less valuable than a larger one. We can explain the details known about each piece rather than relying on generic price claims."
+        },
+        {
+          "heading": "Understand what you are buying",
+          "body": "Before acquiring a sculpture, confirm its actual dimensions, weight, stone, condition and availability. Ask how it will be packed and transported, whether it needs a stable base, and how to care for the surface. We can discuss the information we have and obtain further confirmation where necessary."
+        },
+        {
+          "heading": "Think about where it will live",
+          "body": "Stone sculpture can work in different kinds of rooms, but placement affects how it is seen. Leave room to view the piece from more than one angle when possible. Consider sunlight, nearby materials and whether the surface or pedestal can safely carry its weight."
+        }
+      ],
+      "steps": [
+        {
+          "title": "Explore the collection",
+          "body": "Start with the form and subject that interest you."
+        },
+        {
+          "title": "Ask about a piece",
+          "body": "We can explain the information available and identify anything that still needs checking."
+        },
+        {
+          "title": "Discuss the acquisition",
+          "body": "Availability, price, packing and delivery are confirmed with you directly."
+        }
+      ],
+      "ctaHeading": "Questions about a sculpture?",
+      "ctaBody": "Tell us which work interests you and what you would like to know.",
+      "cta": "Inquire about a sculpture"
+    }
+  },
+  "collections": {
+    "rhythm": {
+      "name": "Rhythm",
+      "eyebrow": "THE COLLECTION / RHYTHM",
+      "heroTitle": "Rhythm",
+      "intro": "Rhythm brings together sculptures built around long curves, loops and openings. Carving these shapes from stone requires planning the parts that will be removed and the narrow sections that must remain strong. The finished forms can look light, but their balance and smooth transitions depend on precision.",
+      "closer": "Follow a curved section from its base through the opening. Notice where it becomes thin, where the surface turns inward, and how the artist has kept the whole structure stable.",
+      "card": "Curves, openings and forms that change as you move around them."
+    },
+    "elemental": {
+      "name": "Elemental",
+      "eyebrow": "THE COLLECTION / ELEMENTAL",
+      "heroTitle": "Elemental",
+      "intro": "The sculptures in Elemental draw attention to the stone itself: colour changes, veins, rough surfaces and polished areas. The artist cannot manufacture the stone’s internal markings. Part of the skill is choosing a block that can support the intended form, then deciding which surfaces to expose and which to leave untouched.",
+      "closer": "Look at the boundary between textured and polished stone. The smooth sections require repeated finishing, while the rough areas may be kept deliberately as part of the composition.",
+      "card": "Stone colour, veining and contrasting surfaces."
+    },
+    "presence": {
+      "name": "Presence",
+      "eyebrow": "THE COLLECTION / PRESENCE",
+      "heroTitle": "Presence",
+      "intro": "Presence focuses on faces and heads. A carved face can change expression with a small adjustment to the brow, mouth, angle or proportion. The artist has to understand both the material and the subject to remove enough stone to create expression without losing its balance or strength.",
+      "closer": "Look at how few lines and planes are needed to suggest an expression, and where the sculptor has chosen to leave stone rather than carve it away.",
+      "card": "Sculptural studies of faces and heads."
+    },
+    "kinship": {
+      "name": "Kinship",
+      "eyebrow": "THE COLLECTION / KINSHIP",
+      "heroTitle": "Kinship",
+      "intro": "Kinship brings several figures into shared compositions. When figures are joined within one block, the artist has to solve both the relationships between the figures and the structure that holds them together. A small change in the direction of a face or shoulder can change the scene.",
+      "closer": "Notice where the figures meet and how the artist has made the separate forms legible while keeping the stone connected.",
+      "card": "Figures shown together, from pairs to family groups."
+    },
+    "wild-grace": {
+      "name": "Wild Grace",
+      "eyebrow": "THE COLLECTION / WILD GRACE",
+      "heroTitle": "Wild Grace",
+      "intro": "Wild Grace presents animal forms, from recognizable figures to simplified movement. Carving an animal involves more than reproducing features: the artist has to judge body weight, posture and proportion so the finished sculpture feels convincing and remains balanced.",
+      "closer": "Study the joins between head, neck, body and base, especially where the outline narrows or the stone projects outward.",
+      "card": "Birds and animals, from recognizable figures to simpler forms."
+    }
+  },
+  "works": {
+    "zsa-013": {
+      "editorialShort": "A narrow form rises and widens around an opening. Pale edges make the outline easier to follow.",
+      "editorialLong": "The outline rises from a narrower base and bends around a central space. The opening is important to how the sculpture reads, especially where the two sides approach one another near the top. From the front the shape looks almost flat in places; a side view should help show how much stone remains behind those edges. The difference in colour along the cut surfaces is another detail to inspect in person. The most demanding part is likely the relationship between the open center and the edges left to support it. A smooth edge only comes after careful removal and finishing.",
+      "detailToPhotograph": "The opening and the thickness of the outer edges.",
+      "placementNote": "This upright piece needs a stable surface and enough room to see its outline without objects immediately behind it."
+    },
+    "zsa-009": {
+      "editorialShort": "A circular form wraps around a rounded centre. The opening and the stone that surrounds it create a balanced shape.",
+      "editorialLong": "There is a difference between carving a circle into the surface and making a loop that stands around another form. Here, the outer structure gives the sculpture its shape while the rounded area draws attention to the middle. Look at the points where the loop connects to the rest of the stone. Those transitions are worth examining from more than one angle, because a photograph does not fully explain how the parts relate in depth. An outer loop is not simply drawn onto the stone: the material inside it has to be removed while the surrounding structure stays intact.",
+      "detailToPhotograph": "How the surrounding loop meets the central rounded form.",
+      "placementNote": "A display with open space behind the work would help make the central opening visible."
+    },
+    "zsa-025": {
+      "editorialShort": "Two openings appear to wind around each other, while pale veins cross the darker stone.",
+      "editorialLong": "This sculpture is difficult to understand fully from a straight-on image. Curved sections pass around two openings, and the eye follows one edge until it disappears behind another. Pale markings in the stone add detail that was not created by carving. A close view can help separate the natural marks from the shaped surfaces. The side and rear views are important for understanding how the different sections connect. Those overlapping turns have to be carved in sequence. As one surface is finished, the artist has less room to reach the adjoining section.",
+      "detailToPhotograph": "The crossing curves and the pale markings within the stone.",
+      "placementNote": "Allow room to view this piece from several sides rather than placing it tightly against a wall."
+    },
+    "zsa-029": {
+      "editorialShort": "A tall, narrow shape twists and opens near the top.",
+      "editorialLong": "The sculpture has a vertical arrangement with curved sections that turn back toward the main body. Its interest is in the way a relatively narrow piece of stone supports broad changes in direction. Look closely at the base and the inner turns: they show how the form remains connected even where the outline seems to separate. A second view would clarify the depth of the openings and the thickness of the raised sections. The upward curls place more demands on balance and on the thickness of the material left at their connections.",
+      "detailToPhotograph": "The inner turns and the connection between the upper curls and base.",
+      "placementNote": "An upright sculpture like this benefits from an uncluttered background and a stable platform."
+    },
+    "zsa-021": {
+      "editorialShort": "Several forms resembling hands extend upward from a heavier base.",
+      "editorialLong": "The raised elements look like separate gestures, but they belong to one sculpture. Their differing heights and directions give the composition its shape. The base carries the weight visually and physically, while the upper sections have much narrower outlines. A close photograph should show how each finger-like or hand-like form is finished and where the rougher stone has been retained. The raised forms and the areas between them require the sculptor to judge how much material can be removed without losing their connection.",
+      "detailToPhotograph": "The different heights and positions of the raised forms.",
+      "placementNote": "The upward direction makes the work suitable for a place where it can be seen from a slight distance."
+    },
+    "zsa-028": {
+      "editorialShort": "Red curved sections cross and reconnect, leaving several openings through the form.",
+      "editorialLong": "The first thing you notice is the strong red colour. After that, the arrangement of the curves becomes clearer. One section passes in front of another, then turns back into the larger form. Each opening has a different shape. The surface of the stone also varies, so a close view matters as much as the silhouette. The colour varies across the surface, so the appearance changes slightly with the viewing angle and light. The choice of where to place each curve affects how the natural colour and the polished surface can be seen.",
+      "detailToPhotograph": "Where the curved sections overlap and how the natural colour changes across the work.",
+      "placementNote": "The sculpture would be easiest to read against a fairly simple backdrop."
+    },
+    "zsa-017": {
+      "editorialShort": "An angular outer shape surrounds a rounded element in its centre.",
+      "editorialLong": "The outside of this sculpture is made of straighter edges and sharply changing directions. Inside that structure sits a smoother rounded form. The contrast makes the middle feel distinct without separating it from the rest of the stone. Look at the narrow connections that keep the outer frame and centre together. The rounded centre and the angular outer edges also catch light differently, making the contrast easier to see from a second angle. Cutting an opening around a central form takes more planning than shaping an outer silhouette alone.",
+      "detailToPhotograph": "The contrast between the outer edges and the rounded centre.",
+      "placementNote": "The open form benefits from a position where viewers can see through it."
+    },
+    "zsa-031": {
+      "editorialShort": "The surface shifts between green and brown areas, with irregular edges around an opening.",
+      "editorialLong": "This piece shows more of its irregular edges than many polished sculptures. The changes in colour are visible across the form, and a large opening separates the upper and lower sections. Instead of reading only as a smooth silhouette, it asks for attention to the surface itself. The mix of rough edges and smoother areas is a large part of its character. The artist must work with the colours already inside the stone, exposing some areas and preserving others through deliberate cuts.",
+      "detailToPhotograph": "The uneven edge, the opening and the colour changes in the stone.",
+      "placementNote": "Natural light may help reveal the colour differences, provided the placement is safe for the material."
+    },
+    "zsa-012": {
+      "editorialShort": "An elongated face is set against a rougher section of stone.",
+      "editorialLong": "The facial features appear in a long, narrow plane. Next to them is a differently textured area whose irregular surface contrasts with the more finished face. That contrast is the main feature of the work. Look at where one surface stops and the other begins. From the side, the thickness of the head and its relationship to the rough plane become clearer than they are in a front-facing image. The difference between the smooth face and rougher plane is achieved through two different treatments of the same material.",
+      "detailToPhotograph": "The border between the face and the textured stone beside it.",
+      "placementNote": "A side view is worth planning for when positioning the sculpture."
+    },
+    "zsa-001": {
+      "editorialShort": "A narrow face is defined by sharp lines and a circular opening.",
+      "editorialLong": "The shape is immediately recognizable as a head, although relatively few facial details are carved. The circular opening interrupts the broad surface and becomes one of the main things you notice. The outer edges narrow and widen in different places, giving the sculpture a distinct front view. Look at the thickness around the opening: the sculpture occupies more depth than a flat photograph suggests. The central opening and pointed outline depend on precise placement of the cuts and careful control of the remaining stone.",
+      "detailToPhotograph": "The circular cut-through and the tapered outline of the head.",
+      "placementNote": "Allow light through the circular opening if the space permits."
+    },
+    "zsa-026": {
+      "editorialShort": "A long facial form rises toward a grooved, pointed upper section.",
+      "editorialLong": "The upper part of the sculpture carries repeated cuts, while the face below is simpler and more continuous. Those two treatments give the work a clear top and bottom. The pointed outline also makes the sculpture look different from the side. Its details should be examined close up to establish which are carved grooves and which are natural markings in the stone. The crown and facial planes require different kinds of carving, with the smaller grooves demanding particular consistency.",
+      "detailToPhotograph": "The grooves and points at the top of the head.",
+      "placementNote": "Keep the upper section visible rather than placing the work below a shelf."
+    },
+    "zsa-023": {
+      "editorialShort": "A slender facial form is defined by angled planes and staggered points.",
+      "editorialLong": "This sculpture has a narrow profile with several changes of direction. Its form is built up through edges rather than broad curves. Small shifts in angle are particularly important here, because they determine which surfaces catch the light. Compare the front and side photographs to understand how much the pointed areas project, and how the base supports the vertical shape. The narrow upper sections and staggered points require careful balance within a relatively slender piece.",
+      "detailToPhotograph": "The different angles and the way the upper points project.",
+      "placementNote": "The upright form is best viewed with some space above and beside it."
+    },
+    "zsa-027": {
+      "editorialShort": "A smoother face sits below a rough, pale upper section.",
+      "editorialLong": "The contrast between the upper and lower surfaces is immediately visible. The face is relatively smooth, with its features expressed through a few clear changes of shape. Above it, the stone is much more irregular. This difference makes the forehead area stand out. Inspect the point where the surfaces meet; it shows how the sculpture moves from the carved facial features into the more textured part. Refining the face while leaving the forehead textured requires the artist to control exactly where one finish stops and another begins.",
+      "detailToPhotograph": "The dividing line between the smooth face and the rougher forehead.",
+      "placementNote": "Soft side lighting can show the different textures without flattening the features."
+    },
+    "zsa-020": {
+      "editorialShort": "Two figures lean together within a compact, rounded shape.",
+      "editorialLong": "The relationship between the figures is conveyed through their positions rather than extensive detail. One form appears to support the other, and their outlines merge into a shared body of stone. A close view helps reveal where one figure ends and the other begins. Notice the direction of the heads and shoulders, and how the remaining stone at the base holds the composition together. The closeness of the figures depends on carefully judging how much stone to remove between the bodies.",
+      "detailToPhotograph": "How the figures overlap and meet at the shoulders.",
+      "placementNote": "This work can be viewed at relatively close range, where the figures can be seen clearly."
+    },
+    "zsa-014": {
+      "editorialShort": "Two profiles share a broad upper section with repeated grooves.",
+      "editorialLong": "The faces sit side by side, with a carved fan-like arrangement above them. The shared top holds the composition together, but the two profiles remain distinct. The shallow grooves create texture without changing the overall outline dramatically. Look at the space between the profiles and at their different angles. Those details establish the relationship between the two figures. The parallel grooves and facing profiles require both repeated detailed cuts and a coherent overall arrangement.",
+      "detailToPhotograph": "The profile of each face and the grooves above them.",
+      "placementNote": "The paired profiles are easier to understand from the main viewing side."
+    },
+    "zsa-007": {
+      "editorialShort": "Two elongated figures lean toward each other, with textured areas around the heads.",
+      "editorialLong": "The figures are tall and close together, but their bodies do not have identical outlines. They lean and turn in slightly different directions, making the relationship between them the main feature. The texturing near the heads contrasts with the smoother parts of the bodies. The overall form is narrow and upright, and the changes of position between the two figures are especially clear from the front. The spaces between the figures and the joining points need control so the figures read separately without the sculpture losing its continuity.",
+      "detailToPhotograph": "The figures’ different postures and the texturing around their heads.",
+      "placementNote": "At this scale, confirm the full depth and weight before choosing a pedestal or surface."
+    },
+    "zsa-010": {
+      "editorialShort": "Two faces turn toward one another across a narrow opening.",
+      "editorialLong": "The faces are brought close enough that the empty area between them helps define both profiles. The sculpture does not rely on detailed facial features; the direction of the heads carries the subject. Look at how the surrounding stone connects the two sides. From another angle, the opening may appear broader or narrower, changing the way the figures relate. An opening between two profiles makes the space itself part of the design; its size and position change the relationship between the figures.",
+      "detailToPhotograph": "The narrow opening between the faces.",
+      "placementNote": "Position it where viewers can recognize both profiles rather than seeing only one."
+    },
+    "zsa-024": {
+      "editorialShort": "Several figures sit within a roughly oval outer frame.",
+      "editorialLong": "The figures are grouped closely together, with very little space between them. The surrounding oval has a rougher finish than some of the forms inside it, giving the composition a clear outer boundary. The subject is easy to read from the front, but close photographs are needed to distinguish each person and the points where their bodies meet. Multiple figures within an enclosing form create several depths to carve, each of which must remain readable and structurally connected.",
+      "detailToPhotograph": "The number and arrangement of figures within the oval.",
+      "placementNote": "A frontal viewing angle shows the grouping clearly; side views clarify its depth."
+    },
+    "zsa-005": {
+      "editorialShort": "Two long-beaked birds stand together in one upright carving.",
+      "editorialLong": "The two birds are joined in a single composition, with long necks and beaks creating a series of narrow lines. Their heads sit at different positions, so they do not read as a repeated pattern. The carving relies on a few distinctive animal features rather than detailed feathers or anatomy. Look at the gap between the necks and the way the lower body supports them. Two long beaks and necks call for accurate proportion and careful shaping around narrow transitions.",
+      "detailToPhotograph": "The direction of the beaks and the gap between the necks.",
+      "placementNote": "Give the upper silhouettes room to be seen clearly from the main approach."
+    },
+    "zsa-006": {
+      "editorialShort": "The neck of a bird-like form curves around into a spiral.",
+      "editorialLong": "The bird is recognizable from the suggestion of a head and neck, but the larger shape is an open curve. The stone turns back toward itself, creating a spiral with changing thickness. Look at the inner edge of the curve and the points where it joins the body. Those are the areas that explain how a relatively slender-looking section stays connected to the rest of the sculpture. The spiralling outline has to retain strength as the curve narrows, and the viewer needs to be able to follow it through depth.",
+      "detailToPhotograph": "The inner spiral and the way it attaches to the lower form.",
+      "placementNote": "This piece benefits from an open background that makes the spiral legible."
+    },
+    "zsa-018": {
+      "editorialShort": "An animal head rises on a curved neck, with long ears projecting upward.",
+      "editorialLong": "The direction of the head gives this sculpture much of its character. Its neck curves upward before meeting a head with elongated ears. The overall form is recognizable without relying on detailed surface treatment. Look at the two ears and the side profile of the head. Those areas establish the animal’s alert posture and may look quite different from the back. The long ears and turning neck make the silhouette recognisable while placing attention on the strength of the connecting stone.",
+      "detailToPhotograph": "The long ears and the change of direction through the neck.",
+      "placementNote": "Allow space above and behind the ears, especially if placing it on a shelf."
+    },
+    "zsa-016": {
+      "editorialShort": "A compact animal-like form has projecting sections that suggest movement.",
+      "editorialLong": "The sculpture has a low, grounded body and parts that extend beyond its main volume. Those projecting sections make the outline less predictable from a single view. Compare the photographs from the front and sides to understand the relationships between them. The sculpture will be easier to understand with the front, side and rear photographs shown together. The winged silhouette depends on the balance of the projecting forms and the solid body that supports them.",
+      "detailToPhotograph": "The projecting sections and how the body is supported.",
+      "placementNote": "This work should be seen from more than one angle to understand the overall form."
+    },
+    "hos-queen-mother": {
+      "editorialShort": "Queen Mother is a carved bust with a wrapped headdress, earrings and layered necklaces. The face and ornament hold different kinds of detail within one stone form.",
+      "editorialLong": "Look first at the broad planes of the face, then at the smaller cuts that define the headdress, earrings and necklaces. The ornament needs enough depth to remain legible without taking attention away from the expression. From the side, the layers around the neck and the shape of the headdress become clearer. These are visible choices in proportion and surface, each requiring careful transitions between the larger form and finer detail.",
+      "placementNote": "At 45 cm high, it needs a stable surface with room to see the profile. The approximately 25 cm width is an image-based estimate pending measurement."
+    },
+    "hos-celebration": {
+      "editorialShort": "A seated figure plays a drum in this warm-toned stone sculpture. The rounded body, arms and instrument meet in a compact composition.",
+      "editorialLong": "The drum and the figure have to read as separate forms while remaining part of one composition. Look at the space around the arms, the curve of the drum and the way the seated base supports the figure. Small differences in the surfaces make the hands and instrument easier to distinguish. The subject is recognizable, but the strength of the work also lies in how the artist has balanced its many connected parts.",
+      "placementNote": "Allow a view from more than one side so the relationship between the figure and drum is visible."
+    },
+    "hos-belonging": {
+      "editorialShort": "Four rounded faces meet around an open centre. Their shared frame keeps the figures connected while leaving space between them.",
+      "editorialLong": "Each face is shaped with a few changes of plane and curve. The opening at the centre lets light pass through the group, while the outer frame carries the weight of the composition. Look at the points where the faces meet the surrounding stone: those connections keep the separate expressions visible without breaking the structure into isolated pieces. The artist attribution and exact stone remain to be confirmed.",
+      "placementNote": "A position with light behind the central opening helps reveal the depth and connections."
+    },
+    "hos-inner-beauty": {
+      "editorialShort": "An elongated face by Philip Mlimu combines a narrow profile with contrasting patterned detail. Its proportions draw attention to the line of the nose and brow.",
+      "editorialLong": "The face is made from long, restrained planes. Near them, the patterned section introduces smaller marks and a different surface rhythm. From the front, the features appear direct; a side view shows how much the profile projects from the surrounding stone. The measured 40 cm height makes the work intimate enough to inspect close up, where those changes in surface become important.",
+      "placementNote": "Place it where viewers can move between front and profile views without strong glare on the polished areas."
+    }
+  },
+  "faq": [
+    {
+      "q": "Are the sculptures made from one piece of stone?",
+      "a": "Many are carved from a single block, but we do not assume that is true of every work. Ask us for confirmation about a particular sculpture, including any base or attached components."
+    },
+    {
+      "q": "Are the sculptures carved entirely by hand?",
+      "a": "Hammer-and-chisel carving is part of the tradition and is visible in our workshop footage. Some artists also use drills or other powered tools, depending on the stone and the work. We will not claim a particular method unless it is verified."
+    },
+    {
+      "q": "Why do polished stone sculptures sometimes look darker than the rough block?",
+      "a": "Sanding, polishing and, in some cases, heat-and-wax finishing can deepen the apparent colour and add a sheen. The process depends on the specific stone and artist."
+    },
+    {
+      "q": "How long does it take to make one sculpture?",
+      "a": "It varies substantially with the size, hardness, design and finish. If the artist has provided the time taken for an individual piece, we will share it. Otherwise we will not give an invented estimate."
+    },
+    {
+      "q": "Are the stone colours natural?",
+      "a": "The stone itself has colour and natural variation. Surface finishing can change its appearance. For any particular sculpture, we can confirm the material and treatment as information becomes available."
+    },
+    {
+      "q": "Can I see a sculpture from more than one angle?",
+      "a": "We show multiple photographs where available. Some sculptures also have 3D models, but these may include reconstructed areas that were not visible in the original photographs."
+    },
+    {
+      "q": "Can I view a sculpture in person?",
+      "a": "Ask us about the specific work. Viewing arrangements depend on its current location and availability."
+    },
+    {
+      "q": "Can you help with a sculpture for an interior project?",
+      "a": "Yes. Share photographs, dimensions and other relevant details. We can discuss pieces that may suit the project and identify what needs to be confirmed before purchase."
+    },
+    {
+      "q": "Can you confirm the artist and provenance?",
+      "a": "We aim to document each work accurately. If an attribution or provenance record is incomplete, we will say so and seek confirmation before an acquisition."
+    },
+    {
+      "q": "How does delivery work?",
+      "a": "Packing, insurance, shipping and any installation requirements are arranged according to the work and destination. We confirm practical terms before an acquisition."
+    },
+    {
+      "q": "How do I care for a stone sculpture?",
+      "a": "Care depends on the stone and finish. In general, avoid abrasive cleaners and unstable display surfaces. Ask for advice specific to the piece before using wax, water or cleaning products."
+    },
+    {
+      "q": "Why are prices provided by inquiry?",
+      "a": "Each piece is individual. An inquiry gives us an opportunity to confirm current availability, pricing, condition and delivery requirements for the specific sculpture."
+    }
+  ]
+}

@@ -29,6 +29,9 @@ class Element {
   querySelectorAll() { return []; }
   append(...children) { this.children.push(...children); }
   prepend(...children) { this.children.unshift(...children); }
+  after(...children) { this.children.push(...children); }
+  before(...children) { this.children.unshift(...children); }
+  remove() {}
   replaceChildren(...children) { this.children=children; }
   focus() { this.focused=true; }
   scrollIntoView(options) { this.scrolled=true;this.scrollOptions=options; }
@@ -79,6 +82,13 @@ test('Back restores the visitor route and scroll position through work and artis
   f.browserWindow.scrollY=240;await f.delegated({artist:'tariro'});assert.equal(f.location.pathname,'/artists/tariro-mavhunga');
   await f.delegated({back:''});assert.equal(f.location.pathname,'/works/folded-light');assert.equal(f.browserWindow.scrollY,240);
   await f.delegated({back:''});assert.equal(f.location.pathname,'/');assert.equal(f.browserWindow.scrollY,1840);assert.equal(f.get('#hos-page-navigation').hidden,true);
+});
+test('editorial copy loads with sculpture detail and process sections',async t=>{
+  const f=await clientFixture(t);
+  assert.equal(f.get('[data-page="making"]').querySelector('.hos-process-steps').children.length,8);
+  assert.match(f.get('[data-page="home"]').querySelector('.hos-home-mission p').textContent,/Zimbabwean artists/);
+  await f.delegated({work:'folded-light'});
+  assert.equal(f.get('#hos-work-story').hidden,true); // legacy seed has no matched editorial essay
 });
 test('Back on a directly opened sculpture safely returns to the collection',async t=>{
   const f=await clientFixture(t,{initialPath:'/works/folded-light'});assert.equal(f.get('#hos-page-navigation').hidden,false);

@@ -474,6 +474,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         const result=await publishOwnerRoundSix({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
         console.log('Owner-requested artist and brand:',JSON.stringify(result));
       } catch(error) { console.error('Owner artist and brand did not complete:',error.message); }
+      try {
+        const {publishOwnerRoundSeven}=await import('./scripts/publish-owner-round-seven.mjs');
+        const result=await publishOwnerRoundSeven({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
+        console.log('Owner-requested catalogue update:',JSON.stringify(result));
+      } catch(error) { console.error('Owner catalogue update did not complete:',error.message); }
     }
   });
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(() => process.exit(0)));
