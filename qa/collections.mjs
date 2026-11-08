@@ -71,7 +71,7 @@ try {
  }
  assert(!requests.some(url=>url.endsWith('.glb') || url.includes('sculpture-viewer.js')),'No GPU resources should load for missing matching models');
  await page.setViewportSize({width:390,height:844});await page.goto(base+'/');await page.locator('#hos-concept[data-ready="true"]').waitFor();
- await page.getByRole('link',{name:'Discover the collection',exact:true}).click();assert.equal(new URL(page.url()).pathname,'/');await page.waitForFunction(()=>scrollY>100);
+ await page.locator('[data-scroll-collection]').click();assert.equal(new URL(page.url()).pathname,'/');await page.waitForFunction(()=>scrollY>100);
  await page.locator('.hos-menu-toggle').click();await page.getByRole('link',{name:'The collection 01'}).click();await page.waitForURL('**/collection');
  await page.goto(base+'/works/zsa-page-28');await page.locator('#hos-concept[data-ready="true"]').waitFor();await page.locator('#hos-work-inquiry').click();
  await page.locator('[name="name"]').fill('Local browser QA');await page.locator('[name="email"]').fill('local@example.test');await page.getByRole('button',{name:'Review inquiry',exact:true}).click();await page.locator('#hos-inquiry-send').click();await page.locator('#hos-inquiry-success').waitFor({state:'visible'});
