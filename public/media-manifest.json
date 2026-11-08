@@ -1294,9 +1294,9 @@
     "height": 1024,
     "srcset": "/assets/collectors-red-stone-v2-480.webp 480w, /assets/collectors-red-stone-v2-800.webp 800w, /assets/collectors-red-stone-v2-1200.webp 1200w, /assets/collectors-red-stone-v2.webp 1536w"
   },
-  "/assets/elemental-campaign-v3.webp": {
+  "/assets/elemental-campaign-v4.webp": {
     "width": 1536,
     "height": 1024,
-    "srcset": "/assets/elemental-campaign-v3-480.webp 480w, /assets/elemental-campaign-v3-800.webp 800w, /assets/elemental-campaign-v3-1200.webp 1200w, /assets/elemental-campaign-v3.webp 1536w"
+    "srcset": "/assets/elemental-campaign-v4-480.webp 480w, /assets/elemental-campaign-v4-800.webp 800w, /assets/elemental-campaign-v4-1200.webp 1200w, /assets/elemental-campaign-v4.webp 600w"
   }
 }

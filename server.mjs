@@ -459,6 +459,16 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         const result=await publishOwnerMeasurements({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
         console.log('Owner-requested measurements and sculpture name:',JSON.stringify(result));
       } catch(error) { console.error('Owner measurements did not complete:',error.message); }
+      try {
+        const {publishOwnerRoundFour}=await import('./scripts/publish-owner-round-four.mjs');
+        const result=await publishOwnerRoundFour({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
+        console.log('Owner-requested catalogue corrections:',JSON.stringify(result));
+      } catch(error) { console.error('Owner catalogue corrections did not complete:',error.message); }
+      try {
+        const {publishOwnerRoundFive}=await import('./scripts/publish-owner-round-five.mjs');
+        const result=await publishOwnerRoundFive({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
+        console.log('Owner-requested sculpture titles:',JSON.stringify(result));
+      } catch(error) { console.error('Owner sculpture titles did not complete:',error.message); }
     }
   });
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(() => process.exit(0)));

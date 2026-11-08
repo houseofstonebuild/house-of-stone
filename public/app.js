@@ -93,6 +93,7 @@ function applyImage(img, source, sizes = '(max-width: 650px) 100vw, 55vw') {
   if(artistPhoto)source=artistPhoto.original;
   img.toggleAttribute('data-artist-original', Boolean(artistPhoto));
   if(!source){img.removeAttribute('src');img.removeAttribute('srcset');return;}
+  img.style.rotate=source==='/assets/zsa-012-photoshoot-front-v1.webp'?'-4deg':source==='/assets/zsa-012-studio-front-v3.webp'?'6deg':'';
   img.decoding = 'async';
   const info = media[source];
   img.removeAttribute('srcset'); img.removeAttribute('width'); img.removeAttribute('height');
@@ -290,6 +291,7 @@ function renderPresentation(){
     const page=$(`[data-page="${key}"]`),content=presentationFor(catalog.site,key);
     page.querySelector('h1').textContent=content.title;page.querySelector('.hos-page-heading p').textContent=content.intro;
     const img=page.querySelector('.hos-editorial-image img'),campaign=editorial.pageBanners?.[key],bannerSource=campaign?.source||assets[content.image],caption=campaign?.caption||content.caption;if(bannerSource){applyImage(img,bannerSource,'90vw');img.alt=caption;}page.querySelector('figcaption').textContent=caption;
+    const homeBanner=$('.hos-home-services .hos-summary-photo[data-view="'+key+'"] img') || $('.hos-summary-photo[data-view="'+key+'"] img');if(homeBanner&&bannerSource){applyImage(homeBanner,bannerSource,'(max-width:700px) 100vw, 50vw');homeBanner.alt=caption;}
     const steps=page.querySelector('.hos-service-grid');steps.replaceChildren();content.steps.forEach((step,i)=>{const card=el('div');card.dataset.reveal='';card.append(el('div','hos-eyebrow',String(i+1).padStart(2,'0')),el('h2','',step.title),el('p','',step.text));steps.append(card);});
     const faq=page.querySelector('.hos-service-questions');faq.replaceChildren(el('h2','','A few practical questions'));
     for(const question of content.questions){const item=el('details'),summary=el('summary','',question.title);item.append(summary,el('p','',question.text));faq.append(item);}
@@ -502,7 +504,7 @@ function renderWork(work) {
   for(const id of ['#hos-work-specifications','#hos-work-delivery','#hos-work-provenance'])$(id).open=false;
   // A campaign photograph leads the page once, instead of recurring at the
   // end of the sculpture's angle gallery.
-  gallery?.setWork(work,assets,[],campaign?.source);
+  gallery?.setWork(work,assets,workScenes(work),window.matchMedia?.('(max-width:700px)')?.matches?'':campaign?.source);
   const mobileAction=$('#hos-mobile-work-action'),mobileButton=$('#hos-mobile-work-inquiry');mobileButton.textContent=button.textContent;Object.assign(mobileButton.dataset,button.dataset);mobileButton.setAttribute('aria-label',(sold?'Inquire about alternatives to ':'Inquire about ')+work.title);mobileAction.hidden=true;
   workActionObserver?.disconnect();
   if('IntersectionObserver' in window && !previewMode){let originalVisible=false,footerVisible=false;workActionObserver=new window.IntersectionObserver(entries=>{for(const entry of entries){if(entry.target===button)originalVisible=entry.isIntersecting;else footerVisible=entry.isIntersecting;}mobileAction.hidden=originalVisible||footerVisible;});workActionObserver.observe(button);workActionObserver.observe($('.hos-footer'));}
@@ -710,7 +712,7 @@ async function start() {
       card.append(image(artist.portrait,artistLeadAlt(artist),true,'(max-width: 700px) 90vw, 29vw'),el('h3','',artist.name),el('p','hos-artist-style',artist.style || 'Stone sculpture · Zimbabwe'));grid.append(card);
     });
   });
-  gallery=initializeGallery({root,document,applyImage,resolveSource:source=>editorial.artistPhotography?.[source]?.original||source,motionPreference,onView:()=>track('photo_view',{workId:activeWork?.id || '',artistId:activeArtist?.id || ''})});
+  gallery=initializeGallery({root,document,applyImage,rotationFor:source=>source==='/assets/zsa-012-photoshoot-front-v1.webp'?'-4deg':source==='/assets/zsa-012-studio-front-v3.webp'?'6deg':'',resolveSource:source=>editorial.artistPhotography?.[source]?.original||source,motionPreference,onView:()=>track('photo_view',{workId:activeWork?.id || '',artistId:activeArtist?.id || ''})});
   renderPresentation();
   const chapters=$('#hos-home-chapters');chapters.replaceChildren();
   if(collections.length){collectionIndex($('#hos-home-collection-index'),{home:true});collections.forEach(collection=>chapters.append(collectionChapter(collection)));}

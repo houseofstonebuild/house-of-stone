@@ -51,3 +51,14 @@
 
 #hos-concept img[data-artist-original="true"] {object-fit:contain!important;background:transparent!important;}
 #hos-concept :is([data-page="designers"],[data-page="collectors"]) .hos-editorial-image img {width:100%;height:auto;aspect-ratio:3/2;object-fit:contain;}
+
+/* Desktop photographs return to a vertical sequence below the work details. */
+#hos-concept [data-page="work"] > .hos-photo-carousel {margin:48px auto;max-width:1100px;}
+@media(min-width:701px){
+ #hos-concept .hos-photo-carousel-heading button {display:none;}
+ #hos-concept .hos-photo-carousel .hos-work-gallery-story {display:flex;flex-direction:column;overflow:visible;scroll-snap-type:none;padding:0;gap:36px;}
+ #hos-concept .hos-photo-carousel .hos-gallery-image {width:100%;flex:none;}
+ #hos-concept .hos-photo-carousel .hos-gallery-image button {position:relative;width:100%;height:auto;aspect-ratio:auto;}
+ #hos-concept .hos-photo-carousel .hos-gallery-image img {position:static;display:block;width:100%;height:auto;max-height:880px;object-fit:contain;}
+ #hos-concept .hos-photo-carousel .hos-gallery-detail img {height:auto;max-height:880px;}
+}
