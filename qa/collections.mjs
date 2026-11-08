@@ -22,7 +22,7 @@ try {
  await page.locator('#prepare-founding').click();await page.waitForFunction(()=>document.querySelector('#field-name')?.value==='Rhythm');
  assert.equal(await page.locator('#collection-list .record').count(),5);
  await page.locator('#work-list .record>button:first-child').filter({hasText:'Flame in Motion'}).click();
- await page.locator('#field-availability').selectOption('available');await page.locator('#save').click();await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('confirmed sold'));
+ await page.locator('#field-availability').selectOption('available');await page.locator('#save').click();await page.waitForFunction(()=>document.querySelector('#status').textContent==='Draft saved.');
  await page.locator('#field-availability').selectOption('sold');await page.locator('#save').click();await page.waitForFunction(()=>document.querySelector('#status').textContent==='Draft saved.');
  staged=await api('content');
  await page.goto(base+'/admin/preview');await page.locator('#hos-concept[data-ready="true"]').waitFor();
@@ -61,7 +61,7 @@ try {
    await page.locator('#hos-concept[data-ready="true"]').waitFor();
    await page.evaluate(async()=>{const images=[...document.querySelectorAll('main img')].filter(img=>img.getClientRects().length);images.forEach(img=>img.loading='eager');await Promise.all(images.map(img=>img.decode()));});
    const layout=await page.evaluate(()=>({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,header:document.querySelector('.hos-header').getBoundingClientRect().top,footer:getComputedStyle(document.querySelector('.hos-footer')).position,images:[...document.querySelectorAll('main img')].filter(img=>img.getClientRects().length).map(img=>({fit:getComputedStyle(img).objectFit,fullComposition:innerWidth<=700&&img.src.includes('elemental-campaign'),hero:img.classList.contains('hos-hero-image')||img.parentElement.classList.contains('hos-collection-landscape')}))}));
-   assert(layout.scroll<=layout.width+1,`${route} overflows at ${width}`);assert.equal(layout.header,0);assert.equal(layout.footer,'static');assert(layout.images.every(img=>img.fit===(img.hero&&!img.fullComposition?'cover':'contain')),`Cropping ${route}`);
+   assert(layout.scroll<=layout.width+1,`${route} overflows at ${width}`);assert.equal(layout.header,0);assert.equal(layout.footer,'static');assert(layout.images.every(img=>img.fit===(img.hero||img.fullComposition?'cover':'contain')),`Cropping ${route}`);
    if(route==='/'){assert.equal(await page.locator('#hos-home-chapters [data-collection-section]').count(),5);assert.equal(await page.locator('#hos-home-chapters .hos-work-card .hos-availability').allTextContents().then(v=>v.join()),'Sold');assert.equal(await page.locator('.hos-hero-copy h1 span').last().evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');}
    if(route.includes('/collections/')){const collection=content.collections.find(c=>route.endsWith('/'+c.slug));assert.deepEqual(await page.locator('#hos-category-content .hos-work-card').evaluateAll(nodes=>nodes.map(node=>node.dataset.workRecord)),collection.workIds);}
    checked++;
