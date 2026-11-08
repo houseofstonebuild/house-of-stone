@@ -90,7 +90,7 @@
 #hos-concept .hos-process-steps .hos-story-section h2 {margin:12px 0 18px;}
 #hos-concept .hos-story-end {max-width:900px;border-top:1px solid var(--hos-line);padding-top:36px;}
 #hos-concept .hos-story-end h2:not(:first-child) {margin-top:48px;}
-#hos-concept .hos-story-end .hos-documentary-note {font-size:12px;margin-top:38px;}
+#hos-concept .hos-story-end .hos-documentary-note {font-size:15px;margin-top:38px;}
 #hos-concept .hos-story-closing {width:calc(100% - var(--hos-gutter) * 2);max-width:var(--hos-content-width);margin:0 auto 48px;font-size:16px;line-height:1.8;color:var(--hos-muted);}
 #hos-concept .hos-invitation p {max-width:62ch;margin:0 0 20px;font-size:15px;line-height:1.8;}
 #hos-concept .hos-work-story {max-width:1000px;border-top:1px solid var(--hos-line);padding-top:32px;}
