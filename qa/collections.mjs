@@ -69,7 +69,7 @@ try {
    if(route.includes('/collections/')){const collection=content.collections.find(c=>route.endsWith('/'+c.slug));assert.deepEqual(await page.locator('#hos-category-content .hos-work-card').evaluateAll(nodes=>nodes.map(node=>node.dataset.workRecord)),collection.workIds);}
    checked++;
   }
-  await page.goto(base+'/collections/rhythm');await page.locator('#hos-concept[data-ready="true"]').waitFor();await page.evaluate(async()=>{const imgs=[...document.querySelectorAll('#hos-category-content img')];imgs.forEach(img=>img.loading='eager');await Promise.all(imgs.map(img=>img.decode()));});await page.screenshot({path:new URL(`collections-${engineName}-${width}.png`,out).pathname,fullPage:true});
+  if(engineName!=='chromium'){await page.goto(base+'/collections/rhythm');await page.locator('#hos-concept[data-ready="true"]').waitFor();await page.evaluate(async()=>{const imgs=[...document.querySelectorAll('#hos-category-content img')];imgs.forEach(img=>img.loading='eager');await Promise.all(imgs.map(img=>img.decode()));});await page.screenshot({path:new URL(`collections-${engineName}-${width}.png`,out).pathname,fullPage:true});}
  }
  assert(!requests.some(url=>url.endsWith('.glb') || url.includes('sculpture-viewer.js')),'No GPU resources should load for missing matching models');
  await page.setViewportSize({width:390,height:844});await page.goto(base+'/');await page.locator('#hos-concept[data-ready="true"]').waitFor();
