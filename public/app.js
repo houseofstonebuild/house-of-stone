@@ -93,7 +93,6 @@ function applyImage(img, source, sizes = '(max-width: 650px) 100vw, 55vw') {
   if(artistPhoto)source=artistPhoto.original;
   img.toggleAttribute('data-artist-original', Boolean(artistPhoto));
   if(!source){img.removeAttribute('src');img.removeAttribute('srcset');return;}
-  img.style.rotate=source==='/assets/zsa-012-photoshoot-front-v1.webp'?'-4deg':source==='/assets/zsa-012-studio-front-v3.webp'?'6deg':'';
   img.decoding = 'async';
   const info = media[source];
   img.removeAttribute('srcset'); img.removeAttribute('width'); img.removeAttribute('height');

@@ -62,3 +62,6 @@
  #hos-concept .hos-photo-carousel .hos-gallery-image img {position:static;display:block;width:100%;height:auto;max-height:880px;object-fit:contain;}
  #hos-concept .hos-photo-carousel .hos-gallery-detail img {height:auto;max-height:880px;}
 }
+
+/* Straighten only the sculpture photograph within its fixed, square frame. */
+#hos-concept :is(.hos-work-card-photo,.hos-work-photo-open,.hos-photo-thumbnail,.hos-gallery-image) img[src*="zsa-012-photoshoot-front-v1.webp"] {rotate:-4deg;}
