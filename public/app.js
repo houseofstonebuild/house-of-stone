@@ -202,7 +202,7 @@ function collectionRail(grid,label) {
   const controls=el('div','hos-collection-rail-controls');controls.append(el('span','','Scroll to explore'));
   for(const [step,text] of [[-1,'Previous sculptures'],[1,'Next sculptures']]){
     const button=el('button','',step<0?'←':'→');button.type='button';button.setAttribute('aria-label',text+' in '+label);
-    button.addEventListener('click',()=>grid.scrollBy({left:step*grid.clientWidth*.8,behavior:motionPreference?.matches?'instant':'smooth'}));controls.append(button);
+    button.addEventListener('click',()=>grid.scrollBy({left:step*grid.clientWidth,behavior:motionPreference?.matches?'instant':'smooth'}));controls.append(button);
   }
   const update=()=>{const overflow=grid.scrollWidth>grid.clientWidth+2;controls.hidden=!overflow;const buttons=controls.querySelectorAll('button');buttons[0].disabled=grid.scrollLeft<=1;buttons[1].disabled=grid.scrollLeft+grid.clientWidth>=grid.scrollWidth-2;};
   grid.addEventListener('scroll',update,{passive:true});if(typeof ResizeObserver==='function')new ResizeObserver(update).observe(grid);
