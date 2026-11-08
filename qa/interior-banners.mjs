@@ -56,7 +56,7 @@ try{
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  }
  for(const c of catalog.collections){await page.goto(origin+'/collections/'+c.slug);await page.locator('#hos-concept[data-ready="true"]').waitFor();assert.equal(await page.locator('#hos-category-content .hos-visual-modes,#hos-category-content [data-model-stage]').count(),0);}
- const star=catalog.works.find(w=>w.id===catalog.collections[0].starWorkId);await page.goto(origin+'/works/'+star.slug);await page.locator('#hos-concept[data-ready="true"]').waitFor();assert(await page.locator('#hos-work-model').isVisible(),'3D remains on sculpture pages');
+ const star=catalog.works.find(w=>w.id===catalog.collections[0].starWorkId);await page.goto(origin+'/works/'+star.slug);await page.locator('#hos-concept[data-ready="true"]').waitFor();assert.equal(await page.locator('#hos-work-model').isVisible(),Boolean(star.modelVerified),'Unapproved reconstruction stays private');
  console.log('Interior banners and mobile carousel passed: five sources, title-first order, landscape desktop and edge-to-edge portrait mobile.');
 }finally{await browser?.close();await new Promise(r=>app.server.close(r));rmSync(dataDir,{recursive:true,force:true});}
 
