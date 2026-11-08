@@ -147,7 +147,7 @@ function render() {
     grid.querySelector('#field-members').addEventListener('input',event=>{record.workIds=event.target.value.split(/\s+/).filter(Boolean);});
     field(grid,record,'starWorkId','Star sculpture',{options:draft.works.filter(w=>!w.archived).map(w=>({value:w.id,label:w.title+' · '+w.id}))});
     grid.querySelector('#field-starWorkId').addEventListener('change',()=>{record.workIds=[record.starWorkId,...record.workIds.filter(id=>id!==record.starWorkId)];edited();render();});
-    fields.append(element('p','Move collections with the arrows in the sidebar. Each sculpture belongs to one primary collection. Source page 13 stays Sold.','note'));
+    fields.append(element('p','Move collections with the arrows in the sidebar. Each sculpture belongs to one primary collection.','note'));
   } else if(selection.kind==='artist') {
     field(grid,record,'name','Artist name',{required:true,max:120});field(grid,record,'slug','Page address',{max:100});
     field(grid,record,'style','Style',{max:120});

@@ -22,7 +22,8 @@ try {
  await page.locator('#prepare-founding').click();await page.waitForFunction(()=>document.querySelector('#field-name')?.value==='Rhythm');
  assert.equal(await page.locator('#collection-list .record').count(),5);
  await page.locator('#work-list .record>button:first-child').filter({hasText:'Flame in Motion'}).click();
- await page.locator('#field-availability').selectOption('available');await page.locator('#save').click();await page.waitForFunction(()=>document.querySelector('#status').textContent==='Draft saved.');
+ await page.locator('#field-availability').selectOption('available');await page.locator('#save').click();await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('Confirm availability'));
+ await page.locator('#fields .wide').filter({hasText:'Confirmed information'}).locator('label').filter({hasText:'availability'}).locator('input').check();await page.locator('#save').click();await page.waitForFunction(()=>document.querySelector('#status').textContent==='Draft saved.');
  await page.locator('#field-availability').selectOption('sold');await page.locator('#save').click();await page.waitForFunction(()=>document.querySelector('#status').textContent==='Draft saved.');
  staged=await api('content');
  await page.goto(base+'/admin/preview');await page.locator('#hos-concept[data-ready="true"]').waitFor();
