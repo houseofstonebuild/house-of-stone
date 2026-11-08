@@ -34,7 +34,7 @@ try{
       await photo.evaluate(image=>image.decode());
       assert.equal(await banner.locator('#hos-work-banner-title').innerText(),work.title);
       assert.equal(await banner.locator('#hos-work-banner-artist').innerText(),catalog.artists.find(artist=>artist.id===work.artistId).name);
-      assert.equal(await banner.locator('#hos-work-banner-stone').innerText(),work.material);
+      assert.equal(await banner.locator('#hos-work-banner-stone').innerText(),work.material+(work.materialEstimated?' (estimated)':''));
       if(width>700){
         const a=await caption.boundingBox(),b=await photo.boundingBox();assert(a.x+a.width<=b.x+1,work.title+': caption must be left of image');
         assert(b.width<=width*.6+1,work.title+': image must occupy right column');assert((await banner.boundingBox()).height<=701);

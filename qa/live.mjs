@@ -9,11 +9,13 @@ import {measurements} from '../scripts/publish-owner-measurements.mjs';
 
 // Production verification is read-only. Discover routes from the published
 // catalogue, not the seed: a code release must preserve the owner's database.
-const origin=new URL(process.env.HOS_LIVE_URL || 'https://house-of-stone-production.up.railway.app').origin;
+const origin=new URL(process.env.HOS_LIVE_URL || 'https://houseofmabwe.com').origin;
+const production=['https://house-of-stone-production.up.railway.app','https://houseofmabwe.com'].includes(origin);
 const models=JSON.parse(readFileSync(new URL('../public/models.json',import.meta.url),'utf8'));
 const output=new URL(process.env.HOS_LIVE_OUTPUT || '../test-results/live/',import.meta.url);mkdirSync(output,{recursive:true});
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
-const paths=new Set(['/app.js','/styles.css','/light-theme.css','/collections.css','/quality.css','/editorial-layout.css','/editorial.json','/gallery.js','/work-photography.js','/studio-frame.js','/presentation.js','/media-upload.js','/models.json','/sculpture-viewer.js','/stone-surface.js']);
+const paths=new Set(['/app.js','/styles.css','/light-theme.css','/collections.css','/quality.css','/editorial-layout.css','/round-three.css','/editorial.json','/story.json','/gallery.js','/work-photography.js','/studio-frame.js','/presentation.js','/media-upload.js','/models.json','/sculpture-viewer.js','/stone-surface.js']);
+for(const section of JSON.parse(readFileSync(new URL('../public/story.json',import.meta.url))).pages.making.sections)paths.add('/assets/'+section.image);
 const approvedEditorial=JSON.parse(readFileSync(new URL('../public/editorial.json',import.meta.url),'utf8'));
 for(const photo of Object.values(approvedEditorial.artistPhotography||{}))paths.add(photo.original);
 paths.add(approvedEditorial.workScenes['zsa-028'].scenes[0].source);
@@ -44,9 +46,11 @@ assert(deployed,lastError);
 const response=await fetch(origin+'/content.json');assert(response.ok);const catalog=await response.json();
 // Historical release fixtures also reuse this verifier against loopback.
 // These new publication requirements apply to the production catalogue.
-if(origin==='https://house-of-stone-production.up.railway.app'){
- for(const [id,values] of Object.entries(measurements))assert.equal(catalog.works.find(work=>work.id===id)?.dimensions,values.join(' × ')+' cm','Published owner measurements: '+id);
+if(production){
+ for(const [id,values] of Object.entries(measurements))if(!['zsa-007','zsa-001'].includes(id))assert.equal(catalog.works.find(work=>work.id===id)?.dimensions,values.join(' × ')+' cm','Published owner measurements: '+id);
  assert.equal(catalog.works.find(work=>work.id==='zsa-031')?.title,'Protection Spirit');
+ assert.equal(catalog.works.find(work=>work.id==='zsa-007')?.dimensions,'78 × 46 cm');
+ assert.equal(catalog.works.find(work=>work.id==='zsa-001')?.dimensions,'40 × 25 cm');
 }
 const editorial=JSON.parse(readFileSync(new URL('../public/editorial.json',import.meta.url),'utf8'));
 applyWorkPhotography(catalog,editorial.workPhotography);
@@ -58,6 +62,7 @@ if(process.env.HOS_EXPECT_FOUNDING_RELEASE==='true'){
     const presence=expected.collections.find(collection=>collection.id==='presence');
     presence.workIds=presence.workIds.map(id=>id==='zsa-002'?'hos-inner-beauty':id);
     presence.workIds.push('hos-queen-mother','hos-celebration');
+    if(production){presence.workIds=presence.workIds.filter(id=>id!=='hos-queen-mother');presence.workIds.splice(1,0,'hos-queen-mother');}
     expected.collections.find(collection=>collection.id==='kinship').workIds.push('hos-belonging');
     assert(!works.has('zsa-002'),'Philip’s replaced Lovers must be archived');
     assert(!catalog.artists.some(artist=>['tariro','kuda','ruvimbo','farai','tendai'].includes(artist.id)),'Fictional artist profiles must be archived');
@@ -66,7 +71,14 @@ if(process.env.HOS_EXPECT_FOUNDING_RELEASE==='true'){
   }
   assert.deepEqual(collections.map(c=>({id:c.id,star:c.starWorkId,works:c.workIds})),expected.collections.map(c=>({id:c.id,star:c.starWorkId,works:c.workIds})),'The current collection release must be public.');
   assert.equal(catalog.works.length,roundTwo?26:23);assert(catalog.works.every(w=>w.title && w.artistId && w.material && w.dimensions));
-  assert.equal(works.get('zsa-013').availability,'sold');
+  if(production){
+   assert.equal(catalog.site.name,'House of Mabwe');
+   assert.deepEqual(catalog.works.filter(w=>w.availability==='sold').map(w=>w.id).sort(),['zsa-023','zsa-026']);
+   assert(catalog.works.every(w=>!w.yearMade));
+   assert.equal(works.get('zsa-017').artistId,catalog.artists.find(a=>a.name==='Tawanda Sere')?.id);
+   assert.equal(works.get('zsa-031').artistId,catalog.artists.find(a=>a.name==='Tawanda Sere')?.id);
+   assert.equal(works.get('hos-inner-beauty').dimensions,'40 × 14 cm');
+  }else assert.equal(works.get('zsa-013').availability,'sold');
 }
 const matchingModel=work=>{
   const entry=models[work?.id];if(!entry || entry.source!==catalog.assets[work.image])return false;

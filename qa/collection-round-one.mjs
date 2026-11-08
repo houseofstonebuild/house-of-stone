@@ -40,7 +40,7 @@ try{
       for(const id of collection.workIds){
         const work=catalog.works.find(work=>work.id===id),card=chapter.locator('[data-work-record="'+id+'"]');
         assert.equal(await card.locator('h3').innerText(),work.title);
-        assert.equal(await card.locator('.hos-card-stone').evaluate(node=>[...node.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.textContent).join('').trim()),work.material);
+        assert.equal(await card.locator('.hos-card-stone').evaluate(node=>[...node.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.textContent).join('').trim()),work.material+(work.materialEstimated?' (estimated)':''));
         assert(await card.locator('.hos-card-stone').evaluate(node=>parseFloat(getComputedStyle(node).fontSize)>=11));
         assert.equal(await card.locator('[data-artist]').evaluate(node=>[...node.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.textContent).join('').trim()),catalog.artists.find(artist=>artist.id===work.artistId).name);
         assert.equal(await card.locator('img').getAttribute('src'),catalog.assets[work.image]);

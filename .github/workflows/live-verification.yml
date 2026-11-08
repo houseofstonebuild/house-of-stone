@@ -23,9 +23,10 @@ jobs:
       - run: node qa/live.mjs
         env:
           HOS_EXPECT_FOUNDING_RELEASE: 'true'
+          HOS_LIVE_URL: https://houseofmabwe.com
       - run: node qa/light-theme.mjs
         env:
-          HOS_LIGHT_PREVIEW_URL: https://house-of-stone-production.up.railway.app
+          HOS_LIGHT_PREVIEW_URL: https://houseofmabwe.com
       - uses: actions/upload-artifact@v5
         if: always()
         with:
@@ -34,4 +35,3 @@ jobs:
             test-results/live/
             test-results/browser/light-*
           retention-days: 7
-
