@@ -1,5 +1,5 @@
 // Original photographs are fetched for inspection; responsive images lead browsing.
-export function initializeGallery({root,document,applyImage,resolveSource=source=>source,motionPreference,onView}) {
+export function initializeGallery({root,document,applyImage,rotationFor=()=>'',resolveSource=source=>source,motionPreference,onView}) {
   const dialog=root.querySelector('#hos-photo-dialog'),stage=dialog.querySelector('.hos-photo-stage'),large=dialog.querySelector('img'),title=dialog.querySelector('h2'),status=dialog.querySelector('[role="status"]');
   const main=root.querySelector('#hos-work-image'),opener=root.querySelector('#hos-work-photo-open'),thumbs=root.querySelector('#hos-work-additional-images'),story=root.querySelector('#hos-work-gallery-story'),count=root.querySelector('#hos-gallery-count');
   let photos=[],index=0,scale=1,lastTrigger,touchStart,suppressUntil=0,selectedWorkId='',pan;
@@ -14,9 +14,10 @@ export function initializeGallery({root,document,applyImage,resolveSource=source
     if(selected)thumbs.scrollTo({left:selected.offsetLeft-thumbs.offsetLeft-(thumbs.clientWidth-selected.clientWidth)/2,behavior:motionPreference?.matches?'instant':'smooth'});
     root.querySelector('#hos-work-photo-caption').textContent=photo.label;count.textContent=(index+1)+' / '+photos.length;
     if(!motionPreference?.matches && main.decode)main.decode().then(()=>{if(photos[index]===photo)main.animate?.([{opacity:.35},{opacity:1}],{duration:320,easing:'ease-out'});}).catch(()=>{});
-    root.querySelectorAll('[data-story-step]').forEach(button=>button.addEventListener('click',()=>story.scrollBy({left:Number(button.dataset.storyStep)*(story.children[0]?.offsetWidth+24||story.clientWidth*.85),behavior:motionPreference?.matches?'instant':'smooth'})));
+
   root.querySelectorAll('[data-gallery-step]').forEach(button=>button.disabled=photos.length<2);
   }
+  root.querySelectorAll('[data-story-step]').forEach(button=>button.addEventListener('click',()=>story.scrollBy({left:Number(button.dataset.storyStep)*(story.children[0]?.offsetWidth+24||story.clientWidth*.85),behavior:motionPreference?.matches?'instant':'smooth'})));
   function zoom(value,center=true){
     const oldWidth=large.offsetWidth,oldHeight=large.offsetHeight,cx=(stage.scrollLeft+stage.clientWidth/2-Math.max(0,(stage.clientWidth-oldWidth)/2))/Math.max(oldWidth,1),cy=(stage.scrollTop+stage.clientHeight/2)/Math.max(oldHeight,1);
     scale=Math.min(5,Math.max(1,value));
@@ -29,7 +30,7 @@ export function initializeGallery({root,document,applyImage,resolveSource=source
   }
   function display(){
     stage.scrollTo({left:0,top:0,behavior:'instant'});
-    scale=photos[index].zoom || 1;large.onload=()=>zoom(scale,false);large.src=photos[index].source;large.alt=photos[index].label+' of '+title.textContent;
+    scale=photos[index].zoom || 1;large.onload=()=>zoom(scale,false);large.src=photos[index].source;large.style.rotate=rotationFor(photos[index].source);large.alt=photos[index].label+' of '+title.textContent;
     if(large.complete&&large.naturalWidth)zoom(scale,false);
     status.textContent=photos[index].label+' · '+(index+1)+' / '+photos.length;for(const node of dialog.querySelectorAll('[data-photo-step]'))node.disabled=photos.length<2;
   }
