@@ -519,7 +519,7 @@ function renderWork(work) {
   description.textContent=story.works?.[work.id]?.editorialShort || work.description || '';
   // One artwork-specific paragraph, followed by an unobtrusive route to the deeper process story.
   const essayHost=$('#hos-work-story');essayHost.replaceChildren();essayHost.hidden=true;
-  if(!$('#hos-work-making-link')){
+  if(!document.getElementById('hos-work-making-link')){
     const makingLink=link('How the sculptures are made',{view:'making'});
     makingLink.id='hos-work-making-link';
     description.after(makingLink);
