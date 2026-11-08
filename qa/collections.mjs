@@ -55,7 +55,9 @@ try {
  const context=await browser.newContext({reducedMotion:'reduce'});await context.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
  page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));page.on('request',request=>requests.push(request.url()));page.on('response',response=>{if(response.url().startsWith(base)&&response.status()>=400)failedResponses.push([response.status(),response.url()]);});
  const routes=['/','/collection','/artists','/making','/designers','/collectors','/house','/privacy',...content.collections.map(c=>'/collections/'+c.slug),...content.works.map(w=>'/works/'+w.slug),...content.artists.map(a=>'/artists/'+a.slug)];
- for(const [width,height] of [[320,568],[390,844],[844,390],[1440,1000],[2560,1440],[3840,2160]]) {
+ // The general browser sweep covers eleven viewport sizes on every route.
+ // Keep this interaction-heavy collection pass to a phone and desktop canvas.
+ for(const [width,height] of [[390,844],[1440,1000]]) {
   await page.setViewportSize({width,height});
   for(const route of routes){
    const response=await page.goto(base+route);assert.equal(response.status(),200,route);
@@ -92,6 +94,6 @@ try {
  await viewerPage.locator('#hos-category-content .hos-card-title[data-work="folded-light"]').click();
  await viewerPage.locator('#hos-work-model').click();await viewerPage.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-model-stage').dataset.modelState));
  assert(await viewerPage.locator('#hos-model-dialog').isVisible());await viewerPage.keyboard.press('Escape');assert(await viewerPage.locator('#hos-model-dialog').isHidden());await viewerContext.close();
- assert.deepEqual(errors,[]);assert.deepEqual(failedResponses,[]);writeFileSync(new URL(`collections-${engineName}-report.json`,out),JSON.stringify({engine:engineName,routes:routes.length,sizes:6,checks:checked,errors,inquiries:2,matchingStarModels:0,photoFallbacks:5},null,2));console.log(`Collection QA passed: ${checked} route/viewport checks, private draft, filters, links, sold alternatives, inquiries and session logging (${engineName}).`);
+ assert.deepEqual(errors,[]);assert.deepEqual(failedResponses,[]);writeFileSync(new URL(`collections-${engineName}-report.json`,out),JSON.stringify({engine:engineName,routes:routes.length,sizes:2,checks:checked,errors,inquiries:2,matchingStarModels:0,photoFallbacks:5},null,2));console.log(`Collection QA passed: ${checked} route/viewport checks, private draft, filters, links, sold alternatives, inquiries and session logging (${engineName}).`);
 } finally {await browser?.close();await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});}
 
