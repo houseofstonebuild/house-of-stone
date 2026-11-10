@@ -23,11 +23,11 @@ try{
     await page.goto(origin+'/works/zsa-page-18');await page.locator('#hos-concept[data-ready="true"]').waitFor();
     const row=page.locator('#hos-work-additional-images'),tile=row.locator('.hos-model-thumbnail'),photos=row.locator('.hos-photo-thumbnail:not(.hos-model-thumbnail)');
     assert.equal(await tile.count(),1);assert.equal(await tile.getAttribute('data-model'),'zsa-018');
-    assert(await row.locator('button').nth(1).evaluate(element=>element.classList.contains('hos-model-thumbnail')));
+    assert(await row.locator('button').last().evaluate(element=>element.classList.contains('hos-model-thumbnail')));
     assert.equal(await tile.getAttribute('aria-haspopup'),'dialog');
     const count=await photos.count();assert.equal(await page.locator('#hos-gallery-count').innerText(),'1 / '+count);
-    await row.scrollIntoViewIfNeeded();const rect=await tile.boundingBox(),bounds=await row.boundingBox();
-    assert(rect.x>=bounds.x&&rect.x+rect.width<=bounds.x+bounds.width+1,'3D tile should be immediately visible without scrolling the row');
+    await tile.scrollIntoViewIfNeeded();const rect=await tile.boundingBox(),bounds=await row.boundingBox();
+    assert(rect.x>=bounds.x&&rect.x+rect.width<=bounds.x+bounds.width+1,'The last 3D tile should be reachable by scrolling the row');
     const photoSize=await photos.first().locator('img').boundingBox(),modelSize=await tile.locator('.hos-model-tile-face').boundingBox();
     assert.equal(modelSize.width,photoSize.width);assert.equal(modelSize.height,photoSize.height);
     await row.screenshot({path:new URL(`tiles-${width}.png`,output).pathname});
@@ -47,6 +47,6 @@ try{
     await page.evaluate(()=>{history.pushState({},'', '/works/zsa-page-13');dispatchEvent(new PopStateEvent('popstate'));});
     assert.equal(await row.locator('.hos-model-thumbnail').count(),0,'A work without a matching model must have no 3D tile');
     assert(await page.locator('#hos-work-model').isHidden());assert.deepEqual(errors,[]);await page.close();
-    console.log(`${width}px: 3D tile visible after Front, photo navigation/counts preserved, keyboard opens model, focus returns, missing-model tile omitted.`);
+    console.log(`${width}px: 3D tile is last and reachable, photo navigation/counts preserved, keyboard opens model, focus returns, missing-model tile omitted.`);
   }
 }finally{await browser?.close();await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});}

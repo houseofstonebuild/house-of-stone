@@ -67,7 +67,7 @@ export function initializeGallery({root,document,applyImage,rotationFor=()=>'',r
     photos.forEach((photo,i)=>{
       const button=document.createElement('button');button.type='button';button.className='hos-photo-thumbnail';button.setAttribute('aria-label','Show '+photo.label.toLowerCase());button.setAttribute('aria-pressed',String(i===0));
       const img=document.createElement('img');applyImage(img,photo.source,'120px');img.alt='';img.loading='lazy';const label=document.createElement('span');label.textContent=photo.label;button.append(img,label);button.addEventListener('click',()=>select(i));thumbs.append(button);photoButtons.push(button);
-      if(i===0&&hasModel){
+      if(i===photos.length-1&&hasModel){
         const model=document.createElement('button');model.type='button';model.className='hos-photo-thumbnail hos-model-thumbnail cursor-interaction';model.dataset.model=work.id;
         model.setAttribute('aria-label','View '+work.title+' in 3D');model.setAttribute('aria-haspopup','dialog');model.setAttribute('aria-controls','hos-model-dialog');
         const face=document.createElement('span');face.className='hos-model-tile-face';face.setAttribute('aria-hidden','true');
