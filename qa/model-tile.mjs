@@ -46,6 +46,24 @@ try{
     assert(await page.locator('#hos-work-photo-open').isHidden(),'The photo should be hidden only while the 3D view is selected');
     assert.equal(await modelMode.getAttribute('aria-pressed'),'true');
     await inline.screenshot({path:new URL(`inline-${width}.png`,output).pathname});
+    // Normal page scrolling must never rotate the sculpture, even for visitors
+    // without reduced-motion preferences. Rotation remains available by dragging.
+    await page.emulateMedia({reducedMotion:'no-preference'});
+    const inlineCanvas=inline.locator('.hos-3d-canvas');
+    const initialRotation=Number(await inlineStage.getAttribute('data-model-rotation'));
+    const scrollBefore=await page.evaluate(()=>scrollY);
+    await page.evaluate(()=>scrollBy({top:90,behavior:'instant'}));
+    await page.waitForFunction(before=>scrollY>before,scrollBefore);
+    await page.waitForTimeout(100);
+    const afterScroll=Number(await inlineStage.getAttribute('data-model-rotation'));
+    assert(Math.abs(afterScroll-initialRotation)<.001,'Page scroll must not rotate the inline 3D sculpture');
+    const canvasBounds=await inlineCanvas.boundingBox();assert(canvasBounds,'Inline model canvas must remain visible');
+    await page.mouse.move(canvasBounds.x+canvasBounds.width*.45,canvasBounds.y+canvasBounds.height*.5);
+    await page.mouse.down();
+    await page.mouse.move(canvasBounds.x+canvasBounds.width*.45+80,canvasBounds.y+canvasBounds.height*.5,{steps:8});
+    await page.mouse.up();
+    await page.waitForFunction(before=>Number(document.querySelector('#hos-work-inline-model [data-model-stage]').dataset.modelRotation)>before+.4,afterScroll);
+    await page.emulateMedia({reducedMotion:'reduce'});
     await photosMode.click();
     assert(await page.locator('#hos-work-photo-open').isVisible());
     assert(await inline.isHidden());
