@@ -64,9 +64,12 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
   const pointers=new Map(),inlineViews=new WeakMap(),countedInteractions=new Set();let pinchDistance=0;
   const inlineView=host=>{if(!inlineViews.has(host))inlineViews.set(host,{yaw:0,pitch:0,zoom:1});return inlineViews.get(host);};
   const controls=[...dialog.querySelectorAll('[data-model-control]')];
+  const loadingIndicator=dialogHost.querySelector('.hos-model-loading');
   const statusFor=host=>host===dialogHost?dialogStatus:host.parentElement.querySelector('.hos-3d-hint');
   function fallback(host,message) {
     host.dataset.modelState='unavailable';host.querySelector('.hos-3d-poster').hidden=false;
+    host.setAttribute('aria-busy','false');
+    if(host===dialogHost)loadingIndicator.hidden=true;
     const snapshot=host.querySelector('.hos-3d-snapshot');if(snapshot)snapshot.hidden=true;
     statusFor(host).textContent=message;
     if(host===dialogHost)controls.forEach(button=>button.disabled=true);
@@ -163,7 +166,7 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
     saveFrame();pointers.clear();if(renderer?.domElement.parentElement)renderer.domElement.remove();
     active=null;lastView='';loadingHost=host;
     if(!makeRenderer()||contextLost){fallback(host,'3D is unavailable in this browser. You can still explore the sculpture photos.');loadingHost=null;return;}
-    host.dataset.modelState='loading';statusFor(host).textContent='Loading 3D view…';
+    host.dataset.modelState='loading';host.setAttribute('aria-busy','true');statusFor(host).textContent='Loading 3D view…';
     try {
       const object=await model(id);
       if(generation!==activationGeneration||loadingHost!==host||host.dataset.modelId!==id||chooseHost()!==host)return;
@@ -175,6 +178,7 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
       renderer.domElement.style.touchAction=host===dialogHost?'none':'pan-y pinch-zoom';
       host.querySelector('.hos-3d-poster').hidden=true;const snapshot=host.querySelector('.hos-3d-snapshot');if(snapshot)snapshot.hidden=true;
       host.dataset.modelState='ready';
+      host.setAttribute('aria-busy','false');if(host===dialogHost)loadingIndicator.hidden=true;
       statusFor(host).textContent=host===dialogHost?'Drag to rotate · Pinch or use the controls to zoom':reduced.matches?'Drag to rotate':'Drag or scroll to rotate';
       if(host===dialogHost)controls.forEach(button=>button.disabled=false);
       refresh();
@@ -260,7 +264,8 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
     reviewNote.hidden=!(reviewMode && models[work.id]?.reconstruction);
     dialogWork=work;trigger=button;yaw=-.3;pitch=0;zoom=1;interactionCounted=false;pointers.clear();
     dialogTitle.textContent=work.title;dialogHost.dataset.modelId=work.id;dialogHost.dataset.modelState='waiting';
-    dialogHost.querySelector('.hos-3d-poster').src=poster;dialogHost.querySelector('.hos-3d-poster').hidden=false;
+    dialogHost.setAttribute('aria-busy','true');loadingIndicator.hidden=false;
+    dialogHost.querySelector('.hos-3d-poster').src=poster;dialogHost.querySelector('.hos-3d-poster').hidden=true;
     controls.forEach(button=>button.disabled=true);dialogStatus.textContent='Loading 3D view…';
     document.body.style.setProperty('--hos-scrollbar',`${Math.max(0,innerWidth-document.documentElement.clientWidth)}px`);document.body.classList.add('hos-model-open');
     dialogCleaned=false;dialog.showModal();root.querySelector('#hos-model-close').focus({preventScroll:true});refresh();

@@ -103,6 +103,16 @@ body.hos-menu-open #hos-concept .hos-header,body.hos-model-open #hos-concept .ho
 #hos-concept .hos-model-controls button {display:flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;border:1px solid var(--hos-line);font-size:20px;}
 #hos-concept .hos-model-controls button:disabled {color:#777;}
 #hos-concept .hos-model-controls .hos-model-reset {font-size:13px;padding:0 14px;}
+#hos-concept .hos-model-loading:not([hidden]) {position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;}
+#hos-concept .hos-model-loader {width:28px;height:28px;border:1px solid currentColor;border-right-color:transparent;border-bottom-color:transparent;border-radius:50%;opacity:.4;animation:hos-model-loading 1.2s linear infinite;}
+#hos-concept .hos-model-note {margin:10px auto 0;max-width:48ch;font-size:12px;line-height:1.5;text-align:center;color:var(--hos-muted);visibility:hidden;}
+#hos-model-stage[data-model-state="ready"]~.hos-model-note {visibility:visible;}
+#hos-model-stage[data-model-state="ready"] .hos-3d-canvas {animation:hos-model-appear .18s ease-out;}
+@keyframes hos-model-loading {to {transform:rotate(360deg);}}
+@keyframes hos-model-appear {from {opacity:0;}to {opacity:1;}}
+@media (prefers-reduced-motion:reduce) {
+  #hos-concept .hos-model-loader,#hos-model-stage[data-model-state="ready"] .hos-3d-canvas {animation:none;}
+}
 #hos-concept .hos-chapter-additional {padding:12px 32px 32px;border-top:1px solid var(--hos-line);}
 #hos-concept .hos-chapter-additional>h3 {font-size:23px;}
 #hos-concept .hos-page-navigation {width:calc(100% - var(--hos-gutter) - var(--hos-gutter));max-width:var(--hos-content-width);margin:0 auto;padding-top:20px;}

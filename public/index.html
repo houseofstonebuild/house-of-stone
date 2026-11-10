@@ -183,7 +183,7 @@
   </section>
   <dialog id="hos-model-dialog" class="hos-model-dialog" aria-labelledby="hos-model-title">
     <div class="hos-model-top"><div><div class="hos-eyebrow">SCULPTURE IN 3D</div><h2 id="hos-model-title"></h2></div><button id="hos-model-close" type="button" class="hos-close cursor-interaction" aria-label="Close 3D viewer">Close <span aria-hidden="true">×</span></button></div>
-    <div id="hos-model-stage" class="hos-3d-stage"><img class="hos-3d-poster" alt="" aria-hidden="true"></div>
+    <div id="hos-model-stage" class="hos-3d-stage"><img class="hos-3d-poster" alt="" aria-hidden="true" hidden><div class="hos-model-loading" aria-hidden="true" hidden><span class="hos-model-loader"></span></div></div>
     <div id="hos-model-status" class="hos-3d-hint" role="status">Drag to rotate · Pinch or use the controls to zoom</div>
     <div class="hos-model-controls" role="group" aria-label="3D sculpture controls">
       <button type="button" data-model-control="left" aria-label="Rotate left" class="cursor-interaction"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 6 9 12l6 6"/></svg></button>
@@ -192,6 +192,7 @@
       <button type="button" data-model-control="in" aria-label="Zoom in" class="cursor-interaction">+</button>
       <button type="button" data-model-control="reset" class="hos-model-reset cursor-interaction">Reset</button>
     </div>
+    <p class="hos-model-note">Digital representation. The actual sculpture may differ slightly.</p>
   </dialog>
   <dialog id="hos-photo-dialog" class="hos-photo-dialog" aria-labelledby="hos-photo-title"><div class="hos-photo-top"><div><div class="hos-eyebrow">PHOTOGRAPHS</div><h2 id="hos-photo-title"></h2></div><button type="button" data-photo-close class="hos-close" aria-label="Close photographs">Close ×</button></div><div class="hos-photo-stage"><img alt=""></div><div class="hos-photo-controls"><button type="button" data-photo-step="-1" aria-label="Previous photograph">Previous</button><span role="status" aria-live="polite"></span><button type="button" data-photo-step="1" aria-label="Next photograph">Next</button><div class="hos-photo-zoom-controls"><button type="button" data-photo-zoom="-.5" aria-label="Zoom out photograph">−</button><button type="button" data-photo-zoom=".5" aria-label="Zoom in photograph">+</button><span class="hos-zoom-status" aria-live="polite">100%</span><button type="button" data-photo-reset>Fit</button></div></div><p class="hos-photo-pan-hint">Use + to zoom, then drag to explore the detail. Double-click to zoom or fit.</p></dialog>
   <footer class="hos-footer">
