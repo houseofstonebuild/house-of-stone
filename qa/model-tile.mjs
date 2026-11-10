@@ -36,6 +36,21 @@ try{
     await page.getByRole('button',{name:'Next sculpture photograph',exact:true}).click();
     assert.equal(await page.locator('#hos-work-photo-caption').innerText(),'Right');
     await page.getByRole('button',{name:'Previous sculpture photograph',exact:true}).click();
+    const modes=page.locator('#hos-work-view-modes'),photosMode=modes.locator('[data-work-visual="photos"]'),modelMode=modes.locator('[data-work-visual="model"]');
+    assert(await modes.isVisible(),'Approved models should have a prominent photo / 3D switch');
+    assert.equal(await photosMode.getAttribute('aria-pressed'),'true');
+    await modelMode.click();
+    const inline=page.locator('#hos-work-inline-model'),inlineStage=inline.locator('[data-model-stage]');
+    await page.waitForFunction(()=>document.querySelector('#hos-work-inline-model [data-model-stage]')?.dataset.modelState==='ready',null,{timeout:60000});
+    assert(await inline.locator('.hos-3d-canvas').isVisible(),'The 3D model should render directly in the work gallery');
+    assert(await page.locator('#hos-work-photo-open').isHidden(),'The photo should be hidden only while the 3D view is selected');
+    assert.equal(await modelMode.getAttribute('aria-pressed'),'true');
+    await inline.screenshot({path:new URL(`inline-${width}.png`,output).pathname});
+    await photosMode.click();
+    assert(await page.locator('#hos-work-photo-open').isVisible());
+    assert(await inline.isHidden());
+    assert.equal(await photosMode.getAttribute('aria-pressed'),'true');
+    assert.equal(await page.locator('#hos-work-photo-caption').innerText(),'Left','Changing display modes must preserve the chosen photo');
     await tile.focus();await page.keyboard.press('Enter');
     await page.waitForFunction(()=>document.querySelector('#hos-model-stage').dataset.modelState==='ready');
     assert.equal(await page.locator('#hos-model-title').innerText(),'Rabbit');
@@ -46,7 +61,7 @@ try{
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
     await page.evaluate(()=>{history.pushState({},'', '/works/zsa-page-13');dispatchEvent(new PopStateEvent('popstate'));});
     assert.equal(await row.locator('.hos-model-thumbnail').count(),0,'A work without a matching model must have no 3D tile');
-    assert(await page.locator('#hos-work-model').isHidden());assert.deepEqual(errors,[]);await page.close();
+    assert(await page.locator('#hos-work-model').isHidden());assert(await modes.isHidden(),'No unapproved or mismatched model switch should appear');assert.deepEqual(errors,[]);await page.close();
     console.log(`${width}px: 3D tile is last and reachable, photo navigation/counts preserved, keyboard opens model, focus returns, missing-model tile omitted.`);
   }
 }finally{await browser?.close();await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});}
