@@ -88,7 +88,7 @@ test('confirmed identity publication is revision checked and legacy artist URLs 
     assert.equal(response.status,308);
     assert.equal(response.headers.get('location'),'/artists/yusufu-jamare?ref=old');
   }
-  assert((await fetch(origin+'/artists/yusufu-jamare')).ok());
+  assert((await fetch(origin+'/artists/yusufu-jamare')).ok);
   assert.deepEqual(await publishConfirmedArtistIdentities(params),{skipped:'already-published'});
   assert.deepEqual(await publishConfirmedArtistIdentities({...params,publicOrigin:'https://other.example'}),{skipped:'different-service'});
 });
