@@ -387,7 +387,7 @@ function modelPanel(work) {
   const poster=image(work.image,'',true,'(max-width: 700px) 90vw, 750px');poster.className='hos-3d-poster';poster.setAttribute('aria-hidden','true');
   const snapshot=el('canvas','hos-3d-snapshot');snapshot.hidden=true;snapshot.setAttribute('aria-hidden','true');
   stage.append(poster,snapshot);
-  const hint=el('div','hos-3d-hint',motionPreference?.matches?'Drag to rotate':'Drag or scroll to rotate');hint.setAttribute('role','status');
+  const hint=el('div','hos-3d-hint','Drag to rotate');hint.setAttribute('role','status');
   panel.append(top,stage,hint);
   if(previewMode && modelDefinition(work).reconstruction)panel.append(el('p','hos-model-review-note','Reference-based reconstruction. Depth and unseen surfaces are inferred.'));
   return panel;
