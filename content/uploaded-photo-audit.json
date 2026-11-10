@@ -1,0 +1,65 @@
+[
+  {
+    "workId": "hos-tall-attention",
+    "side": "front",
+    "sourceName": "SCULPTURENO5(1).png",
+    "file": "/assets/hos-tall-attention-front-v1.png",
+    "sha256": "26f751c66e0fc78a3e87537aa047160c34d484b1f7204182e6aa1759528bfd5e"
+  },
+  {
+    "workId": "hos-tall-attention",
+    "side": "left",
+    "sourceName": "SCULPTURENO5(2)-Photoroom.png",
+    "file": "/assets/hos-tall-attention-left-v1.png",
+    "sha256": "0d3f0f7cf50380e2806a4e3fba9475134d92705cb2ca993d51cfe71b40afad7f"
+  },
+  {
+    "workId": "hos-tall-attention",
+    "side": "right",
+    "sourceName": "SCULPTURENO5(3)-Photoroom.png",
+    "file": "/assets/hos-tall-attention-right-v1.png",
+    "sha256": "e10efc52c9eb27f04b61fcba0c870c0d2a9deba69b4d9697f41c6c23583220a3"
+  },
+  {
+    "workId": "hos-tall-attention",
+    "side": "detail",
+    "sourceName": "SCULPTURENO5(4)-Photoroom.png",
+    "file": "/assets/hos-tall-attention-detail-v1.png",
+    "sha256": "32017a81e6a22f4c047b00ef137aa9ce231b6039fd7ff2f04aebf16a741b9d17"
+  },
+  {
+    "workId": "hos-tall-attention",
+    "side": "detail2",
+    "sourceName": "SCULPTURENO5(5)-Photoroom.png",
+    "file": "/assets/hos-tall-attention-detail2-v1.png",
+    "sha256": "0bea6c3bebc906e478bc59e325e4fda0e787940649cdbb348fb1f52a201012a6"
+  },
+  {
+    "workId": "hos-kissing-lovers",
+    "side": "front",
+    "sourceName": "SCULPTURENO26(3)-Photoroom.png",
+    "file": "/assets/hos-kissing-lovers-front-v1.png",
+    "sha256": "453342573581f14bf90f6a03000a612bf51f33640648e8c472ac033d0a720423"
+  },
+  {
+    "workId": "hos-kissing-lovers",
+    "side": "back",
+    "sourceName": "SCULPTURENO26(1)-Photoroom.png",
+    "file": "/assets/hos-kissing-lovers-back-v1.png",
+    "sha256": "03d26f42b46c83eccb98ddb5eb8ce985ce14170e3460cabcb0581a7a96d02307"
+  },
+  {
+    "workId": "hos-kissing-lovers",
+    "side": "left",
+    "sourceName": "SCULPTURENO26(2)-Photoroom.png",
+    "file": "/assets/hos-kissing-lovers-left-v1.png",
+    "sha256": "f8204324b6d98c1308f1da80830629071073c3e94ab7ba7a03603d33dbbdf7fd"
+  },
+  {
+    "workId": "hos-kissing-lovers",
+    "side": "right",
+    "sourceName": "SCULPTURENO26(4)-Photoroom.png",
+    "file": "/assets/hos-kissing-lovers-right-v1.png",
+    "sha256": "b86039f449599aa290a0cf83f505b0236e17c2c8c39d7111b3ceb8675c05078b"
+  }
+]

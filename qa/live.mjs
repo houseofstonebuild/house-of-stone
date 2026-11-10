@@ -6,6 +6,7 @@ import {chromium} from 'playwright';
 import {applyWorkPhotography} from '../public/work-photography.js';
 import {additions,artistPhotos} from '../scripts/publish-collection-round-two.mjs';
 import {measurements} from '../scripts/publish-owner-measurements.mjs';
+import {newWorks} from '../scripts/publish-uploaded-model-works.mjs';
 
 // Production verification is read-only. Discover routes from the published
 // catalogue, not the seed: a code release must preserve the owner's database.
@@ -14,7 +15,8 @@ const production=['https://house-of-stone-production.up.railway.app','https://ho
 const models=JSON.parse(readFileSync(new URL('../public/models.json',import.meta.url),'utf8'));
 const output=new URL(process.env.HOS_LIVE_OUTPUT || '../test-results/live/',import.meta.url);mkdirSync(output,{recursive:true});
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
-const paths=new Set(['/app.js','/styles.css','/light-theme.css','/collections.css','/quality.css','/editorial-layout.css','/round-three.css','/editorial.json','/story.json','/gallery.js','/work-photography.js','/studio-frame.js','/presentation.js','/media-upload.js','/models.json','/sculpture-viewer.js','/stone-surface.js']);
+const paths=new Set(['/app.js','/styles.css','/light-theme.css','/collections.css','/quality.css','/editorial-layout.css','/round-three.css','/editorial.json','/story.json','/gallery.js','/work-photography.js','/studio-frame.js','/presentation.js','/media-upload.js','/models.json','/sculpture-viewer.js','/stone-surface.js','/vendor/meshopt_decoder.js']);
+for(const work of newWorks)for(const side of work.photos)paths.add('/assets/'+work.id+'-'+side+'-v1.png');
 for(const section of JSON.parse(readFileSync(new URL('../public/story.json',import.meta.url))).pages.making.sections)paths.add('/assets/'+section.image);
 const approvedEditorial=JSON.parse(readFileSync(new URL('../public/editorial.json',import.meta.url),'utf8'));
 for(const photo of Object.values(approvedEditorial.artistPhotography||{}))paths.add(photo.original);
@@ -39,6 +41,7 @@ for(let attempt=0;attempt<attempts;attempt++){
     }
     const manifestResponse=await fetch(origin+'/media-manifest.json',{cache:'no-store',signal:AbortSignal.timeout(15000)});assert(manifestResponse.ok);const manifest=await manifestResponse.json(),bundled=JSON.parse(readFileSync(new URL('../public/media-manifest.json',import.meta.url),'utf8'));
     for(const [source,info] of Object.entries(bundled))assert.deepEqual(manifest[source],info,'Bundled responsive image '+source);
+    if(production){const current=await(await fetch(origin+'/content.json',{signal:AbortSignal.timeout(15000)})).json();assert(newWorks.every(work=>current.works.some(item=>item.id===work.id)),'Waiting for the two owner-uploaded sculptures to be published');}
     deployed=true;break;
   }catch(error){lastError=error.message;console.log(`Waiting for release (${attempt+1}/${attempts}): ${lastError}`);if(attempt+1<attempts)await delay(retry);}
 }
@@ -56,6 +59,8 @@ const editorial=JSON.parse(readFileSync(new URL('../public/editorial.json',impor
 applyWorkPhotography(catalog,editorial.workPhotography);
 const collections=catalog.collections || [],works=new Map(catalog.works.map(work=>[work.id,work]));
 const roundTwo=works.has('hos-queen-mother');
+const uploadedWorksPresent=newWorks.every(work=>works.has(work.id));
+if(production)assert(uploadedWorksPresent,'Both owner-uploaded sculptures must be published');
 if(process.env.HOS_EXPECT_FOUNDING_RELEASE==='true'){
   const expected=JSON.parse(readFileSync(new URL('../content/founding-collection.json',import.meta.url),'utf8'));
   if(roundTwo){
@@ -69,8 +74,9 @@ if(process.env.HOS_EXPECT_FOUNDING_RELEASE==='true'){
     for(const item of additions){const work=works.get(item.id);assert.equal(work?.title,item.title);assert.equal(work.material,item.material);assert.equal(catalog.artists.find(artist=>artist.id===work.artistId)?.name,item.artist);}
     for(const photo of artistPhotos){const artist=catalog.artists.find(artist=>artist.name===photo.name),work=works.get(photo.workId);assert(artist&&work?.artistId===artist.id);assert.match(catalog.assets[artist.portrait],/\/hos-artist-/);assert(work.additionalImages.includes(artist.studioImage));}
   }
+  if(uploadedWorksPresent)expected.collections.find(collection=>collection.id==='kinship').workIds.push(...newWorks.map(work=>work.id));
   assert.deepEqual(collections.map(c=>({id:c.id,star:c.starWorkId,works:c.workIds})),expected.collections.map(c=>({id:c.id,star:c.starWorkId,works:c.workIds})),'The current collection release must be public.');
-  assert.equal(catalog.works.length,roundTwo?26:23);assert(catalog.works.every(w=>w.title && w.artistId && w.material && w.dimensions));
+  assert.equal(catalog.works.length,(roundTwo?26:23)+(uploadedWorksPresent?2:0));assert(catalog.works.every(w=>w.title && w.artistId && w.material && w.dimensions));
   if(production){
    assert.equal(catalog.site.name,'House of Mabwe');
    assert.deepEqual(catalog.works.filter(w=>w.availability==='sold').map(w=>w.id).sort(),['zsa-023','zsa-026']);

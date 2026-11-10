@@ -142,5 +142,214 @@
     "workId": "zsa-026",
     "file": "/models/polygamist-uploaded-v1.glb",
     "title": "Polygamist"
+  },
+  {
+    "originalName": "abstract-flower.glb",
+    "sourceSha256": "d5ed0be6d15bb9cde48e0ba1eabe9a012eda798419bc8017bb0f39aa30e9a62d",
+    "originalBytes": 38760804,
+    "triangles": 293372,
+    "maxTextureSize": 2048,
+    "webSha256": "4b6bca9edd7ccbe1449d58fe49dabda56ff0fad3d5c641ce1f3c4c3edf39a796",
+    "webBytes": 6204676,
+    "workId": "zsa-025",
+    "file": "/models/abstract-flower-uploaded-v1.glb",
+    "title": "Abstract Flower",
+    "meshopt": true,
+    "quantization": {
+      "position": 16,
+      "normal": 12,
+      "texcoord": 14
+    },
+    "triangleCountPreserved": true
+  },
+  {
+    "originalName": "belonging.glb",
+    "sourceSha256": "6832aa7e8a5e85c50ff5e91fbbf18d06f5919898c3230cb0af7861853576f2c5",
+    "originalBytes": 38865488,
+    "triangles": 240322,
+    "maxTextureSize": 2048,
+    "webSha256": "9d90c0e74a3639d22b9d952de9e5bfcc9a96693d53b72f23c558936e51d87fc0",
+    "webBytes": 5364188,
+    "workId": "hos-belonging",
+    "file": "/models/belonging-uploaded-v1.glb",
+    "title": "Belonging",
+    "meshopt": true,
+    "quantization": {
+      "position": 16,
+      "normal": 12,
+      "texcoord": 14
+    },
+    "triangleCountPreserved": true
+  },
+  {
+    "originalName": "birds.glb",
+    "sourceSha256": "b31b1b43abc525f6573c7dc7ebd6db81f97a164cdd371c1bee3072c162e63932",
+    "originalBytes": 35364208,
+    "triangles": 232512,
+    "maxTextureSize": 2048,
+    "webSha256": "094b22afa3e310f0ccfc67bdc57de31bf3ff3ff5e21c28b112d3cfab88b165f3",
+    "webBytes": 4675852,
+    "workId": "zsa-005",
+    "file": "/models/birds-uploaded-v1.glb",
+    "title": "Birds",
+    "meshopt": true,
+    "quantization": {
+      "position": 16,
+      "normal": 12,
+      "texcoord": 14
+    },
+    "triangleCountPreserved": true
+  },
+  {
+    "originalName": "celebration.glb",
+    "sourceSha256": "9a65bcc7ca473c61033407ef053cbae2fdc841f098fe1132dcaf5a26cc91c53f",
+    "originalBytes": 58172284,
+    "triangles": 776876,
+    "maxTextureSize": 2048,
+    "webSha256": "aa62c20472ccd2412f7a5547d77ee397b83389b5b01441b4b65f78dfd11a80cf",
+    "webBytes": 9769700,
+    "workId": "hos-celebration",
+    "file": "/models/celebration-uploaded-v1.glb",
+    "title": "Celebration",
+    "meshopt": true,
+    "quantization": {
+      "position": 16,
+      "normal": 12,
+      "texcoord": 14
+    },
+    "triangleCountPreserved": true
+  },
+  {
+    "originalName": "dancers.glb",
+    "sourceSha256": "05c1e6a3d471274a17ad42355fa8ca8e2de03e765aaa7f5938ff6e3ad5035177",
+    "originalBytes": 48240332,
+    "triangles": 594726,
+    "maxTextureSize": 2048,
+    "webSha256": "2c2e7c25c008e21d33af65edb1277659af0f7fd6fdb6100074395a2b76daa4de",
+    "webBytes": 7956180,
+    "workId": "zsa-007",
+    "file": "/models/dancers-uploaded-v1.glb",
+    "title": "Dancers",
+    "meshopt": true,
+    "quantization": {
+      "position": 16,
+      "normal": 12,
+      "texcoord": 14
+    },
+    "triangleCountPreserved": true
+  },
+  {
+    "originalName": "family.glb",
+    "sourceSha256": "39fe0a1e573a892b1cdfe73531f9c02e9df891986f5cbf90f0801c1da65af66a",
+    "originalBytes": 41978184,
+    "triangles": 431810,
+    "maxTextureSize": 2048,
+    "webSha256": "3114ae75dcdee233033ceaf1eaa2e08ea372014099cf27c6d9181213fcb00c2f",
+    "webBytes": 6367328,
+    "workId": "zsa-024",
+    "file": "/models/family-uploaded-v1.glb",
+    "title": "Family",
+    "meshopt": true,
+    "quantization": {
+      "position": 16,
+      "normal": 12,
+      "texcoord": 14
+    },
+    "triangleCountPreserved": true
+  },
+  {
+    "originalName": "paired-reflection.glb",
+    "sourceSha256": "af47c7c70e239ea4c76ef47d23481fca02c2a1ec65c9bb75e0554d04f1e5bdfa",
+    "originalBytes": 44429168,
+    "triangles": 510232,
+    "maxTextureSize": 2048,
+    "webSha256": "e9b15bcd153fda077326cf1d3fa1344ad58852ce39e6d2d0d666e316545cbf5d",
+    "webBytes": 7267836,
+    "workId": "zsa-014",
+    "file": "/models/paired-reflection-uploaded-v1.glb",
+    "title": "Paired Reflection",
+    "meshopt": true,
+    "quantization": {
+      "position": 16,
+      "normal": 12,
+      "texcoord": 14
+    },
+    "triangleCountPreserved": true
+  },
+  {
+    "originalName": "sisters.glb",
+    "sourceSha256": "20c3809693be867b4c22784dc11ecae8d28e466fd08e8a9a4e49997a098ed657",
+    "originalBytes": 39766120,
+    "triangles": 389580,
+    "maxTextureSize": 2048,
+    "webSha256": "0484842a060cd036933ebe3998aa44b3485aa82195a9bca401f5ca8dae72788d",
+    "webBytes": 5985412,
+    "workId": "zsa-010",
+    "file": "/models/sisters-uploaded-v1.glb",
+    "title": "Sisters",
+    "meshopt": true,
+    "quantization": {
+      "position": 16,
+      "normal": 12,
+      "texcoord": 14
+    },
+    "triangleCountPreserved": true
+  },
+  {
+    "originalName": "queen-mother.glb",
+    "sourceSha256": "7b0771cbfb1db471f4d12741256922fbdb6f42b84df8b0944f1de157b2f6e1bd",
+    "originalBytes": 49516056,
+    "triangles": 854760,
+    "maxTextureSize": 2048,
+    "webSha256": "ab2e9accef715512c0f91a9ccf5f462009b9b9b940fe31886285677b03a4af18",
+    "webBytes": 9458960,
+    "workId": "hos-queen-mother",
+    "file": "/models/queen-mother-uploaded-v1.glb",
+    "title": "Queen Mother",
+    "meshopt": true,
+    "quantization": {
+      "position": 16,
+      "normal": 12,
+      "texcoord": 14
+    },
+    "triangleCountPreserved": true
+  },
+  {
+    "originalName": "kissing-lovers.glb",
+    "sourceSha256": "98b95d88af09e5ff0107c8845d4882f74b2c920a4a195bb9bdf95e37eff29242",
+    "originalBytes": 64054676,
+    "triangles": 1474830,
+    "maxTextureSize": 2048,
+    "webSha256": "7a3c795f9104f146aa9f096b102ce36a389b7630ff717a22ca0fc7f78c79a68b",
+    "webBytes": 13771492,
+    "workId": "hos-kissing-lovers",
+    "file": "/models/kissing-lovers-uploaded-v1.glb",
+    "title": "Kissing Lovers",
+    "meshopt": true,
+    "quantization": {
+      "position": 16,
+      "normal": 12,
+      "texcoord": 14
+    },
+    "triangleCountPreserved": true
+  },
+  {
+    "originalName": "tall-attention.glb",
+    "sourceSha256": "909451d2ddaac626dba365506a34cd24f3120fa44df1528c85dc2aeef14facac",
+    "originalBytes": 42086088,
+    "triangles": 349056,
+    "maxTextureSize": 2048,
+    "webSha256": "5be94bdaaff74acbc96168fb83e5281f8d1f0404927027f48628d18d51f1a960",
+    "webBytes": 6294364,
+    "workId": "hos-tall-attention",
+    "file": "/models/tall-attention-uploaded-v1.glb",
+    "title": "Tall Attention",
+    "meshopt": true,
+    "quantization": {
+      "position": 16,
+      "normal": 12,
+      "texcoord": 14
+    },
+    "triangleCountPreserved": true
   }
 ]

@@ -138,7 +138,7 @@ function artistLeadAlt(artist) { return /\/hos-artist-/.test(assets[artist.portr
 const artistFor = work => artists.find(artist => artist.id === work.artistId);
 const collectionFor = work => collections.find(collection => collection.workIds.includes(work.id));
 const workLabel = work => `${work.title}${artistFor(work) ? ' by ' + artistFor(work).name : ''}`;
-const stoneLabel = work => work.material ? work.material+(work.materialEstimated?' (estimated)':'') : '';
+const stoneLabel = work => work.material ? work.material+(work.materialEstimated&&work.material!=='Details on inquiry'?' (estimated)':'') : '';
 function availabilityLabel(work) {
   const label = {sold:'Sold',available:'Available',reserved:'Reserved'}[work.availability];
   const badge=label ? el('span','hos-availability',label) : null;

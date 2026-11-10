@@ -1,5 +1,6 @@
 import * as THREE from './vendor/three.module.min.js';
 import {GLTFLoader} from './vendor/GLTFLoader.js';
+import {MeshoptDecoder} from './vendor/meshopt_decoder.js';
 import {stoneSurfaceGLSL} from './stone-surface.js';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
@@ -57,7 +58,7 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
   // Native image loading keeps local JPEGs reliable across Safari navigations.
   // GLTFLoader still configures the UV orientation, samplers and colour space.
   manager.addHandler(/(?:^|\/)(?:assets|models\/textures)\/[^/]+\.jpg$/i,new THREE.TextureLoader(manager));
-  const loader=new GLTFLoader(manager);
+  const loader=new GLTFLoader(manager).setMeshoptDecoder(MeshoptDecoder);
   let renderer,scene,camera,sculpture,active,pending=0,unavailable=false,contextLost=false,trigger,dialogWork,interactionCounted=false;
   let yaw=-.3,pitch=0,zoom=1,lastView='',loadingHost,activationGeneration=0,dialogCleaned=true;
   const pointers=new Map(),inlineViews=new WeakMap(),countedInteractions=new Set();let pinchDistance=0;
@@ -106,8 +107,24 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
     }
     return renderer;
   }
+  function disposeModel(object) {
+    const geometries=new Set(),materials=new Set(),textures=new Set(),images=new Set();
+    object.traverse(node=>{if(!node.isMesh)return;geometries.add(node.geometry);for(const material of Array.isArray(node.material)?node.material:[node.material])materials.add(material);});
+    for(const material of materials){for(const value of Object.values(material))if(value?.isTexture)textures.add(value);material.dispose();}
+    for(const texture of textures){if(texture.image)images.add(texture.image);texture.dispose();}
+    for(const geometry of geometries)geometry.dispose();
+    for(const image of images)image.close?.();
+  }
+  function trimModels(keep) {
+    // Dense uploads must not accumulate GPU textures throughout a long visit.
+    for(const [id,request] of scenes){
+      if(scenes.size<=2)break;
+      if(id===keep||id===sculpture?.userData.workId)continue;
+      scenes.delete(id);request.then(object=>{if(object!==sculpture)disposeModel(object);}).catch(()=>{});
+    }
+  }
   function model(id) {
-    if(scenes.has(id))return scenes.get(id);
+    if(scenes.has(id)){const cached=scenes.get(id);scenes.delete(id);scenes.set(id,cached);return cached;}
     const entry=models[id];
     const request=loader.loadAsync(new URL(entry.file,location.href).href).then(gltf=>{
       const group=gltf.scene,box=new THREE.Box3().setFromObject(group),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
@@ -117,9 +134,9 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
       if(entry.stoneGrain)group.traverse(node=>{if(node.isMesh)for(const material of Array.isArray(node.material)?node.material:[node.material])grain(material);});
       if(entry.referenceSurface)group.traverse(node=>{if(node.isMesh)for(const material of Array.isArray(node.material)?node.material:[node.material])referenceSurface(material,(entry.reconstruction && node.parent?.scale?node.parent.scale:node.scale).clone(),entry.stoneSwatch,entry.stonePolish ?? 1,entry.reconstruction===true);});
       const pose=new THREE.Group();pose.rotation.y=entry.referenceYaw||0;pose.add(group);
-      const turntable=new THREE.Group();turntable.add(pose);return turntable;
-    }).catch(error=>{scenes.delete(id);throw error;});
-    scenes.set(id,request);return request;
+      const turntable=new THREE.Group();turntable.userData.workId=id;turntable.add(pose);return turntable;
+    }).catch(error=>{if(scenes.get(id)===request)scenes.delete(id);throw error;});
+    scenes.set(id,request);trimModels(id);return request;
   }
   function saveFrame() {
     if(!active||!renderer||!sculpture||contextLost)return;
@@ -151,6 +168,7 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
       const object=await model(id);
       if(generation!==activationGeneration||loadingHost!==host||host.dataset.modelId!==id||chooseHost()!==host)return;
       if(sculpture)scene.remove(sculpture);sculpture=object;scene.add(sculpture);active=host;loadingHost=null;
+      trimModels(id);host.dataset.modelCacheSize=String(scenes.size);
       host.dataset.loadedModel=id;host.append(renderer.domElement);
       renderer.domElement.tabIndex=0;
       renderer.domElement.setAttribute('aria-label',host===dialogHost?`${dialogTitle.textContent}. Arrow keys rotate, plus and minus zoom, Home resets.`:`3D view of ${models[host.dataset.modelId].title}. Drag or use arrow keys to rotate. Home resets.`);

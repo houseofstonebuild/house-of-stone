@@ -136,23 +136,13 @@
   },
   "zsa-005": {
     "workId": "zsa-005",
-    "title": "Original ZSA page 5",
-    "source": "/assets/zsa-page-05.jpg",
-    "sourcePage": 5,
-    "sourceSha256": "b8c4f8ca4b84d9aff0dd801334d7f118644a26e557fee1253db4cf86c5f39010",
-    "file": "/models/zsa-005.glb",
-    "referenceSurface": true,
-    "reconstruction": true,
-    "reviewOnly": true,
-    "referenceYaw": 0.3,
-    "stoneGrain": false,
-    "stoneSwatch": [
-      0.75,
-      0,
-      0.25,
-      1
-    ],
-    "stonePolish": 0.78
+    "title": "Birds",
+    "source": "/assets/zsa-005-studio-front-v2.webp",
+    "file": "/models/birds-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
   },
   "zsa-016": {
     "workId": "zsa-016",
@@ -257,6 +247,106 @@
     "title": "Polygamist",
     "source": "/assets/zsa-026-studio-front-v2.webp",
     "file": "/models/polygamist-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "zsa-025": {
+    "workId": "zsa-025",
+    "title": "Abstract Flower",
+    "source": "/assets/zsa-025-studio-front-v2.webp",
+    "file": "/models/abstract-flower-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "hos-belonging": {
+    "workId": "hos-belonging",
+    "title": "Belonging",
+    "source": "/assets/hos-belonging-front-v1.webp",
+    "file": "/models/belonging-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "hos-celebration": {
+    "workId": "hos-celebration",
+    "title": "Celebration",
+    "source": "/assets/hos-celebration-front-v1.webp",
+    "file": "/models/celebration-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "zsa-007": {
+    "workId": "zsa-007",
+    "title": "Dancers",
+    "source": "/assets/zsa-007-studio-front-v2.webp",
+    "file": "/models/dancers-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "zsa-024": {
+    "workId": "zsa-024",
+    "title": "Family",
+    "source": "/assets/zsa-024-studio-front-v2.webp",
+    "file": "/models/family-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "hos-kissing-lovers": {
+    "workId": "hos-kissing-lovers",
+    "title": "Kissing Lovers",
+    "source": "/assets/hos-kissing-lovers-front-v1.png",
+    "file": "/models/kissing-lovers-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "zsa-014": {
+    "workId": "zsa-014",
+    "title": "Paired Reflection",
+    "source": "/assets/zsa-014-studio-front-v2.webp",
+    "file": "/models/paired-reflection-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "zsa-010": {
+    "workId": "zsa-010",
+    "title": "Sisters",
+    "source": "/assets/zsa-010-studio-front-v2.webp",
+    "file": "/models/sisters-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "hos-tall-attention": {
+    "workId": "hos-tall-attention",
+    "title": "Tall Attention",
+    "source": "/assets/hos-tall-attention-front-v1.png",
+    "file": "/models/tall-attention-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "hos-queen-mother": {
+    "workId": "hos-queen-mother",
+    "title": "Queen Mother",
+    "source": "/assets/hos-queen-mother-front-v1.webp",
+    "file": "/models/queen-mother-uploaded-v1.glb",
     "uploaded": true,
     "ownerApproved": true,
     "referenceSurface": false,

@@ -1298,5 +1298,50 @@
     "width": 1536,
     "height": 1024,
     "srcset": "/assets/elemental-campaign-v4-480.webp 480w, /assets/elemental-campaign-v4-800.webp 800w, /assets/elemental-campaign-v4-1200.webp 1200w, /assets/elemental-campaign-v4.webp 600w"
+  },
+  "/assets/hos-tall-attention-front-v1.png": {
+    "width": 2000,
+    "height": 3000,
+    "srcset": "/assets/hos-tall-attention-front-v1-480.webp 480w, /assets/hos-tall-attention-front-v1-800.webp 800w, /assets/hos-tall-attention-front-v1-1200.webp 1200w, /assets/hos-tall-attention-front-v1-1600.webp 1600w, /assets/hos-tall-attention-front-v1.png 2000w"
+  },
+  "/assets/hos-tall-attention-left-v1.png": {
+    "width": 1449,
+    "height": 2400,
+    "srcset": "/assets/hos-tall-attention-left-v1-480.webp 480w, /assets/hos-tall-attention-left-v1-800.webp 800w, /assets/hos-tall-attention-left-v1-1200.webp 1200w, /assets/hos-tall-attention-left-v1.png 1449w"
+  },
+  "/assets/hos-tall-attention-right-v1.png": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/hos-tall-attention-right-v1-480.webp 480w, /assets/hos-tall-attention-right-v1-800.webp 800w, /assets/hos-tall-attention-right-v1-1200.webp 1200w, /assets/hos-tall-attention-right-v1.png 1600w"
+  },
+  "/assets/hos-tall-attention-detail-v1.png": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/hos-tall-attention-detail-v1-480.webp 480w, /assets/hos-tall-attention-detail-v1-800.webp 800w, /assets/hos-tall-attention-detail-v1-1200.webp 1200w, /assets/hos-tall-attention-detail-v1.png 1600w"
+  },
+  "/assets/hos-tall-attention-detail2-v1.png": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/hos-tall-attention-detail2-v1-480.webp 480w, /assets/hos-tall-attention-detail2-v1-800.webp 800w, /assets/hos-tall-attention-detail2-v1-1200.webp 1200w, /assets/hos-tall-attention-detail2-v1.png 1600w"
+  },
+  "/assets/hos-kissing-lovers-front-v1.png": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/hos-kissing-lovers-front-v1-480.webp 480w, /assets/hos-kissing-lovers-front-v1-800.webp 800w, /assets/hos-kissing-lovers-front-v1-1200.webp 1200w, /assets/hos-kissing-lovers-front-v1.png 1600w"
+  },
+  "/assets/hos-kissing-lovers-back-v1.png": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/hos-kissing-lovers-back-v1-480.webp 480w, /assets/hos-kissing-lovers-back-v1-800.webp 800w, /assets/hos-kissing-lovers-back-v1-1200.webp 1200w, /assets/hos-kissing-lovers-back-v1.png 1600w"
+  },
+  "/assets/hos-kissing-lovers-left-v1.png": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/hos-kissing-lovers-left-v1-480.webp 480w, /assets/hos-kissing-lovers-left-v1-800.webp 800w, /assets/hos-kissing-lovers-left-v1-1200.webp 1200w, /assets/hos-kissing-lovers-left-v1.png 1600w"
+  },
+  "/assets/hos-kissing-lovers-right-v1.png": {
+    "width": 1600,
+    "height": 2400,
+    "srcset": "/assets/hos-kissing-lovers-right-v1-480.webp 480w, /assets/hos-kissing-lovers-right-v1-800.webp 800w, /assets/hos-kissing-lovers-right-v1-1200.webp 1200w, /assets/hos-kissing-lovers-right-v1.png 1600w"
   }
 }

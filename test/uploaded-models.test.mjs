@@ -4,23 +4,25 @@ import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import vm from 'node:vm';
 import {GLTFLoader} from '../public/vendor/GLTFLoader.js';
+import {MeshoptDecoder} from '../public/vendor/meshopt_decoder.js';
 import {Box3,Vector3,Texture} from '../public/vendor/three.module.min.js';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url));
 const models=JSON.parse(read('public/models.json'));
 const audit=JSON.parse(read('content/uploaded-model-audit.json'));
 
 test('uploaded sculptures retain finite geometry, embedded PBR textures and recorded triangle counts',async()=>{
-  assert.equal(audit.length,12);
+  assert.equal(audit.length,23);
   for(const record of audit){
     const entry=models[record.workId],bytes=read('public'+entry.file);
     assert(entry.uploaded&&entry.ownerApproved&&!entry.referenceSurface&&!entry.stoneGrain);
     assert.equal(createHash('sha256').update(bytes).digest('hex'),record.webSha256);
-    assert(bytes.length<10_000_000&&bytes.length<record.originalBytes);
+    assert(bytes.length<(record.meshopt?15_000_000:10_000_000)&&bytes.length<record.originalBytes);
     const document=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)).toString());
-    assert(document.buffers.every(buffer=>!buffer.uri));
+    assert(document.buffers.every(buffer=>!buffer.uri||buffer.extensions?.EXT_meshopt_compression?.fallback));
+    if(record.meshopt)assert(document.extensionsRequired.includes('EXT_meshopt_compression'));
     assert.equal(document.images.length,3);
     assert(document.images.every(image=>Number.isInteger(image.bufferView)&&!image.uri));
-    const loader=new GLTFLoader().register(()=>({name:'NODE_TEXTURE_FIXTURE',loadTexture(){return Promise.resolve(new Texture());}}));
+    const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).register(()=>({name:'NODE_TEXTURE_FIXTURE',loadTexture(){return Promise.resolve(new Texture());}}));
     const gltf=await loader.parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');
     gltf.scene.updateMatrixWorld(true);
     const size=new Box3().setFromObject(gltf.scene).getSize(new Vector3());
