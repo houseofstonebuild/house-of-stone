@@ -12,7 +12,7 @@ import { prepareFoundingCollection } from './founding-collection.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = resolve(ROOT, 'public');
-const INTERESTS = ['Collecting a work', 'Sourcing for a project', 'Following the launch', 'Learning about the artists'];
+const INTERESTS = ['Collecting a work', 'Sourcing for a project', 'Commissioning a sculpture', 'Following the launch', 'Learning about the artists'];
 const EVENTS = new Set(['page_view', 'explore_click', 'artist_view', 'work_view', 'inquiry_opened', 'inquiry_started', 'model_view', 'model_interaction', 'photo_view']);
 const PAGES = new Set(['home', 'collection', 'category', 'artists', 'artist', 'work', 'making', 'designers', 'collectors', 'house', 'privacy', 'notfound']);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -179,7 +179,7 @@ export function createApp(options = {}) {
     const message = text(input.message, 5000);
     const work = workMap.get(input.workId), artist = artistMap.get(input.artistId);
     if (input.workId && !work || input.artistId && !artist) throw new HttpError(400, 'This work is no longer listed. Please begin a general inquiry.');
-    const allowedTopics = new Set(['General interest', 'Collection interest', 'Designer project', 'About the house']);
+    const allowedTopics = new Set(['General interest', 'Collection interest', 'Designer project', 'Sculpture commission', 'About the house']);
     if (work?.availability === 'sold' && input.intent !== 'alternatives') throw new HttpError(400, 'This sculpture is sold. Please inquire about related works instead.');
     const workTopic = work ? `${work.title}${artistMap.get(work.artistId) ? ' by ' + artistMap.get(work.artistId).name : ''}` : '';
     const topic = work ? (work.availability === 'sold' ? `Alternatives to ${workTopic}` : workTopic) : artist ? `Work by ${artist.name}` : allowedTopics.has(input.topic) ? input.topic : 'General interest';
