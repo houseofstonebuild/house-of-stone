@@ -44,6 +44,7 @@ function el(tag, className, text) {
 let catalog, artists, works, assets, collections = [], media = {}, editorial = {}, story = {}, models = {}, viewerPromise, modelViewer;
 let activePage = 'home', activeArtist, activeWork;
 let gallery;
+let collectionDirectoryReady=false,artistDirectoryReady=false;
 const inquiryDrafts=new Map();
 let inquiryDraftKey='', privacyReturn=false;
 const inquiryKey=context=>[context.workId,context.artistId,context.intent,context.topic].join('|');
@@ -572,6 +573,24 @@ function renderWork(work) {
   const sameArtist=activeArtist?works.filter(w=>w.artistId===activeArtist.id&&w.id!==work.id&&!sameCollection.some(other=>other.id===w.id)):[];
   if(sameArtist.length)related.append(el('h2','','More by '+activeArtist.name),relatedRail(sameArtist,'More by '+activeArtist.name),link('All works by '+activeArtist.name,{artist:activeArtist.id}));
 }
+function renderArtistDirectory() {
+  const grids=root.querySelectorAll('[data-artist-grid]');
+  const ordered=[...artists].sort((a,b)=>(a.name==='Artist to be confirmed')-(b.name==='Artist to be confirmed') || a.name.localeCompare(b.name));
+  grids.forEach(grid=>{
+    const fragment=document.createDocumentFragment();
+    ordered.forEach(artist=>{
+      const card=photoLink('hos-portrait-card cursor-interaction',{artist:artist.id},'About '+artist.name);
+      card.dataset.reveal='';
+      card.append(image(artist.portrait,artistLeadAlt(artist),true,'(max-width: 700px) 90vw, 29vw'),el('h3','',artist.name),el('p','hos-artist-style',artist.style || 'Stone sculpture · Zimbabwe'));
+      fragment.append(card);
+    });
+    grid.replaceChildren(fragment);
+  });
+}
+function ensurePageContent(page){
+  if(page==='collection'&&!collectionDirectoryReady){renderOverview();collectionDirectoryReady=true;}
+  if(page==='artists'&&!artistDirectoryReady){renderArtistDirectory();artistDirectoryReady=true;}
+}
 function route(path, shouldFocus = true) {
   let page = path === '/' ? 'home' : path.slice(1);
   let item;
@@ -579,6 +598,7 @@ function route(path, shouldFocus = true) {
   if (path.startsWith('/collections/')) { item=collections.find(c=>c.slug===path.split('/')[2]);if(item){renderCollection(item);page='category';} }
   if (path.startsWith('/works/')) { item = works.find(w => w.slug === path.split('/')[2]); if (item) { renderWork(item); page = 'work'; } }
   if (!$(`[data-page="${page.replace(/[^a-z]/g, '')}"]`) || !['home','collection','category','artists','artist','work','making','designers','collectors','house','privacy','notfound'].includes(page)) page = 'notfound';
+  ensurePageContent(page);
   activePage = page;
   $('#hos-page-navigation').hidden = page === 'home';
   pageAnimation?.cancel();
@@ -767,19 +787,13 @@ async function start() {
   root.querySelectorAll('[data-asset]').forEach(img => { if(!assets[img.dataset.asset])return;applyImage(img,assets[img.dataset.asset]); if (!img.classList.contains('hos-brand-mark')) img.loading = 'lazy'; });
   applyImage($('.hos-hero-image'),heroSource(),'100vw');$('.hos-hero-image').alt=heroDescription();
   root.querySelectorAll('.hos-editorial-image img,.hos-summary-photo img[src]').forEach(img=>applyImage(img,img.getAttribute('src'),'90vw'));
-  root.querySelectorAll('[data-artist-grid]').forEach(grid => {
-    [...artists].sort((a,b)=>(a.name==='Artist to be confirmed')-(b.name==='Artist to be confirmed') || a.name.localeCompare(b.name)).forEach(artist => {
-      const card=photoLink('hos-portrait-card cursor-interaction',{artist:artist.id},'About '+artist.name);card.dataset.reveal='';
-      card.append(image(artist.portrait,artistLeadAlt(artist),true,'(max-width: 700px) 90vw, 29vw'),el('h3','',artist.name),el('p','hos-artist-style',artist.style || 'Stone sculpture · Zimbabwe'));grid.append(card);
-    });
-  });
   gallery=initializeGallery({root,document,applyImage,rotationFor:source=>source==='/assets/zsa-012-photoshoot-front-v1.webp'?'-4deg':source==='/assets/zsa-012-studio-front-v3.webp'?'6deg':'',resolveSource:source=>editorial.artistPhotography?.[source]?.original||source,motionPreference,onView:()=>track('photo_view',{workId:activeWork?.id || '',artistId:activeArtist?.id || ''})});
   renderPresentation();
   renderStory();
   const chapters=$('#hos-home-chapters');chapters.replaceChildren();
   if(collections.length){collectionIndex($('#hos-home-collection-index'),{home:true});collections.forEach(collection=>chapters.append(collectionChapter(collection)));}
   else {const jumps=el('nav','hos-collection-jumps');jumps.setAttribute('aria-label','Jump to an artist');artists.forEach(artist=>{const selected=works.filter(work=>work.artistId===artist.id);if(selected.length){chapters.append(artistChapter(artist,selected,true));const anchor=el('a','',artist.name);anchor.href='#hos-home-artist-'+artist.id;anchor.dataset.jumpCollection='hos-home-artist-'+artist.id;jumps.append(anchor);}});$('#hos-home-collection-index').append(jumps);}
-  renderOverview();refreshLinks();
+  refreshLinks();
   watchModels(root);
   if (previewMode) {
     root.querySelectorAll('[data-inquiry]').forEach(button=>{ button.disabled=true; });
