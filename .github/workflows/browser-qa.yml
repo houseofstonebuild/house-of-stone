@@ -42,6 +42,8 @@ jobs:
         if: matrix.engine == 'chromium'
       - run: sh scripts/run-browser-qa.sh qa/model-loading.mjs
         if: matrix.engine == 'chromium'
+      - run: sh scripts/run-browser-qa.sh qa/model-tile.mjs
+        if: matrix.engine == 'chromium'
       - uses: actions/upload-artifact@v5
         if: always()
         with:

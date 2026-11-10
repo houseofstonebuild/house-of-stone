@@ -14,6 +14,7 @@
 #hos-concept .hos-work-photo .hos-photo-thumbnail {flex:0 0 76px;width:76px;scroll-snap-align:center;padding:0 0 6px;}
 #hos-concept .hos-work-photo .hos-photo-thumbnail img {width:76px;height:90px;}
 #hos-concept .hos-work-photo .hos-photo-thumbnail span {display:block;font-size:10px;line-height:1.5;}
+#hos-concept .hos-work-photo .hos-model-thumbnail .hos-model-tile-face {display:grid;place-items:center;width:76px;height:90px;margin:0;box-sizing:border-box;border:1px solid var(--hos-studio-border);background:#fff;color:var(--hos-fg);}
 #hos-concept .hos-photo-thumbnail[aria-pressed="true"] {border-bottom:2px solid var(--hos-fg);}
 #hos-concept .hos-photo-zoom-invite {position:absolute;right:14px;bottom:14px;padding:9px 12px;border:1px solid #d8d5cd;background:rgba(255,255,255,.94);font-size:11px;color:#34332e;pointer-events:none;}
 #hos-concept .hos-photo-stage {touch-action:pan-x pan-y;cursor:default;}

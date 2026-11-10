@@ -547,7 +547,7 @@ function renderWork(work) {
   for(const id of ['#hos-work-specifications','#hos-work-delivery','#hos-work-provenance'])$(id).open=false;
   // A campaign photograph leads the page once, instead of recurring at the
   // end of the sculpture's angle gallery.
-  gallery?.setWork(work,assets,workScenes(work),window.matchMedia?.('(max-width:700px)')?.matches?'':campaign?.source);
+  gallery?.setWork(work,assets,workScenes(work),window.matchMedia?.('(max-width:700px)')?.matches?'':campaign?.source,Boolean(modelDefinition(work)));
   const mobileAction=$('#hos-mobile-work-action'),mobileButton=$('#hos-mobile-work-inquiry');mobileButton.textContent=button.textContent;Object.assign(mobileButton.dataset,button.dataset);mobileButton.setAttribute('aria-label',(sold?'Inquire about alternatives to ':'Inquire about ')+work.title);mobileAction.hidden=true;
   workActionObserver?.disconnect();
   if('IntersectionObserver' in window && !previewMode){let originalVisible=false,footerVisible=false;workActionObserver=new window.IntersectionObserver(entries=>{for(const entry of entries){if(entry.target===button)originalVisible=entry.isIntersecting;else footerVisible=entry.isIntersecting;}mobileAction.hidden=originalVisible||footerVisible;});workActionObserver.observe(button);workActionObserver.observe($('.hos-footer'));}

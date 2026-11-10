@@ -40,7 +40,7 @@ try{
     assert(rows.every((y,i)=>i===0||y>rows[i-1]),'Desktop sculpture photos stay in a vertical sequence');
    }
    if(id==='zsa-012'&&[390,1440].includes(width))await page.locator('.hos-photo-carousel').screenshot({path:new URL(width+'-sculpture-carousel.jpg',out).pathname,type:'jpeg',quality:90});
-   const thumbs=page.locator('.hos-photo-thumbnail');assert(await thumbs.count()>1);await thumbs.nth(1).click();assert.equal(await thumbs.nth(1).getAttribute('aria-pressed'),'true');
+   const thumbs=page.locator('.hos-photo-thumbnail:not(.hos-model-thumbnail)');assert(await thumbs.count()>1);await thumbs.nth(1).click();assert.equal(await thumbs.nth(1).getAttribute('aria-pressed'),'true');
    await page.locator('#hos-work-photo-open').click();const dialog=page.locator('#hos-photo-dialog'),stage=dialog.locator('.hos-photo-stage');await dialog.locator('img').evaluate(i=>i.decode());
    for(let n=0;n<8;n++)await page.getByRole('button',{name:'Zoom in photograph',exact:true}).click();assert.equal(await dialog.locator('.hos-zoom-status').textContent(),'500%');
    const b=await stage.boundingBox(),before=await stage.evaluate(n=>({x:n.scrollLeft,y:n.scrollTop}));await page.mouse.move(b.x+b.width*.5,b.y+b.height*.5);await page.mouse.down();await page.mouse.move(b.x+b.width*.5-55,b.y+b.height*.5-45,{steps:5});await page.mouse.up();const after=await stage.evaluate(n=>({x:n.scrollLeft,y:n.scrollTop}));assert(after.x>before.x||after.y>before.y,'Zoomed photo must pan');

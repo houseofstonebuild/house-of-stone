@@ -43,7 +43,7 @@ try {
  }
  await ready('/works/zsa-page-9');await page.locator('#hos-work-inquiry').click();assert(await page.locator('#hos-inquiry').isVisible());await page.locator('#hos-inquiry-close').click();
  await page.locator('#hos-work-photo-open').click();assert(await page.locator('#hos-photo-dialog').isVisible());await page.keyboard.press('Escape');assert(await page.locator('#hos-photo-dialog').isHidden());
- await page.locator('.hos-photo-thumbnail').last().click();assert.equal(await page.locator('.hos-photo-thumbnail').last().getAttribute('aria-pressed'),'true');
+ await page.locator('.hos-photo-thumbnail:not(.hos-model-thumbnail)').last().click();assert.equal(await page.locator('.hos-photo-thumbnail:not(.hos-model-thumbnail)').last().getAttribute('aria-pressed'),'true');
  await page.emulateMedia({reducedMotion:'no-preference'});await ready('/collection');const photo=page.locator('.hos-view:visible .hos-work-card-photo').first();await photo.hover();await page.waitForTimeout(700);assert.equal(await photo.locator('img').evaluate(n=>getComputedStyle(n).transform),'none','Artwork frames remain stable on hover');
  await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await photo.locator('img').evaluate(n=>getComputedStyle(n).transform),'none');
  assert.deepEqual(errors,[]);console.log('Gallery redesign passed: '+checked+' route/viewport combinations, native card links, inquiry, photo inspection, hover and reduced motion.');

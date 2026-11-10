@@ -1,0 +1,52 @@
+import assert from 'node:assert/strict';
+import {mkdtempSync,rmSync,mkdirSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {randomUUID} from 'node:crypto';
+import {chromium} from 'playwright';
+import {createApp} from '../server.mjs';
+import {prepareOwnerPublication} from '../scripts/publish-owner-release.mjs';
+
+const dataDir=mkdtempSync(join(tmpdir(),'hos-model-tile-')),password=randomUUID();
+const app=createApp({dataDir,env:{ADMIN_PASSWORD:password},backgroundNotifications:false});
+await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));
+const origin='http://127.0.0.1:'+app.server.address().port;
+const api=async(path,data)=>{const response=await fetch(origin+'/api/admin/'+path,{headers:{Authorization:'Basic '+Buffer.from('admin:'+password).toString('base64'),'Content-Type':'application/json',Origin:origin},...(data?{method:'POST',body:JSON.stringify(data)}:{})});assert(response.ok);return response.json();};
+const output=new URL('../test-results/browser/model-tile/',import.meta.url);mkdirSync(output,{recursive:true});let browser;
+try{
+  const current=await api('content'),catalog=prepareOwnerPublication(current.draft);catalog.works.find(work=>work.id==='zsa-018').title='Rabbit';
+  const saved=await api('content',{revision:current.revision,catalog});await api('publish',{revision:saved.revision});
+  browser=await chromium.launch({...(process.env.QA_CHROMIUM_PATH?{executablePath:process.env.QA_CHROMIUM_PATH}:{}),args:[...(process.getuid?.()===0?['--no-sandbox']:[]),'--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+  for(const width of [1440,390,320]){
+    const page=await browser.newPage({viewport:{width,height:900},reducedMotion:'reduce'});
+    const errors=[];page.on('pageerror',error=>errors.push(error.message));await page.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
+    await page.goto(origin+'/works/zsa-page-18');await page.locator('#hos-concept[data-ready="true"]').waitFor();
+    const row=page.locator('#hos-work-additional-images'),tile=row.locator('.hos-model-thumbnail'),photos=row.locator('.hos-photo-thumbnail:not(.hos-model-thumbnail)');
+    assert.equal(await tile.count(),1);assert.equal(await tile.getAttribute('data-model'),'zsa-018');
+    assert(await row.locator('button').nth(1).evaluate(element=>element.classList.contains('hos-model-thumbnail')));
+    assert.equal(await tile.getAttribute('aria-haspopup'),'dialog');
+    const count=await photos.count();assert.equal(await page.locator('#hos-gallery-count').innerText(),'1 / '+count);
+    await row.scrollIntoViewIfNeeded();const rect=await tile.boundingBox(),bounds=await row.boundingBox();
+    assert(rect.x>=bounds.x&&rect.x+rect.width<=bounds.x+bounds.width+1,'3D tile should be immediately visible without scrolling the row');
+    const photoSize=await photos.first().locator('img').boundingBox(),modelSize=await tile.locator('.hos-model-tile-face').boundingBox();
+    assert.equal(modelSize.width,photoSize.width);assert.equal(modelSize.height,photoSize.height);
+    await row.screenshot({path:new URL(`tiles-${width}.png`,output).pathname});
+    await row.getByRole('button',{name:'Show left',exact:true}).click();
+    assert.equal(await page.locator('#hos-work-photo-caption').innerText(),'Left');assert.equal(await page.locator('#hos-gallery-count').innerText(),'2 / '+count);
+    await page.getByRole('button',{name:'Next sculpture photograph',exact:true}).click();
+    assert.equal(await page.locator('#hos-work-photo-caption').innerText(),'Right');
+    await page.getByRole('button',{name:'Previous sculpture photograph',exact:true}).click();
+    await tile.focus();await page.keyboard.press('Enter');
+    await page.waitForFunction(()=>document.querySelector('#hos-model-stage').dataset.modelState==='ready');
+    assert.equal(await page.locator('#hos-model-title').innerText(),'Rabbit');
+    assert(await page.locator('.hos-model-note').isVisible());
+    await page.keyboard.press('Escape');assert(await tile.evaluate(element=>element===document.activeElement));
+    assert.equal(await row.getByRole('button',{name:'Show left',exact:true}).getAttribute('aria-pressed'),'true');
+    assert.equal(await page.locator('#hos-gallery-count').innerText(),'2 / '+count);
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+    await page.evaluate(()=>{history.pushState({},'', '/works/zsa-page-13');dispatchEvent(new PopStateEvent('popstate'));});
+    assert.equal(await row.locator('.hos-model-thumbnail').count(),0,'A work without a matching model must have no 3D tile');
+    assert(await page.locator('#hos-work-model').isHidden());assert.deepEqual(errors,[]);await page.close();
+    console.log(`${width}px: 3D tile visible after Front, photo navigation/counts preserved, keyboard opens model, focus returns, missing-model tile omitted.`);
+  }
+}finally{await browser?.close();await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});}
