@@ -475,7 +475,7 @@ function artistChapter(artist, selected, withInquiry = false) {
   const chapter=el('section','hos-artist-chapter');chapter.id='hos-home-artist-'+artist.id;const intro=el('div','hos-artist-intro');intro.dataset.reveal='';
   const portrait=photoLink('hos-artist-intro-photo cursor-interaction',{artist:artist.id},`Read about ${artist.name}`);portrait.setAttribute('aria-label',`Read about ${artist.name}`);
   portrait.append(image(artist.portrait,artistLeadAlt(artist),true,'(max-width: 700px) 90vw, 420px'));
-  const copy=el('div','hos-artist-intro-copy');copy.append(el('div','hos-eyebrow','THE ARTIST'),el('h2','',artist.name),el('p','hos-artist-style',artist.style),el('p','',artistBiography(artist)),link('About the artist',{artist:artist.id}));
+  const copy=el('div','hos-artist-intro-copy');copy.append(el('div','hos-eyebrow','THE ARTIST'),el('h2','',artist.name),el('p','hos-artist-style',artist.style),el('p','',artist.description || artistBiography(artist)),link('About the artist',{artist:artist.id}));
   intro.append(portrait,copy);chapter.append(intro,workGrid(selected));
   if(withInquiry){const action=el('div','hos-setting-action');action.append(link('Inquire',{inquiry:`Works by ${artist.name}`,inquiryArtist:artist.id}));chapter.append(action);}
   return chapter;
