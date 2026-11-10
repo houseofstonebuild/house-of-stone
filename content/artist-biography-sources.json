@@ -1,5 +1,5 @@
 {
-  "sourceNote": "Artist biographies supplied by the House of Mabwe owner on 2026-11-10. Preserve attribution and do not merge artists by approximate spelling. Only status=matched profiles may be published automatically.",
+  "sourceNote": "Artist biographies supplied by House of Mabwe's owner on 2026-11-10. Donald Chapenga and Luckmore Joseph matched exactly; owner subsequently confirmed that Tawanda Mukonori Seremwe is Tawanda Sere and that Yusufu Jemalo and Yusuf Jemali are both Yusufu Jamare. Preserve original source names and historical aliases.",
   "profiles": [
     {
       "sourceName": "Donald Chapenga",
@@ -20,20 +20,26 @@
     {
       "sourceName": "Tawanda Mukonori Seremwe",
       "targetName": "Tawanda Sere",
-      "status": "identity-review",
+      "status": "confirmed-alias",
       "source": "Photographed artist biography headed TAWANDA MUKONORI SEREMWE, November 2026",
       "introduction": "Tawanda developed his sculpture practice under the guidance of Gerald Takawira, carving forms that convey different meanings and emotions.",
       "biography": "Tawanda Mukonori Seremwe was born in 1977 in Zimbabwe's Marondera District. Growing up in a farming family, he became interested in carving at an early age. During school holidays he worked in the workshop of his uncle, the sculptor Gerald Takawira, learning to remove material and develop forms from stone.\n\nAfter completing secondary school in 1996, Tawanda joined Takawira's workshop full-time. In 1999 he began sculpting independently, and some of his pieces were sold to the National Gallery of Zimbabwe. His work explores different meanings and feelings through sculptural form. His supplied biography records exhibitions and workshops in Munich, Berlin and Frankfurt in 2006, and the presentation of his sculpture in Zimbabwe and Europe.",
-      "reviewReason": "The website currently credits works to Tawanda Sere; the biography is headed Tawanda Mukonori Seremwe. Confirm these are the same person before assignment."
+      "confirmedPublicName": "Tawanda Sere",
+      "alternateNames": [
+        "Tawanda Mukonori Seremwe"
+      ]
     },
     {
       "sourceName": "Yusufu Jamare",
-      "targetName": null,
-      "status": "identity-review",
+      "targetName": "Yusufu Jamare",
+      "status": "confirmed-alias",
       "source": "Yusufu Jamare biography.pdf, November 2026",
       "introduction": "Yusufu Jamare's sculptural practice includes abstract forms, carved heads and flowers.",
       "biography": "Yusufu Jamare grew up as the third of seven children in a family supported largely by small-scale farming and art made by older relatives. He attended Howson Primary School and Chabwino Secondary School. He began carving at the age of nine under the guidance of Chituwa Jemali and Daenny Kanyemba, whom his biography identifies as experienced artists.\n\nJamare went on to develop original pieces of his own, working across abstract sculpture, carved heads and floral forms. His supplied biography records an ambition to exhibit his work both in Zimbabwe and internationally.",
-      "reviewReason": "The website has separate artist records named Yusufu Jemalo and Yusuf Jemali. Neither is an exact match for Yusufu Jamare; confirm the correct identity before assignment."
+      "alternateNames": [
+        "Yusufu Jemalo",
+        "Yusuf Jemali"
+      ]
     }
   ]
 }
