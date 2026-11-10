@@ -1,14 +1,45 @@
 // Extend only the photographed backdrop into object-fit letterboxing.
 // The source bitmap and sculpture pixels are never rewritten or cropped.
 const frames=new WeakMap();
+// Reuse one observer per page, not one per image. Unrelated photographs do not
+// need image processing, and studio backgrounds can wait until near the screen.
+let resizeObserver,visibilityObserver;
+function observeStudio(img,state){
+ if(typeof window.ResizeObserver==='function'){
+  if(!resizeObserver)resizeObserver=new window.ResizeObserver(entries=>{
+   for(const entry of entries){const current=frames.get(entry.target);if(current?.source&&current.visible)paint(entry.target,current);}
+  });
+  resizeObserver.observe(img);
+ }
+ if(typeof window.IntersectionObserver==='function'){
+  if(!visibilityObserver)visibilityObserver=new window.IntersectionObserver(entries=>{
+   for(const entry of entries){
+    const current=frames.get(entry.target);if(!current?.source)continue;
+    current.visible=entry.isIntersecting;
+    if(current.visible&&entry.target.complete&&entry.target.naturalWidth)paint(entry.target,current);
+   }
+  },{rootMargin:'400px 0px'});
+  state.visible=false;
+  visibilityObserver.observe(img);
+ }
+}
 export function frameStudioImage(img,source){
  if(typeof img.decode!=='function')return;
  let state=frames.get(img);
- if(!state){state={source:'',observer:null};frames.set(img,state);if(typeof window.ResizeObserver==='function'){state.observer=new window.ResizeObserver(()=>paint(img,state));state.observer.observe(img);}}
+ if(!source&&!state)return;
+ if(!state){
+  state={source:'',signature:'',visible:typeof window.IntersectionObserver!=='function'};
+  frames.set(img,state);
+ }
+ const previous=state.source;
  state.source=source;state.signature='';delete img.dataset.studioFramed;img.style.backgroundImage='';
- if(!source)return;
- if(img.complete&&img.naturalWidth)paint(img,state);
- else img.addEventListener('load',()=>{if(state.source===source)paint(img,state);},{once:true});
+ if(!source){
+  resizeObserver?.unobserve(img);visibilityObserver?.unobserve(img);
+  return;
+ }
+ if(!previous)observeStudio(img,state);
+ if(img.complete&&img.naturalWidth&&state.visible)paint(img,state);
+ else if(!img.complete||!img.naturalWidth)img.addEventListener('load',()=>{if(state.source===source&&state.visible)paint(img,state);},{once:true});
 }
 function paint(img,state){
  if(!state.source||!img.naturalWidth||!img.clientWidth||!img.clientHeight)return;
