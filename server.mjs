@@ -220,6 +220,30 @@ export function createApp(options = {}) {
     res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store' });
     res.end(type.startsWith('application/json') ? JSON.stringify(value) : value);
   }
+  // Cache serialized public catalogues and ship compressed representations.
+  // Revalidation keeps editorial changes current without repeated full downloads.
+  const publicResponses=new Map();
+  function sendPublicJSON(res,req,key,value){
+    const json=JSON.stringify(value);
+    let response=publicResponses.get(key);
+    if(!response||response.json!==json){
+      const body=Buffer.from(json);
+      response={json,body,etag:'"'+createHash('sha256').update(body).digest('hex')+'"'};
+      publicResponses.set(key,response);
+    }
+    const common={'Cache-Control':'public, max-age=0, must-revalidate','ETag':response.etag,'Vary':'Accept-Encoding'};
+    if(req.headers['if-none-match']?.split(',').some(tag=>tag.trim()===response.etag)){
+      res.writeHead(304,common);return res.end();
+    }
+    const acceptsGzip=String(req.headers['accept-encoding']||'').split(',').some(part=>{
+      const [encoding,...params]=part.trim().split(';');
+      return encoding==='gzip'&&!params.some(p=>/^q=0(?:\.0*)?$/.test(p.trim()));
+    });
+    const body=acceptsGzip?(response.gzip ||=gzipSync(response.body)):response.body;
+    res.writeHead(200,{...common,'Content-Type':'application/json; charset=utf-8',
+      'Content-Length':body.length,...(acceptsGzip?{'Content-Encoding':'gzip'}:{})});
+    res.end(body);
+  }
   function summary(days) {
     const since = new Date(Date.now() - days * 86400000).toISOString();
     const funnel = ['page_view', 'explore_click', 'work_view', 'inquiry_started', 'inquiry_submitted'].map(name => ({ name, sessions: db.prepare('SELECT count(DISTINCT session_hash) AS n FROM events WHERE name=? AND created_at>=?').get(name, since).n, events: db.prepare('SELECT count(*) AS n FROM events WHERE name=? AND created_at>=?').get(name, since).n }));
@@ -263,7 +287,7 @@ export function createApp(options = {}) {
         if (!authenticated(req)) { res.setHeader('WWW-Authenticate', 'Basic realm="House of Mabwe private", charset="UTF-8"'); return send(res, 401, 'Sign in to House of Mabwe.', 'text/plain; charset=utf-8'); }
       }
       if (req.method === 'GET' && path === '/health') return send(res, 200, { ok: true });
-      if (req.method === 'GET' && path === '/content.json') return send(res, 200, catalog);
+      if (req.method === 'GET' && path === '/content.json') return sendPublicJSON(res,req,'content',catalog);
       if (req.method === 'GET' && path === '/api/admin/content') return send(res, 200, collectionState());
       if (req.method === 'GET' && path === '/api/admin/preview-content') return send(res, 200, publicCatalog(collectionState().draft, {preview:true}));
       if (req.method === 'POST' && path === '/api/admin/prepare-founding-collection') {
@@ -317,7 +341,8 @@ export function createApp(options = {}) {
       }
       if(req.method==='GET' && ['/media-manifest.json','/api/admin/media-manifest'].includes(path)){
         const source=path.startsWith('/api/admin/')?collectionState().draft:catalog;
-        return send(res,200,{...JSON.parse(readFileSync(resolve(PUBLIC,'media-manifest.json'),'utf8')),...uploadedManifest(source.assets,mediaDir)});
+        const manifest={...JSON.parse(readFileSync(resolve(PUBLIC,'media-manifest.json'),'utf8')),...uploadedManifest(source.assets,mediaDir)};
+        return path==='/media-manifest.json'?sendPublicJSON(res,req,'manifest',manifest):send(res,200,manifest);
       }
       if (['GET','HEAD'].includes(req.method) && /^\/media\/[a-f0-9]{64}\.(jpg|png|webp)$/.test(path)) {
         const published = Object.values(catalog.assets).includes(path) || Object.values(uploadedManifest(catalog.assets,mediaDir)).some(info=>info.variants?.includes(path));
