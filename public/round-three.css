@@ -139,3 +139,6 @@
   #hos-concept .hos-work-inline-model .hos-3d-stage {min-height:270px;}
   #hos-concept .hos-work-inline-model .hos-3d-top {padding:12px 14px 0;}
 }
+
+/* Artist-page long biographies preserve paragraph spacing; collection previews stay brief. */
+#hos-concept #hos-artist-biography {white-space:pre-line;}
