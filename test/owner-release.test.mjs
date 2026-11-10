@@ -7,9 +7,10 @@ import {validateCatalog,publicCatalog} from '../catalog.mjs';
 import {prepareOwnerPublication,publishOwnerRelease,releaseId,releaseOrigin} from '../scripts/publish-owner-release.mjs';
 const root=new URL('../',import.meta.url),seed=()=>JSON.parse(readFileSync(new URL('content/catalog.json',root),'utf8'));
 const options={publicDir:new URL('public/',root).pathname,mediaDir:'/tmp/hos-unused-media',publish:true};
+const legacyModels=JSON.parse(readFileSync(new URL('content/legacy-models.json',root),'utf8'));
 
 test('the owner release publishes all working content and five source-matched models without falsely confirming factual fields',()=>{
- const content=validateCatalog(prepareOwnerPublication(seed()),options),live=publicCatalog(content);
+ const content=validateCatalog(prepareOwnerPublication(seed(),undefined,legacyModels),options),live=publicCatalog(content);
  assert.equal(live.collections.length,5);assert.equal(live.works.length,23);assert.equal(live.works.filter(w=>w.modelVerified).length,5);
  assert.deepEqual(live.collections.map(c=>c.starWorkId),['zsa-013','zsa-028','zsa-001','zsa-020','zsa-005']);
  assert(live.works.every(w=>w.title && w.artistId && w.material && w.dimensions));
@@ -22,8 +23,8 @@ test('the owner release publishes all working content and five source-matched mo
 });
 
 test('changed source photographs never inherit a working 3D model',()=>{
- const current=prepareOwnerPublication(seed());current.assets['new-front']=current.assets.hero;current.works.find(w=>w.id==='zsa-028').image='new-front';
- assert.equal(prepareOwnerPublication(current).works.find(w=>w.id==='zsa-028').workingModel,false);
+ const current=prepareOwnerPublication(seed(),undefined,legacyModels);current.assets['new-front']=current.assets.hero;current.works.find(w=>w.id==='zsa-028').image='new-front';
+ assert.equal(prepareOwnerPublication(current,undefined,legacyModels).works.find(w=>w.id==='zsa-028').workingModel,false);
 });
 
 test('authenticated owner publication preserves history and inquiries and runs only once across future content edits',async t=>{

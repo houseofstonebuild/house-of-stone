@@ -15,8 +15,15 @@ try{
  page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>requests.push(r.url()));
  const ready=async path=>{await page.goto(base+path);await page.locator('#hos-concept[data-ready="true"]').waitFor();};
  await ready('/admin/preview');assert.equal(await page.locator('#hos-home-chapters [data-model-stage]').count(),0);assert.equal(requests.filter(url=>url.endsWith('.glb')).length,0);
- // Old reconstructions cannot follow a replaced sculpture photograph, even in preview.
+ // No model may follow a different sculpture photograph, even in preview.
+ // Owner uploads now replace some of the old source-based reconstructions.
+ await page.route('**/models.json',async route=>{
+   const response=await route.fetch(),models=await response.json();
+   for(const collection of staged.draft.collections)if(models[collection.starWorkId])models[collection.starWorkId].source='/assets/nonmatching-source.jpg';
+   await route.fulfill({response,json:models});
+ });
  for(const collection of staged.draft.collections){const work=staged.draft.works.find(w=>w.id===collection.starWorkId);await ready('/admin/preview/works/'+work.slug);assert(await page.locator('#hos-work-model').isHidden(),work.id+' must retain its source gate');report.sourceMismatchGates++;}
+ await page.unroute('**/models.json');
  const work=staged.draft.works.find(w=>w.id==='zsa-016');assert(work);await ready('/admin/preview/works/'+work.slug);await page.locator('#hos-work-model').click();
  await page.waitForFunction(()=>['ready','unavailable'].includes(document.querySelector('#hos-model-stage').dataset.modelState),null,{timeout:45000});
  const stage=page.locator('#hos-model-stage'),rendered=await stage.getAttribute('data-model-state')==='ready';if(name==='chromium')assert(rendered,'The approved Happy Times mesh must render');

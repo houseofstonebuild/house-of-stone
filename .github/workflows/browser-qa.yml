@@ -38,6 +38,8 @@ jobs:
       - run: sh scripts/run-browser-qa.sh qa/related-cards.mjs
       - run: sh scripts/run-browser-qa.sh qa/live-fixtures.mjs
         if: matrix.engine == 'chromium'
+      - run: sh scripts/run-browser-qa.sh qa/uploaded-models.mjs
+        if: matrix.engine == 'chromium'
       - uses: actions/upload-artifact@v5
         if: always()
         with:

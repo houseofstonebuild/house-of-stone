@@ -4,8 +4,8 @@ import {readFileSync} from 'node:fs';
 import {GLTFLoader} from '../public/vendor/GLTFLoader.js';
 import {Box3,Vector3} from '../public/vendor/three.module.min.js';
 
-test('owner-approved Wingbeat preserves its vertex colours, polished material and model bounds',async()=>{
- const entry=JSON.parse(readFileSync(new URL('../public/models.json',import.meta.url)))['zsa-016'];
+test('legacy Wingbeat preserves its vertex colours, polished material and model bounds',async()=>{
+ const entry=JSON.parse(readFileSync(new URL('../content/legacy-models.json',import.meta.url)))['zsa-016'];
  assert.equal(entry.ownerApproved,true);assert.equal(entry.referenceSurface,false);
  assert.equal(entry.source,'/assets/wingbeat-shoot-front-v1.webp');
  const bytes=readFileSync(new URL('../public'+entry.file,import.meta.url));

@@ -82,6 +82,7 @@ if(process.env.HOS_EXPECT_FOUNDING_RELEASE==='true'){
 }
 const matchingModel=work=>{
   const entry=models[work?.id];if(!entry || entry.source!==catalog.assets[work.image])return false;
+  if(entry.uploaded)return entry.workId===work.id && entry.ownerApproved===true;
   return entry.reconstruction?entry.workId===work.id && (work.modelVerified===true || entry.ownerApproved===true) && (!work.sourcePage || entry.sourcePage===work.sourcePage):entry.title===work.title;
 };
 const browser=await chromium.launch({args:['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader']});

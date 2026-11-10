@@ -96,23 +96,13 @@
   },
   "zsa-028": {
     "workId": "zsa-028",
-    "title": "Original ZSA page 28",
-    "source": "/assets/zsa-page-28.jpg",
-    "sourcePage": 28,
-    "sourceSha256": "d5ddf9372087e76d228f80937ef20fdc17a128085087f4b8cca6d2a891da8d29",
-    "file": "/models/zsa-028.glb",
-    "referenceSurface": true,
-    "reconstruction": true,
-    "reviewOnly": true,
-    "referenceYaw": 0.3,
-    "stoneGrain": false,
-    "stoneSwatch": [
-      0.75,
-      0,
-      0.25,
-      1
-    ],
-    "stonePolish": 0.82
+    "title": "Red Interlace",
+    "source": "/assets/zsa-028-studio-front-v2.webp",
+    "file": "/models/red-interlace-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
   },
   "zsa-001": {
     "workId": "zsa-001",
@@ -136,23 +126,13 @@
   },
   "zsa-020": {
     "workId": "zsa-020",
-    "title": "Original ZSA page 20",
-    "source": "/assets/zsa-page-20.jpg",
-    "sourcePage": 20,
-    "sourceSha256": "12231e6c9ac638933a00a1e173b6bf718d043eba972e711b38133cc250e3d8ff",
-    "file": "/models/zsa-020.glb",
-    "referenceSurface": true,
-    "reconstruction": true,
-    "reviewOnly": true,
-    "referenceYaw": 0.3,
-    "stoneGrain": false,
-    "stoneSwatch": [
-      0.75,
-      0,
-      0.25,
-      1
-    ],
-    "stonePolish": 0.9
+    "title": "Lovers",
+    "source": "/assets/zsa-020-studio-front-v2.webp",
+    "file": "/models/lovers-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
   },
   "zsa-005": {
     "workId": "zsa-005",
@@ -176,21 +156,109 @@
   },
   "zsa-016": {
     "workId": "zsa-016",
-    "title": "Wingbeat",
+    "title": "Happy Times",
     "source": "/assets/wingbeat-shoot-front-v1.webp",
-    "sourcePage": 16,
-    "file": "/models/wingbeat-v3.glb",
-    "reconstruction": true,
+    "file": "/models/happy-times-uploaded-v1.glb",
+    "uploaded": true,
     "ownerApproved": true,
     "referenceSurface": false,
-    "stoneGrain": false,
-    "geometryVersion": 3
+    "stoneGrain": false
   },
   "zsa-018": {
     "workId": "zsa-018",
     "title": "Rabbit",
     "source": "/assets/zsa-018-studio-front-v2.webp",
     "file": "/models/rabbit-v1.glb",
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "zsa-031": {
+    "workId": "zsa-031",
+    "title": "Protection Spirit",
+    "source": "/assets/zsa-031-studio-front-v2.webp",
+    "file": "/models/protection-spirit-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "zsa-006": {
+    "workId": "zsa-006",
+    "title": "Coil",
+    "source": "/assets/zsa-006-studio-front-v2.webp",
+    "file": "/models/coil-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "hos-inner-beauty": {
+    "workId": "hos-inner-beauty",
+    "title": "Inner Beauty",
+    "source": "/assets/hos-inner-beauty-front-v1.webp",
+    "file": "/models/inner-beauty-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "zsa-029": {
+    "workId": "zsa-029",
+    "title": "Open Curls",
+    "source": "/assets/zsa-029-studio-front-v2.webp",
+    "file": "/models/open-curls-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "zsa-023": {
+    "workId": "zsa-023",
+    "title": "Reflection",
+    "source": "/assets/zsa-023-studio-front-v2.webp",
+    "file": "/models/reflection-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "zsa-012": {
+    "workId": "zsa-012",
+    "title": "Chiefs Head",
+    "source": "/assets/zsa-012-studio-front-v3.webp",
+    "file": "/models/chiefs-head-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "zsa-027": {
+    "workId": "zsa-027",
+    "title": "The Old Man",
+    "source": "/assets/zsa-027-studio-front-v2.webp",
+    "file": "/models/the-old-man-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "zsa-009": {
+    "workId": "zsa-009",
+    "title": "Blooming",
+    "source": "/assets/zsa-009-studio-front-v2.webp",
+    "file": "/models/blooming-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
+    "referenceSurface": false,
+    "stoneGrain": false
+  },
+  "zsa-026": {
+    "workId": "zsa-026",
+    "title": "Polygamist",
+    "source": "/assets/zsa-026-studio-front-v2.webp",
+    "file": "/models/polygamist-uploaded-v1.glb",
+    "uploaded": true,
+    "ownerApproved": true,
     "referenceSurface": false,
     "stoneGrain": false
   }
