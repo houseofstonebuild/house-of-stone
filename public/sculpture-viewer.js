@@ -179,7 +179,7 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
       host.querySelector('.hos-3d-poster').hidden=true;const snapshot=host.querySelector('.hos-3d-snapshot');if(snapshot)snapshot.hidden=true;
       host.dataset.modelState='ready';
       host.setAttribute('aria-busy','false');if(host===dialogHost&&loadingIndicator)loadingIndicator.hidden=true;
-      statusFor(host).textContent=host===dialogHost?'Drag to rotate · Pinch or use the controls to zoom':reduced.matches?'Drag to rotate':'Drag or scroll to rotate';
+      statusFor(host).textContent=host===dialogHost?'Drag to rotate · Pinch or use the controls to zoom':'Drag to rotate';
       if(host===dialogHost)controls.forEach(button=>button.disabled=false);
       refresh();
     } catch {
@@ -193,8 +193,9 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
     if(host!==active||host.dataset.loadedModel!==host.dataset.modelId){if(loadingHost!==host&&host.dataset.modelState!=='unavailable')void activate(host);return;}
     if(contextLost)return;
     const rect=host.getBoundingClientRect();if(!rect.width||!rect.height)return;
-    const inline=inlineView(host),scrollRotation=reduced.matches?-.3:((innerHeight-rect.top)/(innerHeight+rect.height)-.5)*Math.PI*2-.3;
-    const rotation=host===dialogHost?yaw:scrollRotation+inline.yaw,currentPitch=host===dialogHost?pitch:inline.pitch,currentZoom=host===dialogHost?zoom:inline.zoom;
+    // Page scrolling only changes which viewer is visible, never its orientation.
+    const inline=inlineView(host);
+    const rotation=host===dialogHost?yaw:-.3+inline.yaw,currentPitch=host===dialogHost?pitch:inline.pitch,currentZoom=host===dialogHost?zoom:inline.zoom;
     const view=[Math.round(rect.width),Math.round(rect.height),rotation,currentPitch,currentZoom,host===dialogHost].join(':');if(view===lastView)return;lastView=view;
     renderer.setPixelRatio(Math.min(devicePixelRatio||1,2,2048/Math.max(rect.width,rect.height)));renderer.setSize(rect.width,rect.height,false);
     camera.aspect=rect.width/rect.height;
@@ -255,7 +256,7 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
   dialog.addEventListener('click',event=>{if(event.target!==dialog)return;const b=dialog.getBoundingClientRect();if(event.clientX<b.left||event.clientX>b.right||event.clientY<b.top||event.clientY>b.bottom)close();});
   root.querySelector('#hos-model-close').addEventListener('click',close);
   controls.forEach(button=>button.addEventListener('click',()=>control(button.dataset.modelControl)));
-  reduced.addEventListener('change',()=>{lastView='';if(active&&active!==dialogHost)statusFor(active).textContent=reduced.matches?'Drag to rotate':'Drag or scroll to rotate';refresh();});
+  reduced.addEventListener('change',()=>{lastView='';refresh();});
   addEventListener('scroll',refresh,{passive:true});addEventListener('resize',refresh,{passive:true});document.addEventListener('visibilitychange',refresh);
   new ResizeObserver(refresh).observe(dialogHost);
   const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(!unavailable&&entry.isIntersecting&&models[entry.target.dataset.modelId]&&makeRenderer())void model(entry.target.dataset.modelId).catch(()=>{});refresh();},{rootMargin:'200px',threshold:[0,.1,.5,1]});hosts.forEach(host=>observer.observe(host));
