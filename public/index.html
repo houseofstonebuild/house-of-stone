@@ -92,8 +92,13 @@
       </figure>
       <div class="hos-work-layout">
         <div class="hos-work-photo" data-reveal>
+          <div id="hos-work-view-modes" class="hos-work-view-modes" role="group" aria-label="Choose sculpture view" hidden>
+            <button type="button" class="hos-work-view-option cursor-interaction" data-work-visual="photos" aria-pressed="true">Photographs</button>
+            <button type="button" class="hos-work-view-option cursor-interaction" data-work-visual="model" aria-pressed="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 2 9 5v10l-9 5-9-5V7z"/><path d="m3 7 9 5 9-5M12 12v10"/></svg>Explore in 3D</button>
+          </div>
           <div id="hos-work-additional-images" class="hos-work-additional-images" aria-label="Sculpture views"></div>
           <div class="hos-work-primary-photo"><button id="hos-work-photo-open" type="button" class="hos-work-photo-open" aria-label="Inspect sculpture photograph"><img id="hos-work-image" alt="Sculpture photograph"><span class="hos-photo-zoom-invite" aria-hidden="true">＋ Inspect &amp; zoom</span></button><p id="hos-work-photo-caption" class="hos-photo-caption"></p><div class="hos-gallery-navigation"><button type="button" data-gallery-step="-1" aria-label="Previous sculpture photograph">Previous</button><span id="hos-gallery-count" role="status"></span><button type="button" data-gallery-step="1" aria-label="Next sculpture photograph">Next</button></div></div>
+          <div id="hos-work-inline-model" class="hos-work-inline-model" hidden></div>
         </div>
         <div class="hos-work-details" data-reveal>
           <div id="hos-work-context" class="hos-work-context"></div><h1 id="hos-work-title">Folded Light</h1><a id="hos-work-artist" class="hos-eyebrow hos-artist-name-link cursor-interaction" data-artist="tariro">TARIRO MAVHUNGA</a><p id="hos-work-description"></p><p id="hos-work-short-specs" class="hos-work-short-specs"></p>
