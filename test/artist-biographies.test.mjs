@@ -17,7 +17,7 @@ const fixture=()=>prepareCollectionRoundTwo(prepareCollectionRoundOne(prepareVer
 test('owner artist biographies are assigned strictly by exact artist identity',()=>{
   assert.equal(source.profiles.length,4);
   assert.deepEqual(confirmedProfiles.map(p=>p.targetName),['Donald Chapenga','Luckmore Joseph']);
-  assert.deepEqual(source.profiles.filter(p=>p.status==='identity-review').map(p=>p.sourceName),
+  assert.deepEqual(source.profiles.filter(p=>p.status==='confirmed-alias').map(p=>p.sourceName),
     ['Tawanda Mukonori Seremwe','Yusufu Jamare']);
   const before=fixture(),after=prepareOwnerArtistBiographies(before);
   for(const profile of confirmedProfiles){
