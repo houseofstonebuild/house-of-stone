@@ -620,6 +620,7 @@ function openInquiry(topic, trigger) {
   form.reset(); form.hidden = false; review.hidden = true; success.hidden = true;
   $('#hos-inquiry-discard').hidden=false;title.textContent = 'Your inquiry'; statusMessage(''); $('#hos-inquiry-context').textContent = topic;
   if (['Designer project','Corporate project'].includes(topic))form.elements.interest.value='Sourcing for a project';
+  if (topic==='Sculpture commission')form.elements.interest.value='Commissioning a sculpture';
   if(saved)for(const [key,value] of Object.entries(saved.values))form.elements[key].value=value;
   $('#hos-inquiry-response-note').textContent=catalog.site.inquiryNote || 'Your inquiry starts a direct conversation with House of Mabwe. We will respond by email.';
   main.hidden = true; inquiry.hidden = false; setMenu(false);
