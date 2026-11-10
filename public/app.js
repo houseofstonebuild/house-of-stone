@@ -154,6 +154,7 @@ function workCard(work, {compact = false} = {}) {
   const photo = photoLink('hos-work-card-photo cursor-interaction',{work:work.id},`View ${workLabel(work)}`);
   photo.setAttribute('aria-label', `View ${workLabel(work)}`);
   photo.append(image(work.image,work.description || workLabel(work),true,'(max-width: 700px) 90vw, 520px'));
+  if(modelDefinition(work)){const badge=el('span','hos-work-card-3d','3D VIEW');badge.setAttribute('aria-hidden','true');photo.append(badge);}
   const copy = el('div','hos-work-card-copy'), badge=availabilityLabel(work);
   if(badge && work.availability!=='available')photo.append(badge);
   const heading=el('h3'),titleLink=photoLink('hos-card-title',{work:work.id},`View ${workLabel(work)}`);titleLink.textContent=work.title;heading.append(titleLink);
@@ -390,6 +391,14 @@ function modelPanel(work) {
   if(previewMode && modelDefinition(work).reconstruction)panel.append(el('p','hos-model-review-note','Reference-based reconstruction. Depth and unseen surfaces are inferred.'));
   return panel;
 }
+function setWorkVisual(view, {trackView = true} = {}) {
+  const modes=$('#hos-work-view-modes'),photo=$('.hos-work-primary-photo'),thumbs=$('#hos-work-additional-images'),host=$('#hos-work-inline-model');
+  const showModel=view==='model' && !modes.hidden && Boolean(host.firstElementChild);
+  photo.hidden=showModel;thumbs.hidden=showModel || thumbs.children.length<2;host.hidden=!showModel;
+  modes.querySelectorAll('[data-work-visual]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.workVisual===(showModel?'model':'photos'))));
+  if(showModel){watchModels(host);if(trackView && activeWork)track('model_view',{workId:activeWork.id,artistId:activeWork.artistId});}
+  else modelViewer?.refresh();
+}
 function sculptureSettings(artist, work, entry, withInquiry = false) {
   const carousel = el('div', 'hos-settings-carousel'); carousel.dataset.reveal = '';
   carousel.setAttribute('role', 'group'); carousel.setAttribute('aria-label', `${work.title} in different spaces`);
@@ -547,7 +556,12 @@ function renderWork(work) {
   for(const id of ['#hos-work-specifications','#hos-work-delivery','#hos-work-provenance'])$(id).open=false;
   // A campaign photograph leads the page once, instead of recurring at the
   // end of the sculpture's angle gallery.
-  gallery?.setWork(work,assets,workScenes(work),window.matchMedia?.('(max-width:700px)')?.matches?'':campaign?.source,Boolean(modelDefinition(work)));
+  const hasModel=Boolean(modelDefinition(work));
+  gallery?.setWork(work,assets,workScenes(work),window.matchMedia?.('(max-width:700px)')?.matches?'':campaign?.source,hasModel);
+  const modes=$('#hos-work-view-modes'),inlineModel=$('#hos-work-inline-model');
+  modes.hidden=!hasModel;inlineModel.replaceChildren();
+  if(hasModel){const panel=modelPanel(work);panel.classList.add('hos-work-3d-panel');inlineModel.append(panel);}
+  setWorkVisual('photos',{trackView:false});
   const mobileAction=$('#hos-mobile-work-action'),mobileButton=$('#hos-mobile-work-inquiry');mobileButton.textContent=button.textContent;Object.assign(mobileButton.dataset,button.dataset);mobileButton.setAttribute('aria-label',(sold?'Inquire about alternatives to ':'Inquire about ')+work.title);mobileAction.hidden=true;
   workActionObserver?.disconnect();
   if('IntersectionObserver' in window && !previewMode){let originalVisible=false,footerVisible=false;workActionObserver=new window.IntersectionObserver(entries=>{for(const entry of entries){if(entry.target===button)originalVisible=entry.isIntersecting;else footerVisible=entry.isIntersecting;}mobileAction.hidden=originalVisible||footerVisible;});workActionObserver.observe(button);workActionObserver.observe($('.hos-footer'));}
@@ -661,6 +675,8 @@ root.addEventListener('click', event => {
   if (!catalog || submitting) return;
   const anchor=event.target.closest('a');if(anchor){if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||anchor.target==='_blank'||anchor.hasAttribute('download'))return;if(anchor.getAttribute('aria-disabled')==='true'){event.preventDefault();return;}if(anchor.matches('[data-view],[data-work],[data-artist],[data-collection],[data-scroll-supporting],[data-scroll-collection],[data-jump-collection]'))event.preventDefault();}
   const jump=event.target.closest('[data-jump-collection]');if(jump){const target=document.getElementById(jump.dataset.jumpCollection);target?.scrollIntoView({behavior:motionPreference?.matches?'instant':'smooth',block:'start'});return;}
+  const workVisual=event.target.closest('[data-work-visual]');
+  if(workVisual){setWorkVisual(workVisual.dataset.workVisual);return;}
   const mode=event.target.closest('[data-visual-mode]');
   if(mode){
     const visual=mode.closest('.hos-collection-visual'),showModel=mode.dataset.visualMode==='model';
