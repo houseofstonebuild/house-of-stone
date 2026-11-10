@@ -17,6 +17,19 @@ const api=async(path,data)=>{
  const response=await fetch(origin+'/api/admin/'+path,{headers:{...auth,...(data?{'Content-Type':'application/json',Origin:origin}:{})},...(data?{method:'POST',body:JSON.stringify(data)}:{})});
  assert(response.ok);return response.json();
 };
+// The public manifest may contain newly approved models for owner-replaced photos.
+// Temporary catalogue fixtures use historical photos, so only source-matched and
+// eligible models should be expected, rather than an old fixed count.
+async function eligiblePublishedModelCount(){
+ const catalog=await (await fetch(origin+'/content.json')).json();
+ const manifest=JSON.parse(readFileSync(new URL('../public/models.json',import.meta.url),'utf8'));
+ return catalog.works.filter(work=>{
+   const entry=manifest[work.id];if(!entry||entry.source!==catalog.assets[work.image])return false;
+   if(entry.uploaded)return entry.workId===work.id&&entry.ownerApproved===true;
+   if(entry.reconstruction)return entry.workId===work.id&&(work.modelVerified===true||entry.ownerApproved===true)&&(!work.sourcePage||entry.sourcePage===work.sourcePage);
+   return entry.title===work.title;
+ }).length;
+}
 async function verify(name,modelCount,fallbackCount){
  const out=new URL(`../test-results/live-fixtures/${name}/`,import.meta.url);
  const env={...process.env,HOS_LIVE_URL:origin,HOS_LIVE_ATTEMPTS:'1',HOS_LIVE_RETRY_MS:'0',HOS_LIVE_OUTPUT:out.href};
@@ -34,9 +47,9 @@ try{
  }else{
  await verify('legacy',5,0);
  let state=await api('prepare-founding-collection',{revision:0});await api('publish',{revision:state.revision});
- await verify('collections-unconfirmed',17,5);
+ await verify('collections-unconfirmed',await eligiblePublishedModelCount(),5);
  state=await api('content');for(const work of state.draft.works)if(work.modelStatus==='review')work.verification.model=true;
  state=await api('content',{revision:state.revision,catalog:state.draft});await api('publish',{revision:state.revision});
- await verify('collections-confirmed',17,5);
+ await verify('collections-confirmed',await eligiblePublishedModelCount(),5);
  }
 }finally{await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});}
