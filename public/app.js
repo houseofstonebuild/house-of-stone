@@ -109,8 +109,8 @@ function applyImage(img, source, sizes = '(max-width: 650px) 100vw, 55vw') {
   img.classList.toggle('hos-studio-photo', /^\/assets\/zsa-\d+-(?:studio-(?:front|back|left|right)-v[234]|photoshoot-(?:front|back|left|right)-v1)\.webp$/.test(source));
 }
 function image(key, alt, lazy = true, sizes) {
-  const img = el('img'); applyImage(img, assets[key], sizes); img.alt = alt;
-  if (lazy) img.loading = 'lazy';
+  const img = el('img'); if (lazy) img.loading = 'lazy';
+  applyImage(img, assets[key], sizes); img.alt = alt;
   return img;
 }
 function routeURL(path) { return (previewMode ? '/admin/preview' : '') + path; }
@@ -362,7 +362,7 @@ function chapterMedia(artist, work) {
   return entry;
 }
 function editorialImage(source, alt, sizes) {
-  const img = el('img'); applyImage(img, source, sizes); img.alt = alt; img.loading = 'lazy'; return img;
+  const img = el('img'); img.loading = 'lazy'; applyImage(img, source, sizes); img.alt = alt; return img;
 }
 function modelDefinition(work) {
   const entry=models[work.id];
