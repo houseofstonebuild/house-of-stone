@@ -484,6 +484,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         const result=await publishUploadedWorks({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
         console.log('Owner-uploaded sculptures:',JSON.stringify(result));
       } catch(error) { console.error('Owner-uploaded sculptures did not complete:',error.message); }
+      try {
+        const {publishOwnerArtistBiographies}=await import('./scripts/publish-owner-artist-biographies.mjs');
+        const result=await publishOwnerArtistBiographies({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
+        console.log('Owner-supplied artist biographies:',JSON.stringify(result));
+      } catch(error) { console.error('Artist biographies publication did not complete:',error.message); }
     }
   });
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(() => process.exit(0)));
