@@ -516,7 +516,7 @@ function renderWork(work) {
   const bannerImage = $('#hos-work-banner-image');
   applyImage(bannerImage,campaign?.source || assets[work.image],'100vw');
   bannerImage.alt = campaign ? `${work.title} in an interior setting` : `Front photograph of ${work.title}`;
-  $('#hos-work-banner-collection').textContent = collectionFor(work)?.name || 'THE COLLECTION';
+  $('#hos-work-banner-collection').textContent = collectionFor(work)?.name || 'INDIVIDUAL WORK';
   $('#hos-work-banner-title').textContent = work.title;
   $('#hos-work-banner-artist').textContent = activeArtist?.name || '';
   $('#hos-work-banner-stone').textContent = stoneLabel(work) || 'Stone details on inquiry';
