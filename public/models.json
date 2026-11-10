@@ -185,5 +185,13 @@
     "referenceSurface": false,
     "stoneGrain": false,
     "geometryVersion": 3
+  },
+  "zsa-018": {
+    "workId": "zsa-018",
+    "title": "Rabbit",
+    "source": "/assets/zsa-018-studio-front-v2.webp",
+    "file": "/models/rabbit-v1.glb",
+    "referenceSurface": false,
+    "stoneGrain": false
   }
 }

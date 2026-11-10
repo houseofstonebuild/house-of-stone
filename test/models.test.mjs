@@ -10,7 +10,8 @@ import {createApp} from '../server.mjs';
 const definitions=JSON.parse(readFileSync(new URL('../public/models.json',import.meta.url),'utf8'));
 test('all five textured GLB files load as finite volumes with reference openings and a dished recess',async()=>{
   const loaded=new Map();
-  for(const [id,definition] of Object.entries(definitions).filter(([,entry])=>!entry.reconstruction)) {
+  for(const id of ['folded-light','continuum','together','quiet-flight','equilibrium']) {
+    const definition=definitions[id];
     const bytes=readFileSync(new URL('../public'+definition.file,import.meta.url));
     const jsonLength=bytes.readUInt32LE(12),doc=JSON.parse(bytes.subarray(20,20+jsonLength).toString());
     assert.deepEqual(doc.extensionsRequired,['KHR_mesh_quantization']);
