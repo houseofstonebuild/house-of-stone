@@ -69,7 +69,7 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
   function fallback(host,message) {
     host.dataset.modelState='unavailable';host.querySelector('.hos-3d-poster').hidden=false;
     host.setAttribute('aria-busy','false');
-    if(host===dialogHost)loadingIndicator.hidden=true;
+    if(host===dialogHost&&loadingIndicator)loadingIndicator.hidden=true;
     const snapshot=host.querySelector('.hos-3d-snapshot');if(snapshot)snapshot.hidden=true;
     statusFor(host).textContent=message;
     if(host===dialogHost)controls.forEach(button=>button.disabled=true);
@@ -178,7 +178,7 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
       renderer.domElement.style.touchAction=host===dialogHost?'none':'pan-y pinch-zoom';
       host.querySelector('.hos-3d-poster').hidden=true;const snapshot=host.querySelector('.hos-3d-snapshot');if(snapshot)snapshot.hidden=true;
       host.dataset.modelState='ready';
-      host.setAttribute('aria-busy','false');if(host===dialogHost)loadingIndicator.hidden=true;
+      host.setAttribute('aria-busy','false');if(host===dialogHost&&loadingIndicator)loadingIndicator.hidden=true;
       statusFor(host).textContent=host===dialogHost?'Drag to rotate · Pinch or use the controls to zoom':reduced.matches?'Drag to rotate':'Drag or scroll to rotate';
       if(host===dialogHost)controls.forEach(button=>button.disabled=false);
       refresh();
@@ -264,7 +264,7 @@ export function initializeViewer({root,models,works,onInteraction,reviewMode=fal
     reviewNote.hidden=!(reviewMode && models[work.id]?.reconstruction);
     dialogWork=work;trigger=button;yaw=-.3;pitch=0;zoom=1;interactionCounted=false;pointers.clear();
     dialogTitle.textContent=work.title;dialogHost.dataset.modelId=work.id;dialogHost.dataset.modelState='waiting';
-    dialogHost.setAttribute('aria-busy','true');loadingIndicator.hidden=false;
+    dialogHost.setAttribute('aria-busy','true');if(loadingIndicator)loadingIndicator.hidden=false;
     dialogHost.querySelector('.hos-3d-poster').src=poster;dialogHost.querySelector('.hos-3d-poster').hidden=true;
     controls.forEach(button=>button.disabled=true);dialogStatus.textContent='Loading 3D view…';
     document.body.style.setProperty('--hos-scrollbar',`${Math.max(0,innerWidth-document.documentElement.clientWidth)}px`);document.body.classList.add('hos-model-open');

@@ -60,4 +60,14 @@ try{
   assert.equal(await page.locator('#hos-model-stage').getAttribute('aria-busy'),'false');
   console.log('Unavailable WebGL: labelled photo fallback remains available; model-only caption and loader stay hidden.');
   await page.close();
+  // An already-open page can fetch the new lazy viewer before refreshing its HTML.
+  const existingPage=await browser.newPage({reducedMotion:'reduce'});
+  await existingPage.addInitScript(()=>localStorage.setItem('hos-measurement','off'));
+  await existingPage.goto(origin+'/works/zsa-page-18');
+  await existingPage.locator('.hos-model-loading').evaluate(element=>element.remove());
+  await existingPage.locator('#hos-work-model').click();
+  await existingPage.waitForFunction(()=>document.querySelector('#hos-model-stage').dataset.modelState==='ready');
+  assert(await existingPage.locator('#hos-model-stage .hos-3d-poster').isHidden());
+  await existingPage.close();
+  console.log('Previously opened HTML remains compatible with the lazy-loaded viewer.');
 }finally{await browser?.close();await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});}
