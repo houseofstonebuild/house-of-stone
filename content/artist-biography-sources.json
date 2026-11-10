@@ -1,0 +1,39 @@
+{
+  "sourceNote": "Artist biographies supplied by the House of Mabwe owner on 2026-11-10. Preserve attribution and do not merge artists by approximate spelling. Only status=matched profiles may be published automatically.",
+  "profiles": [
+    {
+      "sourceName": "Donald Chapenga",
+      "targetName": "Donald Chapenga",
+      "status": "matched",
+      "source": "Owner-supplied written biography, November 2026",
+      "introduction": "Donald Chapenga explores movement and organic form through flowing dancers, abstract compositions and floral shapes.",
+      "biography": "Donald Chapenga was born in Zimbabwe on 28 June 1974, one of eight children. After attending Raffingora Primary School, he completed his formal education in the Guruve area in 1995. He began carving as a young hobby, following a family tradition, and started sculpting seriously alongside his brother Casten and two cousins in 1995.\n\nIn Guruve, Chapenga worked alongside Brighton Sango and encountered artists from Tengenenge who visited the area for its colourful serpentine. He moved to Chitungwiza Art Centre in 1997, then to Airport Road Sculpture Park in Harare in 2011. His sculptures draw on flowers, abstraction and fluid dancing figures. He works with a range of stones, including springstone, opal, cobalt, dolomite and verdite. His supplied biography describes his work as represented in galleries internationally."
+    },
+    {
+      "sourceName": "Luckmore Joseph",
+      "targetName": "Luckmore Joseph",
+      "status": "matched",
+      "source": "Owner-supplied biographical notes, November 2026",
+      "introduction": "Luckmore Joseph creates sculptures about everyday life, dignity and the shared humanity of rich and poor.",
+      "biography": "Born in 1979, Luckmore Joseph developed an early interest in drawing and basket weaving. The loss of his parents while he was young shaped his sense of life's fragility and the importance of pursuing his creative interests. In 1999 he became an assistant to the sculptor Sydney Majengwa, first gaining experience with torsos before developing figures of pregnant women and people living on the streets.\n\nJoseph often discovers the subject of a sculpture by studying the natural shape of its stone. He wants his work to communicate the comedy and tragedy of daily life and to affirm the equal dignity and rights of rich and poor. Rather than imitate his teachers, he has sought an artistic language of his own. His sculptures, often made from springstone and other Zimbabwean hard stones, are represented in galleries and private collections internationally, according to his supplied biography."
+    },
+    {
+      "sourceName": "Tawanda Mukonori Seremwe",
+      "targetName": "Tawanda Sere",
+      "status": "identity-review",
+      "source": "Photographed artist biography headed TAWANDA MUKONORI SEREMWE, November 2026",
+      "introduction": "Tawanda developed his sculpture practice under the guidance of Gerald Takawira, carving forms that convey different meanings and emotions.",
+      "biography": "Tawanda Mukonori Seremwe was born in 1977 in Zimbabwe's Marondera District. Growing up in a farming family, he became interested in carving at an early age. During school holidays he worked in the workshop of his uncle, the sculptor Gerald Takawira, learning to remove material and develop forms from stone.\n\nAfter completing secondary school in 1996, Tawanda joined Takawira's workshop full-time. In 1999 he began sculpting independently, and some of his pieces were sold to the National Gallery of Zimbabwe. His work explores different meanings and feelings through sculptural form. His supplied biography records exhibitions and workshops in Munich, Berlin and Frankfurt in 2006, and the presentation of his sculpture in Zimbabwe and Europe.",
+      "reviewReason": "The website currently credits works to Tawanda Sere; the biography is headed Tawanda Mukonori Seremwe. Confirm these are the same person before assignment."
+    },
+    {
+      "sourceName": "Yusufu Jamare",
+      "targetName": null,
+      "status": "identity-review",
+      "source": "Yusufu Jamare biography.pdf, November 2026",
+      "introduction": "Yusufu Jamare's sculptural practice includes abstract forms, carved heads and flowers.",
+      "biography": "Yusufu Jamare grew up as the third of seven children in a family supported largely by small-scale farming and art made by older relatives. He attended Howson Primary School and Chabwino Secondary School. He began carving at the age of nine under the guidance of Chituwa Jemali and Daenny Kanyemba, whom his biography identifies as experienced artists.\n\nJamare went on to develop original pieces of his own, working across abstract sculpture, carved heads and floral forms. His supplied biography records an ambition to exhibit his work both in Zimbabwe and internationally.",
+      "reviewReason": "The website has separate artist records named Yusufu Jemalo and Yusuf Jemali. Neither is an exact match for Yusufu Jamare; confirm the correct identity before assignment."
+    }
+  ]
+}
