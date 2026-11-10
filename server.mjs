@@ -383,6 +383,13 @@ export function createApp(options = {}) {
         return send(res, 200, `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${paths.map(p => `<url><loc>${esc(origin(req) + p)}</loc></url>`).join('')}</urlset>`, 'application/xml; charset=utf-8');
       }
       if (!['GET', 'HEAD'].includes(req.method)) { res.setHeader('Allow', 'GET, HEAD'); throw new HttpError(405, 'Method not allowed.'); }
+      // Retain discoverability of the two pre-correction artist URLs after the
+      // canonical profile is actually published (not during older QA fixtures).
+      const historicalYusufuPaths=new Set(['/artists/yusufu-jemalo','/artists/yusuf-jemali']);
+      if(historicalYusufuPaths.has(path) && catalog.artists.some(a=>a.slug==='yusufu-jamare')){
+        res.writeHead(308,{'Location':'/artists/yusufu-jamare'+url.search,'Cache-Control':'public, max-age=3600'});
+        return res.end();
+      }
       const preview = path === '/admin/preview' || path.startsWith('/admin/preview/');
       const pagePath = preview ? path.slice('/admin/preview'.length) || '/' : path;
       const meta = pageMeta(pagePath, preview ? publicCatalog(collectionState().draft, {preview:true}) : catalog);
@@ -489,6 +496,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         const result=await publishOwnerArtistBiographies({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
         console.log('Owner-supplied artist biographies:',JSON.stringify(result));
       } catch(error) { console.error('Artist biographies publication did not complete:',error.message); }
+      try {
+        const {publishConfirmedArtistIdentities}=await import('./scripts/publish-confirmed-artist-identities.mjs');
+        const result=await publishConfirmedArtistIdentities({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
+        console.log('Owner-confirmed artist identities:',JSON.stringify(result));
+      } catch(error) { console.error('Confirmed artist identities publication did not complete:',error.message); }
     }
   });
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(() => process.exit(0)));
