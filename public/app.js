@@ -508,6 +508,7 @@ let workActionObserver;
 function renderWork(work) {
   activeWork = work; activeArtist = artistFor(work);
   $('#hos-work-title').textContent = work.title;
+  $('#hos-work-breadcrumb-title').textContent = work.title;
   const campaign = workScenes(work)[0] || (assets[work.views?.interior] ? {source:assets[work.views.interior]} : null);
   const banner = $('#hos-work-banner');
   banner.dataset.workRecord = work.id;
@@ -520,6 +521,11 @@ function renderWork(work) {
   $('#hos-work-banner-title').textContent = work.title;
   $('#hos-work-banner-artist').textContent = activeArtist?.name || '';
   $('#hos-work-banner-stone').textContent = stoneLabel(work) || 'Stone details on inquiry';
+  const collectionForBreadcrumb=collectionFor(work),breadcrumbLink=$('#hos-work-breadcrumb-collection');
+  breadcrumbLink.hidden=!collectionForBreadcrumb;
+  $('.hos-work-breadcrumb-divider').hidden=!collectionForBreadcrumb;
+  if(collectionForBreadcrumb){breadcrumbLink.textContent=collectionForBreadcrumb.name;breadcrumbLink.dataset.collection=collectionForBreadcrumb.id;breadcrumbLink.href=routeURL('/collections/'+collectionForBreadcrumb.slug);}
+  $('#hos-work-overline').textContent=(collectionForBreadcrumb?.name ? collectionForBreadcrumb.name.toUpperCase()+' / ' : '')+'ORIGINAL STONE SCULPTURE';
   const modelLink=$('#hos-work-model');modelLink.hidden=!modelDefinition(work);modelLink.dataset.model=work.id;
   const artistLink=$('#hos-work-artist');artistLink.textContent=activeArtist?.name || 'Artist details on inquiry';artistLink.dataset.artist=activeArtist?.id || '';artistLink.toggleAttribute('aria-disabled',!activeArtist);
   for(const [id,value] of [['year',work.yearMade],['dimensions',work.dimensions],['material',stoneLabel(work)],['acquisition',work.acquisitionMethod]]) {
@@ -528,14 +534,11 @@ function renderWork(work) {
   $('#hos-work-core-specs').hidden=![work.yearMade,work.dimensions,work.material,work.acquisitionMethod].some(Boolean);
   const description=$('#hos-work-description');
   description.textContent=story.works?.[work.id]?.editorialShort || work.description || '';
-  // One artwork-specific paragraph, followed by an unobtrusive route to the deeper process story.
   const essayHost=$('#hos-work-story');essayHost.replaceChildren();essayHost.hidden=true;
-  if(!document.getElementById('hos-work-making-link')){
-    const makingLink=link('How the sculptures are made',{view:'making'});
-    makingLink.id='hos-work-making-link';
-    description.after(makingLink);
-  }
-  $('#hos-work-short-specs').textContent=[stoneLabel(work),work.dimensions].filter(Boolean).join(' · ');
+  $('#hos-work-short-specs').textContent='';
+  $('#hos-work-essential-stone').textContent=stoneLabel(work)||'On inquiry';
+  $('#hos-work-essential-dimensions').textContent=work.dimensions||'On inquiry';
+  $('#hos-work-essential-availability').textContent=({available:'Available',sold:'Sold',reserved:'Reserved'})[work.availability]||'On inquiry';
   const button = $('#hos-work-inquiry'),sold=work.availability==='sold';
   button.textContent=sold?'Inquire about related works':'Inquire about this work';
   const arrow=el('span','hos-link-arrow');arrow.setAttribute('aria-hidden','true');arrow.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" focusable="false"><path d="M6 18 18 6M6 6h12v12"/></svg>';button.append(arrow);
@@ -543,7 +546,7 @@ function renderWork(work) {
   const img = $('#hos-work-image'); applyImage(img, assets[work.image]); img.alt = work.description || workLabel(work);
   const context=$('#hos-work-context');context.replaceChildren();const badge=availabilityLabel(work);if(badge)context.append(badge);
   const collection=collectionFor(work);if(collection)context.append(link(collection.name,{collection:collection.id}));
-  if(sold)context.append(el('p','','This work is sold. Explore related works or ask us about alternatives.'));
+  if(sold)context.append(el('p','','This work is sold. You can inquire about related works.'));
   const details=$('#hos-work-extra-specs'),serviceDetails=$('#hos-work-service-specs'),provenanceDetails=$('#hos-work-provenance-specs');details.replaceChildren();serviceDetails.replaceChildren();provenanceDetails.replaceChildren();
   const units = work.dimensions?.match(/([\d.]+)\s*×\s*([\d.]+)(?:\s*×\s*([\d.]+))?\s*cm/i);
   const values={...(work.details || {})};
@@ -567,6 +570,15 @@ function renderWork(work) {
   workActionObserver?.disconnect();
   if('IntersectionObserver' in window && !previewMode){let originalVisible=false,footerVisible=false;workActionObserver=new window.IntersectionObserver(entries=>{for(const entry of entries){if(entry.target===button)originalVisible=entry.isIntersecting;else footerVisible=entry.isIntersecting;}mobileAction.hidden=originalVisible||footerVisible;});workActionObserver.observe(button);workActionObserver.observe($('.hos-footer'));}
   const maker=$('#hos-work-maker');maker.replaceChildren();const contextArtist=artistContext(work);maker.hidden=!contextArtist;if(contextArtist)maker.append(contextArtist);
+  const detail=$('#hos-work-detail'),detailCopy=$('#hos-work-detail-copy'),detailImage=$('#hos-work-detail-image');
+  const detailSource=(work.views?.detail&&assets[work.views.detail])||(work.views?.detail2&&assets[work.views.detail2]);
+  // A separately photographed close-up is optional; do not invent a crop or repeat the front image.
+  detail.hidden=!detailSource;
+  if(detailSource){
+    applyImage(detailImage,detailSource,'(max-width:700px) 90vw, 52vw');
+    detailImage.alt='Carved detail of '+work.title;
+    detailCopy.textContent='An additional photograph shows the surface and carving of this work more closely.';
+  }else detailImage.removeAttribute('src');
   const related=$('#hos-work-related');related.replaceChildren();
   const sameCollection=collection?collection.workIds.filter(id=>id!==work.id).map(id=>works.find(w=>w.id===id)).filter(Boolean):[];
   if(sameCollection.length){related.append(el('h2','',sold?'Explore related works':`More from ${collection.name}`),relatedRail(sameCollection,'More from '+collection.name),link('Explore '+collection.name,{collection:collection.id}));}
@@ -653,6 +665,15 @@ function openInquiry(topic, trigger) {
   submissionId=saved?.submissionId || uuid();inquiryStarted=saved?.started || false;
   form.reset(); form.hidden = false; review.hidden = true; success.hidden = true;
   $('#hos-inquiry-discard').hidden=false;title.textContent = 'Your inquiry'; statusMessage(''); $('#hos-inquiry-context').textContent = topic;
+  const artwork=works?.find(work=>work.id===inquiryContext.workId);
+  const artworkPreview=$('#hos-inquiry-artwork');
+  artworkPreview.hidden=!artwork;
+  if(artwork){
+    applyImage($('#hos-inquiry-artwork-image'),assets[artwork.image],'96px');
+    $('#hos-inquiry-artwork-image').alt=artwork.title;
+    $('#hos-inquiry-artwork-title').textContent=artwork.title;
+    $('#hos-inquiry-artwork-info').textContent=[artistFor(artwork)?.name,stoneLabel(artwork),artwork.dimensions].filter(Boolean).join(' · ');
+  }else $('#hos-inquiry-artwork-image').removeAttribute('src');
   if (['Designer project','Corporate project'].includes(topic))form.elements.interest.value='Sourcing for a project';
   if (topic==='Sculpture commission')form.elements.interest.value='Commissioning a sculpture';
   if(saved)for(const [key,value] of Object.entries(saved.values))form.elements[key].value=value;
