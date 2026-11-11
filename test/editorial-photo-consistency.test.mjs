@@ -38,6 +38,7 @@ test('closer-look text uses one explicit, real alternate photograph of the same 
     assert(note.copy?.trim().split(/\s+/).length>=25,id+' has no specific explanation');
     const path=photoPath(id,note.photoView);
     assert(path,id+' does not have the selected '+note.photoView+' view');
+    assert.equal(note.photoSource,path,id+' caption must name the reviewed bitmap');
     assert(existsSync(fileURLToPath(at('../public'+path))),id+' view missing from repository: '+path);
     if(editorial.workPhotography[id])assert.notEqual(path,editorial.workPhotography[id].front,id+' close look repeats the hero');
   }
@@ -50,4 +51,12 @@ test('Queen Mother detail points to the side photograph showing jewellery and he
   assert.equal(detail.photoView,'right');
   assert.match(detail.heading,/headdress and jewellery/i);
   assert.equal(photoPath('hos-queen-mother',detail.photoView),'/assets/hos-queen-mother-right-v1.webp');
+});
+
+
+test('Inner Beauty describes the paired forms and uses the unadorned reverse',()=>{
+  const work=story.works['hos-inner-beauty'];
+  assert.equal(work.closerLook.photoView,'back');
+  assert.match(work.editorialShort,/Two tall forms/);
+  assert.doesNotMatch(work.editorialShort,/elongated face|facial profile/);
 });

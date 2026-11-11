@@ -2,6 +2,7 @@ import { frameStudioImage } from './studio-frame.js';
 import { presentationFor, pageDescriptions } from './presentation.js';
 import { initializeGallery } from './gallery.js';
 import { applyWorkPhotography } from './work-photography.js';
+import { closerLookPhoto } from './closer-look.js';
 const root = document.getElementById('hos-concept');
 const previewMode = location.pathname === '/admin/preview' || location.pathname.startsWith('/admin/preview/');
 const routePath = () => previewMode ? location.pathname.slice('/admin/preview'.length) || '/' : location.pathname;
@@ -577,10 +578,8 @@ function renderWork(work) {
   // The editorial record names the precise photograph that illustrates its text.
   // Never silently substitute a different angle: doing so can make the caption false.
   const viewKey=closer?.photoView;
-  const allowedViews=['detail','detail2','right','left','back'];
-  const detailSource=allowedViews.includes(viewKey)?assets[work.views?.[viewKey]]:null;
-  const isDistinctSource=detailSource && detailSource!==assets[work.image];
-  detail.hidden=!(closer?.heading&&closer?.copy&&isDistinctSource);
+  const detailSource=closerLookPhoto(work,assets,closer);
+  detail.hidden=!detailSource;
   if(!detail.hidden){
     $('#hos-work-detail-title').textContent=closer.heading;
     detailCopy.textContent=closer.copy;
@@ -588,7 +587,7 @@ function renderWork(work) {
     detailImage.alt=({right:'Right side',left:'Left side',back:'Rear',detail:'Detail',detail2:'Second detail'})[viewKey]+' photograph of '+work.title+', showing '+closer.heading.toLowerCase();
   }else{
     detailCopy.textContent='';
-    detailImage.removeAttribute('src');
+    applyImage(detailImage,null);
     detailImage.alt='';
   }
   const related=$('#hos-work-related');related.replaceChildren();
@@ -838,6 +837,7 @@ async function start() {
 start().catch(error => {
   const notice = el('p','hos-form-note',error.message || 'The collection could not load. Please refresh the page.'); notice.setAttribute('role','alert'); $('.hos-hero-copy').append(notice);
 });
+
 
 
 
