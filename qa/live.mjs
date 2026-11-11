@@ -75,7 +75,19 @@ if(process.env.HOS_EXPECT_FOUNDING_RELEASE==='true'){
     for(const photo of artistPhotos){const artist=catalog.artists.find(artist=>artist.name===photo.name),work=works.get(photo.workId);assert(artist&&work?.artistId===artist.id);assert.match(catalog.assets[artist.portrait],/\/hos-artist-/);assert(work.additionalImages.includes(artist.studioImage));}
   }
   if(uploadedWorksPresent)expected.collections.find(collection=>collection.id==='kinship').workIds.push(...newWorks.map(work=>work.id));
-  assert.deepEqual(collections.map(c=>({id:c.id,star:c.starWorkId,works:c.workIds})),expected.collections.map(c=>({id:c.id,star:c.starWorkId,works:c.workIds})),'The current collection release must be public.');
+  if(production){
+    // The live SQLite catalogue is authoritative. Curators may intentionally reassign
+    // works between collections without modifying the initial seed manifest.
+    const liveWorkIds=new Set(catalog.works.map(work=>work.id));
+    assert.deepEqual(collections.map(c=>c.id),expected.collections.map(c=>c.id),'Founding collection identities should remain');
+    for(const collection of collections){
+      assert(collection.workIds.every(id=>liveWorkIds.has(id)),'Collection must reference existing works: '+collection.id);
+      assert(collection.workIds.includes(collection.starWorkId),'Collection star must belong to its collection: '+collection.id);
+      assert.equal(new Set(collection.workIds).size,collection.workIds.length,'Duplicate work within collection: '+collection.id);
+    }
+  }else{
+    assert.deepEqual(collections.map(c=>({id:c.id,star:c.starWorkId,works:c.workIds})),expected.collections.map(c=>({id:c.id,star:c.starWorkId,works:c.workIds})),'Seed fixture collection release changed unexpectedly.');
+  }
   assert.equal(catalog.works.length,(roundTwo?26:23)+(uploadedWorksPresent?2:0));assert(catalog.works.every(w=>w.title && w.artistId && w.material && w.dimensions));
   if(production){
    assert.equal(catalog.site.name,'House of Mabwe');
