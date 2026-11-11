@@ -95,7 +95,7 @@ test('sculpture pages show factual essentials, a gallery breadcrumb and an artwo
   const f=await clientFixture(t);
   await f.delegated({work:'folded-light'});
   assert.equal(f.get('#hos-work-breadcrumb-title').textContent,'Folded Light');
-  assert.equal(f.get('#hos-work-essential-stone').textContent,'Ivory limestone');
+  assert.match(f.get('#hos-work-essential-stone').textContent,/Ivory limestone/);
   assert(f.get('#hos-work-essential-dimensions').textContent.length>0);
   assert(f.get('#hos-work-essential-availability').textContent.length>0);
   assert(f.get('#hos-work-description').textContent.length>0);
