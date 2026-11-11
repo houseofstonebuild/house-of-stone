@@ -91,6 +91,24 @@ test('editorial copy loads with sculpture detail and process sections',async t=>
   await f.delegated({work:'folded-light'});
   assert.equal(f.get('#hos-work-story').hidden,true); // legacy seed has no matched editorial essay
 });
+test('sculpture pages show factual essentials, a gallery breadcrumb and an artwork-specific inquiry preview',async t=>{
+  const f=await clientFixture(t);
+  await f.delegated({work:'folded-light'});
+  assert.equal(f.get('#hos-work-breadcrumb-title').textContent,'Folded Light');
+  assert.equal(f.get('#hos-work-essential-stone').textContent,'Springstone');
+  assert(f.get('#hos-work-essential-dimensions').textContent.length>0);
+  assert.equal(f.get('#hos-work-essential-availability').textContent,'Available');
+  assert(f.get('#hos-work-description').textContent.length>0);
+  assert.equal(f.get('#hos-work-detail').hidden,true);
+  await f.delegated({inquiry:'Folded Light by Tariro Mavhunga',inquiryWork:'folded-light'});
+  assert.equal(f.get('#hos-inquiry-artwork').hidden,false);
+  assert.equal(f.get('#hos-inquiry-artwork-title').textContent,'Folded Light');
+  assert.match(f.get('#hos-inquiry-artwork-info').textContent,/Springstone/);
+});
+test('general enquiries remain free of an unrelated artwork preview',async t=>{
+  const f=await clientFixture(t);await f.delegated({inquiry:'General interest'});
+  assert.equal(f.get('#hos-inquiry-artwork').hidden,true);
+});
 test('Back on a directly opened sculpture safely returns to the collection',async t=>{
   const f=await clientFixture(t,{initialPath:'/works/folded-light'});assert.equal(f.get('#hos-page-navigation').hidden,false);
   await f.delegated({back:''});assert.equal(f.location.pathname,'/collection');
