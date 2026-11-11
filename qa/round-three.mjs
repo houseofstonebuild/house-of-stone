@@ -28,18 +28,11 @@ try{
    if(collection.id==='presence'&&[390,1440].includes(width))await chapter.screenshot({path:new URL(width+'-presence.jpg',out).pathname,type:'jpeg',quality:88});report.rails++;
   }
   for(const id of ['zsa-012','zsa-016','hos-queen-mother']){
-   const work=catalog.works.find(w=>w.id===id);await ready('/works/'+work.slug);assert.equal(await page.locator('#hos-work-banner').isVisible(),width>700);if(id==='zsa-012'&&[390,1440].includes(width)){await page.locator('#hos-work-image').evaluate(image=>image.decode());await page.locator('#hos-work-photo-open').screenshot({path:new URL(width+'-chief.jpg',out).pathname,type:'jpeg',quality:90});}
-   const rail=page.locator('#hos-work-gallery-story');
-   const rows=await rail.locator('figure').evaluateAll(nodes=>nodes.map(n=>Math.round(n.getBoundingClientRect().top)));
-   assert(rows.length>1,'Sculpture gallery includes multiple images');
-   if(width<=700){
-    assert(rows.every(y=>y===rows[0]),'Mobile sculpture photos stay in one horizontal carousel row');
-    await page.getByRole('button',{name:'Scroll photographs right',exact:true}).click();
-    await page.waitForFunction(el=>el.scrollLeft>10,await rail.elementHandle());
-   }else{
-    assert(rows.every((y,i)=>i===0||y>rows[i-1]),'Desktop sculpture photos stay in a vertical sequence');
-   }
-   if(id==='zsa-012'&&[390,1440].includes(width))await page.locator('.hos-photo-carousel').screenshot({path:new URL(width+'-sculpture-carousel.jpg',out).pathname,type:'jpeg',quality:90});
+   const work=catalog.works.find(w=>w.id===id);await ready('/works/'+work.slug);assert.equal(await page.locator('#hos-work-banner').isVisible(),false);assert(await page.locator('#hos-work-photo-open').isVisible());assert.equal(await page.locator('#hos-work-title').textContent(),work.title);assert(await page.locator('#hos-work-essential-stone').textContent());if(id==='zsa-012'&&[390,1440].includes(width)){await page.locator('#hos-work-image').evaluate(image=>image.decode());await page.locator('#hos-work-photo-open').screenshot({path:new URL(width+'-chief.jpg',out).pathname,type:'jpeg',quality:90});}
+   // The approved work template uses one primary image and selectable thumbnails,
+   // rather than a second carousel of full-sized photographs below the fold.
+   assert.equal(await page.locator('.hos-photo-carousel').isVisible(),false);
+   if(id==='zsa-012'&&[390,1440].includes(width))await page.locator('.hos-work-photo').screenshot({path:new URL(width+'-sculpture-carousel.jpg',out).pathname,type:'jpeg',quality:90});
    const thumbs=page.locator('.hos-photo-thumbnail:not(.hos-model-thumbnail)');assert(await thumbs.count()>1);await thumbs.nth(1).click();assert.equal(await thumbs.nth(1).getAttribute('aria-pressed'),'true');
    await page.locator('#hos-work-photo-open').click();const dialog=page.locator('#hos-photo-dialog'),stage=dialog.locator('.hos-photo-stage');await dialog.locator('img').evaluate(i=>i.decode());
    for(let n=0;n<8;n++)await page.getByRole('button',{name:'Zoom in photograph',exact:true}).click();assert.equal(await dialog.locator('.hos-zoom-status').textContent(),'500%');
