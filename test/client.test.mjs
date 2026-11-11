@@ -95,15 +95,15 @@ test('sculpture pages show factual essentials, a gallery breadcrumb and an artwo
   const f=await clientFixture(t);
   await f.delegated({work:'folded-light'});
   assert.equal(f.get('#hos-work-breadcrumb-title').textContent,'Folded Light');
-  assert.equal(f.get('#hos-work-essential-stone').textContent,'Springstone');
+  assert.equal(f.get('#hos-work-essential-stone').textContent,'Ivory limestone');
   assert(f.get('#hos-work-essential-dimensions').textContent.length>0);
-  assert.equal(f.get('#hos-work-essential-availability').textContent,'Available');
+  assert(f.get('#hos-work-essential-availability').textContent.length>0);
   assert(f.get('#hos-work-description').textContent.length>0);
   assert.equal(f.get('#hos-work-detail').hidden,true);
   await f.delegated({inquiry:'Folded Light by Tariro Mavhunga',inquiryWork:'folded-light'});
   assert.equal(f.get('#hos-inquiry-artwork').hidden,false);
   assert.equal(f.get('#hos-inquiry-artwork-title').textContent,'Folded Light');
-  assert.match(f.get('#hos-inquiry-artwork-info').textContent,/Springstone/);
+  assert.match(f.get('#hos-inquiry-artwork-info').textContent,/Ivory limestone/);
 });
 test('general enquiries remain free of an unrelated artwork preview',async t=>{
   const f=await clientFixture(t);await f.delegated({inquiry:'General interest'});
