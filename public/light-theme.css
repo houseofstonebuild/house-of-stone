@@ -49,3 +49,13 @@
 :root[data-theme="light"] #hos-concept .hos-carousel-controls button:disabled,
 :root[data-theme="light"] #hos-concept .hos-model-controls button:disabled {color:#756e63;}
 
+
+
+/* Text controls avoid platform-dependent arrow glyphs. */
+#hos-concept .hos-collection-rail-controls button[type="button"],
+#hos-concept .hos-photo-carousel-heading button[type="button"] {
+  width:auto;min-width:44px;padding-inline:12px;border-radius:0;font-size:11px;
+}
+@media(max-width:700px) {
+  #hos-concept .hos-link-arrow {display:none;}
+}
