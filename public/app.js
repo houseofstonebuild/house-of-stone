@@ -358,10 +358,10 @@ function artistBiography(artist) {
   const names = selected.map(work => work.title);
   const worksPhrase = names.length > 1 ? names.slice(0,-1).join(', ') + ' and ' + names.at(-1) : names[0];
   const material = [...new Set(selected.map(work => stoneLabel(work)).filter(Boolean))];
-  const practice = artist.style || artist.description;
+  const practice = artist.story || artist.description || artist.style;
   return [artist.name + ' is a stone sculptor working in Harare, Zimbabwe.',
     practice ? practice.replace(/\.$/,'') + '.' : '',
-    worksPhrase ? 'The works presented here include ' + worksPhrase + (material.length === 1 ? ', carved in ' + material[0].toLowerCase() : '') + '. Each asks to be seen from more than one angle, as the shape changes around the carved stone.' : ''
+    worksPhrase ? 'The works presented here include ' + worksPhrase + (material.length === 1 ? ', carved in ' + material[0].toLowerCase() : '') + '. Their carved profiles and surfaces can be studied from multiple sides in the gallery photographs.' : ''
   ].filter(Boolean).join(' ');
 }
 function workGrid(selected) { const grid=el('div','hos-work-grid');grid.dataset.count=String(selected.length);grid.dataset.reveal='';selected.forEach(work=>grid.append(workCard(work)));return grid; }
