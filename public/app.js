@@ -103,7 +103,7 @@ function applyImage(img, source, sizes = '(max-width: 650px) 100vw, 55vw') {
     img.sizes = sizes; img.srcset = info.srcset;
   }
   img.src = source;
-  const studio=/^\/assets\/(?:zsa-.*(?:studio|photoshoot).*|wingbeat-shoot-.*|hos-(?:queen-mother|celebration|belonging|inner-beauty)-.*)\.webp$/.test(source);
+  const studio=/^\/assets\/(?:zsa-.*(?:studio|photoshoot).*|wingbeat-shoot-.*|hos-(?:queen-mother|celebration|belonging|inner-beauty)-(?:front|back|left|right)-v1(?:-\d+)?)\.webp$/.test(source);
   frameStudioImage(img,studio?source:'');
   // A single studio mat fills the aspect-ratio space around the original photo.
   // It does not sample edge pixels or alter the sculpture bitmap.
@@ -510,6 +510,16 @@ function renderWork(work) {
   activeWork = work; activeArtist = artistFor(work);
   $('#hos-work-title').textContent = work.title;
   $('#hos-work-breadcrumb-title').textContent = work.title;
+  const setting=editorial.workSettings?.[work.id],settingSection=$('#hos-work-setting'),settingImage=$('#hos-work-setting-image');
+  settingSection.hidden=!setting?.source;
+  if(setting?.source){
+    applyImage(settingImage,setting.source,'(max-width:700px) 92vw, (max-width:1600px) 90vw, 1460px');
+    settingImage.alt=work.title+' in '+setting.label.toLowerCase();
+    $('#hos-work-setting-caption').textContent=setting.label;
+  }else{
+    for(const attribute of ['src','srcset','sizes','width','height'])settingImage.removeAttribute(attribute);
+    settingImage.alt='';$('#hos-work-setting-caption').textContent='';
+  }
   const campaign = workScenes(work)[0] || (assets[work.views?.interior] ? {source:assets[work.views.interior]} : null);
   const banner = $('#hos-work-banner');
   banner.dataset.workRecord = work.id;
@@ -843,6 +853,7 @@ async function start() {
 start().catch(error => {
   const notice = el('p','hos-form-note',error.message || 'The collection could not load. Please refresh the page.'); notice.setAttribute('role','alert'); $('.hos-hero-copy').append(notice);
 });
+
 
 
 
