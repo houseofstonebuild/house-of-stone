@@ -535,7 +535,9 @@ function renderWork(work) {
   const description=$('#hos-work-description');
   description.textContent=story.works?.[work.id]?.editorialShort || work.description || '';
   const essayHost=$('#hos-work-story');essayHost.replaceChildren();essayHost.hidden=true;
-  $('#hos-work-short-specs').textContent='';
+  const compactSpecs=$('#hos-work-short-specs');
+  compactSpecs.textContent=[stoneLabel(work),work.dimensions].filter(Boolean).join('  ·  ');
+  compactSpecs.hidden=!compactSpecs.textContent;
   $('#hos-work-essential-stone').textContent=stoneLabel(work)||'On inquiry';
   $('#hos-work-essential-dimensions').textContent=work.dimensions||'On inquiry';
   $('#hos-work-essential-availability').textContent=({available:'Available',sold:'Sold',reserved:'Reserved'})[work.availability]||'On inquiry';
@@ -571,14 +573,21 @@ function renderWork(work) {
   if('IntersectionObserver' in window && !previewMode){let originalVisible=false,footerVisible=false;workActionObserver=new window.IntersectionObserver(entries=>{for(const entry of entries){if(entry.target===button)originalVisible=entry.isIntersecting;else footerVisible=entry.isIntersecting;}mobileAction.hidden=originalVisible||footerVisible;});workActionObserver.observe(button);workActionObserver.observe($('.hos-footer'));}
   const maker=$('#hos-work-maker');maker.replaceChildren();const contextArtist=artistContext(work);maker.hidden=!contextArtist;if(contextArtist)maker.append(contextArtist);
   const detail=$('#hos-work-detail'),detailCopy=$('#hos-work-detail-copy'),detailImage=$('#hos-work-detail-image');
-  const detailSource=(work.views?.detail&&assets[work.views.detail])||(work.views?.detail2&&assets[work.views.detail2]);
-  // A separately photographed close-up is optional; do not invent a crop or repeat the front image.
-  detail.hidden=!detailSource;
-  if(detailSource){
+  const closer=story.works?.[work.id]?.closerLook;
+  // Use a real alternate photograph of this artwork. Never substitute an unrelated
+  // sculpture or invent a detail by cropping/resynthesizing its main photo.
+  const alternateKeys=['detail','detail2','right','left','back'];
+  const detailSource=alternateKeys.map(key=>assets[work.views?.[key]]).find(source=>source&&source!==assets[work.image]);
+  detail.hidden=!(closer?.heading&&closer?.copy&&detailSource);
+  if(!detail.hidden){
+    $('#hos-work-detail-title').textContent=closer.heading;
+    detailCopy.textContent=closer.copy;
     applyImage(detailImage,detailSource,'(max-width:700px) 90vw, 52vw');
-    detailImage.alt='Carved detail of '+work.title;
-    detailCopy.textContent='An additional photograph shows the surface and carving of this work more closely.';
-  }else detailImage.removeAttribute('src');
+    detailImage.alt='Alternate photograph showing '+closer.heading.toLowerCase()+' of '+work.title;
+  }else{
+    detailCopy.textContent='';
+    detailImage.removeAttribute('src');
+  }
   const related=$('#hos-work-related');related.replaceChildren();
   const sameCollection=collection?collection.workIds.filter(id=>id!==work.id).map(id=>works.find(w=>w.id===id)).filter(Boolean):[];
   if(sameCollection.length){related.append(el('h2','',sold?'Explore related works':`More from ${collection.name}`),relatedRail(sameCollection,'More from '+collection.name),link('Explore '+collection.name,{collection:collection.id}));}
