@@ -1,0 +1,192 @@
+/* Sculpture page: approved Queen Mother viewing concept.
+   All rules are scoped to work pages; no homepage, collection or media changes. */
+#hos-concept [data-page="work"] {--hos-work-soft:#f5f5f2;--hos-work-ink:#252624;--hos-work-border:#e7e7e1;}
+#hos-concept [data-page="work"] > #hos-work-banner {display:none!important;}
+#hos-concept .hos-work-breadcrumb {
+  display:flex;align-items:center;flex-wrap:wrap;gap:13px;
+  width:calc(100% - 2 * var(--hos-gutter));max-width:var(--hos-content-width);
+  margin:24px auto 8px;color:#83857f;font-size:11px;line-height:1.5;
+}
+#hos-concept .hos-work-breadcrumb a {color:#757872;text-decoration:none;}
+#hos-concept .hos-work-breadcrumb a:hover {text-decoration:underline;}
+#hos-concept .hos-work-breadcrumb [hidden] {display:none!important;}
+#hos-concept [data-page="work"] > .hos-work-layout {
+  display:grid;grid-template-columns:minmax(0,1.24fr) minmax(330px,.82fr);
+  gap:clamp(36px,5.5vw,100px);max-width:1480px;
+  align-items:start;padding-top:25px;padding-bottom:28px;
+}
+#hos-concept [data-page="work"] .hos-work-photo {
+  display:grid;grid-template-columns:minmax(0,1fr);gap:0;min-width:0;max-width:none;
+}
+#hos-concept [data-page="work"] .hos-work-photo #hos-work-view-modes {
+  grid-column:1;grid-row:1;margin:0 0 16px;padding:0 0 12px;
+}
+#hos-concept [data-page="work"] .hos-work-photo .hos-work-primary-photo {
+  grid-column:1;grid-row:2;min-width:0;position:relative;
+}
+#hos-concept [data-page="work"] .hos-work-photo .hos-work-additional-images {
+  grid-column:1;grid-row:3;display:flex;flex-direction:row;gap:12px;
+  width:100%;max-height:none;overflow-x:auto;overflow-y:hidden;
+  padding:14px 0 8px;margin:0;scroll-snap-type:x proximity;
+}
+#hos-concept [data-page="work"] .hos-work-photo .hos-photo-thumbnail {
+  flex:0 0 82px;width:82px;margin:0;padding:0 0 6px;scroll-snap-align:start;
+}
+#hos-concept [data-page="work"] .hos-work-photo .hos-photo-thumbnail img,
+#hos-concept [data-page="work"] .hos-work-photo .hos-model-thumbnail .hos-model-tile-face {
+  width:82px;height:96px;object-fit:contain;background:#f5f5f2;
+  border:1px solid var(--hos-work-border);
+}
+#hos-concept [data-page="work"] .hos-work-photo .hos-photo-thumbnail span {
+  display:block;font-size:10px;line-height:1.4;color:#777972;margin-top:5px;
+}
+#hos-concept [data-page="work"] .hos-work-photo-open {
+  display:flex;align-items:center;justify-content:center;
+  width:100%;height:auto;aspect-ratio:1.02/1;background:#f5f5f2;
+  border:0;overflow:hidden;
+}
+#hos-concept [data-page="work"] .hos-work-photo-open img {
+  width:100%;height:100%;object-fit:contain;
+  background:transparent;border:0;
+}
+#hos-concept [data-page="work"] .hos-work-photo-caption {
+  text-align:left;max-width:none;margin:12px 0;
+  font-size:11px;color:#777972;
+}
+#hos-concept [data-page="work"] .hos-gallery-navigation {
+  position:absolute;right:0;bottom:0;display:flex;align-items:center;
+  gap:12px;margin:0;
+}
+#hos-concept [data-page="work"] .hos-gallery-navigation button {
+  padding:8px 10px;font-size:11px;border:1px solid var(--hos-work-border);background:#fff;
+}
+#hos-concept [data-page="work"] .hos-work-details {
+  position:sticky;top:calc(var(--hos-visible-header-height,var(--hos-header-height)) + 24px);
+  grid-column:2;grid-row:1;padding:12px 0 0;margin:0;max-width:490px;width:100%;
+}
+#hos-concept [data-page="work"] .hos-work-overline {
+  color:#777a73;font-size:10px;letter-spacing:.14em;line-height:1.7;
+}
+#hos-concept [data-page="work"] .hos-work-details h1 {
+  font-size:clamp(37px,3.8vw,60px);font-weight:400;letter-spacing:-.045em;
+  line-height:1.1;margin:18px 0 12px;
+}
+#hos-concept [data-page="work"] .hos-work-byline {
+  font-size:14px;line-height:1.7;color:#676a64;
+}
+#hos-concept [data-page="work"] .hos-work-byline a {
+  text-decoration:none;color:#41453e;border-bottom:1px solid #a9aca5;
+  display:inline;padding:0 0 3px;min-height:0;
+}
+#hos-concept [data-page="work"] .hos-work-context {
+  margin:22px 0 12px;gap:12px;align-items:center;
+}
+#hos-concept [data-page="work"] .hos-work-context .hos-availability {
+  background:transparent;color:#575d51;border:0;padding:0;font-size:11px;
+  letter-spacing:.025em;text-transform:none;
+}
+#hos-concept [data-page="work"] .hos-work-details #hos-work-description {
+  color:#565a53;line-height:1.85;font-size:14px;margin:16px 0 27px;
+  max-width:55ch;
+}
+#hos-concept [data-page="work"] .hos-work-essentials {
+  border-top:1px solid var(--hos-work-border);
+  border-bottom:1px solid var(--hos-work-border);
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:21px 18px;padding:20px 0 23px;margin:0 0 24px;
+}
+#hos-concept [data-page="work"] .hos-work-essentials div {min-width:0;}
+#hos-concept [data-page="work"] .hos-work-essentials span {
+  display:block;font-size:10px;text-transform:uppercase;letter-spacing:.10em;
+  color:#8a8d85;margin-bottom:5px;
+}
+#hos-concept [data-page="work"] .hos-work-essentials strong {
+  display:block;line-height:1.5;font-weight:500;font-size:13px;
+  color:#2c302a;overflow-wrap:anywhere;
+}
+#hos-concept [data-page="work"] #hos-work-inquiry {
+  width:100%;min-height:54px;margin:0;display:flex;justify-content:space-between;
+}
+#hos-concept [data-page="work"] .hos-work-inquiry-note {
+  color:#92948d;font-size:11px;line-height:1.7;
+  margin:12px 0 18px;
+}
+#hos-concept [data-page="work"] .hos-work-details #hos-work-model {margin:0 0 18px;}
+#hos-concept [data-page="work"] > .hos-photo-carousel {display:none!important;}
+#hos-concept [data-page="work"] .hos-work-detail,
+#hos-concept [data-page="work"] .hos-work-further {
+  width:calc(100% - 2 * var(--hos-gutter));max-width:var(--hos-content-width);
+  margin:84px auto 0;
+}
+#hos-concept [data-page="work"] .hos-work-detail {
+  display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);
+  gap:clamp(40px,8vw,130px);align-items:center;
+  padding-top:64px;border-top:1px solid var(--hos-work-border);
+}
+#hos-concept [data-page="work"] .hos-work-detail[hidden] {display:none!important;}
+#hos-concept [data-page="work"] .hos-work-detail h2 {
+  font-size:clamp(30px,3vw,43px);line-height:1.16;
+  font-weight:400;letter-spacing:-.035em;margin:20px 0;
+}
+#hos-concept [data-page="work"] .hos-work-detail p,
+#hos-concept [data-page="work"] .hos-work-making-card p {
+  color:#676a64;line-height:1.8;font-size:14px;max-width:50ch;
+}
+#hos-concept [data-page="work"] .hos-work-detail figure {margin:0;background:#f5f5f2;}
+#hos-concept [data-page="work"] .hos-work-detail figure img {
+  display:block;width:100%;height:400px;object-fit:contain;
+}
+#hos-concept [data-page="work"] .hos-work-further {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:55px;
+  border-top:1px solid var(--hos-work-border);
+  border-bottom:1px solid var(--hos-work-border);
+  padding:34px 0 42px;
+}
+#hos-concept [data-page="work"] .hos-work-further .hos-work-maker {margin:0;max-width:none;width:100%;}
+#hos-concept [data-page="work"] .hos-work-further .hos-artist-context {
+  max-width:none;margin:0;padding:0;border:0;
+}
+#hos-concept [data-page="work"] .hos-work-making-card {
+  border-left:1px solid var(--hos-work-border);padding:0 0 0 40px;
+}
+#hos-concept [data-page="work"] .hos-work-making-card h2 {
+  font-size:clamp(23px,2.4vw,32px);font-weight:400;margin:14px 0;
+}
+#hos-concept [data-page="work"] .hos-work-making-card .hos-text-link {margin-top:18px;}
+#hos-concept [data-page="work"] > .hos-more-works {margin-top:72px;}
+#hos-concept .hos-inquiry-artwork {
+  display:flex;align-items:center;gap:17px;max-width:540px;
+  background:#f5f5f2;border:1px solid #e5e7e0;padding:11px 13px;margin:24px 0;
+}
+#hos-concept .hos-inquiry-artwork[hidden] {display:none!important;}
+#hos-concept .hos-inquiry-artwork img {width:64px;height:78px;object-fit:contain;flex-shrink:0;}
+#hos-concept .hos-inquiry-artwork strong {display:block;font-size:15px;font-weight:500;color:#343733;}
+#hos-concept .hos-inquiry-artwork span {display:block;margin-top:5px;font-size:12px;line-height:1.6;color:#72766f;}
+@media(max-width:920px){
+ #hos-concept [data-page="work"] > .hos-work-layout {grid-template-columns:minmax(0,1fr) minmax(300px,.85fr);gap:32px;}
+ #hos-concept [data-page="work"] .hos-work-details {position:static;}
+}
+@media(max-width:700px){
+ #hos-concept .hos-work-breadcrumb {margin-top:15px;gap:9px;font-size:10px;}
+ #hos-concept [data-page="work"] > .hos-work-layout {display:flex;flex-direction:column;gap:22px;padding-top:10px;}
+ #hos-concept [data-page="work"] .hos-work-photo {display:grid;width:100%;gap:0;}
+ #hos-concept [data-page="work"] .hos-work-photo-open {aspect-ratio:1/1.09;height:auto;min-height:0;}
+ #hos-concept [data-page="work"] .hos-work-photo .hos-photo-thumbnail {flex-basis:68px;width:68px;}
+ #hos-concept [data-page="work"] .hos-work-photo .hos-photo-thumbnail img,
+ #hos-concept [data-page="work"] .hos-work-photo .hos-model-thumbnail .hos-model-tile-face {width:68px;height:80px;}
+ #hos-concept [data-page="work"] .hos-work-details {padding:10px 0 0;max-width:none;}
+ #hos-concept [data-page="work"] .hos-work-details h1 {font-size:clamp(36px,9vw,49px);}
+ #hos-concept [data-page="work"] .hos-work-context {margin-top:15px;}
+ #hos-concept [data-page="work"] .hos-work-details #hos-work-description {margin:17px 0 26px;max-width:none;}
+ #hos-concept [data-page="work"] .hos-work-detail,
+ #hos-concept [data-page="work"] .hos-work-further {margin-top:50px;}
+ #hos-concept [data-page="work"] .hos-work-detail {display:flex;flex-direction:column;gap:24px;padding-top:32px;}
+ #hos-concept [data-page="work"] .hos-work-detail figure {width:100%;}
+ #hos-concept [data-page="work"] .hos-work-detail figure img {height:360px;}
+ #hos-concept [data-page="work"] .hos-work-further {grid-template-columns:1fr;gap:30px;padding-top:30px;}
+ #hos-concept [data-page="work"] .hos-work-making-card {border-left:0;border-top:1px solid var(--hos-work-border);padding:30px 0 0;}
+ #hos-concept [data-page="work"] > .hos-more-works {margin-top:50px;}
+}
+@media(prefers-reduced-motion:reduce){
+ #hos-concept [data-page="work"] .hos-work-photo-open img {transition:none;}
+}
