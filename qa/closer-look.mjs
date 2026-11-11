@@ -42,7 +42,7 @@ try{
       });
       assert.equal(geometry.source,note.photoSource);
       assert.equal(geometry.overflow,'hidden');
-      assert.equal(geometry.objectFit,'fill');
+      assert.equal(geometry.objectFit,'contain');
       assert(Math.abs(geometry.width/geometry.height-note.photoCrop.aspectRatio)<.01,'Crop frame changed proportions');
       assert(Math.abs(geometry.imageWidth/geometry.imageHeight-geometry.naturalRatio)<.015,'Cropping distorted the sculpture');
       assert(geometry.height<=561&&geometry.width<=width,'Close-up overflows its viewport');

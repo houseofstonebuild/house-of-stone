@@ -142,7 +142,7 @@
   aspect-ratio:var(--detail-aspect);margin-inline:auto;
 }
 #hos-concept [data-page="work"] .hos-work-detail figure[data-detail-crop] img {
-  position:absolute;max-width:none;max-height:none;object-fit:fill;
+  position:absolute;max-width:none;max-height:none;object-fit:contain;
   left:var(--detail-left);top:var(--detail-top);
   width:var(--detail-width);height:var(--detail-height);
 }
