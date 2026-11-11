@@ -71,82 +71,186 @@
   },
   "works": {
     "zsa-013": {
-      "editorialShort": "A tall, narrow form rises from a broad base and curves inward near the top. Its central opening required the sculptor to work from both sides while retaining enough stone to support the upper section. The curved edges and changes in thickness become clearer as you move around the piece."
+      "editorialShort": "A tall, narrow form rises from a broad base and curves inward near the top. Its central opening required the sculptor to work from both sides while retaining enough stone to support the upper section. The curved edges and changes in thickness become clearer as you move around the piece.",
+      "closerLook": {
+        "heading": "The central opening",
+        "copy": "The two sides rise from a heavy base and narrow as they curve toward each other. The sculptor has carved through the centre while leaving enough stone for the upper form to remain supported. This open space defines the sculpture from every angle."
+      }
     },
     "zsa-009": {
-      "editorialShort": "A rounded form sits inside a larger circular shape. The gap between them is narrow in places, which makes the interior carving particularly demanding. The outer surface is smoothly finished, while the opening creates a different outline from each viewing angle."
+      "editorialShort": "A rounded form sits inside a larger circular shape. The gap between them is narrow in places, which makes the interior carving particularly demanding. The outer surface is smoothly finished, while the opening creates a different outline from each viewing angle.",
+      "closerLook": {
+        "heading": "The sphere inside the loop",
+        "copy": "The rounded centre sits close to the surrounding curve without filling it. Shaping this gap calls for precise work on the inside of the loop, where the tool has less room to move. The arrangement becomes clearer when viewed from the side."
+      }
     },
     "zsa-025": {
-      "editorialShort": "Curving sections cross and turn through the stone, leaving several open spaces. The artist has removed material from the centre and behind the upper forms, where access with carving tools becomes more difficult. Natural markings remain visible across the polished surface."
+      "editorialShort": "Curving sections cross and turn through the stone, leaving several open spaces. The artist has removed material from the centre and behind the upper forms, where access with carving tools becomes more difficult. Natural markings remain visible across the polished surface.",
+      "closerLook": {
+        "heading": "The crossing curves",
+        "copy": "The upper forms cross at different depths, creating openings that change shape as the sculpture is turned. The artist must preserve the narrow connections between them while refining the internal curves. The pale mineral markings run through both surfaces."
+      }
     },
     "zsa-029": {
-      "editorialShort": "The sculpture rises through a series of curves that widen toward the top. Its upper sections extend beyond the narrower form beneath them, so their weight and thickness have to be carefully managed. The shape changes substantially when viewed from the side."
+      "editorialShort": "The sculpture rises through a series of curves that widen toward the top. Its upper sections extend beyond the narrower form beneath them, so their weight and thickness have to be carefully managed. The shape changes substantially when viewed from the side.",
+      "closerLook": {
+        "heading": "The upper curl",
+        "copy": "The sculpture widens as its curves turn back near the top. From the side, the upper sections project beyond the narrower stone beneath them. Their proportions determine whether the whole work appears balanced."
+      }
     },
     "zsa-021": {
-      "editorialShort": "Several slender forms extend upward from a common base. Their different angles make them read as separate gestures rather than repeated shapes. Carving between the sections requires care because each finished element still has to support its own weight."
+      "editorialShort": "Several slender forms extend upward from a common base. Their different angles make them read as separate gestures rather than repeated shapes. Carving between the sections requires care because each finished element still has to support its own weight.",
+      "closerLook": {
+        "heading": "The separate reaching forms",
+        "copy": "Each slender upper section extends in a slightly different direction. The sculptor has cut between them while keeping their connection to the base secure. Viewed from an angle, the spacing between the forms becomes easier to appreciate."
+      }
     },
     "zsa-028": {
-      "editorialShort": "Red and darker areas of stone run through the curved composition. The artist has opened spaces between the forms while leaving the natural colour changes visible across the polished surfaces. The piece looks different from each side because the curves overlap."
+      "editorialShort": "Red and darker areas of stone run through the curved composition. The artist has opened spaces between the forms while leaving the natural colour changes visible across the polished surfaces. The piece looks different from each side because the curves overlap.",
+      "closerLook": {
+        "heading": "The natural red markings",
+        "copy": "The stone's red areas pass across several separate curves rather than remaining in a single flat surface. The polished finish makes these mineral variations easier to see. The artist has worked with the existing colour instead of covering it."
+      }
     },
     "zsa-017": {
-      "editorialShort": "A rounded centre is held within an outer frame of straighter lines. The artist has carved away the space between the two shapes, leaving narrow connections that must support the centre. The contrast between the angular outside and smooth inner form defines the sculpture."
+      "editorialShort": "A rounded centre is held within an outer frame of straighter lines. The artist has carved away the space between the two shapes, leaving narrow connections that must support the centre. The contrast between the angular outside and smooth inner form defines the sculpture.",
+      "closerLook": {
+        "heading": "The space around the centre",
+        "copy": "The rounded centre is surrounded by a more angular frame. Carving the gap between them leaves a narrow amount of material at the points where the forms meet. The contrast between curved and straight surfaces is especially clear from the side."
+      }
     },
     "zsa-031": {
-      "editorialShort": "The stone's green and earth-coloured markings remain prominent throughout this piece. Some edges have been shaped and smoothed, while others retain a more irregular surface. The contrast makes it possible to see both the original material and the areas the sculptor has worked."
+      "editorialShort": "The stone's green and earth-coloured markings remain prominent throughout this piece. Some edges have been shaped and smoothed, while others retain a more irregular surface. The contrast makes it possible to see both the original material and the areas the sculptor has worked.",
+      "closerLook": {
+        "heading": "The rough and polished surfaces",
+        "copy": "The artist has refined some edges into smooth curves while leaving other parts of the stone more irregular. The green and rust-coloured areas remain visible across both finishes. The contrast gives the viewer a direct sense of the original material."
+      }
     },
     "zsa-012": {
-      "editorialShort": "A long face emerges beside an unpolished section of rust-coloured stone. The artist has kept the features relatively simple and used the difference between smooth and rough surfaces to distinguish the face from the surrounding material. The side view makes that contrast especially clear."
+      "editorialShort": "A long face emerges beside an unpolished section of rust-coloured stone. The artist has kept the features relatively simple and used the difference between smooth and rough surfaces to distinguish the face from the surrounding material. The side view makes that contrast especially clear.",
+      "closerLook": {
+        "heading": "The two surface finishes",
+        "copy": "One side of the head is carved into a defined facial profile; the adjacent stone retains a rougher, rust-coloured texture. That difference is intentional within the composition. It shows how the artist has chosen which areas to shape and which to leave exposed."
+      }
     },
     "zsa-001": {
-      "editorialShort": "The head is formed with a small number of strong lines and a circular opening. Rather than carving detailed facial features, the sculptor has used the opening and the surrounding shape to define the piece. The view changes when light passes through the centre."
+      "editorialShort": "The head is formed with a small number of strong lines and a circular opening. Rather than carving detailed facial features, the sculptor has used the opening and the surrounding shape to define the piece. The view changes when light passes through the centre.",
+      "closerLook": {
+        "heading": "The opening through the face",
+        "copy": "The circular opening replaces detail that might otherwise have been carved onto the surface. It also changes how light passes through the work. From the side, the thickness of the stone surrounding the opening becomes visible."
+      }
     },
     "zsa-026": {
-      "editorialShort": "A long face sits below a deeply grooved upper section. The repeated cuts catch light differently from the smoother facial surface, making the contrast visible even from a distance. The sculptor has concentrated the detail at the top, leaving the expression below comparatively restrained."
+      "editorialShort": "A long face sits below a deeply grooved upper section. The repeated cuts catch light differently from the smoother facial surface, making the contrast visible even from a distance. The sculptor has concentrated the detail at the top, leaving the expression below comparatively restrained.",
+      "closerLook": {
+        "heading": "The grooved crown",
+        "copy": "Repeated cuts across the upper section create a noticeably different texture from the smooth face beneath it. The grooves are closely spaced, so their depth and direction need to remain consistent. The face is intentionally much simpler."
+      }
     },
     "zsa-023": {
-      "editorialShort": "Angular planes form the forehead, nose and profile of this elongated head. Each plane reflects light differently, so the expression changes with the viewing angle. The crisp transitions between surfaces require careful shaping rather than extensive carved ornament."
+      "editorialShort": "Angular planes form the forehead, nose and profile of this elongated head. Each plane reflects light differently, so the expression changes with the viewing angle. The crisp transitions between surfaces require careful shaping rather than extensive carved ornament.",
+      "closerLook": {
+        "heading": "The angled facial planes",
+        "copy": "The forehead, nose and jaw are defined by changes in angle rather than rounded features. Light moves differently across each plane. Looking from the side reveals how a small shift in the stone changes the outline of the face."
+      }
     },
     "zsa-027": {
-      "editorialShort": "This face combines a smooth lower section with a rougher, pale forehead. The artist has retained the different textures instead of polishing the whole stone uniformly. The boundary between the two treatments is one of the most distinctive features of the work."
+      "editorialShort": "This face combines a smooth lower section with a rougher, pale forehead. The artist has retained the different textures instead of polishing the whole stone uniformly. The boundary between the two treatments is one of the most distinctive features of the work.",
+      "closerLook": {
+        "heading": "The unpolished forehead",
+        "copy": "The pale, rough upper section remains visibly different from the smooth facial surface. The sculptor has preserved that texture while refining the features below it. This contrast is central to the sculpture's appearance."
+      }
     },
     "zsa-020": {
-      "editorialShort": "Two figures lean toward one another in a single stone composition. Their closeness is conveyed by the angle of the heads and shoulders, with relatively little facial detail. The artist has carved between the bodies while keeping the form connected."
+      "editorialShort": "Two figures lean toward one another in a single stone composition. Their closeness is conveyed by the angle of the heads and shoulders, with relatively little facial detail. The artist has carved between the bodies while keeping the form connected.",
+      "closerLook": {
+        "heading": "The shared posture",
+        "copy": "The figures lean into each other, and their shoulders form one connected shape. The sculptor has kept the bodies distinct without separating them into fragile individual pieces. Their relationship is communicated mainly through the direction of the heads."
+      }
     },
     "zsa-014": {
-      "editorialShort": "Two faces share an upper arrangement of repeated grooves, but each has a distinct profile. The detail above the heads contrasts with the quieter facial surfaces below. The figures' slightly different angles are most apparent when viewed from the side."
+      "editorialShort": "Two faces share an upper arrangement of repeated grooves, but each has a distinct profile. The detail above the heads contrasts with the quieter facial surfaces below. The figures' slightly different angles are most apparent when viewed from the side.",
+      "closerLook": {
+        "heading": "The two profiles",
+        "copy": "The faces share a carved upper section but retain different outlines. The repeated grooves above them draw the eye across both figures. From the side, the slight differences between their profiles are easier to see."
+      }
     },
     "zsa-007": {
-      "editorialShort": "Two slender figures face one another, their heads worked with more texture than the smooth bodies below. The sculptor has removed much of the stone between them while leaving the connection through the lower form. Their relationship is conveyed through posture and proximity."
+      "editorialShort": "Two slender figures face one another, their heads worked with more texture than the smooth bodies below. The sculptor has removed much of the stone between them while leaving the connection through the lower form. Their relationship is conveyed through posture and proximity.",
+      "closerLook": {
+        "heading": "The space between the figures",
+        "copy": "The two figures are close but not identical in their posture. The narrow space separating them had to be carved without weakening the lower connection. Their textured heads contrast with the longer, smoother body forms."
+      }
     },
     "zsa-010": {
-      "editorialShort": "Two profiles turn toward each other across a narrow opening. The position of their heads establishes the subject without elaborate facial features. The sculptor has carefully defined the gap between them, which becomes more or less visible as the work is turned."
+      "editorialShort": "Two profiles turn toward each other across a narrow opening. The position of their heads establishes the subject without elaborate facial features. The sculptor has carefully defined the gap between them, which becomes more or less visible as the work is turned.",
+      "closerLook": {
+        "heading": "The gap between the faces",
+        "copy": "The profiles approach each other across a small opening. That space keeps both faces recognizable while conveying the closeness of the figures. It also changes shape as the sculpture is turned."
+      }
     },
     "zsa-024": {
-      "editorialShort": "Several figures are gathered inside an oval frame. Their individual faces remain distinguishable, even though the group is carved from a single block. The artist has worked the spaces between them and retained a more textured treatment around the outer edge."
+      "editorialShort": "Several figures are gathered inside an oval frame. Their individual faces remain distinguishable, even though the group is carved from a single block. The artist has worked the spaces between them and retained a more textured treatment around the outer edge.",
+      "closerLook": {
+        "heading": "The figures inside the frame",
+        "copy": "Several faces are carved within one oval surrounding form. Each needs enough separation to remain visible, but the entire group is still a single connected piece of stone. The rougher outer treatment makes the carved figures stand out."
+      }
     },
     "zsa-005": {
-      "editorialShort": "Two long-beaked birds rise from a common base. Their heads and necks have different angles, giving each a distinct posture. The slender beaks and the spaces around the necks are the most delicate parts of the carving."
+      "editorialShort": "Two long-beaked birds rise from a common base. Their heads and necks have different angles, giving each a distinct posture. The slender beaks and the spaces around the necks are the most delicate parts of the carving.",
+      "closerLook": {
+        "heading": "The birds' beaks and necks",
+        "copy": "The birds have different heights and head positions. Their slender beaks and the spaces around the necks are delicate parts of the composition, requiring more careful shaping than the broader base. The two silhouettes become distinct from the side."
+      }
     },
     "zsa-006": {
-      "editorialShort": "A bird's head and neck are carried into a larger spiral form. The sculptor has simplified the anatomy but kept enough detail for the subject to remain recognizable. The inner curve and narrow sections require precise shaping to maintain an even, flowing outline."
+      "editorialShort": "A bird's head and neck are carried into a larger spiral form. The sculptor has simplified the anatomy but kept enough detail for the subject to remain recognizable. The inner curve and narrow sections require precise shaping to maintain an even, flowing outline.",
+      "closerLook": {
+        "heading": "The inside of the spiral",
+        "copy": "The bird's neck turns into a broad circular curve. The inside edge needs to be worked consistently so the form remains clear and structurally sound. It is the shape of that opening, rather than detailed feathers, that gives the sculpture its character."
+      }
     },
     "zsa-018": {
-      "editorialShort": "Long ears and an upward-curving neck give this animal an alert posture. The artist relies mainly on the silhouette rather than small surface details. Viewed from the side, the position of the head and the thickness of the supporting neck become more apparent."
+      "editorialShort": "Long ears and an upward-curving neck give this animal an alert posture. The artist relies mainly on the silhouette rather than small surface details. Viewed from the side, the position of the head and the thickness of the supporting neck become more apparent.",
+      "closerLook": {
+        "heading": "The curve of the neck",
+        "copy": "The long ears and raised head create an alert posture. The neck has to support the projecting head while remaining narrow enough for the silhouette to read clearly. The side view shows that balance particularly well."
+      }
     },
     "zsa-016": {
-      "editorialShort": "Projecting shapes extend from a compact central form, suggesting an animal in movement. The sculpture is not a literal anatomical study; its character comes largely from the silhouette. Those extended sections have to be carved without weakening the main body."
+      "editorialShort": "Projecting shapes extend from a compact central form, suggesting an animal in movement. The sculpture is not a literal anatomical study; its character comes largely from the silhouette. Those extended sections have to be carved without weakening the main body.",
+      "closerLook": {
+        "heading": "The projecting forms",
+        "copy": "The extended sections make the sculpture look different from each side. They also create narrow areas that must remain connected to the main body. The artist has relied on those shapes to suggest movement rather than carving a literal anatomical study."
+      }
     },
     "hos-queen-mother": {
-      "editorialShort": "Queen Mother is a carved bust with a wrapped headdress, long earrings and layered necklaces. Deep grooves define the folds of the headdress, while smaller cuts separate the jewellery from the neck and shoulders. Tinodashe Mangenda leaves the face comparatively smooth, so the difference between the broad facial surfaces and the worked details is easy to see. Natural colour variations remain visible in the butter jade."
+      "editorialShort": "Queen Mother is a carved bust with a wrapped headdress, long earrings and layered necklaces. Deep grooves define the folds of the headdress, while smaller cuts separate the jewellery from the neck and shoulders. Tinodashe Mangenda leaves the face comparatively smooth, so the difference between the broad facial surfaces and the worked details is easy to see. Natural colour variations remain visible in the butter jade.",
+      "closerLook": {
+        "heading": "The headdress and jewellery",
+        "copy": "Deep grooves distinguish the folds of the wrapped headdress. Around the neck, finer cuts separate the beads and necklace layers. The side view shows the thickness of the earrings and how far the headdress extends beyond the face."
+      }
     },
     "hos-celebration": {
-      "editorialShort": "A seated figure plays a drum. The artist has carved the hands, arms and instrument as parts of one connected composition, with each remaining clearly recognizable. The figure's posture gives the scene its movement, while the rounded shapes of the body and drum hold the work together."
+      "editorialShort": "A seated figure plays a drum. The artist has carved the hands, arms and instrument as parts of one connected composition, with each remaining clearly recognizable. The figure's posture gives the scene its movement, while the rounded shapes of the body and drum hold the work together.",
+      "closerLook": {
+        "heading": "The hands and the drum",
+        "copy": "The hands, arms and rounded drum are carved as one connected composition. Each part has to remain recognizable while fitting the figure's seated posture. The space around the instrument is particularly important to how the scene reads."
+      }
     },
     "hos-belonging": {
-      "editorialShort": "Four faces are gathered around an opening within a single stone frame. Each face has a slightly different position, but all four are connected by the surrounding material. The title, Belonging, suggests a shared relationship; the sculptor expresses it through the way the figures are arranged."
+      "editorialShort": "Four faces are gathered around an opening within a single stone frame. Each face has a slightly different position, but all four are connected by the surrounding material. The title, Belonging, suggests a shared relationship; the sculptor expresses it through the way the figures are arranged.",
+      "closerLook": {
+        "heading": "Four faces within one frame",
+        "copy": "Each of the four faces has its own position, but all are joined through the surrounding stone. The sculptor has carved the opening between them so that each face remains distinct. From different angles, their relationships become easier to see."
+      }
     },
     "hos-inner-beauty": {
-      "editorialShort": "An elongated face is set beside carefully carved patterned detail. The facial features are restrained, with a long nose and a smooth profile that contrast with the texture alongside them. The small changes in depth are easiest to appreciate from the side or at close range."
+      "editorialShort": "An elongated face is set beside carefully carved patterned detail. The facial features are restrained, with a long nose and a smooth profile that contrast with the texture alongside them. The small changes in depth are easiest to appreciate from the side or at close range.",
+      "closerLook": {
+        "heading": "The patterned carving",
+        "copy": "The long, smooth facial profile sits beside an area of more closely worked texture. Individual cuts create the pattern without overwhelming the features. The contrast is easier to appreciate from the side, where the change in depth becomes visible."
+      }
     }
   }
 }
