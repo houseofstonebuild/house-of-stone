@@ -30,19 +30,18 @@ try{
     await page.setViewportSize({width,height:1000});
     for(const work of catalog.works){
       await ready('/works/'+work.slug);await page.mouse.move(0,0);
-      const banner=page.locator('#hos-work-banner'),photo=banner.locator('img'),caption=banner.locator('figcaption');
-      await photo.evaluate(image=>image.decode());
-      assert.equal(await banner.locator('#hos-work-banner-title').innerText(),work.title);
-      assert.equal(await banner.locator('#hos-work-banner-artist').innerText(),catalog.artists.find(artist=>artist.id===work.artistId).name);
-      assert.equal(await banner.locator('#hos-work-banner-stone').innerText(),work.material+(work.materialEstimated?' (estimated)':''));
-      if(width>700){
-        const a=await caption.boundingBox(),b=await photo.boundingBox();assert(a.x+a.width<=b.x+1,work.title+': caption must be left of image');
-        assert(b.width<=width*.6+1,work.title+': image must occupy right column');assert((await banner.boundingBox()).height<=701);
-      }
+      const mainPhoto=page.locator('#hos-work-image'),workLayout=page.locator('.hos-work-layout');
+      await mainPhoto.evaluate(image=>image.decode());
+      assert(await mainPhoto.evaluate(image=>image.naturalWidth>0),work.title+': artwork photo did not load');
+      assert.equal(await page.locator('#hos-work-title').innerText(),work.title);
+      assert.equal(await page.locator('#hos-work-artist').innerText(),catalog.artists.find(artist=>artist.id===work.artistId).name);
+      assert.equal(await page.locator('#hos-work-essential-stone').innerText(),work.material+(work.materialEstimated?' (estimated)':''));
+      assert.equal(await page.locator('#hos-work-banner').isVisible(),false,'Approved sculpture pages omit the redundant banner');
+      assert(await mainPhoto.isVisible(),work.title+': primary sculpture photo must be visible');
+      assert(await page.locator('#hos-work-description').innerText(),work.title+': sculpture-specific description must exist');
+      if(work.id==='zsa-012')assert.equal(await mainPhoto.evaluate(image=>getComputedStyle(image).transform),'none');
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),work.title+': overflow at '+width);
-      assert.equal(await banner.isVisible(),width>700,'Sculpture intro visibility at '+width);
-      if(work.id==='zsa-012')assert.equal(await photo.evaluate(image=>getComputedStyle(image).transform),'none');
-      if([390,1440].includes(width)&&(additions.some(item=>item.id===work.id)||['zsa-001','zsa-013','zsa-026','zsa-031','zsa-012','zsa-024'].includes(work.id)))await (width>700?banner:page.locator('.hos-work-layout')).screenshot({path:new URL(width+'-'+work.id+'-intro.jpg',out).pathname,type:'jpeg',quality:88});
+      if([390,1440].includes(width)&&(additions.some(item=>item.id===work.id)||['zsa-001','zsa-013','zsa-026','zsa-031','zsa-012','zsa-024'].includes(work.id)))await workLayout.screenshot({path:new URL(width+'-'+work.id+'-intro.jpg',out).pathname,type:'jpeg',quality:88});
       report.intros++;
     }
     await ready('/artists');
