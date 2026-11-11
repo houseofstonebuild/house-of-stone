@@ -63,7 +63,7 @@ export function initializeGallery({root,document,applyImage,rotationFor=()=>'',r
     if(!work.views?.detail && assets[work.image])photos.push({source:assets[work.image],label:'Stone detail',kind:'detail',zoom:1.8});
     for(const [n,key] of (work.additionalImages||[]).entries())if(assets[key]&&!photos.some(photo=>photo.source===assets[key]))photos.push({source:assets[key],label:assets[key].includes('/hos-artist-')?'With the artist':'Additional view '+(n+1),kind:assets[key].includes('/hos-artist-')?'artist':'angle'});
     for(const scene of scenes)photos.push({...scene,label:scene.label||'In a space',kind:'interior'});
-    photos=photos.filter(photo=>photo.source).filter((photo,i,all)=>all.findIndex(other=>other.source===photo.source)===i).map(photo=>({...photo,source:resolveSource(photo.source)}));title.textContent=work.title;thumbs.replaceChildren();story.replaceChildren();photoButtons=[];
+    photos=photos.filter(photo=>photo.source).filter((photo,i,all)=>photo.zoom||all.findIndex(other=>other.source===photo.source)===i).map(photo=>({...photo,source:resolveSource(photo.source)}));title.textContent=work.title;thumbs.replaceChildren();story.replaceChildren();photoButtons=[];
     photos.forEach((photo,i)=>{
       const button=document.createElement('button');button.type='button';button.className='hos-photo-thumbnail';button.setAttribute('aria-label','Show '+photo.label.toLowerCase());button.setAttribute('aria-pressed',String(i===0));
       const img=document.createElement('img');img.loading='lazy';applyImage(img,photo.source,'120px');img.alt='';const label=document.createElement('span');label.textContent=photo.label;button.append(img,label);button.addEventListener('click',()=>select(i));thumbs.append(button);photoButtons.push(button);
