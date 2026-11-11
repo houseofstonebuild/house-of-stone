@@ -353,7 +353,16 @@ function watchModels(container) {
 }
 function artistBiography(artist) {
   const value = artist.biography || editorial.biographies?.[artist.id];
-  return typeof value === 'object' ? (value.name === artist.name ? value.text : artist.description) : value || artist.description;
+  if(value) return typeof value === 'object' ? (value.name === artist.name ? value.text : artist.description) : value;
+  const selected = works.filter(work => work.artistId === artist.id).slice(0, 3);
+  const names = selected.map(work => work.title);
+  const worksPhrase = names.length > 1 ? names.slice(0,-1).join(', ') + ' and ' + names.at(-1) : names[0];
+  const material = [...new Set(selected.map(work => stoneLabel(work)).filter(Boolean))];
+  const practice = artist.style || artist.description;
+  return [artist.name + ' is a stone sculptor working in Harare, Zimbabwe.',
+    practice ? practice.replace(/\.$/,'') + '.' : '',
+    worksPhrase ? 'The works presented here include ' + worksPhrase + (material.length === 1 ? ', carved in ' + material[0].toLowerCase() : '') + '. Each asks to be seen from more than one angle, as the shape changes around the carved stone.' : ''
+  ].filter(Boolean).join(' ');
 }
 function workGrid(selected) { const grid=el('div','hos-work-grid');grid.dataset.count=String(selected.length);grid.dataset.reveal='';selected.forEach(work=>grid.append(workCard(work)));return grid; }
 function chapterMedia(artist, work) {
@@ -574,7 +583,7 @@ function renderWork(work) {
   // A campaign photograph leads the page once, instead of recurring at the
   // end of the sculpture's angle gallery.
   const hasModel=Boolean(modelDefinition(work));
-  gallery?.setWork(work,assets,workScenes(work),window.matchMedia?.('(max-width:700px)')?.matches?'':campaign?.source,hasModel);
+  gallery?.setWork(work,assets,setting?.source?[{source:setting.source,label:'In a space'}]:workScenes(work),window.matchMedia?.('(max-width:700px)')?.matches?'':campaign?.source,hasModel);
   const modes=$('#hos-work-view-modes'),inlineModel=$('#hos-work-inline-model');
   modes.hidden=!hasModel;inlineModel.replaceChildren();
   if(hasModel){const panel=modelPanel(work);panel.classList.add('hos-work-3d-panel');inlineModel.append(panel);}
@@ -828,6 +837,9 @@ async function start() {
   if (modelResponse.ok) models = await modelResponse.json();
   if (storyResponse.ok) story = await storyResponse.json();
   catalog = await response.json(); applyWorkPhotography(catalog, editorial.workPhotography); ({artists,works,assets} = catalog);collections=catalog.collections || [];
+  // Keep the published gallery title consistent until the collection editor
+  // record is updated. The work ID and route slug remain stable.
+  if(!previewMode)for(const work of works)if(work.id==='zsa-029' && work.title==='Abstract Flower')work.title='Unfurl';
   catalog.site.description = catalog.site.description.replace(/\benquir/gi, word => word[0] === 'E' ? 'Inquir' : 'inquir');
   $('#hos-copyright').textContent = `© ${new Date().getFullYear()} House of Mabwe`;
   $('#hos-location').textContent = catalog.site.location;

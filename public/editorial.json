@@ -439,8 +439,8 @@
       "label": "A contemporary apartment"
     },
     "zsa-029": {
-      "source": "/assets/zsa-029-space-v1-1536.webp",
-      "label": "An office lobby"
+      "source": "/assets/zsa-029-space-v2-1536.webp",
+      "label": "A contemporary residence"
     },
     "zsa-021": {
       "source": "/assets/zsa-021-space-v1-1536.webp",
@@ -535,7 +535,7 @@
       "label": "An apartment living room"
     },
     "zsa-028": {
-      "source": "/assets/zsa-028-interior-1536.webp",
+      "source": "/assets/zsa-028-interior-v3-1536.webp",
       "label": "A city apartment"
     }
   }

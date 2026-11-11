@@ -14,6 +14,30 @@
   --hos-work-border:#ecece8;
   --hos-work-soft:#fbfbfa;
 }
+#hos-concept .hos-page-navigation:not([hidden]) {
+  position:sticky;
+  top:calc(var(--hos-visible-header-height,var(--hos-header-height)) + env(safe-area-inset-top) + 8px);
+  z-index:26;
+  align-self:center;
+  pointer-events:none;
+}
+#hos-concept .hos-page-navigation .hos-back {
+  pointer-events:auto;
+  min-height:38px;
+  padding:4px 12px;
+  border:1px solid #e7e7e2;
+  border-radius:2px;
+  background:rgba(255,255,255,.96);
+  box-shadow:0 2px 12px rgba(0,0,0,.045);
+  color:#343630;
+}
+#hos-concept .hos-process-steps .hos-story-section figure img {
+  width:100%;
+  height:auto;
+  aspect-ratio:4/3;
+  object-fit:cover;
+  background:transparent;
+}
 #hos-concept .hos-work-breadcrumb {
   margin:26px auto 0;
   font-size:11px;
