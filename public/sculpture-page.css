@@ -108,7 +108,7 @@
   width:100%;min-height:54px;margin:0;display:flex;justify-content:space-between;
 }
 #hos-concept [data-page="work"] .hos-work-inquiry-note {
-  color:#73766f;font-size:12px;line-height:1.7;
+  color:#676b64;font-size:14px;line-height:1.75;
   margin:12px 0 18px;
 }
 #hos-concept [data-page="work"] .hos-work-details #hos-work-model {margin:0 0 18px;}
