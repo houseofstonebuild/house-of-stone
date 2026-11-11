@@ -39,7 +39,7 @@ try{
     assert.equal(await page.locator('#hos-work-detail-title').textContent(),'The headdress and jewellery');
     assert.match(await page.locator('#hos-work-detail-copy').textContent(),/Deep grooves separate/);
     const actual=page.locator('#hos-work-detail-image');
-    assert.match(await actual.getAttribute('src'),/hos-queen-mother-right-v1\\.webp$/,'Queen Mother must show the right-side headdress and jewellery');
+    assert.match(await actual.getAttribute('src'),/hos-queen-mother-right-v1[.]webp$/,'Queen Mother must show the right-side headdress and jewellery');
     await actual.evaluate(image=>image.decode());
     assert(await actual.evaluate(image=>image.naturalWidth>0),'Real close-look photograph did not load');
     assert.match(await page.locator('#hos-work-short-specs').textContent(),/Butter Jade/i);
