@@ -33,6 +33,17 @@ try{
    // rather than a second carousel of full-sized photographs below the fold.
    assert.equal(await page.locator('.hos-photo-carousel').isVisible(),false);
    if(id==='zsa-012'&&[390,1440].includes(width))await page.locator('.hos-work-photo').screenshot({path:new URL(width+'-sculpture-carousel.jpg',out).pathname,type:'jpeg',quality:90});
+   if(id==='hos-queen-mother'){
+    const closer=page.locator('#hos-work-detail');
+    assert(await closer.isVisible(),'Queen Mother should have a visible artwork-specific close look');
+    assert.equal(await page.locator('#hos-work-detail-title').textContent(),'The headdress and jewellery');
+    assert.match(await page.locator('#hos-work-detail-copy').textContent(),/Deep grooves distinguish/);
+    const actual=page.locator('#hos-work-detail-image');
+    await actual.evaluate(image=>image.decode());
+    assert(await actual.evaluate(image=>image.naturalWidth>0),'Real close-look photograph did not load');
+    assert.match(await page.locator('#hos-work-short-specs').textContent(),/Butter Jade/i);
+    if([390,1440].includes(width))await closer.screenshot({path:new URL(width+'-queen-mother-close-look.jpg',out).pathname,type:'jpeg',quality:87});
+   }
    const thumbs=page.locator('.hos-photo-thumbnail:not(.hos-model-thumbnail)');assert(await thumbs.count()>1);await thumbs.nth(1).click();assert.equal(await thumbs.nth(1).getAttribute('aria-pressed'),'true');
    await page.locator('#hos-work-photo-open').click();const dialog=page.locator('#hos-photo-dialog'),stage=dialog.locator('.hos-photo-stage');await dialog.locator('img').evaluate(i=>i.decode());
    for(let n=0;n<8;n++)await page.getByRole('button',{name:'Zoom in photograph',exact:true}).click();assert.equal(await dialog.locator('.hos-zoom-status').textContent(),'500%');
