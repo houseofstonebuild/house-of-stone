@@ -9,6 +9,7 @@ import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {createApp} from '../server.mjs';
 import {prepareOwnerPublication} from '../scripts/publish-owner-release.mjs';
+import {applyWorkPhotography} from '../public/work-photography.js';
 const exec=promisify(execFile),dataDir=mkdtempSync(join(tmpdir(),'hos-release-fixtures-')),password=randomUUID();
 const app=createApp({dataDir,env:{ADMIN_PASSWORD:password},backgroundNotifications:false});
 await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));
@@ -22,6 +23,10 @@ const api=async(path,data)=>{
 // eligible models should be expected, rather than an old fixed count.
 async function eligiblePublishedModelCount(){
  const catalog=await (await fetch(origin+'/content.json')).json();
+ // The browser applies owner-approved studio photographs before checking model sources.
+ // Count models against those same displayed photographs, not the unmodified DB assets.
+ const editorial=JSON.parse(readFileSync(new URL('../public/editorial.json',import.meta.url),'utf8'));
+ applyWorkPhotography(catalog,editorial.workPhotography);
  const manifest=JSON.parse(readFileSync(new URL('../public/models.json',import.meta.url),'utf8'));
  return catalog.works.filter(work=>{
    const entry=manifest[work.id];if(!entry||entry.source!==catalog.assets[work.image])return false;
