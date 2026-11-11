@@ -15,21 +15,46 @@
   --hos-work-soft:#fbfbfa;
 }
 #hos-concept .hos-page-navigation:not([hidden]) {
-  position:sticky;
-  top:calc(var(--hos-visible-header-height,var(--hos-header-height)) + env(safe-area-inset-top) + 8px);
-  z-index:26;
-  align-self:center;
-  pointer-events:none;
+  position:fixed;
+  top:calc(env(safe-area-inset-top) + 20px);
+  left:calc(var(--hos-gutter) + 84px);
+  z-index:31;
+  width:auto;
+  max-width:none;
+  margin:0;
+  padding:0;
 }
 #hos-concept .hos-page-navigation .hos-back {
-  pointer-events:auto;
-  min-height:38px;
-  padding:4px 12px;
-  border:1px solid #e7e7e2;
-  border-radius:2px;
-  background:rgba(255,255,255,.96);
-  box-shadow:0 2px 12px rgba(0,0,0,.045);
+  min-height:44px;
+  padding:0 2px;
+  gap:5px;
+  border:0;
+  background:transparent;
+  box-shadow:none;
   color:#343630;
+  font-size:12px;
+}
+#hos-concept .hos-page-navigation .hos-back:hover {
+  text-decoration:underline;
+  text-underline-offset:4px;
+}
+@media(max-width:700px) {
+  #hos-concept .hos-page-navigation:not([hidden]) {
+    top:calc(env(safe-area-inset-top) + 10px);
+    left:calc(var(--hos-gutter) + 43px);
+  }
+}
+@media(max-width:360px) {
+  #hos-concept .hos-page-navigation .hos-back {
+    font-size:0;
+  }
+  #hos-concept .hos-page-navigation .hos-back .hos-link-arrow svg {
+    width:17px;
+    height:17px;
+  }
+}
+body.hos-menu-open #hos-concept .hos-page-navigation {
+  visibility:hidden;
 }
 #hos-concept .hos-process-steps .hos-story-section figure img {
   width:100%;
@@ -80,6 +105,29 @@
   max-width:100%;
   background:transparent;
 }
+#hos-concept [data-page="work"] .hos-work-photo-open[data-photo-kind="interior"] {
+  display:block;
+  height:auto;
+  aspect-ratio:auto;
+  background:#fff;
+  border:0;
+}
+#hos-concept [data-page="work"] .hos-work-photo-open[data-photo-kind="interior"] img {
+  display:block;
+  width:100%;
+  height:auto;
+  object-fit:contain;
+}
+#hos-concept [data-page="work"] .hos-photo-zoom-invite {
+  right:12px;
+  bottom:12px;
+  padding:6px 9px;
+  border:0;
+  background:rgba(255,255,255,.9);
+  color:#373a36;
+  font-size:11px;
+  line-height:1.4;
+}
 #hos-concept [data-page="work"] .hos-work-photo .hos-work-additional-images {
   gap:12px;
   padding:15px 0 5px;
@@ -101,6 +149,10 @@
   height:78px;
   background:#fafaf9;
   border:1px solid #eee;
+}
+#hos-concept [data-page="work"] .hos-model-tile-face svg {
+  width:22px;
+  height:22px;
 }
 #hos-concept [data-page="work"] .hos-work-photo .hos-photo-thumbnail span {
   font-size:10px;

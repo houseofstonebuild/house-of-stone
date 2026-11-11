@@ -7,6 +7,7 @@ export function initializeGallery({root,document,applyImage,rotationFor=()=>'',r
   function select(i){
     if(!photos.length)return;index=(i+photos.length)%photos.length;const photo=photos[index];
     applyImage(main,photo.source,'(max-width:700px) 90vw, 65vw');main.alt=photo.label+' of '+title.textContent;
+    opener.dataset.photoKind=photo.kind||'studio';
     main.style.transform=photo.zoom?'scale('+photo.zoom+')':'';
     opener.setAttribute('aria-label','Inspect '+photo.label.toLowerCase()+' of '+title.textContent);opener.dataset.detailCrop=String(Boolean(photo.zoom));
     photoButtons.forEach((button,n)=>button.setAttribute('aria-pressed',String(n===index)));
