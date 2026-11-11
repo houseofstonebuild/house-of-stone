@@ -63,8 +63,16 @@ try{
     await ready('/works/'+work.slug);
     const sources=await page.locator('#hos-work-photo-open img,.hos-photo-thumbnail img,#hos-work-gallery-story img').evaluateAll(images=>images.map(image=>image.getAttribute('src')));
     assert(sources.length>0);
-    const allowed=new Set([catalog.assets[work.image],...Object.values(work.views||{}).map(key=>catalog.assets[key]),...(editorial.workScenes?.[work.id]?.scenes||[]).map(scene=>scene.source)]);
+    const setting=editorial.workSettings?.[work.id];
+    const allowed=new Set([catalog.assets[work.image],...Object.values(work.views||{}).map(key=>catalog.assets[key]),...(editorial.workScenes?.[work.id]?.scenes||[]).map(scene=>scene.source),setting?.source]);
     for(const source of sources)assert(allowed.has(source),'Unexpected gallery source '+source);
+    if(setting?.source){
+      const thumbnails=await page.locator('.hos-photo-thumbnail').evaluateAll(buttons=>buttons.map(button=>({source:button.querySelector('img')?.getAttribute('src'),model:button.classList.contains('hos-model-thumbnail')})));
+      const sceneIndex=thumbnails.findIndex(item=>item.source===setting.source);
+      assert(sceneIndex>=0,'Missing in-a-space thumbnail for '+work.id);
+      const modelIndex=thumbnails.findIndex(item=>item.model);
+      if(modelIndex>=0)assert.equal(sceneIndex,modelIndex-1,'Room scene must precede 3D for '+work.id);
+    }
     if(corrections.some(fix=>fix.id===work.id)){
       await page.locator('#hos-work-image').evaluate(image=>image.decode());
       await page.locator('#hos-work-photo-open').click();
