@@ -574,19 +574,22 @@ function renderWork(work) {
   const maker=$('#hos-work-maker');maker.replaceChildren();const contextArtist=artistContext(work);maker.hidden=!contextArtist;if(contextArtist)maker.append(contextArtist);
   const detail=$('#hos-work-detail'),detailCopy=$('#hos-work-detail-copy'),detailImage=$('#hos-work-detail-image');
   const closer=story.works?.[work.id]?.closerLook;
-  // Use a real alternate photograph of this artwork. Never substitute an unrelated
-  // sculpture or invent a detail by cropping/resynthesizing its main photo.
-  const alternateKeys=['detail','detail2','right','left','back'];
-  const detailSource=alternateKeys.map(key=>assets[work.views?.[key]]).find(source=>source&&source!==assets[work.image]);
-  detail.hidden=!(closer?.heading&&closer?.copy&&detailSource);
+  // The editorial record names the precise photograph that illustrates its text.
+  // Never silently substitute a different angle: doing so can make the caption false.
+  const viewKey=closer?.photoView;
+  const allowedViews=['detail','detail2','right','left','back'];
+  const detailSource=allowedViews.includes(viewKey)?assets[work.views?.[viewKey]]:null;
+  const isDistinctSource=detailSource && detailSource!==assets[work.image];
+  detail.hidden=!(closer?.heading&&closer?.copy&&isDistinctSource);
   if(!detail.hidden){
     $('#hos-work-detail-title').textContent=closer.heading;
     detailCopy.textContent=closer.copy;
     applyImage(detailImage,detailSource,'(max-width:700px) 90vw, 52vw');
-    detailImage.alt='Alternate photograph showing '+closer.heading.toLowerCase()+' of '+work.title;
+    detailImage.alt=({right:'Right side',left:'Left side',back:'Rear',detail:'Detail',detail2:'Second detail'})[viewKey]+' photograph of '+work.title+', showing '+closer.heading.toLowerCase();
   }else{
     detailCopy.textContent='';
     detailImage.removeAttribute('src');
+    detailImage.alt='';
   }
   const related=$('#hos-work-related');related.replaceChildren();
   const sameCollection=collection?collection.workIds.filter(id=>id!==work.id).map(id=>works.find(w=>w.id===id)).filter(Boolean):[];
