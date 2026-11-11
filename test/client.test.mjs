@@ -9,13 +9,13 @@ import { webcrypto } from 'node:crypto';
 import {presentationFor,pageDescriptions} from '../public/presentation.js';
 import {initializeGallery} from '../public/gallery.js';
 import {applyWorkPhotography} from '../public/work-photography.js';
-import {closerLookPhoto} from '../public/closer-look.js';
+import {closerLookPhoto,closerLookCrop} from '../public/closer-look.js';
 import { createApp } from '../server.mjs';
 
 // A small DOM adapter exercises the actual client script and real HTTP server.
 // It verifies interaction state and network contracts, not browser layout.
 class Element {
-  constructor() { this.hidden=false;this.disabled=false;this.dataset={};this.style={};this.children=[];this.listeners={};this.value='';this.textContent='';this.classList={contains:()=>false,toggle(){},add(){},remove(){}};this.nodes=new Map(); }
+  constructor() { this.hidden=false;this.disabled=false;this.dataset={};this.style={setProperty(){}};this.children=[];this.listeners={};this.value='';this.textContent='';this.classList={contains:()=>false,toggle(){},add(){},remove(){}};this.nodes=new Map(); }
   addEventListener(name,listener) { (this.listeners[name] ??= []).push(listener); }
   async dispatch(name,extra={}) { const event={target:this,preventDefault(){},...extra};await Promise.all((this.listeners[name]||[]).map(listener=>listener(event))); }
   setAttribute(name,value) { this[name]=String(value); }
@@ -69,7 +69,7 @@ async function clientFixture(t, {privacy=false,loseConfirmation=false,preview=fa
   const fetchImpl=async(path,options={})=>{
     const promise=(async()=>{const response=await fetch(base+path,{...options,headers:{...options.headers,...previewHeaders,...(options.method==='POST'?{Origin:base}:{})}});if(path==='/api/inquiries'&&loseConfirmation&&!lost){lost=true;throw new TypeError('Connection interrupted after server saved the enquiry');}return response;})();requests.push(promise.catch(()=>{}));return promise;
   };
-  const context=vm.createContext({document:{body:new Element(),getElementById:id=>get('#'+id),querySelector:get,createElement:()=>new Element(),createTextNode:text=>Object.assign(new Element(),{textContent:String(text)}),referrer:'https://example.test/path?private=value'},navigator:{doNotTrack:privacy?'1':'0'},crypto:webcrypto,localStorage:new Storage(),sessionStorage:new Storage(),location,history:browserHistory,window:browserWindow,URL,URLSearchParams,AbortSignal,fetch:fetchImpl,presentationFor,pageDescriptions,initializeGallery,applyWorkPhotography,closerLookPhoto,frameStudioImage,console});
+  const context=vm.createContext({document:{body:new Element(),getElementById:id=>get('#'+id),querySelector:get,createElement:()=>new Element(),createTextNode:text=>Object.assign(new Element(),{textContent:String(text)}),referrer:'https://example.test/path?private=value'},navigator:{doNotTrack:privacy?'1':'0'},crypto:webcrypto,localStorage:new Storage(),sessionStorage:new Storage(),location,history:browserHistory,window:browserWindow,URL,URLSearchParams,AbortSignal,fetch:fetchImpl,presentationFor,pageDescriptions,initializeGallery,applyWorkPhotography,closerLookPhoto,closerLookCrop,frameStudioImage,console});
   vm.runInContext(readFileSync(new URL('../public/app.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,''),context);
   async function flush(){for(let i=0;i<3;i++){await Promise.all([...requests]);await new Promise(resolve=>setImmediate(resolve));}}
   await flush();

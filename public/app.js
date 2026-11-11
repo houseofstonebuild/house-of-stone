@@ -2,7 +2,7 @@ import { frameStudioImage } from './studio-frame.js';
 import { presentationFor, pageDescriptions } from './presentation.js';
 import { initializeGallery } from './gallery.js';
 import { applyWorkPhotography } from './work-photography.js';
-import { closerLookPhoto } from './closer-look.js';
+import { closerLookPhoto, closerLookCrop } from './closer-look.js';
 const root = document.getElementById('hos-concept');
 const previewMode = location.pathname === '/admin/preview' || location.pathname.startsWith('/admin/preview/');
 const routePath = () => previewMode ? location.pathname.slice('/admin/preview'.length) || '/' : location.pathname;
@@ -579,12 +579,18 @@ function renderWork(work) {
   // Never silently substitute a different angle: doing so can make the caption false.
   const viewKey=closer?.photoView;
   const detailSource=closerLookPhoto(work,assets,closer);
+  const crop=detailSource&&closerLookCrop(closer),detailFigure=detail.querySelector('figure');
+  detailFigure.toggleAttribute('data-detail-crop',Boolean(crop));
+  if(crop){
+    for(const [key,value] of Object.entries({aspect:crop.aspectRatio,left:-100*crop.x/crop.width+'%',top:-100*crop.y/crop.height+'%',width:100/crop.width+'%',height:100/crop.height+'%'}))detailFigure.style.setProperty('--detail-'+key,value);
+  }
   detail.hidden=!detailSource;
   if(!detail.hidden){
     $('#hos-work-detail-title').textContent=closer.heading;
     detailCopy.textContent=closer.copy;
-    applyImage(detailImage,detailSource,'(max-width:700px) 90vw, 52vw');
-    detailImage.alt=({right:'Right side',left:'Left side',back:'Rear',detail:'Detail',detail2:'Second detail'})[viewKey]+' photograph of '+work.title+', showing '+closer.heading.toLowerCase();
+    applyImage(detailImage,detailSource,crop?`(max-width:700px) ${Math.ceil(90/crop.width)}vw, ${Math.ceil(52/crop.width)}vw`:'(max-width:700px) 90vw, 52vw');
+    if(crop)frameStudioImage(detailImage,'');
+    detailImage.alt=closer.photoAlt||({front:'Close-up',right:'Right side',left:'Left side',back:'Rear',detail:'Detail',detail2:'Second detail'})[viewKey]+' photograph of '+work.title+', showing '+closer.heading.toLowerCase();
   }else{
     detailCopy.textContent='';
     applyImage(detailImage,null);

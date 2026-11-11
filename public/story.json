@@ -81,19 +81,35 @@
     "zsa-009": {
       "editorialShort": "This sculpture considers the relationship between two forms that belong together without touching. A rounded centre is held inside a larger looping shape, suggesting a planet following its path or two people moving within each other's lives. The sculptor has used a continuous curve to give the eye somewhere to travel, then placed the sphere where that movement seems to gather. The idea is about connection, but also the space each part needs to remain itself.",
       "closerLook": {
-        "heading": "The loop around the centre",
-        "copy": "From the right side, look at the depth of the carved loop and the space left around the rounded centre. The thickness of the surrounding stone changes as the curve turns. Those connections keep the two forms visually balanced while holding the work together.",
-        "photoView": "right",
-        "photoSource": "/assets/zsa-009-studio-right-v2.webp"
+        "heading": "The sphere held in the curve",
+        "copy": "A small polished sphere rests at the turn of a much larger ribbon of stone. The opening beside it keeps its rounded outline distinct, while the ribbon passes below and rises around it. That change in scale gives the sculpture its centre of gravity: the eye pauses at the sphere before following the curve onward.",
+        "photoView": "front",
+        "photoSource": "/assets/zsa-009-studio-front-v2.webp",
+        "photoCrop": {
+          "x": 0.229084,
+          "y": 0.276294,
+          "width": 0.540999,
+          "height": 0.347364,
+          "aspectRatio": 0.881155
+        },
+        "photoAlt": "Close-up showing the sphere held in the curve"
       }
     },
     "zsa-025": {
       "editorialShort": "Two paths cross, separate and meet again in this abstract sculpture. The idea is familiar from life: people and decisions can move in different directions and still return to a shared point. Rather than illustrating a particular event, the sculptor builds that idea through interlocking curves and several open spaces. The pale natural markings pass through the turns in the stone, adding variation that no drawing or repeated mould could exactly reproduce.",
       "closerLook": {
-        "heading": "Where the curves cross",
-        "copy": "The left-side photograph shows how the curving sections sit at different depths. Look at the gaps between them and the narrow places where one part of the composition joins another. These spaces are carved out of the original block, not assembled from separate pieces.",
-        "photoView": "left",
-        "photoSource": "/assets/zsa-025-studio-left-v2.webp"
+        "heading": "Where the stone becomes a ribbon",
+        "copy": "At the central crossing, a broad band twists until its face becomes a narrow edge. The opening beneath lets you follow that change in thickness and direction. Pale markings continue across the polished turn, keeping the movement tied to the particular stone rather than a perfectly uniform geometric shape.",
+        "photoView": "back",
+        "photoSource": "/assets/zsa-025-studio-back-v2.webp",
+        "photoCrop": {
+          "x": 0.079121,
+          "y": 0.279572,
+          "width": 0.840376,
+          "height": 0.511625,
+          "aspectRatio": 0.91415
+        },
+        "photoAlt": "Close-up showing where the stone becomes a ribbon"
       }
     },
     "zsa-029": {
@@ -159,28 +175,52 @@
     "zsa-026": {
       "editorialShort": "The long face and strongly patterned upper section suggest a person whose position carries both recognition and responsibility. A crown or headdress can communicate status, but the sculpture gives equal importance to the calm expression below it. The sculptor has deliberately separated these two visual elements: detailed grooves above, restrained facial features beneath. The result feels less like a celebration of power than a portrait of someone expected to carry it well.",
       "closerLook": {
-        "heading": "The portrait seen edge-on",
-        "copy": "From the right, the portrait becomes a narrow, pointed outline above its rectangular base. The broad face and its patterned upper section turn away from the camera. This angle reveals the thinness of the upright stone and the small projections that give the front its depth.",
-        "photoView": "right",
-        "photoSource": "/assets/zsa-026-studio-right-v2.webp"
+        "heading": "The grooves of the headdress",
+        "copy": "Closely spaced diagonal grooves run across the pointed headdress, stopping at a sharp boundary above the face. Beneath them, the long smooth planes and lowered eye are much quieter. This small change in surface makes the headdress feel elaborate without covering the whole portrait in ornament.",
+        "photoView": "front",
+        "photoSource": "/assets/zsa-026-studio-front-v2.webp",
+        "photoCrop": {
+          "x": 0.019746,
+          "y": 0.048642,
+          "width": 0.960507,
+          "height": 0.511855,
+          "aspectRatio": 0.83
+        },
+        "photoAlt": "Close-up showing the grooves of the headdress"
       }
     },
     "zsa-023": {
       "editorialShort": "The face is built from rising points and angled planes rather than soft, rounded features. It suggests someone looking ahead while carrying the marks of difficult experience. The sculptor gives that idea an upright, forward-moving outline, with surfaces that catch the light differently as the work is turned. There is no elaborate expression to explain how the figure feels; the attitude comes from the position and proportions of the head.",
       "closerLook": {
-        "heading": "The narrow edge of the portrait",
-        "copy": "Seen almost edge-on, the portrait becomes a thin upright silhouette with an uneven top. Only a sliver of the broader carved surface is visible. This view shows how little depth the artist needed to create a head that appears much fuller when seen from the front.",
-        "photoView": "left",
-        "photoSource": "/assets/zsa-023-studio-left-v2.webp"
+        "heading": "The face revealed by angular cuts",
+        "copy": "The nose projects from a sharply cut plane, with the small lips set just beneath it. Beside those polished features, a rougher strip preserves the stone’s uneven surface. Seen close, the expression comes from the meeting of these planes and the restrained carving of the mouth, rather than a softly rounded face.",
+        "photoView": "front",
+        "photoSource": "/assets/zsa-023-studio-front-v2.webp",
+        "photoCrop": {
+          "x": 0.082894,
+          "y": 0.37608,
+          "width": 0.833314,
+          "height": 0.429786,
+          "aspectRatio": 0.83
+        },
+        "photoAlt": "Close-up showing the face revealed by angular cuts"
       }
     },
     "zsa-027": {
       "editorialShort": "A composed face sits below a forehead that retains a much rougher surface. The contrast suggests a difference between what people show to the world and the thoughts or experiences they carry within. The sculptor has made the lower face calm and recognizable while refusing to smooth away the stone above it. The unfinished-looking area is not simply an absence of work; it gives the portrait another part of its story.",
       "closerLook": {
-        "heading": "The head balanced over the neck",
-        "copy": "This side view shows the head extending diagonally beyond a much narrower neck. A pale rough area marks the upper end, while a long dark edge runs toward the pointed profile. Beneath it, the irregular body and small opening make the support of that projecting head visible.",
-        "photoView": "right",
-        "photoSource": "/assets/zsa-027-studio-right-v2.webp"
+        "heading": "Where the rough forehead meets the face",
+        "copy": "The rough pale forehead comes down to a defined boundary above the long, closed eyes. Below it, a narrow polished nose leads toward the small mouth. Keeping these surfaces so different gives the portrait its character: the face feels composed, while the stone above remains irregular and tactile.",
+        "photoView": "front",
+        "photoSource": "/assets/zsa-027-studio-front-v2.webp",
+        "photoCrop": {
+          "x": 0.0,
+          "y": 0.149413,
+          "width": 1.0,
+          "height": 0.575755,
+          "aspectRatio": 0.642396
+        },
+        "photoAlt": "Close-up showing where the rough forehead meets the face"
       }
     },
     "zsa-020": {
@@ -195,73 +235,137 @@
     "zsa-014": {
       "editorialShort": "Two faces appear beneath a shared arrangement of carved grooves. They can be understood as people shaped by the same family, place or experience, yet still recognizably different from one another. The sculptor gives them separate profiles but connects them through the upper form, making their relationship visible without showing an embrace. It is a quiet study of what people share and what remains individual.",
       "closerLook": {
-        "heading": "The grooves above the profile",
-        "copy": "The left-side photograph shows the repeated grooves curving across the upper section, above a narrow facial profile. The side of the stone is much thinner than the broad upper form. Green, grey and rust-coloured areas remain visible as the outline descends toward the base.",
-        "photoView": "left",
-        "photoSource": "/assets/zsa-014-studio-left-v2.webp"
+        "heading": "Two profiles under one sweeping form",
+        "copy": "The carved lines spread across the upper form, then give way to two faces turned toward one another. Their noses and mouths almost meet across the opening. The sweep above joins the composition, while the precisely cut space between the profiles keeps each person distinct.",
+        "photoView": "front",
+        "photoSource": "/assets/zsa-014-studio-front-v2.webp",
+        "photoCrop": {
+          "x": 0.025681,
+          "y": 0.045372,
+          "width": 0.948639,
+          "height": 0.621444,
+          "aspectRatio": 0.83
+        },
+        "photoAlt": "Close-up showing two profiles under one sweeping form"
       }
     },
     "zsa-007": {
       "editorialShort": "The figures are close enough to feel connected, but each retains a distinct shape and posture. That makes the work less about an idealized couple than about the effort of moving toward another person. The sculptor has left space between parts of the bodies while bringing the heads together, turning a simple gesture into the subject of the piece. The contrast between textured and smooth areas adds to their individuality.",
       "closerLook": {
-        "heading": "Texture beside a polished profile",
-        "copy": "The side photograph brings the rounded, densely textured upper form into view beside a smoother facial profile. Below them, polished curves surround a dark opening. Look at how these different surfaces catch the light: the small marks scatter it, while the broader curves carry a continuous reflection.",
-        "photoView": "right",
-        "photoSource": "/assets/zsa-007-studio-right-v2.webp"
+        "heading": "The textured heads leaning together",
+        "copy": "Two rounded, closely worked heads incline toward one another above the open space between the bodies. Their pebbled surfaces contrast with the smoother necks below. Up close, those small marks give the heads a separate presence, while their opposing angles make the gesture of closeness legible.",
+        "photoView": "front",
+        "photoSource": "/assets/zsa-007-studio-front-v2.webp",
+        "photoCrop": {
+          "x": 0.150298,
+          "y": 0.051378,
+          "width": 0.699405,
+          "height": 0.429695,
+          "aspectRatio": 0.926133
+        },
+        "photoAlt": "Close-up showing the textured heads leaning together"
       }
     },
     "zsa-010": {
       "editorialShort": "Two faces move toward a kiss, caught at the point where the distance between them almost disappears. The sculptor has chosen a small, recognizable moment instead of a grand romantic scene. Their profiles tell us what is happening before any fine facial detail is needed. The open space around them matters as much as their contact, because it lets the viewer see both individuals and the closeness between them.",
       "closerLook": {
-        "heading": "The rough surface beside the profile",
-        "copy": "At this angle, a broad rough surface occupies the upper part of the sculpture, with a polished profile projecting beside it. Below, a slender dark curve connects the head to the base. The view makes the contrast in finish more apparent than the meeting of the faces.",
-        "photoView": "right",
-        "photoSource": "/assets/zsa-010-studio-right-v2.webp"
+        "heading": "The small distance between the lips",
+        "copy": "The two profiles come together at the lips, each face framed by a different treatment of the stone. One retains a pale rough surround; the other rises into a densely textured crown of hair. The tiny point of contact is what brings those contrasting forms into one intimate gesture.",
+        "photoView": "front",
+        "photoSource": "/assets/zsa-010-studio-front-v2.webp",
+        "photoCrop": {
+          "x": 0.175496,
+          "y": 0.051988,
+          "width": 0.648175,
+          "height": 0.411424,
+          "aspectRatio": 0.865233
+        },
+        "photoAlt": "Close-up showing the small distance between the lips"
       }
     },
     "zsa-024": {
       "editorialShort": "A group of figures is gathered within a rough oval shape, suggesting family or a community held together by shared experience. The people are not identical, and they do not need to be. The sculptor gives each figure enough definition to stand apart while using the surrounding stone to bring them into one composition. The outer edge feels more natural and less controlled, as if the group has been found within the rock itself.",
       "closerLook": {
-        "heading": "The rock around the figures",
-        "copy": "The right-side photograph is dominated by the rough outer stone. A narrow opening and a glimpse of the darker carved interior remain visible along its edge. Look at the uneven outline and the changes in colour: this angle makes the material surrounding the figures the main subject.",
-        "photoView": "right",
-        "photoSource": "/assets/zsa-024-studio-right-v2.webp"
+        "heading": "The smaller figures within the embrace",
+        "copy": "Inside the rough outer frame, two larger figures curve around two smaller ones. The small heads and linking arms remain individually readable despite sharing such a compact space. The openings between them are essential: they let the embrace surround the family without turning the figures into one undifferentiated mass.",
+        "photoView": "front",
+        "photoSource": "/assets/zsa-024-studio-front-v2.webp",
+        "photoCrop": {
+          "x": 0.230471,
+          "y": 0.189229,
+          "width": 0.531248,
+          "height": 0.649228,
+          "aspectRatio": 0.83
+        },
+        "photoAlt": "Close-up showing the smaller figures within the embrace"
       }
     },
     "zsa-005": {
       "editorialShort": "Two long-beaked birds share one upright form, each looking in a slightly different direction. The work brings to mind the companionship that can exist without constant contact or attention. The sculptor has given each bird its own posture while keeping their bodies connected through the same stone. Their beaks and necks make the relationship immediately recognizable, even though the anatomy has been simplified.",
       "closerLook": {
-        "heading": "The long beak in profile",
-        "copy": "This side photograph brings one bird into a single, slender outline. Follow the long beak down into the neck, then notice how the polished green surface meets the pale, rough area at the base. The second bird is largely hidden at this angle; the view reveals the depth of the carving rather than the full pair.",
-        "photoView": "left",
-        "photoSource": "/assets/zsa-005-studio-left-v2.webp"
+        "heading": "Two birds, two different postures",
+        "copy": "The taller bird’s beak runs down beside its long neck, leaving a slim opening between them. Below, a smaller head emerges from the pale curved surface, its eye and beak picked out in dark stone. That difference in scale and finish makes the two birds distinct within one continuous upright form.",
+        "photoView": "front",
+        "photoSource": "/assets/zsa-005-studio-front-v2.webp",
+        "photoCrop": {
+          "x": 0.0,
+          "y": 0.042595,
+          "width": 1.0,
+          "height": 0.694736,
+          "aspectRatio": 0.81169
+        },
+        "photoAlt": "Close-up showing two birds, two different postures"
       }
     },
     "zsa-006": {
       "editorialShort": "A bird becomes almost entirely a curve in this sculpture. Its head and neck lead into a spiral, suggesting the circular movements seen in flight, nesting or the natural world. The sculptor has kept only enough of the animal to make it recognizable, letting the continuous turn carry the rest of the idea. It is an example of how an observed subject can become an abstract form without losing its character.",
       "closerLook": {
-        "heading": "The depth of the carved opening",
-        "copy": "From this narrow side view, the opening reads as an elongated hollow rather than a complete spiral. Light catches the rounded rim while the inside remains dark. The broad pale area above contrasts with the polished dark stone below, making the change in surface treatment particularly visible.",
-        "photoView": "right",
-        "photoSource": "/assets/zsa-006-studio-right-v2.webp"
+        "heading": "The inward turn of the spiral",
+        "copy": "The outer curve rolls inward toward a pointed tip, leaving an open channel around it. Look at the smooth inside edge as well as the outer silhouette: the widening and narrowing spaces are what make the spiral feel continuous. The bird’s neck rises alongside this turn, linking the recognizable animal to the abstract curl.",
+        "photoView": "front",
+        "photoSource": "/assets/zsa-006-studio-front-v2.webp",
+        "photoCrop": {
+          "x": 0.259922,
+          "y": 0.233997,
+          "width": 0.652031,
+          "height": 0.585855,
+          "aspectRatio": 1.029323
+        },
+        "photoAlt": "Close-up showing the inward turn of the spiral"
       }
     },
     "zsa-018": {
       "editorialShort": "The animal lifts its head as though it has heard something beyond our view. The long ears and curved neck are enough to convey attention without showing a landscape or another creature. The sculpture turns listening into a physical posture. It also gives a familiar animal form a quiet dignity: for a moment, stillness is the most important action.",
       "closerLook": {
-        "heading": "The lifted head and neck",
-        "copy": "The left profile makes the upward turn of the neck particularly clear. Its thickness changes as it supports the projecting head, and the long ears extend above the face. These are the main details the sculptor uses to give the animal its alert expression.",
-        "photoView": "left",
-        "photoSource": "/assets/zsa-018-studio-left-v2.webp"
+        "heading": "The ears that give the animal its attention",
+        "copy": "Two long ears rise above the small carved eye and the downward-pointing muzzle. Their recessed centres catch light differently from the polished rims, giving them depth without heavy detailing. This close view makes the animal’s alertness specific: the ears are upright even while the head remains still.",
+        "photoView": "front",
+        "photoSource": "/assets/zsa-018-studio-front-v2.webp",
+        "photoCrop": {
+          "x": 0.100419,
+          "y": 0.045247,
+          "width": 0.798328,
+          "height": 0.612637,
+          "aspectRatio": 0.83
+        },
+        "photoAlt": "Close-up showing the ears that give the animal its attention"
       }
     },
     "zsa-016": {
       "editorialShort": "This work captures the suggestion of an animal or bird in the middle of movement, without trying to reproduce every detail of its body. The projecting sections read like a gesture caught between two positions. The sculptor has built the sense of motion through the outline and the direction of the forms, leaving viewers to complete the action in their imagination. It is a study of movement rather than a literal portrait of an animal.",
       "closerLook": {
-        "heading": "The projecting forms",
-        "copy": "From the right side, the extensions stand apart from the compact centre of the sculpture. The openings and changing thicknesses make the silhouette feel active. The artist has kept those projecting forms connected to the main body while removing much of the stone around them.",
-        "photoView": "right",
-        "photoSource": "/assets/wingbeat-shoot-right-v1.webp"
+        "heading": "The feather cuts at the raised wing",
+        "copy": "The raised wing ends in a series of short, stepped feather tips. Incised lines separate them before giving way to the broad polished surface below. Those concentrated marks make the wing recognizable with very little carving, allowing the larger sweeping shape to carry the feeling of flight.",
+        "photoView": "front",
+        "photoSource": "/assets/wingbeat-shoot-front-v1.webp",
+        "photoCrop": {
+          "x": 0.222932,
+          "y": 0.089455,
+          "width": 0.513643,
+          "height": 0.360603,
+          "aspectRatio": 0.949598
+        },
+        "photoAlt": "Close-up showing the feather cuts at the raised wing"
       }
     },
     "hos-queen-mother": {
@@ -276,28 +380,52 @@
     "hos-celebration": {
       "editorialShort": "A seated musician plays a drum, recalling the gatherings where music brings people together. The figure could be starting a song, keeping a familiar rhythm or inviting others to join in; the sculpture leaves that moment open. The subject is deliberately ordinary, which is part of its appeal. The artist has brought the musician's hands, body and drum into one connected piece so the act of playing becomes the centre of the composition.",
       "closerLook": {
-        "heading": "The musician and the drum",
-        "copy": "The right-side photograph shows the angle of the seated body in relation to the drum. The artist has carved the arms and hands around the instrument, keeping each part distinct while retaining the connections needed to support the whole sculpture.",
-        "photoView": "right",
-        "photoSource": "/assets/hos-celebration-right-v1.webp"
+        "heading": "The hand resting across the drum",
+        "copy": "Long carved fingers spread across the round drumhead, with the palm raised slightly above its surface. The hand gives the instrument a human scale and makes the musician’s contact with it feel deliberate. The circular rim and the individual fingers remain clear even where the forms meet.",
+        "photoView": "front",
+        "photoSource": "/assets/hos-celebration-front-v1.webp",
+        "photoCrop": {
+          "x": 0.189138,
+          "y": 0.451442,
+          "width": 0.604099,
+          "height": 0.412449,
+          "aspectRatio": 0.976442
+        },
+        "photoAlt": "Close-up showing the hand resting across the drum"
       }
     },
     "hos-belonging": {
       "editorialShort": "Four faces occupy a single open stone frame. None is quite like the others, but they share the same structure and space. The sculpture presents belonging as a relationship between individuals, not a demand that everyone look or think alike. Its simple arrangement allows different readings: a family, a circle of friends, or the experience of finding a community where one is accepted. The artist has made that shared connection part of the stone itself.",
       "closerLook": {
-        "heading": "The carving behind the four faces",
-        "copy": "The rear photograph reveals the same four rounded forms and the open centre from the opposite side. Here, the thickness of the surrounding frame and the material supporting the individual heads are clearer. The sculptor had to leave those connections strong while opening the spaces between them.",
-        "photoView": "back",
-        "photoSource": "/assets/hos-belonging-back-v1.webp"
+        "heading": "Four different faces around one opening",
+        "copy": "Each rounded face has its own treatment: pale or dark, smooth or textured, with a small curved line defining the closed eye. The faces turn around the same open centre without becoming identical. These differences make the idea of belonging tangible: individuality remains visible within the shared frame.",
+        "photoView": "front",
+        "photoSource": "/assets/hos-belonging-front-v1.webp",
+        "photoCrop": {
+          "x": 0.057602,
+          "y": 0.156234,
+          "width": 0.90373,
+          "height": 0.684087,
+          "aspectRatio": 0.880717
+        },
+        "photoAlt": "Close-up showing four different faces around one opening"
       }
     },
     "hos-inner-beauty": {
       "editorialShort": "Two tall forms stand close together, their dark upper surfaces giving way to bands of bright pattern below. Inner Beauty invites a reading of character as something gradually revealed: a restrained outline holds unexpected colour and detail. Philip Mlimu brings the figures into one upright composition while leaving a narrow separation between them. Their closeness can suggest companionship, but the contrast between the quiet stone and the decorated surface gives the title another meaning: there is more here than the first silhouette reveals.",
       "closerLook": {
-        "heading": "The unadorned reverse",
-        "copy": "The rear photograph turns away from the decorated front to show a broad, rough dark surface. Two long upright sections remain divided by a narrow line, with uneven upper edges. This simpler reverse reveals the slab-like depth of the stone and gives a different view of the paired forms.",
-        "photoView": "back",
-        "photoSource": "/assets/hos-inner-beauty-back-v1.webp"
+        "heading": "Colour emerging from the dark stone",
+        "copy": "Small red, green and white fragments form a bright field across the lower part of the dark upright forms. Their irregular edges contrast with the long, restrained outline above. The boundary between colour and bare stone is the revealing detail here: the surface becomes more intricate as the eye moves downward.",
+        "photoView": "front",
+        "photoSource": "/assets/hos-inner-beauty-front-v1.webp",
+        "photoCrop": {
+          "x": 0.236904,
+          "y": 0.421631,
+          "width": 0.555359,
+          "height": 0.446071,
+          "aspectRatio": 0.83
+        },
+        "photoAlt": "Close-up showing colour emerging from the dark stone"
       }
     },
     "hos-tall-attention": {
@@ -312,10 +440,18 @@
     "hos-kissing-lovers": {
       "editorialShort": "Two long faces meet in a kiss above an open centre. The sculptor has chosen a private, everyday gesture and made it the whole subject, without adding a setting or an elaborate story about the couple. Their hair and profiles form two distinct figures, but the point where they meet joins the composition together. The work can stand for romantic love, but also for the trust and familiarity that grow from being close to someone over time.",
       "closerLook": {
-        "heading": "The carved lines along the edge",
-        "copy": "The right-side photograph turns the faces almost completely out of view. In their place, long carved lines follow the narrow edge of the stone, bending around its upper end. This angle reveals the depth and surface work behind the kiss, rather than the meeting of the profiles.",
-        "photoView": "right",
-        "photoSource": "/assets/hos-kissing-lovers-right-v1.png"
+        "heading": "The point where the lips meet",
+        "copy": "The lips touch at a small bridge of stone between the two profiles. Around that meeting point, the noses, eyes and rounded cheeks remain separately defined. Fine grooves sweep away through the hair on either side, drawing attention back toward the quiet contact at the centre.",
+        "photoView": "front",
+        "photoSource": "/assets/hos-kissing-lovers-front-v1.png",
+        "photoCrop": {
+          "x": 0.084609,
+          "y": 0.12974,
+          "width": 0.852656,
+          "height": 0.366471,
+          "aspectRatio": 1.551113
+        },
+        "photoAlt": "Close-up showing the point where the lips meet"
       }
     }
   }

@@ -2,17 +2,18 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
+import {closerLookCrop} from '../public/closer-look.js';
 
 const at=path=>new URL(path,import.meta.url);
 const story=JSON.parse(readFileSync(at('../public/story.json'),'utf8'));
 const editorial=JSON.parse(readFileSync(at('../public/editorial.json'),'utf8'));
-const allowed=new Set(['right','left','back','detail','detail2']);
+const allowed=new Set(['front','right','left','back','detail','detail2']);
 const owned=new Set(['hos-queen-mother','hos-celebration','hos-belonging','hos-inner-beauty']);
 const uploaded=new Set(['hos-tall-attention','hos-kissing-lovers']);
 const photoPath=(id,view)=>{
   if(owned.has(id))return '/assets/'+id+'-'+view+'-v1.webp';
   if(uploaded.has(id))return '/assets/'+id+'-'+view+'-v1.png';
-  return editorial.workPhotography[id]?.views?.[view]||null;
+  return (view==='front'?editorial.workPhotography[id]?.front:editorial.workPhotography[id]?.views?.[view])||null;
 };
 
 test('each sculpture story focuses on meaning and has enough substance to be useful',()=>{
@@ -24,7 +25,7 @@ test('each sculpture story focuses on meaning and has enough substance to be use
   }
 });
 
-test('closer-look text uses one explicit, real alternate photograph of the same work',()=>{
+test('closer-look text uses a reviewed alternate photograph or a focused crop of the same work',()=>{
   let selected=0,hidden=0;
   for(const [id,work] of Object.entries(story.works)){
     const note=work.closerLook;
@@ -40,7 +41,7 @@ test('closer-look text uses one explicit, real alternate photograph of the same 
     assert(path,id+' does not have the selected '+note.photoView+' view');
     assert.equal(note.photoSource,path,id+' caption must name the reviewed bitmap');
     assert(existsSync(fileURLToPath(at('../public'+path))),id+' view missing from repository: '+path);
-    if(editorial.workPhotography[id])assert.notEqual(path,editorial.workPhotography[id].front,id+' close look repeats the hero');
+    if(note.photoView==='front')assert(closerLookCrop(note),id+' repeats the primary photograph without a reviewed close-up');
   }
   assert.equal(selected,24,'Only works with matched secondary photographs should show this section');
   assert.equal(hidden,4,'Do not substitute unrelated views for four works without extra photographs');
@@ -54,9 +55,11 @@ test('Queen Mother detail points to the side photograph showing jewellery and he
 });
 
 
-test('Inner Beauty describes the paired forms and uses the unadorned reverse',()=>{
+test('Inner Beauty highlights its patterned front surface',()=>{
   const work=story.works['hos-inner-beauty'];
-  assert.equal(work.closerLook.photoView,'back');
+  assert.equal(work.closerLook.photoView,'front');
+  assert(closerLookCrop(work.closerLook));
+  assert.match(work.closerLook.copy,/red, green and white/);
   assert.match(work.editorialShort,/Two tall forms/);
   assert.doesNotMatch(work.editorialShort,/elongated face|facial profile/);
 });
