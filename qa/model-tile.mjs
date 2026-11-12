@@ -33,9 +33,19 @@ try{
     await row.screenshot({path:new URL(`tiles-${width}.png`,output).pathname});
     await row.getByRole('button',{name:'Show left',exact:true}).click();
     assert.equal(await page.locator('#hos-work-photo-caption').innerText(),'Left');assert.equal(await page.locator('#hos-gallery-count').innerText(),'2 / '+count);
-    await page.getByRole('button',{name:'Next sculpture photograph',exact:true}).click();
+    if(width>700){
+      await page.getByRole('button',{name:'Next sculpture photograph',exact:true}).click();
+    }else{
+      await page.locator('#hos-gallery-track').evaluate(element=>element.scrollTo({left:2*element.clientWidth,behavior:'instant'}));
+      await page.locator('#hos-work-photo-caption').filter({hasText:'Right'}).waitFor();
+    }
     assert.equal(await page.locator('#hos-work-photo-caption').innerText(),'Right');
-    await page.getByRole('button',{name:'Previous sculpture photograph',exact:true}).click();
+    if(width>700){
+      await page.getByRole('button',{name:'Previous sculpture photograph',exact:true}).click();
+    }else{
+      await page.locator('#hos-gallery-track').evaluate(element=>element.scrollTo({left:element.clientWidth,behavior:'instant'}));
+      await page.locator('#hos-work-photo-caption').filter({hasText:'Left'}).waitFor();
+    }
     const modes=page.locator('#hos-work-view-modes'),photosMode=modes.locator('[data-work-visual="photos"]'),modelMode=modes.locator('[data-work-visual="model"]');
     assert(await modes.isVisible(),'Approved models should have a prominent photo / 3D switch');
     assert.equal(await photosMode.getAttribute('aria-pressed'),'true');
