@@ -20,6 +20,7 @@ for(const work of newWorks)for(const side of work.photos)paths.add('/assets/'+wo
 for(const section of JSON.parse(readFileSync(new URL('../public/story.json',import.meta.url))).pages.making.sections)paths.add('/assets/'+section.image);
 const approvedEditorial=JSON.parse(readFileSync(new URL('../public/editorial.json',import.meta.url),'utf8'));
 for(const photo of Object.values(approvedEditorial.artistPhotography||{}))paths.add(photo.original);
+for(const setting of Object.values(approvedEditorial.workSettings||{}))if(setting.source.includes('-space-v3-'))paths.add(setting.source);
 paths.add(approvedEditorial.workScenes['zsa-028'].scenes[0].source);
 const vertexColorOnlyFiles=new Set();
 for(const entry of Object.values(models)){
@@ -41,7 +42,7 @@ for(let attempt=0;attempt<attempts;attempt++){
     }
     const manifestResponse=await fetch(origin+'/media-manifest.json',{cache:'no-store',signal:AbortSignal.timeout(15000)});assert(manifestResponse.ok);const manifest=await manifestResponse.json(),bundled=JSON.parse(readFileSync(new URL('../public/media-manifest.json',import.meta.url),'utf8'));
     for(const [source,info] of Object.entries(bundled))assert.deepEqual(manifest[source],info,'Bundled responsive image '+source);
-    if(production){const current=await(await fetch(origin+'/content.json',{signal:AbortSignal.timeout(15000)})).json();assert(newWorks.every(work=>current.works.some(item=>item.id===work.id)),'Waiting for the two owner-uploaded sculptures to be published');}
+    if(production){const current=await(await fetch(origin+'/content.json',{signal:AbortSignal.timeout(15000)})).json();assert(newWorks.every(work=>current.works.some(item=>item.id===work.id)),'Waiting for the two owner-uploaded sculptures to be published');assert(!current.works.some(work=>work.id==='zsa-017'),'Waiting for Within to be removed');assert.equal(current.works.find(work=>work.id==='zsa-025')?.title,'Turning Line');}
     deployed=true;break;
   }catch(error){lastError=error.message;console.log(`Waiting for release (${attempt+1}/${attempts}): ${lastError}`);if(attempt+1<attempts)await delay(retry);}
 }
@@ -88,7 +89,7 @@ if(process.env.HOS_EXPECT_FOUNDING_RELEASE==='true'){
   }else{
     assert.deepEqual(collections.map(c=>({id:c.id,star:c.starWorkId,works:c.workIds})),expected.collections.map(c=>({id:c.id,star:c.starWorkId,works:c.workIds})),'Seed fixture collection release changed unexpectedly.');
   }
-  assert.equal(catalog.works.length,(roundTwo?26:23)+(uploadedWorksPresent?2:0));assert(catalog.works.every(w=>w.title && w.artistId && w.material && w.dimensions));
+  assert.equal(catalog.works.length,(roundTwo?26:23)+(uploadedWorksPresent?2:0)-(production?1:0));assert(catalog.works.every(w=>w.title && w.artistId && w.material && w.dimensions));
   if(production){
    assert.equal(catalog.site.name,'House of Mabwe');
    assert.deepEqual(catalog.works.filter(w=>w.availability==='sold').map(w=>w.id).sort(),['zsa-023','zsa-026']);
