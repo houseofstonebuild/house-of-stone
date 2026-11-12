@@ -18,6 +18,8 @@ try {
   const failures=[];
   page.on('requestfailed',request=>failures.push(`${request.url()}: ${request.failure()?.errorText}`));
   page.on('pageerror',error=>failures.push(`page: ${error.message}`));
+  page.on('console',message=>{if(message.type()==='error'||message.type()==='warning')failures.push(`console: ${message.text()}`);});
+  page.on('response',response=>{if(response.url().includes('/models/'))failures.push(`model HTTP ${response.status()} ${response.headers()['content-type']} ${response.url()}`);});
   for(const [id,title,file] of [
     ['hos-queen-mother','Queen Mother','/models/queen-mother-uploaded-v1.glb'],
     ['zsa-023','Reflection','/models/reflection-uploaded-v1.glb'],
@@ -35,7 +37,7 @@ try {
       const message=document.querySelector('#hos-ar-status')?.textContent||'';
       return message.includes('approximately')||message.includes('could not');
     },null,{timeout:30000});
-    const result=await viewer.evaluate(element=>({src:element.getAttribute('src'),loaded:element.loaded,errorType:element.dataset.errorType,dimensions:element.getDimensions?.(),scale:element.scale,status:document.querySelector('#hos-ar-status').textContent}));
+    const result=await viewer.evaluate(element=>({src:element.getAttribute('src'),loaded:element.loaded,errorType:element.dataset.errorType,errorSource:element.dataset.errorSource,dimensions:element.getDimensions?.(),scale:element.scale,status:document.querySelector('#hos-ar-status').textContent}));
     console.log(id,JSON.stringify({result,failures}));
     assert(result.status.includes('approximately'),`${id} room preview failed: ${result.status}; ${failures.join('; ')}`);
     assert(result.dimensions?.y>0,`${id} has no model height`);

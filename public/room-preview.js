@@ -93,6 +93,7 @@ export function initializeRoomPreview(root, onAR = () => {}) {
       }, {once:true});
       viewer.addEventListener('error', event => {
         viewer.dataset.errorType = String(event.detail?.type || 'unknown');
+        viewer.dataset.errorSource = String(event.detail?.source || '');
         if (request === generation) status.textContent = 'This model could not load. Please use the sculpture photographs or 3D view.';
       });
       viewer.addEventListener('ar-status', event => {
