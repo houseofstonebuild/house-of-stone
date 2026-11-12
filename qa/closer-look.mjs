@@ -41,7 +41,7 @@ try{
       assert.equal(identity.title,work.title);
       assert.equal(identity.artist,catalog.artists.find(a=>a.id===work.artistId).name);
       assert(identity.bottom<=identity.photoTop+1,'Title and artist must appear above the sculpture photograph');
-      if(width===390)assert(await page.locator('.hos-link-arrow').evaluateAll(nodes=>nodes.every(n=>getComputedStyle(n).display==='none')),'Decorative arrows should not appear on mobile');
+      if(width===390)assert(await page.locator('#hos-main .hos-link-arrow').evaluateAll(nodes=>nodes.every(n=>getComputedStyle(n).display==='none')),'Decorative arrows should not appear on mobile');
       const detail=page.locator('#hos-work-detail');await detail.waitFor({state:'visible'});
       assert.equal(await page.locator('#hos-work-detail-title').textContent(),note.heading);
       await detail.scrollIntoViewIfNeeded();
