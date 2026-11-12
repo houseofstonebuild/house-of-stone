@@ -648,7 +648,7 @@ function route(path, shouldFocus = true) {
   if (!$(`[data-page="${page.replace(/[^a-z]/g, '')}"]`) || !['home','collection','category','artists','artist','work','making','designers','collectors','house','privacy','notfound'].includes(page)) page = 'notfound';
   ensurePageContent(page);
   activePage = page;
-  $('#hos-page-navigation').hidden = page === 'home';
+  $('#hos-page-navigation').hidden = page === 'home' || page === 'work';
   pageAnimation?.cancel();
   root.querySelectorAll('[data-page]').forEach(view => { view.hidden = view.dataset.page !== page; });
   main.hidden = false; inquiry.hidden = true; setMenu(false);
