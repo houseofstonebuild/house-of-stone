@@ -94,7 +94,7 @@ if(process.env.HOS_EXPECT_FOUNDING_RELEASE==='true'){
    assert.equal(catalog.site.name,'House of Mabwe');
    assert.deepEqual(catalog.works.filter(w=>w.availability==='sold').map(w=>w.id).sort(),['zsa-023','zsa-026']);
    assert(catalog.works.every(w=>!w.yearMade));
-   assert.equal(works.get('zsa-017').artistId,catalog.artists.find(a=>a.name==='Tawanda Sere')?.id);
+   assert(!works.has('zsa-017'),'Within should be absent from the public catalogue');
    assert.equal(works.get('zsa-031').artistId,catalog.artists.find(a=>a.name==='Tawanda Sere')?.id);
    assert.equal(works.get('hos-inner-beauty').dimensions,'40 × 14 cm');
   }else assert.equal(works.get('zsa-013').availability,'sold');
