@@ -102,8 +102,8 @@ export function initializeRoomPreview(root, onAR = () => {}) {
         viewer.updateFraming();
         place.disabled = false;
         status.textContent = viewer.canActivateAR
-          ? `Approximately ${height} cm high. In your room, drag the sculpture to compare different spots and use two fingers to turn it.`
-          : `Approximately ${height} cm high. Open this page on a supported phone to place and move it in your room.`;
+          ? `Shown at approximately ${height} cm high. In your room, drag the sculpture to compare different spots and use two fingers to turn it.`
+          : `Shown at approximately ${height} cm high. Open this page on a supported phone to place and move it in your room.`;
       }, {once:true});
       viewer.addEventListener('error', event => {
         viewer.dataset.errorType = String(event.detail?.type || 'unknown');
