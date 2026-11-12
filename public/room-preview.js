@@ -112,7 +112,7 @@ export function initializeRoomPreview(root, onAR = () => {}) {
           ? (viewer.canActivateAR
             ? `Ready for camera placement at approximately ${height} cm high.`
             : `Ready at approximately ${height} cm high. Camera placement requires a supported phone.`)
-          : 'Ready for camera placement. Starting size is illustrative; pinch to resize in your room.';
+          : 'Illustrative size. Open camera, then pinch to resize in your room.';
       }, {once:true});
       viewer.addEventListener('error', event => {
         viewer.dataset.errorType = String(event.detail?.type || 'unknown');
