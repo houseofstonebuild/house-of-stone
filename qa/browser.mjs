@@ -156,8 +156,9 @@ for(const [engineName,engine] of engines) {
         await tile.scrollIntoViewIfNeeded();
         const scroll=await page.evaluate(()=>scrollY);
         await tile.click();assert.equal(new URL(page.url()).pathname,'/works/'+work.slug);
-        assert(await page.locator('.hos-work-back').isVisible());
-        await page.locator('.hos-work-back').click();
+        assert(await page.locator('#hos-page-navigation [data-back]').isVisible());
+        assert(await page.locator('#hos-page-navigation').evaluate(nav=>getComputedStyle(nav).position==='fixed'&&nav.getBoundingClientRect().top>=document.querySelector('.hos-header').getBoundingClientRect().bottom));
+        await page.locator('#hos-page-navigation [data-back]').click();
         await page.waitForURL(base+'/');
         await page.waitForFunction(y=>Math.abs(scrollY-y)<3,scroll);
       }
@@ -169,7 +170,7 @@ for(const [engineName,engine] of engines) {
     await page.locator('#hos-gallery-track').evaluate(el=>el.scrollTo({left:el.clientWidth,behavior:'instant'}));
     await page.locator('#hos-gallery-count').filter({hasText:'2 /'}).waitFor();
     assert.equal(await page.locator('.hos-photo-thumbnail[aria-pressed="true"]').first().evaluate(button=>[...button.parentNode.children].indexOf(button)),1);
-    await page.locator('.hos-work-back').click();await page.waitForURL(base+'/collection');
+    await page.locator('#hos-page-navigation [data-back]').click();await page.waitForURL(base+'/collection');
     await ready(page,'/artists/tariro-mavhunga');await page.locator('#hos-page-navigation [data-back]').click();await page.waitForURL(base+'/artists');
     // The mobile settings stay in a single swipeable row; controls and keyboard
     // navigation must agree with native scroll, including restored Back state.
@@ -190,7 +191,7 @@ for(const [engineName,engine] of engines) {
       const work=catalog.works.find(work=>work.artistId===artist.id);
       await chapter.locator('.hos-setting-action').getByRole('link',{name:'View sculpture',exact:true}).click();
       assert.equal(new URL(page.url()).pathname,'/works/'+work.slug);
-      await page.locator('.hos-work-back').click();await page.waitForURL(base+'/');
+      await page.locator('#hos-page-navigation [data-back]').click();await page.waitForURL(base+'/');
       await counter.filter({hasText:'2 / 3'}).waitFor();
     }
     await ready(page);await page.locator('#hos-home-chapters .hos-artist-chapter').first().screenshot({path:new URL(`${engineName}-mobile-chapter.jpg`,output).pathname,type:'jpeg',quality:90,scale:'css'});
