@@ -111,7 +111,7 @@ test('general enquiries remain free of an unrelated artwork preview',async t=>{
   assert.equal(f.get('#hos-inquiry-artwork').hidden,true);
 });
 test('Back on a directly opened sculpture safely returns to the collection',async t=>{
-  const f=await clientFixture(t,{initialPath:'/works/folded-light'});assert.equal(f.get('#hos-page-navigation').hidden,true);
+  const f=await clientFixture(t,{initialPath:'/works/folded-light'});assert.equal(f.get('#hos-page-navigation').hidden,false);
   await f.delegated({back:''});assert.equal(f.location.pathname,'/collection');
 });
 test('Discover scrolls to the home collection and records demand without opening another page',async t=>{
