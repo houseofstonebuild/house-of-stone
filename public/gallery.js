@@ -7,6 +7,12 @@ export function initializeGallery({root,document,applyImage,rotationFor=()=>'',r
   function updateSelection(i){
     index=Math.max(0,Math.min(photos.length-1,i));const photo=photos[index];if(!photo)return;
     photoButtons.forEach((button,n)=>button.setAttribute('aria-pressed',String(n===index)));
+    const selected=photoButtons[index];
+    if(selected&&thumbs.offsetWidth){
+      const item=selected.getBoundingClientRect(),rail=thumbs.getBoundingClientRect();
+      if(item.left<rail.left)thumbs.scrollBy({left:item.left-rail.left-8,behavior:'smooth'});
+      else if(item.right>rail.right)thumbs.scrollBy({left:item.right-rail.right+8,behavior:'smooth'});
+    }
     [...dots.children].forEach((button,n)=>button.setAttribute('aria-current',String(n===index)));
     root.querySelector('#hos-work-photo-caption').textContent=photo.label;count.textContent=(index+1)+' / '+photos.length;
     opener.dataset.photoKind=photo.kind||'studio';opener.dataset.detailCrop=String(Boolean(photo.zoom));
