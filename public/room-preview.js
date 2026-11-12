@@ -15,7 +15,7 @@ const componentURL = 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.4.0/m
 let componentPromise;
 
 export function roomPreviewEligible(work, model) {
-  return Boolean(work && recordedHeight(work) && model?.file &&
+  return Boolean(work && model?.file &&
     (!model.uploaded || model.ownerApproved === true) &&
     (model.workId ? model.workId === work.id : model.title === work.title));
 }
@@ -25,6 +25,7 @@ export function initializeRoomPreview(root, onAR = () => {}) {
   const stage = root.querySelector('#hos-ar-stage');
   const title = root.querySelector('#hos-ar-title');
   const status = root.querySelector('#hos-ar-status');
+  const note = root.querySelector('#hos-ar-note');
   let opener, generation = 0;
 
   function close() { if (dialog.open) dialog.close(); }
@@ -48,6 +49,10 @@ export function initializeRoomPreview(root, onAR = () => {}) {
     opener = trigger;
     const request = ++generation;
     title.textContent = work.title;
+    const knownHeight = recordedHeight(work);
+    note.textContent = knownHeight
+      ? 'Digital preview at the recorded height. The physical sculpture and its finish may vary from the model.'
+      : 'Illustrative starting size; physical dimensions are on inquiry. Pinch in camera view to compare sizes.';
     status.textContent = 'Preparing the room preview…';
     stage.replaceChildren();
     dialog.showModal();
@@ -63,11 +68,11 @@ export function initializeRoomPreview(root, onAR = () => {}) {
       const viewer = document.createElement('model-viewer');
       viewer.className = 'hos-ar-viewer';
       viewer.setAttribute('src', model.file);
-      const height = recordedHeight(work);
-      viewer.setAttribute('alt', `${work.title} at approximately ${height} centimetres high`);
+      const height = knownHeight || 40;
+      viewer.setAttribute('alt', knownHeight ? `${work.title} at approximately ${height} centimetres high` : `${work.title} in an adjustable room preview`);
       viewer.setAttribute('ar', '');
       viewer.setAttribute('ar-modes', 'webxr quick-look');
-      viewer.setAttribute('ar-scale', 'fixed');
+      viewer.setAttribute('ar-scale', knownHeight ? 'fixed' : 'auto');
       viewer.setAttribute('camera-controls', '');
       viewer.setAttribute('touch-action', 'pan-y');
       viewer.setAttribute('environment-image', 'neutral');
@@ -101,9 +106,11 @@ export function initializeRoomPreview(root, onAR = () => {}) {
         viewer.scale = `${factor} ${factor} ${factor}`;
         viewer.updateFraming();
         place.disabled = false;
-        status.textContent = viewer.canActivateAR
-          ? `Shown at approximately ${height} cm high. In your room, drag the sculpture to compare different spots and use two fingers to turn it.`
-          : `Shown at approximately ${height} cm high. Open this page on a supported phone to place and move it in your room.`;
+        status.textContent = knownHeight
+          ? (viewer.canActivateAR
+            ? `Shown at approximately ${height} cm high. In your room, drag the sculpture to compare different spots and use two fingers to turn it.`
+            : `Shown at approximately ${height} cm high. Open this page on a supported phone to place and move it in your room.`)
+          : 'Illustrative size. Drag to compare spots, and pinch to resize; ask us for the physical dimensions.';
       }, {once:true});
       viewer.addEventListener('error', event => {
         viewer.dataset.errorType = String(event.detail?.type || 'unknown');

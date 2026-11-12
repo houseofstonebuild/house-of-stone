@@ -26,7 +26,8 @@ try {
     ['zsa-024','Family','/models/family-uploaded-v1.glb'],
     ['zsa-028','Red Interlace','/models/red-interlace-uploaded-v1.glb','58 × 34 × 25 cm'],
     ['zsa-006','Coil','/models/coil-uploaded-v1.glb','60 × 36 × 24 cm'],
-    ['zsa-020','Lovers','/models/lovers-uploaded-v1.glb','52 × 26 × 22 cm']
+    ['zsa-020','Lovers','/models/lovers-uploaded-v1.glb','52 × 26 × 22 cm'],
+    ['hos-tall-attention','Tall Attention','/models/tall-attention-uploaded-v1.glb','On inquiry']
   ]) {
     await page.goto(origin+'/');
     await page.locator('#hos-concept[data-ready="true"]').waitFor();
@@ -38,11 +39,11 @@ try {
     assert(await viewer.count(),`${id} component failed: ${await page.locator('#hos-ar-status').textContent()}; ${failures.join('; ')}`);
     await page.waitForFunction(()=>{
       const message=document.querySelector('#hos-ar-status')?.textContent||'';
-      return message.includes('approximately')||message.includes('could not');
+      return message.includes('approximately')||message.includes('Illustrative size')||message.includes('could not');
     },null,{timeout:30000});
     const result=await viewer.evaluate(element=>({src:element.getAttribute('src'),loaded:element.loaded,errorType:element.dataset.errorType,errorSource:element.dataset.errorSource,dimensions:element.getDimensions?.(),scale:element.scale,status:document.querySelector('#hos-ar-status').textContent}));
     console.log(id,JSON.stringify({result,failures}));
-    assert(result.status.includes('approximately'),`${id} room preview failed: ${result.status}; ${failures.join('; ')}`);
+    assert(result.status.includes('approximately')||result.status.includes('Illustrative size'),`${id} room preview failed: ${result.status}; ${failures.join('; ')}`);
     assert(result.dimensions?.y>0,`${id} has no model height`);
     await page.locator('[data-ar-close]').click();
   }

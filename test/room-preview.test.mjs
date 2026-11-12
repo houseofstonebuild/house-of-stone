@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {roomPreviewEligible} from '../public/room-preview.js';
 
-test('room placement opens for published models with a recorded height', () => {
+test('room placement opens for published models, including works without measurements', () => {
   for (const id of ['hos-queen-mother','zsa-023','zsa-024']) {
     const work = {id};
     const model = {workId:id,uploaded:true,ownerApproved:true,file:`/models/${id}.glb`};
@@ -17,5 +17,5 @@ test('room placement opens for published models with a recorded height', () => {
   assert.equal(roomPreviewEligible({id:'legacy',title:'Legacy',dimensions:'40 × 20 cm'},
     {title:'Legacy',file:'/models/legacy.glb'}),true);
   assert.equal(roomPreviewEligible({id:'unknown',dimensions:'On inquiry'},
-    {workId:'unknown',file:'/models/unknown.glb'}),false);
+    {workId:'unknown',file:'/models/unknown.glb'}),true);
 });
