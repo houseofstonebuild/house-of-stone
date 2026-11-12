@@ -31,12 +31,20 @@ try{
   assert((await image.getAttribute('src')).includes('wingbeat-shoot-front-v1'));
   for(const side of ['left','right','back']){
    await page.locator('#hos-work-additional-images').getByRole('button',{name:'Show '+side,exact:true}).click();
-   await image.evaluate(n=>n.decode());
-   assert((await image.getAttribute('src')).includes('wingbeat-shoot-'+side+'-v1'));
-   assert.equal(await image.evaluate(n=>getComputedStyle(n).objectFit),'contain');
+   await page.waitForFunction(expected=>{
+     const selected=document.querySelector('#hos-work-additional-images .hos-photo-thumbnail[aria-pressed="true"]');
+     return selected?.querySelector('img')?.getAttribute('src')?.includes(expected);
+   },'wingbeat-shoot-'+side+'-v1');
+   const selected=page.locator('#hos-work-additional-images .hos-photo-thumbnail[aria-pressed="true"] img');
+   await selected.evaluate(n=>n.decode());
+   assert((await selected.getAttribute('src')).includes('wingbeat-shoot-'+side+'-v1'));
+   const selectedIndex=await page.locator('#hos-work-additional-images .hos-photo-thumbnail[aria-pressed="true"]').evaluate(n=>[...n.parentElement.querySelectorAll('.hos-photo-thumbnail:not(.hos-model-thumbnail)')].indexOf(n));
+   assert.equal(await page.locator('#hos-gallery-track .hos-gallery-slide').nth(selectedIndex).locator('img').evaluate(n=>getComputedStyle(n).objectFit),'contain');
    await page.locator('.hos-work-photo').screenshot({path:new URL(width+'-wingbeat-'+side+'.jpg',out).pathname,type:'jpeg',quality:90});
   }
-  await page.locator('#hos-work-additional-images').getByRole('button',{name:'Show front',exact:true}).click();await image.evaluate(n=>n.decode());
+  await page.locator('#hos-work-additional-images').getByRole('button',{name:'Show front',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('#hos-work-additional-images .hos-photo-thumbnail[aria-pressed="true"]')?.getAttribute('aria-label')==='Show front');
+  await image.evaluate(n=>n.decode());
   await page.locator('[data-page="work"]').screenshot({path:new URL(width+'-wingbeat-front.jpg',out).pathname,type:'jpeg',quality:90});
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   assert(await page.locator('#hos-work-model').isVisible());
