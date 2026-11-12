@@ -30,6 +30,8 @@ jobs:
           node-version: '24.19.0'
           package-manager-cache: false
       - run: npm install --prefix qa --no-audit --no-fund
+      - run: sh scripts/run-browser-qa.sh qa/room-preview.mjs
+        if: matrix.engine != 'firefox'
       - run: sh scripts/run-browser-qa.sh qa/light-theme.mjs
       - run: sh scripts/run-browser-qa.sh qa/browser.mjs
       - run: sh scripts/run-browser-qa.sh qa/collections.mjs
@@ -50,5 +52,6 @@ jobs:
           name: browser-qa-${{ matrix.engine }}
           path: test-results/browser/
           retention-days: 7
+
 
 

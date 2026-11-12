@@ -91,7 +91,8 @@ export function initializeRoomPreview(root, onAR = () => {}) {
           ? `Shown at approximately ${heights[work.id]} cm high. Tap “Place in my room” and point your camera at a clear surface.`
           : `Shown at approximately ${heights[work.id]} cm high. Open this page on a supported phone to place it in your room.`;
       }, {once:true});
-      viewer.addEventListener('error', () => {
+      viewer.addEventListener('error', event => {
+        viewer.dataset.errorType = String(event.detail?.type || 'unknown');
         if (request === generation) status.textContent = 'This model could not load. Please use the sculpture photographs or 3D view.';
       });
       viewer.addEventListener('ar-status', event => {
