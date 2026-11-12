@@ -86,7 +86,12 @@ body.hos-ar-open {overflow:hidden;}
 #hos-concept .hos-ar-viewer {display:block;width:100%;height:100%;background:#f7f7f5;}
 #hos-concept .hos-ar-place {position:absolute;bottom:18px;left:50%;transform:translateX(-50%);min-width:190px;min-height:48px;padding:10px 20px;border-radius:2px;background:#242522;color:#fff;font:inherit;font-size:14px;white-space:nowrap;cursor:pointer;}
 #hos-concept .hos-ar-place:disabled {opacity:.5;cursor:wait;}
+#hos-concept .hos-ar-gesture-tip {display:none;position:absolute;top:18px;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100% - 36px);margin:0;padding:9px 13px;background:rgba(255,255,255,.92);color:#252722;font-size:12px;line-height:1.4;text-align:center;pointer-events:none;z-index:2;}
+#hos-concept .hos-ar-viewer[ar-status="session-started"] .hos-ar-gesture-tip {display:block;}
 #hos-concept .hos-ar-status {min-height:42px;margin:14px 0 5px;color:#3c403b;font-size:13px;line-height:1.5;}
+#hos-concept .hos-ar-move-hint {display:flex;align-items:center;gap:12px;margin:10px 0 14px;padding:11px 13px;border:1px solid #e6e6e2;color:#353833;font-size:12px;line-height:1.5;}
+#hos-concept .hos-ar-move-hint>span:first-child {font-size:26px;line-height:1;font-weight:300;}
+#hos-concept .hos-ar-move-hint strong {font-weight:500;}
 #hos-concept .hos-ar-note {margin:0;color:#767973;font-size:11px;line-height:1.5;}
 @media(max-width:700px){
   #hos-concept [data-page="work"] .hos-work-photo #hos-work-ar-trigger:not([hidden]) {order:3;align-self:flex-start;margin:6px 0 0;}

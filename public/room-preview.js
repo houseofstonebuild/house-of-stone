@@ -1,17 +1,23 @@
-// The pilot uses models with owner-approved geometry and recorded heights.
-// Restrict AR to WebXR and Quick Look: both use the scale set on this viewer.
-const heights = Object.freeze({
+// These three heights were confirmed for the first room-preview release.
+const confirmedHeights = Object.freeze({
   'hos-queen-mother': 45,
   'zsa-023': 156,
   'zsa-024': 43
 });
+function recordedHeight(work) {
+  if (confirmedHeights[work?.id]) return confirmedHeights[work.id];
+  const match = String(work?.dimensions || '').match(/^\s*(\d+(?:\.\d+)?)\s*(?:×|x|cm\b)/i);
+  const height = match ? Number(match[1]) : NaN;
+  return height > 0 && height < 500 ? height : null;
+}
 
 const componentURL = 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.4.0/model-viewer.min.js';
 let componentPromise;
 
 export function roomPreviewEligible(work, model) {
-  return Boolean(work && heights[work.id] && model?.uploaded && model.ownerApproved === true &&
-    model.workId === work.id && model.file);
+  return Boolean(work && recordedHeight(work) && model?.file &&
+    (!model.uploaded || model.ownerApproved === true) &&
+    (model.workId ? model.workId === work.id : model.title === work.title));
 }
 
 export function initializeRoomPreview(root, onAR = () => {}) {
@@ -57,7 +63,8 @@ export function initializeRoomPreview(root, onAR = () => {}) {
       const viewer = document.createElement('model-viewer');
       viewer.className = 'hos-ar-viewer';
       viewer.setAttribute('src', model.file);
-      viewer.setAttribute('alt', `${work.title} at ${heights[work.id]} centimetres high`);
+      const height = recordedHeight(work);
+      viewer.setAttribute('alt', `${work.title} at approximately ${height} centimetres high`);
       viewer.setAttribute('ar', '');
       viewer.setAttribute('ar-modes', 'webxr quick-look');
       viewer.setAttribute('ar-scale', 'fixed');
@@ -74,6 +81,10 @@ export function initializeRoomPreview(root, onAR = () => {}) {
       place.disabled = true;
       place.addEventListener('click', () => onAR(work));
       viewer.append(place);
+      const gesture = document.createElement('p');
+      gesture.className = 'hos-ar-gesture-tip';
+      gesture.textContent = 'Drag the sculpture to try another spot. Use two fingers to turn it.';
+      viewer.append(gesture);
       viewer.addEventListener('load', () => {
         if (request !== generation) return;
         const dimensions = viewer.getDimensions();
@@ -82,7 +93,7 @@ export function initializeRoomPreview(root, onAR = () => {}) {
           status.textContent = 'We could not verify this model’s scale. Explore the 3D view on the sculpture page instead.';
           return;
         }
-        const factor = heights[work.id] / 100 / modelHeight;
+        const factor = height / 100 / modelHeight;
         if (!Number.isFinite(factor) || factor <= 0 || factor > 1000) {
           status.textContent = 'We could not verify this model’s scale. Explore the 3D view on the sculpture page instead.';
           return;
@@ -91,8 +102,8 @@ export function initializeRoomPreview(root, onAR = () => {}) {
         viewer.updateFraming();
         place.disabled = false;
         status.textContent = viewer.canActivateAR
-          ? `Shown at approximately ${heights[work.id]} cm high. Tap “Place in my room” and point your camera at a clear surface.`
-          : `Shown at approximately ${heights[work.id]} cm high. Open this page on a supported phone to place it in your room.`;
+          ? `Approximately ${height} cm high. In your room, drag the sculpture to compare different spots and use two fingers to turn it.`
+          : `Approximately ${height} cm high. Open this page on a supported phone to place and move it in your room.`;
       }, {once:true});
       viewer.addEventListener('error', event => {
         viewer.dataset.errorType = String(event.detail?.type || 'unknown');

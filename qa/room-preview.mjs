@@ -20,17 +20,20 @@ try {
   page.on('pageerror',error=>failures.push(`page: ${error.message}`));
   page.on('console',message=>{if(message.type()==='error'||message.type()==='warning')failures.push(`console: ${message.text()}`);});
   page.on('response',response=>{if(response.url().includes('/models/'))failures.push(`model HTTP ${response.status()} ${response.headers()['content-type']} ${response.url()}`);});
-  for(const [id,title,file] of [
+  for(const [id,title,file,dimensions] of [
     ['hos-queen-mother','Queen Mother','/models/queen-mother-uploaded-v1.glb'],
     ['zsa-023','Reflection','/models/reflection-uploaded-v1.glb'],
-    ['zsa-024','Family','/models/family-uploaded-v1.glb']
+    ['zsa-024','Family','/models/family-uploaded-v1.glb'],
+    ['zsa-028','Red Interlace','/models/red-interlace-uploaded-v1.glb','58 × 34 × 25 cm'],
+    ['zsa-006','Coil','/models/coil-uploaded-v1.glb','60 × 36 × 24 cm'],
+    ['zsa-020','Lovers','/models/lovers-uploaded-v1.glb','52 × 26 × 22 cm']
   ]) {
     await page.goto(origin+'/');
     await page.locator('#hos-concept[data-ready="true"]').waitFor();
-    await page.evaluate(async ({id,title,file})=>{
+    await page.evaluate(async ({id,title,file,dimensions})=>{
       const {initializeRoomPreview}=await import('/room-preview.js');
-      await initializeRoomPreview(document.querySelector('#hos-concept')).open({id,title},{workId:id,file,uploaded:true,ownerApproved:true},document.querySelector('#hos-work-ar-trigger'));
-    },{id,title,file});
+      await initializeRoomPreview(document.querySelector('#hos-concept')).open({id,title,dimensions},{workId:id,file,uploaded:true,ownerApproved:true},document.querySelector('#hos-work-ar-trigger'));
+    },{id,title,file,dimensions});
     const viewer=page.locator('#hos-ar-stage model-viewer');
     assert(await viewer.count(),`${id} component failed: ${await page.locator('#hos-ar-status').textContent()}; ${failures.join('; ')}`);
     await page.waitForFunction(()=>{
