@@ -30,13 +30,13 @@ try{
   const image=page.locator('#hos-work-image');await image.evaluate(n=>n.decode());
   assert((await image.getAttribute('src')).includes('wingbeat-shoot-front-v1'));
   for(const side of ['left','right','back']){
-   await page.getByRole('button',{name:'Show '+side,exact:true}).click();
+   await page.locator('#hos-work-additional-images').getByRole('button',{name:'Show '+side,exact:true}).click();
    await image.evaluate(n=>n.decode());
    assert((await image.getAttribute('src')).includes('wingbeat-shoot-'+side+'-v1'));
    assert.equal(await image.evaluate(n=>getComputedStyle(n).objectFit),'contain');
    await page.locator('.hos-work-photo').screenshot({path:new URL(width+'-wingbeat-'+side+'.jpg',out).pathname,type:'jpeg',quality:90});
   }
-  await page.getByRole('button',{name:'Show front',exact:true}).click();await image.evaluate(n=>n.decode());
+  await page.locator('#hos-work-additional-images').getByRole('button',{name:'Show front',exact:true}).click();await image.evaluate(n=>n.decode());
   await page.locator('[data-page="work"]').screenshot({path:new URL(width+'-wingbeat-front.jpg',out).pathname,type:'jpeg',quality:90});
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   assert(await page.locator('#hos-work-model').isVisible());
@@ -52,3 +52,4 @@ try{
  }
  console.log('Wingbeat photos passed: homepage, four gallery angles, contain fit, mobile and desktop, owner-approved 3D loads and rotates.');
 }finally{await browser?.close();await new Promise(r=>app.server.close(r));rmSync(dataDir,{recursive:true,force:true});}
+
