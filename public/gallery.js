@@ -46,7 +46,7 @@ export function initializeGallery({root,document,applyImage,rotationFor=()=>'',r
   }
   function close(){document.body.classList.remove('hos-photo-open');if(dialog.open){dialog.close();lastTrigger?.focus({preventScroll:true});}large.removeAttribute('src');}
   function inspect(trigger,i=index){if(!photos.length)return;select(i);lastTrigger=trigger;dialog.showModal();display();document.body.classList.add('hos-photo-open');onView?.();}
-  opener.addEventListener('click',event=>{if(Date.now()>=suppressUntil)inspect(event.target.closest('button')||opener);});
+  opener.addEventListener('click',()=>{if(Date.now()>=suppressUntil)inspect(opener.querySelector('.hos-photo-zoom-invite'));});
   opener.addEventListener('touchstart',event=>{const point=event.touches?.[0];if(point)touchStart={x:point.clientX,y:point.clientY};},{passive:true});
   opener.addEventListener('touchend',event=>{const point=event.changedTouches?.[0];if(point&&touchStart&&Math.abs(point.clientX-touchStart.x)>12)suppressUntil=Date.now()+500;touchStart=null;},{passive:true});
   root.querySelectorAll('[data-gallery-step]').forEach(button=>button.addEventListener('click',()=>select(index+Number(button.dataset.galleryStep))));
