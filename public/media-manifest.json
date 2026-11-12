@@ -1473,5 +1473,90 @@
     "width": 1536,
     "height": 1024,
     "srcset": "/assets/zsa-028-interior-v3-480.webp 480w, /assets/zsa-028-interior-v3-960.webp 960w, /assets/zsa-028-interior-v3-1536.webp 1536w"
+  },
+  "/assets/zsa-025-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-025-space-v3-480.webp 480w, /assets/zsa-025-space-v3-1536.webp 1536w"
+  },
+  "/assets/zsa-028-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-028-space-v3-480.webp 480w, /assets/zsa-028-space-v3-1536.webp 1536w"
+  },
+  "/assets/zsa-031-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-031-space-v3-480.webp 480w, /assets/zsa-031-space-v3-1536.webp 1536w"
+  },
+  "/assets/zsa-012-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-012-space-v3-480.webp 480w, /assets/zsa-012-space-v3-1536.webp 1536w"
+  },
+  "/assets/zsa-026-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-026-space-v3-480.webp 480w, /assets/zsa-026-space-v3-1536.webp 1536w"
+  },
+  "/assets/zsa-023-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-023-space-v3-480.webp 480w, /assets/zsa-023-space-v3-1536.webp 1536w"
+  },
+  "/assets/zsa-027-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-027-space-v3-480.webp 480w, /assets/zsa-027-space-v3-1536.webp 1536w"
+  },
+  "/assets/zsa-014-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-014-space-v3-480.webp 480w, /assets/zsa-014-space-v3-1536.webp 1536w"
+  },
+  "/assets/zsa-007-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-007-space-v3-480.webp 480w, /assets/zsa-007-space-v3-1536.webp 1536w"
+  },
+  "/assets/zsa-010-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-010-space-v3-480.webp 480w, /assets/zsa-010-space-v3-1536.webp 1536w"
+  },
+  "/assets/zsa-024-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-024-space-v3-480.webp 480w, /assets/zsa-024-space-v3-1536.webp 1536w"
+  },
+  "/assets/zsa-018-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-018-space-v3-480.webp 480w, /assets/zsa-018-space-v3-1536.webp 1536w"
+  },
+  "/assets/zsa-016-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-016-space-v3-480.webp 480w, /assets/zsa-016-space-v3-1536.webp 1536w"
+  },
+  "/assets/hos-queen-mother-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/hos-queen-mother-space-v3-480.webp 480w, /assets/hos-queen-mother-space-v3-1536.webp 1536w"
+  },
+  "/assets/hos-belonging-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/hos-belonging-space-v3-480.webp 480w, /assets/hos-belonging-space-v3-1536.webp 1536w"
+  },
+  "/assets/hos-tall-attention-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/hos-tall-attention-space-v3-480.webp 480w, /assets/hos-tall-attention-space-v3-1536.webp 1536w"
+  },
+  "/assets/hos-kissing-lovers-space-v3-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/hos-kissing-lovers-space-v3-480.webp 480w, /assets/hos-kissing-lovers-space-v3-1536.webp 1536w"
   }
 }

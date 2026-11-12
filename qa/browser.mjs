@@ -176,6 +176,14 @@ for(const [engineName,engine] of engines) {
     // navigation must agree with native scroll, including restored Back state.
     await page.setViewportSize({width:390,height:844});
     await ready(page);
+    await ready(page,'/works/folded-light');
+    assert(await page.locator('#hos-gallery-dots').isVisible(),'Swipe position dots should appear below the photograph on mobile');
+    assert(await page.locator('#hos-work-additional-images').isVisible(),'Photograph thumbnails should remain visible below the dots');
+    await page.locator('#hos-gallery-track').evaluate(el=>el.scrollTo({left:el.clientWidth,behavior:'instant'}));
+    await page.locator('#hos-gallery-count').filter({hasText:'2 /'}).waitFor();
+    assert.equal(await page.locator('#hos-gallery-dots button[aria-current="true"]').count(),1);
+    assert.equal(await page.locator('#hos-work-additional-images .hos-photo-thumbnail[aria-pressed="true"]').count(),1);
+    await ready(page);
     for(const [artistIndex,artist] of catalog.artists.entries()) {
       const chapter=page.locator('#hos-home-chapters .hos-artist-chapter').nth(artistIndex);
       const track=chapter.locator('.hos-sculpture-settings'),counter=chapter.locator('.hos-carousel-position');

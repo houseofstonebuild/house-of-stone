@@ -427,63 +427,59 @@
   },
   "workSettings": {
     "hos-queen-mother": {
-      "source": "/assets/hos-queen-mother-space-v1-1536.webp",
-      "label": "An apartment library"
+      "source": "/assets/hos-queen-mother-space-v3-1536.webp",
+      "label": "An apartment study"
     },
     "zsa-009": {
       "source": "/assets/zsa-009-space-v1-1536.webp",
       "label": "An executive office"
     },
     "zsa-025": {
-      "source": "/assets/zsa-025-space-v1-1536.webp",
+      "source": "/assets/zsa-025-space-v3-1536.webp",
       "label": "A contemporary apartment"
     },
     "zsa-029": {
-      "source": "/assets/zsa-029-space-v2-1536.webp",
-      "label": "A contemporary residence"
+      "source": "/assets/zsa-029-space-v1-1536.webp",
+      "label": "An office lobby"
     },
     "zsa-021": {
       "source": "/assets/zsa-021-space-v1-1536.webp",
       "label": "A light-filled lobby"
     },
-    "zsa-017": {
-      "source": "/assets/zsa-017-space-v1-1536.webp",
-      "label": "An apartment entrance"
-    },
     "zsa-031": {
-      "source": "/assets/zsa-031-space-v1-1536.webp",
-      "label": "An office lounge"
-    },
-    "zsa-012": {
-      "source": "/assets/zsa-012-space-v1-1536.webp",
+      "source": "/assets/zsa-031-space-v3-1536.webp",
       "label": "An apartment reading room"
     },
+    "zsa-012": {
+      "source": "/assets/zsa-012-space-v3-1536.webp",
+      "label": "An apartment library"
+    },
     "zsa-026": {
-      "source": "/assets/zsa-026-space-v1-1536.webp",
-      "label": "A corporate lobby"
+      "source": "/assets/zsa-026-space-v3-1536.webp",
+      "label": "An apartment sitting room"
     },
     "zsa-023": {
-      "source": "/assets/zsa-023-space-v1-1536.webp",
-      "label": "A design office reception"
+      "source": "/assets/zsa-023-space-v3-1536.webp",
+      "label": "An office study"
     },
     "zsa-027": {
-      "source": "/assets/zsa-027-space-v1-1536.webp",
+      "source": "/assets/zsa-027-space-v3-1536.webp",
       "label": "An apartment library"
     },
     "zsa-014": {
-      "source": "/assets/zsa-014-space-v1-1536.webp",
+      "source": "/assets/zsa-014-space-v3-1536.webp",
       "label": "An apartment living room"
     },
     "zsa-007": {
-      "source": "/assets/zsa-007-space-v1-1536.webp",
-      "label": "A residential lobby"
+      "source": "/assets/zsa-007-space-v3-1536.webp",
+      "label": "An apartment dining room"
     },
     "zsa-010": {
-      "source": "/assets/zsa-010-space-v1-1536.webp",
-      "label": "A contemporary apartment"
+      "source": "/assets/zsa-010-space-v3-1536.webp",
+      "label": "An apartment sitting room"
     },
     "zsa-024": {
-      "source": "/assets/zsa-024-space-v1-1536.webp",
+      "source": "/assets/zsa-024-space-v3-1536.webp",
       "label": "A family apartment"
     },
     "zsa-006": {
@@ -491,19 +487,19 @@
       "label": "An apartment study"
     },
     "zsa-018": {
-      "source": "/assets/zsa-018-space-v1-1536.webp",
-      "label": "A collector’s apartment"
+      "source": "/assets/zsa-018-space-v3-1536.webp",
+      "label": "An apartment library"
     },
     "zsa-016": {
-      "source": "/assets/zsa-016-space-v1-1536.webp",
-      "label": "An executive office"
+      "source": "/assets/zsa-016-space-v3-1536.webp",
+      "label": "An apartment living room"
     },
     "hos-celebration": {
       "source": "/assets/hos-celebration-space-v1-1536.webp",
       "label": "An apartment music room"
     },
     "hos-belonging": {
-      "source": "/assets/hos-belonging-space-v1-1536.webp",
+      "source": "/assets/hos-belonging-space-v3-1536.webp",
       "label": "An apartment living room"
     },
     "hos-inner-beauty": {
@@ -511,32 +507,32 @@
       "label": "A contemporary office"
     },
     "hos-tall-attention": {
-      "source": "/assets/hos-tall-attention-space-v1-1536.webp",
+      "source": "/assets/hos-tall-attention-space-v3-1536.webp",
       "label": "An apartment entrance"
     },
     "hos-kissing-lovers": {
-      "source": "/assets/hos-kissing-lovers-space-v1-1536.webp",
+      "source": "/assets/hos-kissing-lovers-space-v3-1536.webp",
       "label": "An apartment sitting room"
     },
     "zsa-001": {
-      "source": "/assets/zsa-001-space-v1-1536.webp",
-      "label": "An apartment library"
+      "source": "/assets/presence-campaign-v2.webp",
+      "label": "An executive office"
     },
     "zsa-005": {
       "source": "/assets/zsa-005-interior-1536.webp",
       "label": "A reception lounge"
     },
     "zsa-013": {
-      "source": "/assets/zsa-013-interior-1536.webp",
-      "label": "A contemporary residence"
+      "source": "/assets/rhythm-campaign-v2.webp",
+      "label": "A living room"
     },
     "zsa-020": {
-      "source": "/assets/zsa-020-interior-1536.webp",
-      "label": "An apartment living room"
+      "source": "/assets/kinship-campaign-v2.webp",
+      "label": "A living room"
     },
     "zsa-028": {
-      "source": "/assets/zsa-028-interior-v3-1536.webp",
-      "label": "A city apartment"
+      "source": "/assets/zsa-028-space-v3-1536.webp",
+      "label": "An apartment living room"
     }
   }
 }

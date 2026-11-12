@@ -527,6 +527,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         console.log('Owner-confirmed artist identities:',JSON.stringify(result));
       } catch(error) { console.error('Confirmed artist identities publication did not complete:',error.message); }
       try {
+        const {publishOwnerRoundEight}=await import('./scripts/publish-owner-round-eight.mjs');
+        const result=await publishOwnerRoundEight({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
+        console.log('Owner-requested gallery correction:',JSON.stringify(result));
+      } catch(error) { console.error('Gallery correction did not complete:',error.message); }
+      try {
         const {publishStandaloneCelebration}=await import('./scripts/publish-standalone-celebration.mjs');
         const result=await publishStandaloneCelebration({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
         console.log('Owner-approved standalone Celebration:',JSON.stringify(result));
