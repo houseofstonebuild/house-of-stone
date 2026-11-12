@@ -45,6 +45,8 @@ try {
     console.log(id,JSON.stringify({result,failures}));
     assert(result.status.includes('approximately')||result.status.includes('Illustrative size'),`${id} room preview failed: ${result.status}; ${failures.join('; ')}`);
     assert(result.dimensions?.y>0,`${id} has no model height`);
+    assert.equal(await page.locator('.hos-ar-place').textContent(),'Open camera');
+    assert(await page.locator('.hos-ar-launch-panel').isVisible(),`${id} camera launch panel missing`);
     await page.locator('[data-ar-close]').click();
   }
 } finally {

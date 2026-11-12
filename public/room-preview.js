@@ -53,7 +53,7 @@ export function initializeRoomPreview(root, onAR = () => {}) {
     note.textContent = knownHeight
       ? 'Digital preview at the recorded height. The physical sculpture and its finish may vary from the model.'
       : 'Illustrative starting size; physical dimensions are on inquiry. Pinch in camera view to compare sizes.';
-    status.textContent = 'Preparing the room preview…';
+    status.textContent = 'Preparing the camera view…';
     stage.replaceChildren();
     dialog.showModal();
     document.body.classList.add('hos-ar-open');
@@ -80,50 +80,56 @@ export function initializeRoomPreview(root, onAR = () => {}) {
       viewer.setAttribute('loading', 'eager');
       const place = document.createElement('button');
       place.type = 'button';
-      place.slot = 'ar-button';
       place.className = 'hos-ar-place';
-      place.textContent = 'Place in my room';
+      place.textContent = 'Preparing camera…';
       place.disabled = true;
-      place.addEventListener('click', () => onAR(work));
-      viewer.append(place);
+      place.addEventListener('click', () => {
+        onAR(work);
+        viewer.activateAR();
+      });
       const gesture = document.createElement('p');
       gesture.className = 'hos-ar-gesture-tip';
-      gesture.textContent = 'Drag the sculpture to try another spot. Use two fingers to turn it.';
+      gesture.textContent = 'Press and hold to move it around the room. Drag to fine-tune; use two fingers to turn.';
       viewer.append(gesture);
       viewer.addEventListener('load', () => {
         if (request !== generation) return;
         const dimensions = viewer.getDimensions();
         const modelHeight = dimensions?.y;
         if (!Number.isFinite(modelHeight) || modelHeight <= 0) {
-          status.textContent = 'We could not verify this model’s scale. Explore the 3D view on the sculpture page instead.';
+          status.textContent = 'We could not prepare this sculpture for the camera view. Please try again later.';
           return;
         }
         const factor = height / 100 / modelHeight;
         if (!Number.isFinite(factor) || factor <= 0 || factor > 1000) {
-          status.textContent = 'We could not verify this model’s scale. Explore the 3D view on the sculpture page instead.';
+          status.textContent = 'We could not prepare this sculpture for the camera view. Please try again later.';
           return;
         }
         viewer.scale = `${factor} ${factor} ${factor}`;
         viewer.updateFraming();
         place.disabled = false;
+        place.textContent = 'Open camera';
         status.textContent = knownHeight
           ? (viewer.canActivateAR
-            ? `Shown at approximately ${height} cm high. In your room, drag the sculpture to compare different spots and use two fingers to turn it.`
-            : `Shown at approximately ${height} cm high. Open this page on a supported phone to place and move it in your room.`)
-          : 'Illustrative size. Drag to compare spots, and pinch to resize; ask us for the physical dimensions.';
+            ? `Ready for camera placement at approximately ${height} cm high.`
+            : `Ready at approximately ${height} cm high. Camera placement requires a supported phone.`)
+          : 'Ready for camera placement. Starting size is illustrative; pinch to resize in your room.';
       }, {once:true});
       viewer.addEventListener('error', event => {
         viewer.dataset.errorType = String(event.detail?.type || 'unknown');
         viewer.dataset.errorSource = String(event.detail?.source || '');
-        if (request === generation) status.textContent = 'This model could not load. Please use the sculpture photographs or 3D view.';
+        if (request === generation) status.textContent = 'The camera view could not load. Please close and try again.';
       });
       viewer.addEventListener('ar-status', event => {
         if (request === generation && event.detail?.status === 'failed')
-          status.textContent = 'Room placement could not start on this device. The 3D view remains available.';
+          status.textContent = 'Camera placement could not start on this device.';
       });
-      stage.append(viewer);
+      const launchPanel = document.createElement('div');
+      launchPanel.className = 'hos-ar-launch-panel';
+      launchPanel.setAttribute('aria-hidden', 'true');
+      launchPanel.innerHTML = '<span class="hos-ar-camera-symbol" aria-hidden="true"><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4l2-2h6l2 2h4v12H3z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span>See this sculpture in your room</span>';
+      stage.append(viewer, launchPanel, place);
     } catch {
-      if (request === generation) status.textContent = 'The room preview could not load. Please try again or explore the 3D view.';
+      if (request === generation) status.textContent = 'The camera view could not load. Please close and try again.';
     }
   }
   return {open, close};
