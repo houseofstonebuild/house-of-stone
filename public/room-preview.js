@@ -53,7 +53,7 @@ export function initializeRoomPreview(root, onAR = () => {}) {
       if (request !== generation || !dialog.open) return;
       // Uploaded sculpture GLBs use EXT_meshopt_compression. Configure the
       // decoder before model-viewer creates its internal GLTFLoader.
-      customElements.get('model-viewer').meshoptDecoderLocation = new URL('/vendor/meshopt_decoder.js', location.href).href;
+      customElements.get('model-viewer').meshoptDecoderLocation = new URL('/vendor/meshopt_decoder_classic.js', location.href).href;
       const viewer = document.createElement('model-viewer');
       viewer.className = 'hos-ar-viewer';
       viewer.setAttribute('src', model.file);
