@@ -157,7 +157,7 @@ for(const [engineName,engine] of engines) {
         const scroll=await page.evaluate(()=>scrollY);
         await tile.click();assert.equal(new URL(page.url()).pathname,'/works/'+work.slug);
         assert(await page.locator('#hos-page-navigation [data-back]').isVisible());
-        assert(await page.locator('#hos-page-navigation').evaluate(nav=>getComputedStyle(nav).position==='fixed'&&nav.getBoundingClientRect().top>=document.querySelector('.hos-header').getBoundingClientRect().bottom));
+        assert(await page.locator('#hos-page-navigation').evaluate(nav=>getComputedStyle(nav).position==='absolute'&&nav.getBoundingClientRect().top>=document.querySelector('.hos-header').getBoundingClientRect().bottom));
         await page.locator('#hos-page-navigation [data-back]').click();
         await page.waitForURL(base+'/');
         await page.waitForFunction(y=>Math.abs(scrollY-y)<3,scroll);

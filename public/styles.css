@@ -19,7 +19,7 @@ body.hos-menu-open #hos-concept .hos-header,body.hos-model-open #hos-concept .ho
 #hos-concept h2 {font-size:clamp(25px,2.2vw,34px);line-height:1.35;letter-spacing:-.02em;}
 #hos-concept p {color:var(--hos-muted);max-width:660px;line-height:1.85;}
 #hos-concept img {display:block;max-width:100%;object-fit:contain;object-position:center;}
-#hos-main {flex:1;min-width:0;width:100%;}
+#hos-main {position:relative;flex:1;min-width:0;width:100%;}
 #hos-concept .hos-page-heading,#hos-concept .hos-artist-profile,#hos-concept .hos-work-layout,#hos-concept .hos-more-works,#hos-concept .hos-home-collection,#hos-concept .hos-collection-chapters,#hos-concept .hos-all-artists,#hos-concept .hos-home-spaces,#hos-concept .hos-home-making,#hos-concept .hos-home-house,#hos-concept .hos-editorial-story,#hos-concept .hos-service-grid,#hos-concept .hos-process-steps,#hos-concept .hos-page-end {width:calc(100% - var(--hos-gutter) - var(--hos-gutter));max-width:var(--hos-content-width);margin-left:auto;margin-right:auto;}
 #hos-concept .hos-header {position:fixed;inset:0 0 auto;z-index:30;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;height:calc(var(--hos-visible-header-height,var(--hos-header-height)) + env(safe-area-inset-top));gap:16px;padding:calc(10px + env(safe-area-inset-top)) var(--hos-gutter) 10px;border-bottom:1px solid var(--hos-line);background:rgba(8,8,8,.96);backdrop-filter:blur(14px);}
 #hos-concept .hos-wordmark {font-size:13px;line-height:1.3;letter-spacing:.16em;font-weight:300;color:#fff;}

@@ -427,8 +427,8 @@
   },
   "workSettings": {
     "hos-queen-mother": {
-      "source": "/assets/hos-queen-mother-space-v3-1536.webp",
-      "label": "An apartment study"
+      "source": "/assets/hos-queen-mother-space-v4-1536.webp",
+      "label": "An apartment sitting room"
     },
     "zsa-009": {
       "source": "/assets/zsa-009-space-v1-1536.webp",
@@ -459,7 +459,7 @@
       "label": "An apartment sitting room"
     },
     "zsa-023": {
-      "source": "/assets/zsa-023-space-v3-1536.webp",
+      "source": "/assets/zsa-023-space-v4-1536.webp",
       "label": "An office study"
     },
     "zsa-027": {
@@ -479,7 +479,7 @@
       "label": "An apartment sitting room"
     },
     "zsa-024": {
-      "source": "/assets/zsa-024-space-v3-1536.webp",
+      "source": "/assets/zsa-024-space-v4-1536.webp",
       "label": "A family apartment"
     },
     "zsa-006": {

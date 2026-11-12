@@ -22,9 +22,9 @@
   padding-top:20px;
 }
 #hos-concept .hos-page-navigation.hos-work-navigation:not([hidden]) {
-  position:fixed;
+  position:absolute;
   z-index:29;
-  top:calc(var(--hos-visible-header-height,var(--hos-header-height)) + env(safe-area-inset-top) + 12px);
+  top:12px;
   left:var(--hos-gutter);
   width:44px;height:44px;max-width:none;margin:0;padding:0;
 }

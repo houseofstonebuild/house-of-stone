@@ -1558,5 +1558,20 @@
     "width": 1536,
     "height": 1024,
     "srcset": "/assets/hos-kissing-lovers-space-v3-480.webp 480w, /assets/hos-kissing-lovers-space-v3-1536.webp 1536w"
+  },
+  "/assets/hos-queen-mother-space-v4-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/hos-queen-mother-space-v4-480.webp 480w, /assets/hos-queen-mother-space-v4-1536.webp 1536w"
+  },
+  "/assets/zsa-023-space-v4-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-023-space-v4-480.webp 480w, /assets/zsa-023-space-v4-1536.webp 1536w"
+  },
+  "/assets/zsa-024-space-v4-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "srcset": "/assets/zsa-024-space-v4-480.webp 480w, /assets/zsa-024-space-v4-1536.webp 1536w"
   }
 }
