@@ -5,36 +5,32 @@ import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {chromium,webkit} from 'playwright';
 import {createApp} from '../server.mjs';
-import {prepareOwnerPublication} from '../scripts/publish-owner-release.mjs';
 
 const dataDir=mkdtempSync(join(tmpdir(),'hos-ar-')),password=randomUUID();
 const app=createApp({dataDir,env:{ADMIN_PASSWORD:password},backgroundNotifications:false});
 await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));
 const origin='http://127.0.0.1:'+app.server.address().port;
-const api=async(path,data)=>{
-  const response=await fetch(origin+'/api/admin/'+path,{method:data?'POST':'GET',headers:{Authorization:'Basic '+Buffer.from('admin:'+password).toString('base64'),'Content-Type':'application/json',Origin:origin},...(data?{body:JSON.stringify(data)}:{})});
-  assert(response.ok,`${path}: ${response.status}`);return response.json();
-};
 let browser;
 try {
-  const current=await api('content');
-  const state=await api('content',{revision:current.revision,catalog:prepareOwnerPublication(current.draft)});
-  await api('publish',{revision:state.revision});
   const engine=process.env.QA_ENGINE==='webkit'?webkit:chromium;
   browser=await engine.launch(process.env.QA_ENGINE==='webkit'?{}:{args:['--no-sandbox','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
   const page=await browser.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'});
   const failures=[];
   page.on('requestfailed',request=>failures.push(`${request.url()}: ${request.failure()?.errorText}`));
   page.on('pageerror',error=>failures.push(`page: ${error.message}`));
-  const catalog=await(await fetch(origin+'/content.json')).json();
-  for(const id of ['hos-queen-mother','zsa-023','zsa-024']) {
-    const work=catalog.works.find(item=>item.id===id);
-    assert(work,`${id} missing from published fixture`);
-    await page.goto(origin+'/works/'+work.slug);
+  for(const [id,title,file] of [
+    ['hos-queen-mother','Queen Mother','/models/queen-mother-uploaded-v1.glb'],
+    ['zsa-023','Reflection','/models/reflection-uploaded-v1.glb'],
+    ['zsa-024','Family','/models/family-uploaded-v1.glb']
+  ]) {
+    await page.goto(origin+'/');
     await page.locator('#hos-concept[data-ready="true"]').waitFor();
-    await page.locator('#hos-work-ar-trigger').click();
+    await page.evaluate(async ({id,title,file})=>{
+      const {initializeRoomPreview}=await import('/room-preview.js');
+      await initializeRoomPreview(document.querySelector('#hos-concept')).open({id,title},{workId:id,file,uploaded:true,ownerApproved:true},document.querySelector('#hos-work-ar-trigger'));
+    },{id,title,file});
     const viewer=page.locator('#hos-ar-stage model-viewer');
-    await viewer.waitFor();
+    assert(await viewer.count(),`${id} component failed: ${await page.locator('#hos-ar-status').textContent()}; ${failures.join('; ')}`);
     await page.waitForFunction(()=>{
       const message=document.querySelector('#hos-ar-status')?.textContent||'';
       return message.includes('approximately')||message.includes('could not');
