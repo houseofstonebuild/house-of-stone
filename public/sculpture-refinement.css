@@ -62,6 +62,37 @@
 body.hos-menu-open #hos-concept .hos-page-navigation {
   visibility:hidden;
 }
+/* Room placement stays a separate action after the photographic rail. */
+#hos-concept [data-page="work"] .hos-work-photo #hos-work-ar-trigger:not([hidden]) {
+  display:inline-flex;align-items:center;justify-content:center;
+  grid-column:1;grid-row:4;justify-self:start;
+  min-height:44px;margin:12px 0 0;padding:0 19px;
+  border:1px solid #a9aaa5;background:#fff;color:#272925;
+  font-size:13px;line-height:1.4;letter-spacing:.01em;
+}
+#hos-concept [data-page="work"] .hos-work-photo #hos-work-ar-trigger:hover {border-color:#252722;background:#f5f5f2;}
+body.hos-ar-open {overflow:hidden;}
+#hos-concept .hos-ar-dialog {
+  width:min(760px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 32px);
+  padding:24px;border:1px solid #deded9;background:#fff;color:#292a27;
+  font-family:inherit;box-shadow:0 18px 60px rgba(0,0,0,.18);
+}
+#hos-concept .hos-ar-dialog::backdrop {background:rgba(20,22,20,.67);}
+#hos-concept .hos-ar-top {display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:16px;}
+#hos-concept .hos-ar-top .hos-eyebrow {font-size:10px;letter-spacing:.14em;color:#777b73;}
+#hos-concept .hos-ar-top h2 {margin:5px 0 0;color:#252722;font-size:24px;font-weight:400;line-height:1.25;}
+#hos-concept .hos-ar-top .hos-close {min-height:44px;white-space:nowrap;color:#343630;font-size:12px;}
+#hos-concept .hos-ar-stage {position:relative;width:100%;height:min(62vh,540px);min-height:300px;background:#f7f7f5;}
+#hos-concept .hos-ar-viewer {display:block;width:100%;height:100%;background:#f7f7f5;}
+#hos-concept .hos-ar-place {position:absolute;bottom:18px;left:50%;transform:translateX(-50%);min-width:190px;min-height:48px;padding:10px 20px;border-radius:2px;background:#242522;color:#fff;font:inherit;font-size:14px;white-space:nowrap;cursor:pointer;}
+#hos-concept .hos-ar-place:disabled {opacity:.5;cursor:wait;}
+#hos-concept .hos-ar-status {min-height:42px;margin:14px 0 5px;color:#3c403b;font-size:13px;line-height:1.5;}
+#hos-concept .hos-ar-note {margin:0;color:#767973;font-size:11px;line-height:1.5;}
+@media(max-width:700px){
+  #hos-concept [data-page="work"] .hos-work-photo #hos-work-ar-trigger:not([hidden]) {order:3;align-self:flex-start;margin:6px 0 0;}
+  #hos-concept .hos-ar-dialog {width:100vw;height:100dvh;max-height:none;margin:0;padding:calc(22px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom));border:0;}
+  #hos-concept .hos-ar-stage {height:min(66dvh,680px);min-height:300px;}
+}
 #hos-concept .hos-process-steps .hos-story-section figure img {
   width:100%;
   height:auto;

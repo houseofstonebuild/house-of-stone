@@ -104,6 +104,7 @@
             <button type="button" class="hos-work-view-option cursor-interaction" data-work-visual="model" aria-pressed="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.5 20 7v10l-8 4.5L4 17V7Z"/><path d="m4 7 8 4.5L20 7M12 11.5v10"/></svg>Explore in 3D</button>
           </div>
           <div id="hos-work-additional-images" class="hos-work-additional-images" aria-label="Sculpture views"></div>
+          <button id="hos-work-ar-trigger" class="hos-work-ar-trigger cursor-interaction" type="button" hidden>View in your space</button>
           <div class="hos-work-primary-photo"><div id="hos-work-photo-open" class="hos-work-photo-open" aria-label="Sculpture photographs"><div id="hos-gallery-track" class="hos-gallery-track"><div class="hos-gallery-slide"><img id="hos-work-image" alt="Sculpture photograph"></div></div><button type="button" class="hos-photo-zoom-invite" aria-label="Inspect current photograph">Inspect</button></div><div id="hos-gallery-dots" class="hos-gallery-dots" aria-label="Photograph navigation"></div><p id="hos-work-photo-caption" class="hos-photo-caption"></p><div class="hos-gallery-navigation"><button type="button" data-gallery-step="-1" aria-label="Previous sculpture photograph">Previous</button><span id="hos-gallery-count" role="status"></span><button type="button" data-gallery-step="1" aria-label="Next sculpture photograph">Next</button></div></div>
           <div id="hos-work-inline-model" class="hos-work-inline-model" hidden></div>
         </div>
@@ -233,6 +234,12 @@
       <button type="button" data-model-control="reset" class="hos-model-reset cursor-interaction">Reset</button>
     </div>
     <p class="hos-model-note">Digital representation. The actual sculpture may differ slightly.</p>
+  </dialog>
+  <dialog id="hos-ar-dialog" class="hos-ar-dialog" aria-labelledby="hos-ar-title">
+    <div class="hos-ar-top"><div><div class="hos-eyebrow">VIEW IN YOUR SPACE</div><h2 id="hos-ar-title"></h2></div><button type="button" data-ar-close class="hos-close" aria-label="Close room preview">Close ×</button></div>
+    <div id="hos-ar-stage" class="hos-ar-stage"></div>
+    <p id="hos-ar-status" class="hos-ar-status" role="status" aria-live="polite"></p>
+    <p class="hos-ar-note">Digital preview at the recorded height. The physical sculpture and its finish may vary from the model.</p>
   </dialog>
   <dialog id="hos-photo-dialog" class="hos-photo-dialog" aria-labelledby="hos-photo-title"><div class="hos-photo-top"><div><div class="hos-eyebrow">PHOTOGRAPHS</div><h2 id="hos-photo-title"></h2></div><button type="button" data-photo-close class="hos-close" aria-label="Close photographs">Close ×</button></div><div class="hos-photo-stage"><img alt=""></div><div class="hos-photo-controls"><button type="button" data-photo-step="-1" aria-label="Previous photograph">Previous</button><span role="status" aria-live="polite"></span><button type="button" data-photo-step="1" aria-label="Next photograph">Next</button><div class="hos-photo-zoom-controls"><button type="button" data-photo-zoom="-.5" aria-label="Zoom out photograph">−</button><button type="button" data-photo-zoom=".5" aria-label="Zoom in photograph">+</button><span class="hos-zoom-status" aria-live="polite">100%</span><button type="button" data-photo-reset>Fit</button></div></div><p class="hos-photo-pan-hint">Use + to zoom, then drag to explore the detail. Double-click to zoom or fit.</p></dialog>
   <footer class="hos-footer">

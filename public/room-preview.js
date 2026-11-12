@@ -1,0 +1,107 @@
+// The pilot uses models with owner-approved geometry and recorded heights.
+// Restrict AR to WebXR and Quick Look: both use the scale set on this viewer.
+const heights = Object.freeze({
+  'hos-queen-mother': 45,
+  'zsa-023': 156,
+  'zsa-024': 43
+});
+
+const componentURL = 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.4.0/model-viewer.min.js';
+let componentPromise;
+
+export function roomPreviewEligible(work, model) {
+  return Boolean(work && heights[work.id] && model?.uploaded && model.ownerApproved === true &&
+    model.workId === work.id && model.file);
+}
+
+export function initializeRoomPreview(root, onAR = () => {}) {
+  const dialog = root.querySelector('#hos-ar-dialog');
+  const stage = root.querySelector('#hos-ar-stage');
+  const title = root.querySelector('#hos-ar-title');
+  const status = root.querySelector('#hos-ar-status');
+  let opener, generation = 0;
+
+  function close() { if (dialog.open) dialog.close(); }
+  dialog.querySelector('[data-ar-close]').addEventListener('click', close);
+  dialog.addEventListener('click', event => {
+    if (event.target === dialog) {
+      const bounds = dialog.getBoundingClientRect();
+      if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) close();
+    }
+  });
+  dialog.addEventListener('close', () => {
+    generation++;
+    stage.replaceChildren();
+    document.body.classList.remove('hos-ar-open');
+    opener?.focus({preventScroll:true});
+  });
+
+  async function open(work, model, trigger) {
+    if (!roomPreviewEligible(work, model)) return;
+    if (dialog.open) close();
+    opener = trigger;
+    const request = ++generation;
+    title.textContent = work.title;
+    status.textContent = 'Preparing the room preview…';
+    stage.replaceChildren();
+    dialog.showModal();
+    document.body.classList.add('hos-ar-open');
+    try {
+      componentPromise ||= import(componentURL).catch(error => { componentPromise = null; throw error; });
+      await componentPromise;
+      await customElements.whenDefined('model-viewer');
+      if (request !== generation || !dialog.open) return;
+      const viewer = document.createElement('model-viewer');
+      viewer.className = 'hos-ar-viewer';
+      viewer.setAttribute('src', model.file);
+      viewer.setAttribute('alt', `${work.title} at ${heights[work.id]} centimetres high`);
+      viewer.setAttribute('ar', '');
+      viewer.setAttribute('ar-modes', 'webxr quick-look');
+      viewer.setAttribute('ar-scale', 'fixed');
+      viewer.setAttribute('camera-controls', '');
+      viewer.setAttribute('touch-action', 'pan-y');
+      viewer.setAttribute('environment-image', 'neutral');
+      viewer.setAttribute('shadow-intensity', '0.6');
+      viewer.setAttribute('loading', 'eager');
+      const place = document.createElement('button');
+      place.type = 'button';
+      place.slot = 'ar-button';
+      place.className = 'hos-ar-place';
+      place.textContent = 'Place in my room';
+      place.disabled = true;
+      place.addEventListener('click', () => onAR(work));
+      viewer.append(place);
+      viewer.addEventListener('load', () => {
+        if (request !== generation) return;
+        const dimensions = viewer.getDimensions();
+        const modelHeight = dimensions?.y;
+        if (!Number.isFinite(modelHeight) || modelHeight <= 0) {
+          status.textContent = 'We could not verify this model’s scale. Explore the 3D view on the sculpture page instead.';
+          return;
+        }
+        const factor = heights[work.id] / 100 / modelHeight;
+        if (!Number.isFinite(factor) || factor <= 0 || factor > 1000) {
+          status.textContent = 'We could not verify this model’s scale. Explore the 3D view on the sculpture page instead.';
+          return;
+        }
+        viewer.scale = `${factor} ${factor} ${factor}`;
+        viewer.updateFraming();
+        place.disabled = false;
+        status.textContent = viewer.canActivateAR
+          ? `Shown at approximately ${heights[work.id]} cm high. Tap “Place in my room” and point your camera at a clear surface.`
+          : `Shown at approximately ${heights[work.id]} cm high. Open this page on a supported phone to place it in your room.`;
+      }, {once:true});
+      viewer.addEventListener('error', () => {
+        if (request === generation) status.textContent = 'This model could not load. Please use the sculpture photographs or 3D view.';
+      });
+      viewer.addEventListener('ar-status', event => {
+        if (request === generation && event.detail?.status === 'failed')
+          status.textContent = 'Room placement could not start on this device. The 3D view remains available.';
+      });
+      stage.append(viewer);
+    } catch {
+      if (request === generation) status.textContent = 'The room preview could not load. Please try again or explore the 3D view.';
+    }
+  }
+  return {open, close};
+}

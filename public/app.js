@@ -3,6 +3,7 @@ import { presentationFor, pageDescriptions } from './presentation.js';
 import { initializeGallery } from './gallery.js';
 import { applyWorkPhotography } from './work-photography.js';
 import { closerLookPhoto, closerLookCrop } from './closer-look.js';
+import { initializeRoomPreview, roomPreviewEligible } from './room-preview.js';
 const root = document.getElementById('hos-concept');
 const previewMode = location.pathname === '/admin/preview' || location.pathname.startsWith('/admin/preview/');
 const routePath = () => previewMode ? location.pathname.slice('/admin/preview'.length) || '/' : location.pathname;
@@ -45,6 +46,7 @@ function el(tag, className, text) {
 let catalog, artists, works, assets, collections = [], media = {}, editorial = {}, story = {}, models = {}, viewerPromise, modelViewer;
 let activePage = 'home', activeArtist, activeWork;
 let gallery;
+const roomPreview = initializeRoomPreview(root, work => track('ar_launch', {workId:work.id,artistId:work.artistId}));
 let collectionDirectoryReady=false,artistDirectoryReady=false;
 const inquiryDrafts=new Map();
 let inquiryDraftKey='', privacyReturn=false;
@@ -547,6 +549,7 @@ function renderWork(work) {
   if(collectionForBreadcrumb){breadcrumbLink.textContent=collectionForBreadcrumb.name;breadcrumbLink.dataset.collection=collectionForBreadcrumb.id;breadcrumbLink.href=routeURL('/collections/'+collectionForBreadcrumb.slug);}
   $('#hos-work-overline').textContent=(collectionForBreadcrumb?.name ? collectionForBreadcrumb.name.toUpperCase()+' / ' : '')+'ORIGINAL STONE SCULPTURE';
   const modelLink=$('#hos-work-model');modelLink.hidden=!modelDefinition(work);modelLink.dataset.model=work.id;
+  const roomButton=$('#hos-work-ar-trigger');roomButton.hidden=!roomPreviewEligible(work,modelDefinition(work));
   const artistLink=$('#hos-work-artist');artistLink.textContent=activeArtist?.name || 'Artist details on inquiry';artistLink.dataset.artist=activeArtist?.id || '';artistLink.toggleAttribute('aria-disabled',!activeArtist);
   for(const [id,value] of [['year',work.yearMade],['dimensions',work.dimensions],['material',stoneLabel(work)],['acquisition',work.acquisitionMethod]]) {
     const node=$('#hos-work-'+id);node.textContent=value || '';if(node.parentElement)node.parentElement.hidden=!value;
@@ -654,7 +657,7 @@ function route(path, shouldFocus = true) {
   pageAnimation?.cancel();
   root.querySelectorAll('[data-page]').forEach(view => { view.hidden = view.dataset.page !== page; });
   main.hidden = false; inquiry.hidden = true; setMenu(false);
-  modelViewer?.close();modelViewer?.refresh();gallery?.close();refreshLinks();
+  modelViewer?.close();modelViewer?.refresh();gallery?.close();roomPreview.close();refreshLinks();
   const labels = {home:'Zimbabwean stone sculpture',collection:'The collection',artists:'The artists',making:'The making',designers:'For designers',collectors:'For collectors',house:'The house',privacy:'Privacy',notfound:'Page not found'};
   document.title = `${item?.title || item?.name || labels[page] || 'House of Mabwe'} | House of Mabwe`;
   const canonical = document.querySelector('link[rel="canonical"]'); if (canonical) canonical.href = location.origin + (previewMode ? '/admin/preview' : '') + path;
@@ -770,6 +773,12 @@ root.addEventListener('click', event => {
   }
   const supporting=event.target.closest('[data-scroll-supporting]');if(supporting){const section=document.getElementById('hos-supporting-'+supporting.dataset.scrollSupporting);section?.scrollIntoView({behavior:motionPreference?.matches?'instant':'smooth',block:'start'});return;}
   const category=event.target.closest('[data-collection]');if(category){const item=collections.find(c=>c.id===category.dataset.collection);if(item){track('explore_click',{workId:item.starWorkId});navigate(destination(category.dataset));}return;}
+  const room=event.target.closest('#hos-work-ar-trigger');
+  if(room && activeWork && roomPreviewEligible(activeWork,modelDefinition(activeWork))){
+    roomPreview.open(activeWork,modelDefinition(activeWork),room);
+    track('ar_preview_opened',{workId:activeWork.id,artistId:activeWork.artistId});
+    return;
+  }
   const model=event.target.closest('[data-model]');
   if(model){
     const work=works.find(w=>w.id===model.dataset.model);if(!work||!modelDefinition(work))return;
