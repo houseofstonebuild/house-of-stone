@@ -60,9 +60,9 @@
     "srcset": "/assets/responsive/tendai-640.webp 640w, /assets/responsive/tendai-960.webp 960w, /assets/tendai.jpg 1122w"
   },
   "/assets/designer-apartment.jpg": {
-    "width": 1536,
-    "height": 1024,
-    "srcset": "/assets/responsive/designer-apartment-640.webp 640w, /assets/responsive/designer-apartment-960.webp 960w, /assets/designer-apartment.jpg 1536w"
+    "width": 1376,
+    "height": 768,
+    "srcset": "/assets/responsive/designer-apartment-640.webp 640w, /assets/responsive/designer-apartment-960.webp 960w, /assets/designer-apartment.jpg 1376w"
   },
   "/assets/collector-gallery.jpg": {
     "width": 1536,
