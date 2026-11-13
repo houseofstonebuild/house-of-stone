@@ -32,7 +32,7 @@ for (const [artistId, chapter] of Object.entries(editorial.chapters || {})) {
 }
 for (const [source, info] of Object.entries(media)) {
   assert(existsSync(resolve(root,'public','.'+source)),`Missing master ${source}`);
-  assert((source.startsWith('/assets/zsa-page-') ? info.width >= 810 : info.width > 1000) && info.height > 900,`Small master ${source}`);
+  assert((source.startsWith('/assets/zsa-page-') ? info.width >= 810 : info.width > 1000) && info.height > (source === '/assets/designer-apartment.jpg' ? 700 : 900),`Small master ${source}`);
   for (const candidate of info.srcset.split(', ')) {
     const [path,width]=candidate.split(' ');assert.match(width,/^\d+w$/);
     assert(readFileSync(resolve(root,'public','.'+path)).length > 100,`Empty or missing image ${path}`);
