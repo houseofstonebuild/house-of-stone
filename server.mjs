@@ -594,6 +594,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         const result=await publishStandaloneCelebration({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
         console.log('Owner-approved standalone Celebration:',JSON.stringify(result));
       } catch(error) { console.error('Standalone Celebration publication did not complete:',error.message); }
+      try {
+        const {publishArtistEditorialProfiles}=await import('./scripts/publish-artist-editorial-profiles.mjs');
+        const result=await publishArtistEditorialProfiles({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
+        console.log('Artist biographies and retired Within attribution:',JSON.stringify(result));
+      } catch(error) { console.error('Artist editorial publication did not complete:',error.message); }
     }
   });
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(() => process.exit(0)));
