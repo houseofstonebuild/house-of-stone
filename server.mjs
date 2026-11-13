@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { Readable } from 'node:stream';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, chmodSync, accessSync, statSync, createReadStream, constants } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 import { resolve, dirname, extname } from 'node:path';
@@ -423,6 +424,43 @@ export function createApp(options = {}) {
         const html = template.replace(/\{\{(TITLE|DESCRIPTION|URL|IMAGE|ROBOTS)\}\}/g, (_, key) => esc(replacements[key]));
         res.setHeader('X-Robots-Tag', replacements.ROBOTS);
         return send(res, 200, req.method === 'HEAD' ? '' : html, 'text/html; charset=utf-8');
+      }
+
+      // The premium workshop film is stored as immutable pieces for dependable GitHub uploads.
+      // Stream the pieces as one ordinary MP4, honoring browser seek/range requests.
+      if (['GET','HEAD'].includes(req.method) && path === '/assets/house-of-mabwe-making-1080p-v2.mp4') {
+        const parts = ["making-v2-00.part","making-v2-01.part","making-v2-02.part","making-v2-03.part","making-v2-04.part","making-v2-05.part","making-v2-06.part","making-v2-07.part","making-v2-08.part"].map(name => resolve(PUBLIC,'assets/film',name));
+        const lengths = parts.map(file => statSync(file).size);
+        const total = lengths.reduce((sum,n)=>sum+n,0);
+        const rangeHeader = req.headers.range;
+        let start=0,end=total-1,status=200;
+        if (rangeHeader) {
+          const match=/^bytes=(\d*)-(\d*)$/.exec(String(rangeHeader).trim());
+          start=match?(match[1]?Number(match[1]):match[2]?Math.max(0,total-Number(match[2])):NaN):NaN;
+          end=match?(match[1]?(match[2]?Number(match[2]):total-1):total-1):NaN;
+          if (!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start>=total||end<start) {
+            res.writeHead(416,{'Content-Type':'video/mp4','Accept-Ranges':'bytes','Content-Range':'bytes */'+total});
+            return res.end();
+          }
+          end=Math.min(end,total-1);status=206;
+        }
+        const headers={'Content-Type':'video/mp4','Accept-Ranges':'bytes','Cache-Control':'public, max-age=3600','Content-Length':end-start+1};
+        if(status===206)headers['Content-Range']=`bytes ${start}-${end}/${total}`;
+        res.writeHead(status,headers);
+        if(req.method==='HEAD')return res.end();
+        const segments=async function*() {
+          let offset=0;
+          for(let i=0;i<parts.length;i++){
+            const size=lengths[i],from=Math.max(start-offset,0),to=Math.min(end-offset,size-1);
+            if(from<=to)for await(const chunk of createReadStream(parts[i],{start:from,end:to}))yield chunk;
+            offset+=size;
+            if(offset>end)break;
+          }
+        };
+        const stream=Readable.from(segments());
+        stream.on('error',error=>res.destroy(error));
+        stream.pipe(res);
+        return;
       }
       const filePath = resolve(PUBLIC, path === '/admin' ? 'admin.html' : path === '/admin/content' ? 'admin-content.html' : '.' + path);
       if (!filePath.startsWith(PUBLIC + '/') || !existsSync(filePath)) throw new HttpError(404, 'This page could not be found.');
