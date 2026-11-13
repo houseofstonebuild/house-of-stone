@@ -142,3 +142,17 @@
 
 /* Artist-page long biographies preserve paragraph spacing; collection previews stay brief. */
 #hos-concept #hos-artist-biography {white-space:pre-line;}
+
+/* Documentary workshop film on The Making page. */
+#hos-concept .hos-making-film {width:calc(100% - var(--hos-gutter) * 2);max-width:var(--hos-content-width);margin:clamp(32px,5vw,72px) auto 30px;}
+#hos-concept .hos-making-film-intro {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end;gap:24px 56px;padding:0 0 28px;}
+#hos-concept .hos-making-film-intro h2 {font-size:clamp(26px,2.8vw,40px);line-height:1.14;letter-spacing:-.025em;margin:12px 0 0;}
+#hos-concept .hos-making-film-intro p {margin:0;max-width:60ch;font-size:15px;line-height:1.75;color:var(--hos-muted);}
+#hos-concept .hos-making-film-figure {margin:0;}
+#hos-concept .hos-making-film-video {display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;background:#171715;cursor:auto;}
+#hos-concept .hos-making-film-figure figcaption {margin-top:12px;font-size:12px;line-height:1.6;color:var(--hos-muted);}
+@media(max-width:700px) {
+ #hos-concept .hos-making-film {margin-top:36px;margin-bottom:12px;}
+ #hos-concept .hos-making-film-intro {grid-template-columns:minmax(0,1fr);gap:14px;padding-bottom:20px;}
+ #hos-concept .hos-making-film-intro p {font-size:14px;}
+}

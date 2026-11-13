@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { readFileSync, writeFileSync, existsSync, mkdirSync, chmodSync, accessSync, statSync, constants } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, chmodSync, accessSync, statSync, createReadStream, constants } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 import { resolve, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -426,9 +426,29 @@ export function createApp(options = {}) {
       }
       const filePath = resolve(PUBLIC, path === '/admin' ? 'admin.html' : path === '/admin/content' ? 'admin-content.html' : '.' + path);
       if (!filePath.startsWith(PUBLIC + '/') || !existsSync(filePath)) throw new HttpError(404, 'This page could not be found.');
-      const types = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.json':'application/json; charset=utf-8', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.webp':'image/webp', '.png':'image/png', '.ico':'image/x-icon', '.glb':'model/gltf-binary', '.txt':'text/plain; charset=utf-8' };
+      const types = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.json':'application/json; charset=utf-8', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.webp':'image/webp', '.png':'image/png', '.ico':'image/x-icon', '.glb':'model/gltf-binary', '.txt':'text/plain; charset=utf-8', '.mp4':'video/mp4' };
       const type = types[extname(filePath)];
       if (!type) throw new HttpError(404, 'This file could not be found.');
+      if (extname(filePath)==='.mp4') {
+        const total=statSync(filePath).size;
+        const range=req.headers.range;
+        const shared={'Content-Type':'video/mp4','Accept-Ranges':'bytes','Cache-Control':'public, max-age=3600'};
+        if (range) {
+          const match=/^bytes=(\d*)-(\d*)$/.exec(String(range).trim());
+          const start=match?(match[1]?Number(match[1]):match[2]?Math.max(0,total-Number(match[2])):NaN):NaN;
+          const end=match?(match[1]?(match[2]?Number(match[2]):total-1):total-1):NaN;
+          if (!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start>=total||end<start) {
+            res.writeHead(416,{...shared,'Content-Range':'bytes */'+total});return res.end();
+          }
+          const last=Math.min(end,total-1);
+          res.writeHead(206,{...shared,'Content-Range':`bytes ${start}-${last}/${total}`,'Content-Length':last-start+1});
+          if(req.method==='HEAD')return res.end();
+          return createReadStream(filePath,{start,end:last}).pipe(res);
+        }
+        res.writeHead(200,{...shared,'Content-Length':total});
+        if(req.method==='HEAD')return res.end();
+        return createReadStream(filePath).pipe(res);
+      }
       const headers = { 'Content-Type': type, 'Cache-Control': path.startsWith('/admin') ? 'no-store' : ['.js','.css','.html','.json','.glb'].includes(extname(filePath)) ? 'public, max-age=0, must-revalidate' : 'public, max-age=3600' };
       const compressible=['.js','.css','.json','.glb'].includes(extname(filePath));
       const acceptsGzip=String(req.headers['accept-encoding'] || '').split(',').some(part=>{const [encoding,...parameters]=part.trim().split(';');return encoding==='gzip'&&!parameters.some(p=>/^q=0(?:\.0*)?$/.test(p.trim()));});

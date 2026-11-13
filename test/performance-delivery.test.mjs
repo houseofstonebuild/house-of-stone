@@ -84,3 +84,26 @@ test('first-paint hero has responsive candidates and dynamically created photos 
  assert.match(gallery,/const image=document\.createElement\('img'\);image\.loading='lazy';applyImage/);
  assert.match(js,/ensurePageContent\(page\);/);
 });
+
+test('Making film is accessible by streaming byte ranges, without autoplay',async t=>{
+ const dataDir=mkdtempSync(join(tmpdir(),'hos-film-delivery-')),password=randomUUID();
+ const app=createApp({dataDir,env:{ADMIN_PASSWORD:password},backgroundNotifications:false});
+ await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));
+ t.after(async()=>{await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true});});
+ const base='http://127.0.0.1:'+app.server.address().port;
+ const html=await(await fetch(base+'/making')).text();
+ assert.match(html,/class="hos-making-film-video" controls preload="none" playsinline/);
+ assert.match(html,/house-of-mabwe-making-web-v1\.mp4/);
+ assert.doesNotMatch(html,/class="hos-making-film-video"[^>]*autoplay/);
+ const poster=await fetch(base+'/assets/making-film-poster-v1.jpg');assert.equal(poster.status,200);
+ assert.equal(poster.headers.get('content-type'),'image/jpeg');
+ const range=await fetch(base+'/assets/house-of-mabwe-making-web-v1.mp4',{headers:{Range:'bytes=0-1023'}});
+ assert.equal(range.status,206);assert.equal(range.headers.get('content-type'),'video/mp4');
+ assert.equal(range.headers.get('accept-ranges'),'bytes');
+ assert.match(range.headers.get('content-range'),/^bytes 0-1023\/\d+$/);
+ assert.equal((await range.arrayBuffer()).byteLength,1024);
+ const suffix=await fetch(base+'/assets/house-of-mabwe-making-web-v1.mp4',{headers:{Range:'bytes=-128'}});
+ assert.equal(suffix.status,206);assert.equal((await suffix.arrayBuffer()).byteLength,128);
+ const invalid=await fetch(base+'/assets/house-of-mabwe-making-web-v1.mp4',{headers:{Range:'bytes=999999999-'}});
+ assert.equal(invalid.status,416);
+});
