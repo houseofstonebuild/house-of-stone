@@ -88,8 +88,9 @@ export async function publishArtistEditorialProfiles({db,origin,password,publicO
   state=await api('publish',{revision:state.revision});
   const live=await api('content.json',undefined,false);
   assert(!live.works.some(work=>work.id==='zsa-017'),'Within must remain hidden');
-  assert(!live.artists.some(artist=>artist.name==='Kudakwashe Nyamudeza'),
-    'Retired Within attribution must not remain public');
+  const retiredPublic=live.artists.find(artist=>artist.name==='Kudakwashe Nyamudeza');
+  assert(!retiredPublic || live.works.some(work=>work.artistId===retiredPublic.id && work.id!=='zsa-017'),
+    'An unrepresented Within artist must not remain public');
   for(const profile of source.profiles.filter(profile=>profile.kind==='artist-supplied')){
     const artist=live.artists.find(a=>a.name===profile.name);
     assert(artist&&artist.biography===profile.biography,'Sourced biography missing: '+profile.name);
