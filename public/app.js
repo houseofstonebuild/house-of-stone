@@ -204,15 +204,31 @@ function collectionSelection(collection) {
   section.append(heading,collectionRail(grid,collection.name+' sculptures'));return section;
 }
 function collectionRail(grid,label) {
-  const rail=el('div','hos-collection-rail');grid.classList.add('hos-horizontal-works');grid.tabIndex=0;grid.setAttribute('aria-label',label);
-  const controls=el('div','hos-collection-rail-controls');controls.append(el('span','','Scroll to explore'));
-  for(const [step,text] of [[-1,'Previous sculptures'],[1,'Next sculptures']]){
-    const button=el('button','',step<0?'Previous':'Next');button.type='button';button.setAttribute('aria-label',text+' in '+label);
-    button.addEventListener('click',()=>grid.scrollBy({left:step*grid.clientWidth,behavior:motionPreference?.matches?'instant':'smooth'}));controls.append(button);
-  }
-  const update=()=>{const overflow=grid.scrollWidth>grid.clientWidth+2;controls.hidden=!overflow;const buttons=controls.querySelectorAll('button');buttons[0].disabled=grid.scrollLeft<=1;buttons[1].disabled=grid.scrollLeft+grid.clientWidth>=grid.scrollWidth-2;};
-  grid.addEventListener('scroll',update,{passive:true});if(typeof ResizeObserver==='function')new ResizeObserver(update).observe(grid);
-  controls.hidden=true;rail.append(controls,grid);return rail;
+  const rail=el('div','hos-collection-rail');
+  grid.classList.add('hos-horizontal-works');grid.tabIndex=0;
+  grid.setAttribute('role','region');
+  grid.setAttribute('aria-label',label+'. Swipe horizontally or use arrow keys to browse.');
+  const indicator=el('div','hos-collection-rail-progress');
+  indicator.setAttribute('aria-hidden','true');
+  const thumb=el('span','hos-collection-rail-thumb');indicator.append(thumb);
+  const update=()=>{
+    const width=grid.clientWidth,total=grid.scrollWidth,max=total-width;
+    indicator.hidden=max<=2;
+    if(max<=2)return;
+    const fraction=Math.max(.12,Math.min(1,width/total));
+    thumb.style.width=(fraction*100)+'%';
+    thumb.style.left=(Math.max(0,Math.min(1,grid.scrollLeft/max))*(1-fraction)*100)+'%';
+  };
+  grid.addEventListener('scroll',update,{passive:true});
+  grid.addEventListener('keydown',event=>{
+    if(event.target!==grid)return;
+    const direction=event.key==='ArrowRight'?1:event.key==='ArrowLeft'?-1:0;
+    if(!direction)return;
+    event.preventDefault();
+    grid.scrollBy({left:direction*grid.clientWidth*.82,behavior:motionPreference?.matches?'instant':'smooth'});
+  });
+  if(typeof ResizeObserver==='function')new ResizeObserver(update).observe(grid);
+  indicator.hidden=true;rail.append(grid,indicator);return rail;
 }
 function collectionChapter(collection, {heading = true} = {}) {
   const work=works.find(work=>work.id===collection.starWorkId),section=el('section','hos-collection-chapter hos-collection-editorial');

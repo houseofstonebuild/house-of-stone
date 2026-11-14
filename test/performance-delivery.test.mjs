@@ -126,3 +126,14 @@ test('premium workshop video is lossless across stored segment boundaries',async
  const first=await fetch(url,{headers:{Range:'bytes=0-1023'}});
  assert.deepEqual(Buffer.from(await first.arrayBuffer()),complete.subarray(0,1024));
 });
+
+
+test('collection rails use partial-card discovery and a compact progress cue instead of controls',()=>{
+ const js=readFileSync(new URL('../public/app.js',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../public/editorial-layout.css',import.meta.url),'utf8');
+ assert.doesNotMatch(js,/Scroll to explore|Previous sculptures|Next sculptures/);
+ assert.match(js,/hos-collection-rail-progress/);
+ assert.match(js,/grid\.addEventListener\('keydown'/);
+ assert.match(css,/grid-auto-columns:72%/);
+ assert.match(css,/hos-collection-rail-progress:not\(\[hidden\]\)/);
+});

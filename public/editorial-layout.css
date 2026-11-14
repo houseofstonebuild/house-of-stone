@@ -520,14 +520,12 @@
 #hos-concept .hos-portrait-card img[src*="hos-artist-"][src*="-with-"] {object-fit:cover;}
 #hos-concept #hos-artist-image[src*="hos-artist-"][src*="-with-"] {aspect-ratio:4/5;object-fit:cover;}
 
-/* Each desktop collection stays in one row, with controls and a visible scroll bar. */
+/* Unobtrusive collection browsing: visible adjacent work on mobile, scrollbar on desktop. */
 #hos-concept .hos-collection-rail {min-width:0;max-width:100%;}
-#hos-concept .hos-collection-rail-controls {display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:8px 0;}
-#hos-concept .hos-collection-rail-controls[hidden] {display:none;}
-#hos-concept .hos-collection-rail-controls span {font-size:12px;color:var(--hos-muted);margin-right:6px;}
-#hos-concept .hos-collection-rail-controls button {width:40px;height:40px;border:1px solid var(--hos-line);border-radius:50%;background:white;color:var(--hos-fg);cursor:pointer;}
-#hos-concept .hos-collection-rail-controls button:disabled {opacity:.35;cursor:default;}
-#hos-concept .hos-collection-rail-controls button:focus-visible,#hos-concept .hos-horizontal-works:focus-visible {outline:2px solid var(--hos-fg);outline-offset:3px;}
+#hos-concept .hos-collection-rail-progress {display:none;position:relative;width:104px;height:2px;margin:15px auto 0;background:var(--hos-line);overflow:hidden;}
+#hos-concept .hos-collection-rail-progress[hidden] {display:none;}
+#hos-concept .hos-collection-rail-thumb {position:absolute;inset:0 auto 0 0;display:block;min-width:12px;background:var(--hos-fg);transition:left .12s linear;}
+#hos-concept .hos-horizontal-works:focus-visible {outline:2px solid var(--hos-fg);outline-offset:3px;}
 #hos-concept .hos-category-campaign > .hos-collection-introduction {margin-top:36px;}
 @media(min-width:701px){
  #hos-concept .hos-collection-rail .hos-horizontal-works[data-count] {display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:calc((100% - 40px)/3);gap:20px;width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;padding-bottom:16px;scrollbar-width:auto;scrollbar-color:#b7b4ad #f1f0ee;}
@@ -537,5 +535,7 @@
  #hos-concept .hos-horizontal-works::-webkit-scrollbar-track {background:#f1f0ee;}
 }
 @media(max-width:700px){
- #hos-concept .hos-supporting-works .hos-collection-rail-controls {display:none;}
+ #hos-concept .hos-collection-rail-progress:not([hidden]) {display:block;}
+ #hos-concept .hos-collection-rail .hos-horizontal-works[data-count] {scrollbar-width:none;}
+ #hos-concept .hos-collection-rail .hos-horizontal-works::-webkit-scrollbar {display:none;}
 }

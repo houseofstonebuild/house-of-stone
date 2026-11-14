@@ -52,7 +52,6 @@
 
 
 /* Text controls avoid platform-dependent arrow glyphs. */
-#hos-concept .hos-collection-rail-controls button[type="button"],
 #hos-concept .hos-photo-carousel-heading button[type="button"] {
   width:auto;min-width:44px;padding-inline:12px;border-radius:0;font-size:11px;
 }
