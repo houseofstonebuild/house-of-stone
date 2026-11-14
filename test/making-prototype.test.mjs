@@ -30,3 +30,15 @@ test('review prototype and JS can be served without touching collection data',as
   }
  }finally{await new Promise(resolve=>app.server.close(resolve));rmSync(dataDir,{recursive:true,force:true})}
 });
+
+test('advanced stone study has a single geological block, physical tooling and material-preserving final geometry',()=>{
+ assert.match(js,/new THREE\.BoxGeometry\(w,h,d,30,44,20\)/);
+ assert.doesNotMatch(js,/new THREE\.BoxGeometry\(1,1,1,3,4,3\)/);
+ assert.match(js,/makeChalkFromModel\(source\)/);
+ assert.match(js,/new THREE\.ConeGeometry/);
+ assert.match(js,/if\(vStoneCoordinate\.y>uCutY\+wave\)discard/);
+ assert.match(js,/effect\.polishPlane=polishedPlane/);
+ assert.match(js,/source\.traverse\(node=>/);
+ assert.match(html,/designers-coil-v2\.webp/);
+ assert.match(js,/host\.dataset\.modelReady='true'/);
+});
