@@ -274,7 +274,7 @@
 #hos-concept .hos-work-card-photo:is(:hover,:focus-visible) img {transform:scale(1.045);}
 #hos-concept .hos-hero {overflow:hidden;}
 #hos-concept .hos-hero-image {animation:hos-hero-pan 24s cubic-bezier(.37,0,.63,1) infinite alternate;transform-origin:55% 45%;}
-@keyframes hos-hero-pan {from {transform:scale(1.035) translate3d(-.6%,0,0);}to {transform:scale(1.13) translate3d(.6%,-1%,0);}}
+@keyframes hos-hero-pan {from {transform:scale(1.02) translate3d(-.35%,0,0);}to {transform:scale(1.055) translate3d(.35%,-.35%,0);}}
 #hos-concept .hos-hero[data-motion-paused="true"] .hos-hero-image {animation-play-state:paused;}
 #hos-concept .hos-hero-copy .hos-discover {display:flex;flex-direction:column;align-items:center;gap:16px;border:0;padding:0;color:white;}
 #hos-concept .hos-discover-circle {display:grid;place-items:center;width:48px;height:48px;border:1px solid rgba(255,255,255,.7);border-radius:50%;transition:background .3s,border-color .3s,transform .5s cubic-bezier(.16,1,.3,1);}
@@ -538,4 +538,39 @@
  #hos-concept .hos-collection-rail-progress:not([hidden]) {display:block;}
  #hos-concept .hos-collection-rail .hos-horizontal-works[data-count] {scrollbar-width:none;}
  #hos-concept .hos-collection-rail .hos-horizontal-works::-webkit-scrollbar {display:none;}
+}
+
+
+/* Homepage photograph extends behind the fixed navigation, while keeping all
+   collection and interior pages on the normal opaque gallery header. */
+#hos-concept [data-page="home"] .hos-hero {
+  margin-top:calc(0px - var(--hos-header-height) - env(safe-area-inset-top));
+  height:100svh;
+}
+#hos-concept[data-hero-header="true"] .hos-header,
+:root[data-theme="light"] #hos-concept[data-hero-header="true"] .hos-header {
+  background:linear-gradient(180deg,rgba(6,8,10,.54) 0%,rgba(6,8,10,.32) 65%,rgba(6,8,10,.12) 100%);
+  color:#fff;
+  border-bottom:1px solid rgba(255,255,255,.16);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+#hos-concept[data-hero-header="true"] .hos-wordmark,
+:root[data-theme="light"] #hos-concept[data-hero-header="true"] .hos-wordmark {
+  color:#fff;
+}
+#hos-concept[data-hero-header="true"] .hos-brand-mark,
+:root[data-theme="light"] #hos-concept[data-hero-header="true"] .hos-brand-mark {
+  filter:invert(1);
+}
+/* A smaller subtitle keeps the hero secondary copy quiet on phone screens. */
+@media(max-width:700px) {
+  #hos-concept [data-page="home"] .hos-hero-copy h1 span+span {
+    font-size:14px;
+    line-height:1.5;
+    letter-spacing:.02em;
+  }
+}
+@media(max-height:500px) and (orientation:landscape) {
+  #hos-concept [data-page="home"] .hos-hero {min-height:400px;}
 }

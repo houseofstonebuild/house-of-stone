@@ -78,6 +78,9 @@ for(const [engineName,engine] of engines) {
             assert.equal(await page.locator('#hos-home-chapters .hos-setting-tile .hos-text-link').count(),0);
             if(width<=700)assert((await page.locator('#hos-home-chapters .hos-artist-campaign').first().boundingBox()).height>=Math.min(390,width),'Mobile artist campaign should have a large crop');
             assert.equal(await page.locator('.hos-hero-copy h1 span').last().evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');
+            assert.equal(await page.locator('.hos-hero').evaluate(el=>Math.round(el.getBoundingClientRect().top)),0,'Homepage hero must sit behind the header');
+            assert.equal(await page.locator('.hos-header').evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)','Header controls must remain white over photograph');
+            assert.equal(await page.locator('#hos-brand-mark').evaluate(el=>getComputedStyle(el).filter),'invert(1)','Brand mark must contrast with photo header');
             assert.equal(await page.locator('#hos-home-collection-title').evaluate(el=>getComputedStyle(el).color),'rgb(36, 36, 36)');
             assert(await page.locator('#hos-page-navigation').isHidden(),'Home should not show Back');
           }

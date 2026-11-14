@@ -62,6 +62,12 @@ let compactHeader;
 function syncHeader() {
   const y=window.scrollY || 0,compact=y>64 || (compactHeader===true && y>24);
   if(compact!==compactHeader){compactHeader=compact;document.documentElement?.setAttribute('data-header-compact',String(compact));}
+  // The image reaches behind the transparent navigation only on the homepage near the top.
+  // Other pages, open menus, and the inquiry form retain the normal opaque header.
+  const overlay=activePage==='home' && !compact &&
+    !document.body.classList.contains('hos-menu-open') &&
+    $('#hos-inquiry')?.hidden !== false;
+  root.dataset.heroHeader=String(overlay);
 }
 window.addEventListener('scroll',syncHeader,{passive:true});
 syncHeader();
@@ -90,6 +96,7 @@ function setMenu(open) {
   if (!open && menu.open) { menu.getAnimations?.().forEach(animation => animation.cancel()); menu.close(); }
   document.body.classList.toggle('hos-menu-open', open);
   menuToggle.setAttribute('aria-expanded', String(open));
+  syncHeader();
 }
 function statusMessage(text, error = false) { status.textContent = text; status.setAttribute('role', error ? 'alert' : 'status'); }
 function applyImage(img, source, sizes = '(max-width: 650px) 100vw, 55vw') {
@@ -688,6 +695,7 @@ function route(path, shouldFocus = true) {
     pageAnimation = animateSurface($(`[data-page="${page}"]`));
   }
   observeReveals($(`[data-page="${page}"]`));
+  syncHeader();
   const details = page === 'category' ? {workId:item.starWorkId,artistId:artistFor(works.find(work=>work.id===item.starWorkId))?.id || ''} : page === 'work' ? { workId:activeWork.id, artistId:activeArtist?.id || '' } : page === 'artist' ? { artistId:activeArtist.id } : {};
   track('page_view', details);
   if (page === 'work') track('work_view', details);
@@ -735,7 +743,7 @@ function openInquiry(topic, trigger) {
   if (topic==='Sculpture commission')form.elements.interest.value='Commissioning a sculpture';
   if(saved)for(const [key,value] of Object.entries(saved.values))form.elements[key].value=value;
   $('#hos-inquiry-response-note').textContent=catalog.site.inquiryNote || 'Your inquiry starts a direct conversation with House of Mabwe. We will respond by email.';
-  main.hidden = true; inquiry.hidden = false; setMenu(false);
+  main.hidden = true; inquiry.hidden = false; setMenu(false); syncHeader();
   window.scrollTo({top:0,behavior:'instant'}); form.elements.name.focus({preventScroll:true});
   pageAnimation?.cancel();pageAnimation=animateSurface(inquiry);
   track('inquiry_opened', { workId:inquiryContext.workId, artistId:inquiryContext.artistId });
@@ -743,7 +751,7 @@ function openInquiry(topic, trigger) {
 function closeInquiry() {
   if (submitting) return;
   saveInquiryDraft();
-  main.hidden = false; inquiry.hidden = true;
+  main.hidden = false; inquiry.hidden = true; syncHeader();
   window.scrollTo({top:inquiryScroll,behavior:'instant'});
   if (lastInquiryButton && !lastInquiryButton.closest?.('[hidden]')) lastInquiryButton.focus?.({preventScroll:true});
 }

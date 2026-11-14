@@ -137,3 +137,19 @@ test('collection rails use partial-card discovery and a compact progress cue ins
  assert.match(css,/grid-auto-columns:72%/);
  assert.match(css,/hos-collection-rail-progress:not\(\[hidden\]\)/);
 });
+
+test('homepage copy, immersive header and sharp mobile hero variants',()=>{
+ const html=readFileSync(new URL('../public/index.html',import.meta.url),'utf8');
+ const js=readFileSync(new URL('../public/app.js',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../public/editorial-layout.css',import.meta.url),'utf8');
+ assert.match(html,/Hand-carved stone sculpture from Zimbabwe/);
+ assert.match(html,/id="hos-concept" data-hero-header="true"/);
+ assert.match(js,/root\.dataset\.heroHeader=String\(overlay\)/);
+ assert.match(js,/activePage==='home' && !compact/);
+ assert.match(css,/\[data-page="home"\] \.hos-hero \{[\s\S]*?height:100svh;/);
+ assert.match(css,/\[data-hero-header="true"\] \.hos-header/);
+ assert.match(css,/font-size:14px/);
+ const small=readFileSync(new URL('../public/assets/responsive/designer-apartment-640.webp',import.meta.url));
+ const medium=readFileSync(new URL('../public/assets/responsive/designer-apartment-960.webp',import.meta.url));
+ assert(small.length>70000&&medium.length>140000,'Hero responsive versions should retain visual detail');
+});
