@@ -70,7 +70,7 @@ for(const [engineName,engine] of engines) {
           assert(await page.locator('.hos-view:visible .hos-card-stone').evaluateAll(nodes=>nodes.every(node=>parseFloat(getComputedStyle(node).fontSize)>=11)),'Stone captions are too small');
           if(path==='/') {
             assert(Math.abs(layout.hero.left)<1&&Math.abs(layout.hero.right-layout.clientWidth)<2,'Hero has side gaps');
-            assert(Math.abs(layout.hero.top-layout.header.bottom)<2&&Math.abs(layout.hero.bottom-height)<2,'Hero does not fill the visible screen');
+            assert(Math.abs(layout.hero.top)<2&&Math.abs(layout.hero.bottom-height)<2,'Homepage hero must extend from the top of the viewport behind navigation');
             assert.equal(await page.locator('#hos-home-chapters .hos-artist-chapter').count(),catalog.artists.length);
             assert.equal(await page.locator('#hos-home-chapters .hos-artist-campaign').count(),catalog.artists.length);
             assert.equal(await page.locator('#hos-home-chapters .hos-setting-tile').count(),catalog.artists.length*3);
