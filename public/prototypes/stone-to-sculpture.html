@@ -1,9 +1,10 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<title>Stone to Sculpture — House of Mabwe / Private Study</title>
+<meta name="theme-color" content="#151b19">
+<title>From the Earth — House of Mabwe | Sculpture Process Study</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Manrope:wght@300;400;500&display=swap" rel="stylesheet">
@@ -11,26 +12,52 @@
 <script type="module" src="/prototypes/stone-to-sculpture.js"></script>
 </head>
 <body>
-<header class="topbar"><a class="wordmark" href="/" aria-label="House of Mabwe home">HOUSE OF MABWE</a><span class="review">DESIGN STUDY · NOT LINKED FROM THE WEBSITE</span><a class="exit" href="/making">The Making <span aria-hidden="true">↗</span></a></header>
+<header class="topbar"><a class="wordmark" href="/" aria-label="House of Mabwe, home">HOUSE OF MABWE</a><span class="top-note">THE MAKING / A PRIVATE STUDY</span><a class="exit" href="/making">Return to The Making <span aria-hidden="true">↗</span></a></header>
 <main>
-  <section class="opening"><p class="eyebrow">THE MAKING · A SCROLL-DRIVEN STUDY</p><h1>From stone,<br><em>to sculpture.</em></h1><p>From the first marks in raw stone to the finished work of Douglas Musekiwa.</p><div class="scroll-cue">SCROLL TO EXPLORE <span aria-hidden="true">↓</span></div></section>
-  <section class="journey" aria-label="Scroll-driven sculpture process">
-    <div class="stage">
-      <div id="render" aria-label="Interactive 3D visualization of the stone carving process" role="img"><div class="fallback" id="fallback" hidden><img src="/assets/zsa-006-studio-front-v2.webp" alt="Coil, an original stone sculpture from the House of Mabwe collection"></div></div>
-      <div class="stage-vignette"></div>
-      <div class="stage-info"><span class="counter" id="counter">01 / 05</span><p class="eyebrow" id="phase">THE STONE</p><h2 id="stage-title">Every work begins with stone.</h2><p class="description" id="stage-description">A single block is examined for its grain, density and natural character.</p></div>
-      <div class="stage-progress" aria-hidden="true"><span id="progress-fill"></span></div>
-      <div class="scroll-help">SCROLL TO SHAPE THE STORY</div>
-      <button class="skip" id="skip" type="button">Skip to finished work <span aria-hidden="true">↗</span></button>
-    </div>
-    <div class="scroll-track" aria-hidden="true"></div>
-  </section>
-  <section class="closing" id="finished">
-    <p class="eyebrow">THE FINISHED WORK</p><h2>Coil</h2>
-    <p>Carved by Douglas Musekiwa in Zimbabwe. The final 3D geometry is the approved Coil model from our collection.</p>
-    <figure class="interior"><img loading="lazy" decoding="async" src="/assets/designers-coil-v2.webp" alt="Coil displayed in a carefully designed contemporary residential interior"><figcaption>Coil, in a residential setting</figcaption></figure>
-    <div class="closing-actions"><a href="/works/zsa-page-6">Explore the sculpture <span aria-hidden="true">↗</span></a><a href="/making">Explore the making process <span aria-hidden="true">↗</span></a></div>
-    <p class="disclaimer">An artistic visualization of stone-carving stages, not a documentary reconstruction of Coil's creation. The raw stone, markings, carving and finishing actions are illustrative; the finished model represents the actual artwork.</p>
-  </section>
+<section class="journey" aria-label="Scroll through Zimbabwean stone sculpture: source, shaping, finishing and finished work">
+<div class="stage" data-phase="0">
+  <div class="map-scene" id="map-scene" aria-label="Map showing Zimbabwe, the Guruve region, and an illustrative transfer to Harare">
+    <div class="map-texture" aria-hidden="true"></div>
+    <svg id="origin-map" viewBox="0 0 1100 680" preserveAspectRatio="xMidYMid meet" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="country-fill" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#596457"/><stop offset=".58" stop-color="#455247"/><stop offset="1" stop-color="#303d34"/></linearGradient>
+        <filter id="region-shadow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur in="SourceAlpha" stdDeviation="8"/><feOffset dx="0" dy="10"/><feComponentTransfer><feFuncA type="linear" slope=".28"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <clipPath id="country-clip"><path d="M 817.2,605.6 L 769.4,597.8 L 739.1,607.2 L 695.5,594.0 L 658.9,593.1 L 601.5,557.9 L 531.9,545.9 L 505.5,496.4 L 505.2,468.9 L 466.7,460.5 L 364.8,374.9 L 336.5,329.7 L 318.4,315.8 L 283.8,253.5 L 384.4,262.0 L 413.6,271.0 L 444.0,269.2 L 493.8,218.7 L 572.1,154.5 L 604.3,148.4 L 615.3,121.4 L 666.5,90.3 L 734.7,79.6 L 740.5,108.7 L 815.6,107.2 L 857.3,123.6 L 876.7,142.9 L 919.5,148.6 L 966.3,173.6 L 966.5,272.4 L 948.9,326.4 L 945.1,384.7 L 959.5,407.8 L 949.4,453.7 L 935.8,460.8 L 912.0,517.1 L 817.2,605.6 Z"/></clipPath>
+      </defs>
+      <g class="geo-grid">
+        <path d="M 0 120 H 1100 M 0 245 H 1100 M 0 370 H 1100 M 0 495 H 1100 M 0 620 H 1100 M 210 0 V 680 M 360 0 V 680 M 510 0 V 680 M 660 0 V 680 M 810 0 V 680 M 960 0 V 680"/>
+      </g>
+      <text class="neighbour" x="430" y="105">ZAMBIA</text><text class="neighbour" x="1012" y="385" text-anchor="end">MOZAMBIQUE</text><text class="neighbour" x="230" y="480">BOTSWANA</text><text class="neighbour" x="610" y="646">SOUTH AFRICA</text>
+      <path id="country-shape" d="M 817.2,605.6 L 769.4,597.8 L 739.1,607.2 L 695.5,594.0 L 658.9,593.1 L 601.5,557.9 L 531.9,545.9 L 505.5,496.4 L 505.2,468.9 L 466.7,460.5 L 364.8,374.9 L 336.5,329.7 L 318.4,315.8 L 283.8,253.5 L 384.4,262.0 L 413.6,271.0 L 444.0,269.2 L 493.8,218.7 L 572.1,154.5 L 604.3,148.4 L 615.3,121.4 L 666.5,90.3 L 734.7,79.6 L 740.5,108.7 L 815.6,107.2 L 857.3,123.6 L 876.7,142.9 L 919.5,148.6 L 966.3,173.6 L 966.5,272.4 L 948.9,326.4 L 945.1,384.7 L 959.5,407.8 L 949.4,453.7 L 935.8,460.8 L 912.0,517.1 L 817.2,605.6 Z" fill="url(#country-fill)" stroke="#a0aa90" stroke-width="1.9" filter="url(#region-shadow)"/>
+      <g clip-path="url(#country-clip)" class="topography">
+        <path d="M 20 205 C 160 50 300 385 560 135 S 950 220 1160 15 M 20 270 C 190 130 370 425 635 160 S 940 310 1150 110 M 0 330 C 260 180 410 450 680 215 S 920 360 1150 185 M 0 385 C 280 240 440 505 680 300 S 970 440 1170 260 M 0 470 C 180 330 470 580 700 385 S 960 540 1140 360 M 0 560 C 160 390 490 670 750 440 S 980 590 1150 420"/>
+        <path d="M 130 135 C 460 150 410 380 630 360 S 910 270 1130 520 M 220 50 C 480 270 450 410 650 425 S 960 330 1070 570"/>
+      </g>
+      <text class="country-label" x="603" y="372" text-anchor="middle">Z I M B A B W E</text>
+      <path id="travel-route" d="M 773.3,169.4 Q 826.7,188.5 802.4,258.7" fill="none" stroke="#d5b89a" stroke-width="2.1" stroke-linecap="round" stroke-dasharray="0 400"/>
+      <g id="guruve-node" transform="translate(773.3 169.4)"><circle class="pin-halo" r="34"/><circle class="pin-outline" r="7"/><circle class="pin-center" r="2.7"/><text x="20" y="-13" class="pin-label">GURUVE</text><text x="20" y="4" class="pin-secondary">SPRINGSTONE REGION</text></g>
+      <g id="harare-node" transform="translate(802.4 258.7)"><circle class="pin-halo" r="24"/><circle class="pin-outline" r="5"/><circle class="pin-center" r="2.2"/><text x="19" y="-11" class="pin-label">HARARE</text><text x="19" y="6" class="pin-secondary">WORKSHOP REGION</text></g>
+      <g id="transport-marker" transform="translate(773.3 169.4)" opacity="0"><path d="M -8,-11 L -4,-16 L 3,-15 L 7,-11 L 7,-5 L -8,-5 Z" fill="#4c5147" stroke="#bdad8b" stroke-width=".8"/><path d="M -4,-16 L 1,-14 L 7,-11" fill="none" stroke="#9b8670" stroke-width=".65"/><rect x="-10" y="-5" width="14" height="9" rx="2" fill="#e0ccb5"/><path d="M 4,-3 H 10 L 14,0 V 4 H 4 Z" fill="#e0ccb5"/><circle cx="-5" cy="6" r="2.4" fill="#17221c"/><circle cx="9" cy="6" r="2.4" fill="#17221c"/></g>
+    </svg>
+    <div class="map-coordinates" id="map-coordinates">19° S / 30° E</div>
+    <div class="map-scale" aria-hidden="true"><span></span> ZIMBABWE / SOUTHERN AFRICA</div>
+    <div class="map-context" id="map-context">A regional illustration, not Coil's documented quarry.</div>
+  </div>
+  <div id="render" role="img" aria-label="3D study of rough springstone being marked, carved, sanded, heated, waxed and finished into the approved Coil sculpture"><div id="fallback" class="fallback" hidden><img src="/assets/zsa-006-studio-front-v2.webp" alt="Coil, a black stone sculpture by Douglas Musekiwa"/><p>3D is unavailable on this device. The original artwork remains viewable.</p></div></div>
+  <div class="stage-vignette" aria-hidden="true"></div>
+  <div class="stage-info" aria-live="off"><p class="counter" id="counter">01 / 10</p><p class="eyebrow" id="phase">ZIMBABWE</p><h1 id="stage-title">The story begins in Zimbabwe.</h1><p id="stage-description" class="description">Discover the landscape and the stone tradition behind an extraordinary sculptural practice.</p></div>
+  <div class="stage-footer"><div class="progress-track" aria-hidden="true"><span id="progress-fill"></span></div><span class="scroll-help">SCROLL TO FOLLOW THE JOURNEY</span></div>
+  <button id="skip" class="skip" type="button">Skip to the finished work <span aria-hidden="true">↗</span></button>
+</div>
+</section>
+<section class="closing" id="finished">
+  <p class="eyebrow">THE FINISHED WORK</p><h2>Coil</h2><p class="artist">Douglas Musekiwa · Zimbabwe</p>
+  <p>Hand-carved springstone with a continuous sculptural form. The final three-dimensional model above is the approved model of Coil from the House of Mabwe collection.</p>
+  <figure class="interior"><img src="/assets/designers-coil-v2.webp" alt="Coil displayed in a contemporary residential interior" loading="lazy" decoding="async"><figcaption>Coil in a residential setting</figcaption></figure>
+  <div class="closing-actions"><a href="/works/zsa-page-6">Explore Coil <span aria-hidden="true">↗</span></a><a href="/making">Explore the making process <span aria-hidden="true">↗</span></a></div>
+  <p class="disclaimer">This is an educational visualization of typical Zimbabwean stone-carving techniques. Guruve is a recognized springstone-producing region; the specific quarry, transport route and workshop location for Coil have not been verified. The intermediate carving is illustrative, not documentary footage of this particular sculpture.</p>
+  <div class="source-note">PROCESS REFERENCE: <a href="https://www.guruve.com/african-art-culture/sculpture-process/" target="_blank" rel="noopener noreferrer">GURUVE SCULPTURE PROCESS ↗</a><span> · </span><a href="https://www.sfomuseum.org/exhibitions/stone-sculpture-zimbabwe/gallery" target="_blank" rel="noopener noreferrer">SFO MUSEUM: STONE SCULPTURE OF ZIMBABWE ↗</a></div>
+</section>
 </main>
-</body></html>
+</body>
+</html>
