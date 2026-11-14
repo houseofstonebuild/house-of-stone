@@ -520,26 +520,37 @@
 #hos-concept .hos-portrait-card img[src*="hos-artist-"][src*="-with-"] {object-fit:cover;}
 #hos-concept #hos-artist-image[src*="hos-artist-"][src*="-with-"] {aspect-ratio:4/5;object-fit:cover;}
 
-/* Unobtrusive collection browsing: visible adjacent work on mobile, scrollbar on desktop. */
+/* Sculptures remain swipeable; only a discreet, proportional progress line is visible. */
 #hos-concept .hos-collection-rail {min-width:0;max-width:100%;}
-#hos-concept .hos-collection-rail-progress {display:none;position:relative;width:104px;height:2px;margin:15px auto 0;background:var(--hos-line);overflow:hidden;}
+#hos-concept .hos-collection-rail-progress {
+  display:none;position:relative;width:76px;height:2px;margin:18px auto 0;
+  background:rgba(36,36,36,.085);overflow:hidden;
+}
 #hos-concept .hos-collection-rail-progress[hidden] {display:none;}
-#hos-concept .hos-collection-rail-thumb {position:absolute;inset:0 auto 0 0;display:block;min-width:12px;background:var(--hos-fg);transition:left .12s linear;}
+#hos-concept .hos-collection-rail-progress:not([hidden]) {display:block;}
+#hos-concept .hos-collection-rail-thumb {
+  position:absolute;inset:0 auto 0 0;display:block;min-width:12px;
+  background:rgba(36,36,36,.32);transition:left .12s linear;
+}
 #hos-concept .hos-horizontal-works:focus-visible {outline:2px solid var(--hos-fg);outline-offset:3px;}
 #hos-concept .hos-category-campaign > .hos-collection-introduction {margin-top:36px;}
 @media(min-width:701px){
- #hos-concept .hos-collection-rail .hos-horizontal-works[data-count] {display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:calc((100% - 40px)/3);gap:20px;width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;padding-bottom:10px;scrollbar-width:thin;scrollbar-color:#cac7c1 transparent;}
+ #hos-concept .hos-collection-rail .hos-horizontal-works[data-count] {
+   display:grid;grid-template-columns:none;grid-auto-flow:column;
+   grid-auto-columns:calc((100% - 40px)/3);gap:20px;width:100%;
+   max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;
+   scroll-snap-type:x mandatory;overscroll-behavior-x:contain;
+   padding-bottom:3px;scrollbar-width:none;
+ }
  #hos-concept .hos-horizontal-works > .hos-work-card {display:block;min-width:0;scroll-snap-align:start;}
- #hos-concept .hos-horizontal-works::-webkit-scrollbar {height:4px;}
- #hos-concept .hos-horizontal-works::-webkit-scrollbar-thumb {background:#cac7c1;border-radius:4px;}
- #hos-concept .hos-horizontal-works::-webkit-scrollbar-track {background:transparent;}
+ #hos-concept .hos-collection-rail .hos-horizontal-works::-webkit-scrollbar {display:none;}
 }
 @media(max-width:700px){
- #hos-concept .hos-collection-rail-progress:not([hidden]) {display:block;}
+ #hos-concept .hos-collection-rail-progress {width:104px;margin-top:15px;background:var(--hos-line);}
+ #hos-concept .hos-collection-rail-thumb {background:var(--hos-fg);}
  #hos-concept .hos-collection-rail .hos-horizontal-works[data-count] {scrollbar-width:none;}
  #hos-concept .hos-collection-rail .hos-horizontal-works::-webkit-scrollbar {display:none;}
 }
-
 
 /* Homepage photograph extends behind the fixed navigation, while keeping all
    collection and interior pages on the normal opaque gallery header. */
@@ -549,9 +560,10 @@
 }
 #hos-concept[data-hero-header="true"] .hos-header,
 :root[data-theme="light"] #hos-concept[data-hero-header="true"] .hos-header {
-  background:linear-gradient(180deg,rgba(6,8,10,.54) 0%,rgba(6,8,10,.32) 65%,rgba(6,8,10,.12) 100%);
+  background:transparent;
   color:#fff;
-  border-bottom:1px solid rgba(255,255,255,.16);
+  border:0;
+  box-shadow:none;
   backdrop-filter:none;
   -webkit-backdrop-filter:none;
 }
@@ -571,3 +583,18 @@
     letter-spacing:.02em;
   }
 }
+
+/* The image itself supplies the header's shadow. No separate bar or seam. */
+#hos-concept [data-page="home"] .hos-hero-shade {
+  background:linear-gradient(180deg,
+    rgba(8,10,12,.58) 0%,
+    rgba(8,10,12,.3) 13%,
+    rgba(8,10,12,.10) 26%,
+    rgba(8,10,12,0) 39%,
+    rgba(0,0,0,.08) 57%,
+    rgba(0,0,0,.35) 75%,
+    rgba(0,0,0,.72) 100%);
+}
+/* The document scrolls only vertically; inner work rails still scroll horizontally. */
+html, body {overflow-x:clip;}
+#hos-concept {overflow-x:clip;}

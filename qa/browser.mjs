@@ -60,6 +60,14 @@ for(const [engineName,engine] of engines) {
             return {viewport:innerWidth,clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,root:rect('#hos-concept'),header:rect('.hos-header'),footer:rect('.hos-footer'),footerPosition:getComputedStyle(document.querySelector('.hos-footer')).position,main:rect('#hos-main'),hero:rect('.hos-hero-image'),images:visible('#hos-concept img').map(img=>({src:img.currentSrc,naturalWidth:img.naturalWidth,fit:getComputedStyle(img).objectFit,hero:img.classList.contains('hos-hero-image'),campaign:!!img.closest('.hos-artist-campaign'),process:!!img.closest('.hos-process-steps .hos-story-section figure')})),text:visible('#hos-main p').filter(el=>!el.classList.contains('hos-artist-style')&&!el.matches('.hos-card-specs,.hos-card-stone,.hos-filter-count,.hos-work-short-specs,.hos-photo-caption')&&!el.classList.contains('hos-photo-caption')&&!el.classList.contains('hos-work-short-specs')).map(el=>({size:parseFloat(getComputedStyle(el).fontSize),text:el.textContent.slice(0,60)}))};
           });
           assert(layout.scrollWidth<=layout.clientWidth+1,`Horizontal overflow ${JSON.stringify(layout)}`);
+          if(path==='/' && width>700) {
+            const x=await page.evaluate(()=>{
+              window.scrollTo({left:250,behavior:'instant'});
+              return {scrollX:window.scrollX,documentWidth:document.scrollingElement.scrollWidth,viewport:document.documentElement.clientWidth};
+            });
+            assert.equal(x.scrollX,0,'Homepage document must not scroll horizontally');
+            assert(x.documentWidth<=x.viewport+1,'Homepage has unexpected page-wide horizontal scrollbar');
+          }
           assert(Math.abs(layout.root.left)<1&&Math.abs(layout.root.right-layout.clientWidth)<2,`Root does not fill the page width ${JSON.stringify(layout)}`);
           assert(Math.abs(layout.header.top)<1,'Header not anchored');
           assert.equal(layout.footerPosition,'static','Footer must remain in normal page flow');

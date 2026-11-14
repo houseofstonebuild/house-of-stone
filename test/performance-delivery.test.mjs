@@ -153,3 +153,16 @@ test('homepage copy, immersive header and sharp mobile hero variants',()=>{
  const medium=readFileSync(new URL('../public/assets/responsive/designer-apartment-960.webp',import.meta.url));
  assert(small.length>70000&&medium.length>140000,'Hero responsive versions should retain visual detail');
 });
+
+test('immersive hero has no header seam and page cannot scroll sideways',()=>{
+ const layout=readFileSync(new URL('../public/editorial-layout.css',import.meta.url),'utf8');
+ const font=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
+ assert.match(layout,/#hos-concept \[data-page="home"\] \.hos-hero-shade/);
+ assert.match(layout,/background:transparent;\s*color:#fff;\s*border:0;/);
+ assert.match(layout,/html, body \{overflow-x:clip;\}/);
+ assert.match(layout,/#hos-concept \{overflow-x:clip;\}/);
+ assert.match(layout,/scrollbar-width:none/);
+ assert.match(layout,/hos-collection-rail-progress:not\(\[hidden\]\)/);
+ assert.match(font,/Cormorant\+Garamond:wght@400/);
+ assert.match(font,/font-family:'Cormorant Garamond'[^;]*;\s*font-weight:400;/);
+});
