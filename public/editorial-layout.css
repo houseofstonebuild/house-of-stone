@@ -528,11 +528,11 @@
 #hos-concept .hos-horizontal-works:focus-visible {outline:2px solid var(--hos-fg);outline-offset:3px;}
 #hos-concept .hos-category-campaign > .hos-collection-introduction {margin-top:36px;}
 @media(min-width:701px){
- #hos-concept .hos-collection-rail .hos-horizontal-works[data-count] {display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:calc((100% - 40px)/3);gap:20px;width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;padding-bottom:16px;scrollbar-width:auto;scrollbar-color:#b7b4ad #f1f0ee;}
+ #hos-concept .hos-collection-rail .hos-horizontal-works[data-count] {display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:calc((100% - 40px)/3);gap:20px;width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;padding-bottom:10px;scrollbar-width:thin;scrollbar-color:#cac7c1 transparent;}
  #hos-concept .hos-horizontal-works > .hos-work-card {display:block;min-width:0;scroll-snap-align:start;}
- #hos-concept .hos-horizontal-works::-webkit-scrollbar {height:8px;}
- #hos-concept .hos-horizontal-works::-webkit-scrollbar-thumb {background:#b7b4ad;border-radius:4px;}
- #hos-concept .hos-horizontal-works::-webkit-scrollbar-track {background:#f1f0ee;}
+ #hos-concept .hos-horizontal-works::-webkit-scrollbar {height:4px;}
+ #hos-concept .hos-horizontal-works::-webkit-scrollbar-thumb {background:#cac7c1;border-radius:4px;}
+ #hos-concept .hos-horizontal-works::-webkit-scrollbar-track {background:transparent;}
 }
 @media(max-width:700px){
  #hos-concept .hos-collection-rail-progress:not([hidden]) {display:block;}
