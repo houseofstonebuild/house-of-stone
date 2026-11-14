@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Manrope:wght@300;400;500&display=swap');
 :root {color-scheme:dark;background:#080808;--hos-header-height:86px;--hos-gutter:clamp(24px,2.5vw,64px);--hos-content-width:none;}
 html {width:100%;scroll-padding-top:calc(var(--hos-visible-header-height,var(--hos-header-height)) + 24px);}
 body {margin:0;background:#080808;}
@@ -341,3 +341,44 @@ body.hos-menu-open #hos-concept .hos-header,body.hos-model-open #hos-concept .ho
   :root[data-header-compact="true"] #hos-concept .hos-brand-symbol {width:11px;height:18px;}
 }
 @media (prefers-reduced-motion:reduce) {#hos-concept *,#hos-concept *::before,#hos-concept *::after {animation:none!important;transition:none!important;}}
+
+
+/* House of Mabwe hero typography: refined editorial headline, understated Manrope supporting text. */
+#hos-concept .hos-hero-copy h1 {
+  font-weight:400;
+  line-height:1;
+  text-shadow:0 2px 24px rgba(0,0,0,.3);
+}
+#hos-concept .hos-hero-copy h1 span:first-child {
+  font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+  font-weight:500;
+  font-size:clamp(54px,6vw,96px);
+  line-height:.99;
+  letter-spacing:-.028em;
+  text-wrap:balance;
+}
+#hos-concept .hos-hero-copy h1 span+span {
+  font-family:Manrope,'Helvetica Neue',Arial,sans-serif;
+  font-size:clamp(15px,1.45vw,20px);
+  font-weight:400;
+  line-height:1.5;
+  letter-spacing:.045em;
+  margin-top:17px;
+}
+@media(max-width:700px) {
+  #hos-concept .hos-hero-copy h1 span:first-child {
+    font-size:clamp(44px,12vw,60px);
+    letter-spacing:-.026em;
+  }
+  #hos-concept .hos-hero-copy h1 span+span {
+    font-size:15px;
+    line-height:1.55;
+    letter-spacing:.025em;
+    margin-top:12px;
+  }
+}
+@media(max-height:500px) and (orientation:landscape) {
+  #hos-concept .hos-hero-copy h1 span:first-child {font-size:clamp(38px,5vw,52px);}
+  #hos-concept .hos-hero-copy h1 span+span {font-size:13px;margin-top:5px;}
+  #hos-concept .hos-hero-copy .hos-text-link {margin-top:8px;}
+}
