@@ -154,5 +154,5 @@
 @media(max-width:700px) {
  #hos-concept .hos-making-film {margin-top:36px;margin-bottom:12px;}
  #hos-concept .hos-making-film-intro {grid-template-columns:minmax(0,1fr);gap:14px;padding-bottom:20px;}
- #hos-concept .hos-making-film-intro p {font-size:14px;}
+ #hos-concept .hos-making-film-intro p {font-size:15px;}
 }

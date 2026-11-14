@@ -571,6 +571,3 @@
     letter-spacing:.02em;
   }
 }
-@media(max-height:500px) and (orientation:landscape) {
-  #hos-concept [data-page="home"] .hos-hero {min-height:400px;}
-}
