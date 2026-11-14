@@ -163,6 +163,6 @@ test('immersive hero has no header seam and page cannot scroll sideways',()=>{
  assert.match(layout,/#hos-concept \{overflow-x:clip;\}/);
  assert.match(layout,/scrollbar-width:none/);
  assert.match(layout,/hos-collection-rail-progress:not\(\[hidden\]\)/);
- assert.match(font,/Cormorant\+Garamond:wght@400/);
- assert.match(font,/font-family:'Cormorant Garamond'[^;]*;\s*font-weight:400;/);
+ assert.match(font,/Cormorant\+Garamond:wght@300/);
+ assert.match(font,/font-family:'Cormorant Garamond'[^;]*;\s*font-weight:300;/);
 });
