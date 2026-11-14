@@ -1,5 +1,5 @@
 {
-  "sourceNote": "Owner-supplied biographical sources received 14 November 2026. Spencer Chigombe is the same artist previously entered as Spencer Rusike (identity explicitly confirmed by owner). Thomas Nyasoka's handwritten source contains unclear proper names and an ambiguous project date; avoid publishing those unverified details. Tinodashe's source gives a birth date of 29 August 2004; omit age so copy does not become dated. Contact details are internal only and must not appear in public biographies.",
+  "sourceNote": "Owner-supplied biographical sources received 14 November 2026. Spencer Chigombe is the same artist previously entered as Spencer Rusike (identity expressly confirmed by owner). Thomas Nyasoka's handwritten source gives 1 March 1985 and describes mentorship, a start of independent projects in 2004, and stone preferences. Avoid uncertain names. Tinodashe's source gives a birth date of 29 August 2004; omit his age because it becomes dated. Personal contact details are not for public display.",
   "profiles": [
     {
       "name": "Spencer Chigombe",
@@ -14,9 +14,9 @@
     {
       "name": "Thomas Nyasoka",
       "kind": "artist-supplied",
-      "source": "Owner-supplied photograph of Thomas Nyasoka's handwritten biography, 14 November 2026; unclear personal names and early-project date omitted",
-      "introduction": "Born in Guruve, Thomas Nyasoka began sculpting while at school and developed a style incorporating carved heads and birds.",
-      "biography": "Thomas Nyasoka was born on 1 March 1995 in the Guruve area of Zimbabwe, a region closely associated with the country's stone-sculpture tradition. His interest in carving began while he was still at school, when he experimented with his older brother's tools during holidays. After completing school, he gained practical experience assisting another sculptor before pursuing work of his own.\n\nNyasoka's supplied biography describes an approach focused on carved heads and birds. He has worked from a gallery workshop along Airport Road in Harare and particularly values springstone for its texture, while also using cobalt and opal stones to explore different effects. His sculpture Wingbeat, represented in the House of Mabwe collection, captures the suggestion of flight through projecting forms and a strong, simplified silhouette. It offers an example of how recognisable subjects can become expressive shapes in stone."
+      "source": "Owner-supplied handwritten biography photograph, 14 November 2026",
+      "introduction": "Born in Zimbabwe's Guruve area, Thomas Nyasoka learned carving through family exposure and a sculptor's workshop, developing his own approach to heads and birds.",
+      "biography": "Thomas Nyasoka was born on 1 March 1985 in the Guruve area of Zimbabwe, a region with a long association with stone sculpture. He became interested in carving while still at school and experimented with his brother's tools during holidays. After completing school, he gained workshop experience under the sculptor Edron Rukodzi. His supplied biography records that he began pursuing independent projects in 2004, developing a distinctive approach to carved heads and birds.\n\nNyasoka has worked from a gallery workshop along Airport Road in Harare. He particularly values springstone for its texture, while sometimes choosing cobalt and opal stones for variety. In the House of Mabwe collection, his sculpture Wingbeat captures the impression of flight through projecting forms and a simplified silhouette. The piece suggests movement without attempting to reproduce every anatomical detail, bringing a recognisable natural subject into a more abstract composition."
     },
     {
       "name": "Tinodashe Mangenda",
