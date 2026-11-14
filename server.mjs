@@ -606,6 +606,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         console.log('Artist biographies and retired Within attribution:',JSON.stringify(result));
       } catch(error) { console.error('Artist editorial publication did not complete:',error.message); }
       try {
+        const {publishArchiveKissingLovers}=await import('./scripts/publish-owner-archive-kissing-lovers.mjs');
+        const result=await publishArchiveKissingLovers({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
+        console.log('Owner-requested Kissing Lovers archive:',JSON.stringify(result));
+      } catch(error) { console.error('Kissing Lovers archive did not complete:',error.message); }
+      try {
         const {publishVerifiedArtistBiographies}=await import('./scripts/publish-verified-artist-biographies.mjs');
         const result=await publishVerifiedArtistBiographies({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
         console.log('Three owner-supplied verified artist biographies:',JSON.stringify(result));
