@@ -5,7 +5,7 @@ import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {chromium} from 'playwright';
 import {createApp} from '../server.mjs';
-const screenshotFolder=new URL('../test-results/making-v2/',import.meta.url);
+const screenshotFolder=new URL('../test-results/browser/making-v2/',import.meta.url);
 mkdirSync(screenshotFolder,{recursive:true});
 const dataDir=mkdtempSync(join(tmpdir(),'hos-making-v2-'));
 const app=createApp({dataDir,env:{ADMIN_PASSWORD:'test-only-'+randomUUID()},backgroundNotifications:false});
