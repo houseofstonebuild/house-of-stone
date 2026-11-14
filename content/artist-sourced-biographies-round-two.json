@@ -1,0 +1,29 @@
+{
+  "sourceNote": "Owner-supplied biographical sources received 14 November 2026. Spencer Chigombe is the same artist previously entered as Spencer Rusike (identity explicitly confirmed by owner). Thomas Nyasoka's handwritten source contains unclear proper names and an ambiguous project date; avoid publishing those unverified details. Tinodashe's source gives a birth date of 29 August 2004; omit age so copy does not become dated. Contact details are internal only and must not appear in public biographies.",
+  "profiles": [
+    {
+      "name": "Spencer Chigombe",
+      "legacyName": "Spencer Rusike",
+      "slug": "spencer-chigombe",
+      "legacySlug": "spencer-rusike",
+      "kind": "artist-supplied",
+      "source": "Owner-supplied screenshot of Spencer Chigombe biography, 14 November 2026",
+      "introduction": "Spencer Chigombe studied art in school and developed his stone-carving skills under the mentorship of sculptor Tawanda Kapusi.",
+      "biography": "Spencer Chigombe was born on 16 January 1987 in Murehwa, Zimbabwe. His interest in art took shape at secondary school, where he studied it as a subject. He later met the stone sculptor Tawanda Kapusi, whose guidance helped him develop his carving skills and pursue sculpture more seriously. Chigombe credits that mentorship as an important foundation for his growth as an artist.\n\nIn the House of Mabwe collection, Chigombe is represented by Blooming, an abstract composition built around a rounded central form and a broad, looping curve. The space between those elements is fundamental to the work: the outer form appears to move around its centre without enclosing it completely. Its changing outline brings together solidity and openness, giving viewers different impressions as they move around the sculpture."
+    },
+    {
+      "name": "Thomas Nyasoka",
+      "kind": "artist-supplied",
+      "source": "Owner-supplied photograph of Thomas Nyasoka's handwritten biography, 14 November 2026; unclear personal names and early-project date omitted",
+      "introduction": "Born in Guruve, Thomas Nyasoka began sculpting while at school and developed a style incorporating carved heads and birds.",
+      "biography": "Thomas Nyasoka was born on 1 March 1995 in the Guruve area of Zimbabwe, a region closely associated with the country's stone-sculpture tradition. His interest in carving began while he was still at school, when he experimented with his older brother's tools during holidays. After completing school, he gained practical experience assisting another sculptor before pursuing work of his own.\n\nNyasoka's supplied biography describes an approach focused on carved heads and birds. He has worked from a gallery workshop along Airport Road in Harare and particularly values springstone for its texture, while also using cobalt and opal stones to explore different effects. His sculpture Wingbeat, represented in the House of Mabwe collection, captures the suggestion of flight through projecting forms and a strong, simplified silhouette. It offers an example of how recognisable subjects can become expressive shapes in stone."
+    },
+    {
+      "name": "Tinodashe Mangenda",
+      "kind": "artist-supplied",
+      "source": "Owner-supplied written Tinodashe Mangenda biography, 14 November 2026",
+      "introduction": "Tinodashe Mangenda learned stone carving at Chitungwiza Arts Centre and draws inspiration from his father, Farai Mangenda.",
+      "biography": "Tinodashe Mangenda was born in Zimbabwe on 29 August 2004. He developed an interest in stone sculpture at Chitungwiza Arts Centre, where he began refining his carving skills. His father, Farai Mangenda, has been an important influence on his artistic direction. For Tinodashe, continuing that family legacy is closely connected to his ambition to bring Zimbabwean art to a wider audience.\n\nMangenda is at an early stage in his artistic career, but his work already reflects an interest in figurative presence and carefully worked detail. In Queen Mother, a calm portrait is framed by a wrapped headdress, earrings and layered necklaces. The contrast between the composed face and richly carved adornments gives the sculpture its sense of dignity and authority. Mangenda hopes to continue developing his practice and to share his work internationally as part of Zimbabwe's living stone-sculpture tradition."
+    }
+  ]
+}
