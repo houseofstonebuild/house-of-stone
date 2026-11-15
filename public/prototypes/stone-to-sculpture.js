@@ -170,7 +170,7 @@ function stoneMaterial({raw=false,blank=false,color=0x656b62,roughness=.95,flat=
            float localY=clamp((vLocalStone.y+1.69)/3.38,0.0,1.0);
            float tooth=mno(vLocalStone*6.8)*.14+mno(vLocalStone*27.0)*.07;
            float removal=uCarveProgress+localY*.22+tooth-.105;
-           if(removal>.745)discard;`:blank?`
+           if(removal>.52)discard;`:blank?`
           // Do not punch holes in the parent shell. The approved three-dimensional
           // Coil mesh supplies the true openings as material is taken away.
           float localHeight=clamp(vLocalStone.y/3.35,0.0,1.0);
@@ -806,7 +806,7 @@ function render(p){
  // No horizontal reveal plane or disembodied upper sculpture.
  e.carveRevealPlane.constant=.55;
  host.dataset.supportOverlap=supportOverlap.toFixed(4);
- const rockFade=smooth((carve-.69)/.20),roughFade=smooth((carve-.13)/.57);
+ const rockFade=smooth((carve-.69)/.20),roughFade=smooth((carve-.09)/.55);
  host.dataset.carveFrontier=frontier.toFixed(4);
  host.dataset.realShapeReveal=clamp((3.05-frontier)/3.23).toFixed(4);
  host.dataset.blankCapReady=String(Boolean(e.blankCap));
@@ -815,15 +815,20 @@ function render(p){
  e.rock.material.transparent=true;
  e.rock.material.opacity=1-rockFade;
  e.rock.material.depthWrite=carve<.38;
+ host.dataset.rockVisible=String(e.rock.visible);
+ host.dataset.rockOpacity=e.rock.material.opacity.toFixed(3);
  // Retire the unsupported cylindrical intermediate and its flat disk cap.
  if(e.intermediate)e.intermediate.visible=false;
  if(e.blankCap)e.blankCap.visible=false;
+ host.dataset.intermediateVisible='false';
  e.rockCap.visible=false;
  if(e.marks){e.marks.visible=mark>.025;e.marks.material.opacity=.94*mark;}
  host.dataset.markingVisibility=mark.toFixed(4);
  if(e.rough){
    e.rough.visible=carve>.025&&wax<.997;
    const roughOpacity=roughFade;
+   host.dataset.roughOpacity=roughOpacity.toFixed(3);
+   host.dataset.roughVisible=String(e.rough.visible);
    if(Math.abs((e.lastRoughOpacity??-1)-roughOpacity)>.004){
     e.lastRoughOpacity=roughOpacity;
     for(const mat of e.roughMaterials){mat.opacity=roughOpacity;mat.depthWrite=roughOpacity>.85;}
