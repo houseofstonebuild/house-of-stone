@@ -18,6 +18,8 @@ test('private Making V6 runs deterministic non-WebGL scroll animation',()=>{
  assert.match(player,/window\.addEventListener\('scroll',schedule/);
  assert.match(player,/archiveFilm\.play\(\)/);
  assert.match(player,/archiveFilm\.pause\(\)/);
+ assert.match(player,/createCarvingTools/);
+ assert.match(player,/physicalTools\.update\(p,reduced\.matches\)/);
  assert.doesNotMatch(player,/WebGLRenderer|new THREE|GLTFLoader/);
  assert.match(player,/route\.getPointAtLength/);
  assert.match(player,/truck\.setAttribute\('transform'/);
@@ -76,4 +78,17 @@ test('mobile final poster is baked from the real approved GLB',()=>{
  assert.match(approved,/making-coil-approved-workshop-v1\.png/);
  assert.match(approved,/capture-approved-coil/);
  assert.match(approved,/approvedPresentation='baked-original-glb'/);
+});
+
+test('the on-stone hammer and chisel are real animated scene elements, not a test-only data flag',()=>{
+ const tools=readFileSync(asset('prototypes/carving-tools.js'),'utf8');
+ assert.match(tools,/<svg viewBox="0 0 360 330"/);
+ assert.match(tools,/id="tool-chisel"/);
+ assert.match(tools,/id="tool-mallet"/);
+ assert.match(tools,/id="tool-impact"/);
+ assert.match(tools,/setAttribute\('transform'/);
+ assert.match(tools,/physicalStrikeContact/);
+ assert.match(tools,/physicalTipY/);
+ const result=spawnSync(process.execPath,['--check',asset('prototypes/carving-tools.js').pathname],{encoding:'utf8'});
+ assert.equal(result.status,0,result.stderr);
 });
