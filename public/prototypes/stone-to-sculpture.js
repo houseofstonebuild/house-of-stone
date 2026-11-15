@@ -120,8 +120,8 @@ function stoneMaterial({raw=false,blank=false,color=0x656b62,roughness=.95,flat=
        float g=mno(vLocalStone*8.0)*.40+mno(vLocalStone*36.0)*.34+mno(vLocalStone*107.0)*.26;
        float vein=pow(1.0-abs(sin(vLocalStone.y*13.3+vLocalStone.x*4.9+mno(vLocalStone*2.7)*5.0)),35.0);
        diffuseColor.rgb*=mix(.84,1.11,g)*(1.0-.075*vein);
-       ${raw?`float oxide=mno(vLocalStone*4.1+vec3(11.0,-4.0,6.0));
-          float rind=smoothstep(.54,.79,oxide)*.20;
+       ${raw?`float oxide=mno(vLocalStone*9.5+vec3(11.0,-4.0,6.0));
+          float rind=smoothstep(.67,.89,oxide)*.075;
           diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.30,.27,.23),rind);
          float chip=mno(vLocalStone*vec3(10.0,7.0,8.0));
           // Distance to Coil's actual projected mesh (including its central opening).
@@ -156,13 +156,13 @@ function rockGeometry(){
   const geo=new THREE.IcosahedronGeometry(1,5),pos=geo.attributes.position;
   for(let i=0;i<pos.count;i++){
     const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i);
-    const superX=Math.sign(x)*Math.pow(Math.abs(x),.47);
-    const superY=Math.sign(y)*Math.pow(Math.abs(y),.50);
-    const superZ=Math.sign(z)*Math.pow(Math.abs(z),.40);
+    const superX=Math.sign(x)*Math.pow(Math.abs(x),.65);
+    const superY=Math.sign(y)*Math.pow(Math.abs(y),.66);
+    const superZ=Math.sign(z)*Math.pow(Math.abs(z),.61);
     const broad=fbm(x*3.5+2.2,y*3.3+3.5,z*3.8+5.2)-.5;
     const grain=fbm(x*13+6,y*11+7,z*13+4)-.5;
-    const chip=0.12*broad+0.055*grain;
-    const edge=1+.03*Math.sin(y*19+x*8)+.045*broad;
+    const chip=0.17*broad+0.071*grain;
+    const edge=1+.045*Math.sin(y*19+x*8)+.065*broad;
     pos.setXYZ(i,(superX*1.08+x*.15+chip*x)*edge,
       superY*1.67+chip*y+.036*Math.sin(x*20+z*14),
       (superZ*.75+chip*z)*edge);
@@ -532,7 +532,8 @@ function render(p){
  const supportOverlap=.38*(1-smooth((carve-.72)/.26));
  const workingHeight=clamp(frontier+supportOverlap,.025,3.34);
  e.blankHidePlane.constant=workingHeight;
- e.carveRevealPlane.constant=-frontier;
+ // Only expose portions that have cleared the still-solid working surface.
+ e.carveRevealPlane.constant=-(workingHeight-.015);
  host.dataset.supportOverlap=supportOverlap.toFixed(4);
  const toBlank=smooth((carve-.007)/.13),toRough=smooth((carve-.82)/.17);
  host.dataset.carveFrontier=frontier.toFixed(4);
@@ -633,9 +634,12 @@ function render(p){
  }
  if(e.plinth)e.plinth.visible=gallery>.55;
  e.root.rotation.set(.007*Math.sin(p*5),lerp(-.18,.14,smooth((p-.43)/.56)),0);
- const focus=smooth((p-.53)/.20)*(1-smooth((p-.77)/.08)),dist=mobile()?8.7:8.0;
- e.camera.position.set(mobile()?.04:1.38,3.12,dist-.65*focus);
- e.camera.lookAt(mobile()?0:.28,1.68,0);
+ const focus=smooth((p-.53)/.20)*(1-smooth((p-.77)/.08));
+ const mobileFinal=mobile()?smooth((p-.928)/.05):0;
+ const dist=mobile()?lerp(8.7,9.05,mobileFinal):8.55;
+ e.camera.position.set(mobile()?.04:1.38,3.12,dist-.16*focus);
+ // The final work rises clear of the title on narrow phone screens.
+ e.camera.lookAt(mobile()?0:.28,lerp(1.68,.94,mobileFinal),0);
  e.renderer.render(e.scene,e.camera);
  host.dataset.carveProgress=removed.toFixed(4);
  host.dataset.blankReady=String(Boolean(e.intermediate));
