@@ -1,0 +1,49 @@
+name: Capture approved Coil mobile finale
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa/capture-approved-coil.mjs'
+      - 'public/prototypes/approved-coil-reveal.js'
+      - '.github/workflows/capture-approved-coil.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: approved-coil-finale-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --prefix qa --no-audit --no-fund
+      - name: Render exact approved Coil for mobile fallback
+        run: sh scripts/run-browser-qa.sh qa/capture-approved-coil.mjs
+      - name: Retain direct output of approved-GLB render
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: approved-coil-mobile-portrait
+          path: public/assets/making-coil-approved-mobile-v1.png
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Commit approved mobile render
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/assets/making-coil-approved-mobile-v1.png
+          git diff --cached --quiet && exit 0
+          git commit -m 'Publish original-Coil mobile final render from approved GLB'
+          git push origin HEAD:main
