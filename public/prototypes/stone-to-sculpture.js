@@ -681,7 +681,7 @@ function setup(){
  e.renderer=new THREE.WebGLRenderer({canvas,context:ctx,alpha:true,antialias:!mobile(),preserveDrawingBuffer:atlasCapture,powerPreference:'low-power'});
  e.renderer.setClearColor(0x000000,0);e.renderer.localClippingEnabled=true;
  e.renderer.outputColorSpace=THREE.SRGBColorSpace;e.renderer.toneMapping=THREE.ACESFilmicToneMapping;
- e.renderer.toneMappingExposure=1.07;e.renderer.setPixelRatio(Math.min(devicePixelRatio,mobile()?.85:1.5));
+ e.renderer.toneMappingExposure=1.07;e.renderer.setPixelRatio((atlasCapture?1.5:Math.min(devicePixelRatio,mobile()?.85:1.5)));
  e.scene=new THREE.Scene();e.camera=new THREE.PerspectiveCamera(34,1,.1,100);
  e.scene.add(new THREE.HemisphereLight(0xe6e8dd,0x33362e,2.6));
  for(const [color,intensity,x,y,z] of [[0xf6e6cf,3.2,-4,7,6],[0xdde6f0,1.5,4,5,2],[0xf6f1e7,2,1,6,-5]]){
@@ -703,7 +703,7 @@ function resize(){
  if(!e.renderer)return;
  const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);
  if(e.renderWidth!==w||e.renderHeight!==h||e.renderMobile!==mobile()){
-  e.renderer.setPixelRatio(Math.min(devicePixelRatio,mobile()?.85:1.5));e.renderer.setSize(w,h,false);
+  e.renderer.setPixelRatio((atlasCapture?1.5:Math.min(devicePixelRatio,mobile()?.85:1.5)));e.renderer.setSize(w,h,false);
   e.renderWidth=w;e.renderHeight=h;e.renderMobile=mobile();
  }
  e.camera.aspect=w/h;e.camera.fov=mobile()?38:33;e.camera.updateProjectionMatrix();schedule();
