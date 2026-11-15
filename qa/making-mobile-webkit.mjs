@@ -1,0 +1,66 @@
+// WebKit smoke test for the phone-only, seek-free sculpture timeline.
+// This covers the browser engine on iOS; it does not claim to measure real
+// device thermal throttling or native Safari toolbar dynamics.
+import assert from 'node:assert/strict';
+import {mkdtempSync,mkdirSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {randomUUID} from 'node:crypto';
+import {webkit} from 'playwright';
+import {createApp} from '../server.mjs';
+
+const output=new URL('../test-results/browser/mobile-webkit/',import.meta.url);
+mkdirSync(output,{recursive:true});
+const dataDir=mkdtempSync(join(tmpdir(),'hos-webkit-'));
+const app=createApp({dataDir,env:{ADMIN_PASSWORD:'test-only-'+randomUUID()},backgroundNotifications:false});
+let browser;
+try{
+ await new Promise(ok=>app.server.listen(0,'127.0.0.1',ok));
+ const origin='http://127.0.0.1:'+app.server.address().port;
+ browser=await webkit.launch({headless:true});
+ for(const view of [{width:393,height:852},{width:375,height:667}]){
+  const page=await browser.newPage({viewport:view,deviceScaleFactor:2,hasTouch:true,isMobile:true});
+  const errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  page.on('response',r=>{if(r.status()>=400&&/making-mobile-atlas-v1/.test(r.url()))errors.push(String(r.status())+' '+r.url());});
+  await page.goto(origin+'/prototypes/stone-to-sculpture.html',{waitUntil:'domcontentloaded'});
+  await page.locator('#render[data-render-mode="precomputed-mobile"]').waitFor({timeout:30000});
+  const samples=[];
+  for(const progress of [.03,.22,.335,.49,.64,.80,.93,.983,.80,.49]){
+   await page.evaluate(progress=>{
+    const journey=document.querySelector('.journey'),stage=document.querySelector('.stage');
+    const top=journey.getBoundingClientRect().top+scrollY;
+    scrollTo(0,Math.round(top+(journey.offsetHeight-stage.offsetHeight)*progress));
+   },progress);
+   await page.waitForFunction(progress=>{
+    const host=document.getElementById('render'),scene=document.getElementById('mobile-sculpture-frames');
+    const visible=progress>=.305;
+    return !visible||(Number.isInteger(Number(host.dataset.mobileAtlasFrame))&&
+      host.dataset.mobileAtlasPending===''&&getComputedStyle(scene).backgroundImage.includes('making-mobile-atlas-v1'));
+   },progress,{timeout:20000});
+   await page.waitForTimeout(120);
+   const info=await page.evaluate(()=>({
+    frame:Number(document.getElementById('render').dataset.mobileAtlasFrame),
+    phase:Number(document.querySelector('.stage').dataset.phase),
+    progress:parseFloat(document.getElementById('progress-fill').style.width)||0,
+    liveWebGL:!!document.querySelector('#render canvas'),
+    atlas:getComputedStyle(document.getElementById('mobile-sculpture-frames')).backgroundImage,
+    docWidth:document.documentElement.scrollWidth,viewportWidth:innerWidth
+   }));
+   assert(!info.liveWebGL,'WebKit phone unexpectedly instantiated a WebGL renderer');
+   assert(info.docWidth<=info.viewportWidth+2,'WebKit page has horizontal overflow');
+   if(progress>=.305)assert.match(info.atlas,/making-mobile-atlas-v1-/);
+   samples.push({progress,frame:info.frame,phase:info.phase});
+  }
+  assert(samples[7].frame>samples[8].frame,'Backward scroll did not rewind in WebKit');
+  assert(samples[8].frame>samples[9].frame,'WebKit phone failed to rewind further');
+  assert.deepEqual(errors,[],'iOS WebKit script or image failures');
+  await page.screenshot({path:new URL(String(view.width)+'-final.png',output).pathname});
+  console.log('WebKit mobile sculpture frame test',view.width,JSON.stringify(samples));
+  await page.close();
+ }
+}finally{
+ await browser?.close();
+ await new Promise(ok=>app.server.close(ok));
+ rmSync(dataDir,{recursive:true,force:true});
+}
