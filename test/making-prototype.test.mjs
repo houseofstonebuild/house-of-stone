@@ -4,10 +4,16 @@ import {readFileSync,mkdtempSync,rmSync,statSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createApp} from '../server.mjs';
+import {spawnSync} from 'node:child_process';
 
 const html=readFileSync(new URL('../public/prototypes/stone-to-sculpture.html',import.meta.url),'utf8');
 const js=readFileSync(new URL('../public/prototypes/stone-to-sculpture.js',import.meta.url),'utf8');
 const css=readFileSync(new URL('../public/prototypes/stone-to-sculpture.css',import.meta.url),'utf8');
+
+test('prototype browser module parses as valid JavaScript',()=>{
+ const result=spawnSync(process.execPath,['--check',new URL('../public/prototypes/stone-to-sculpture.js',import.meta.url).pathname],{encoding:'utf8'});
+ assert.equal(result.status,0,result.stderr||result.stdout);
+});
 
 test('scroll-driven source map is factual but does not imply a verified Coil quarry',()=>{
  assert.match(html,/name="robots" content="noindex,nofollow,noarchive"/);
