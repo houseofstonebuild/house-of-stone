@@ -107,3 +107,25 @@
  .stage.mobile-atlas-mode #origin-map{will-change:auto;transform:none}
  .stage.mobile-atlas-mode .map-texture{background-image:radial-gradient(circle at 63% 28%,rgba(197,159,118,.11),transparent 48%)}
 }
+
+
+/* Carving is an editorial two-part composition: real documentary handwork and
+   the approved Coil form. Neither the footage nor the copy covers the stone. */
+@media(max-width:800px){
+ .stage[data-phase="6"] .skip{top:70px;right:23px;font-size:9px;z-index:8}
+ .stage[data-phase="6"] .archive-cutaway{
+  top:124px;right:23px;width:min(44vw,178px);aspect-ratio:16/9;
+  border:1px solid rgba(221,209,188,.38);box-shadow:0 11px 30px rgba(0,0,0,.24)
+ }
+ .stage[data-phase="6"] .stage-info{
+  left:25px;right:25px;bottom:106px;width:calc(100% - 50px);max-width:360px;
+ }
+ .stage[data-phase="6"] .stage-info h1{
+  font-size:clamp(42px,10vw,53px);line-height:1.01;max-width:330px;
+  margin-bottom:11px;
+ }
+ .stage[data-phase="6"] .description{font-size:11px;line-height:1.58;max-width:310px}
+ .stage[data-phase="6"] .stage-vignette{
+  background:linear-gradient(0deg,rgba(8,12,10,.96),rgba(8,12,10,.48) 27%,transparent 57%);
+ }
+}
