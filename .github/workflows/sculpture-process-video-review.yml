@@ -27,11 +27,12 @@ jobs:
           ffmpeg -hide_banner -loglevel error -y -ss 0 -t 21.4 -i public/assets/house-of-mabwe-making-web-v1.mp4 -an -vf "scale=640:360:flags=lanczos,format=yuv420p" -r 24 -c:v libx264 -preset veryfast -crf 27 -g 6 -keyint_min 6 -sc_threshold 0 -movflags +faststart public/assets/making-chiseling-scrub-v1.mp4
           ffmpeg -hide_banner -loglevel error -y -ss 7 -i public/assets/house-of-mabwe-making-web-v1.mp4 -frames:v 1 -vf "scale=640:-2" -q:v 3 public/assets/making-chiseling-poster-v1.jpg
           ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 public/assets/making-chiseling-scrub-v1.mp4
+          ffmpeg -hide_banner -loglevel error -y -i public/assets/making-chiseling-scrub-v1.mp4 -vf "fps=2,scale=320:180,tile=7x6:padding=0:margin=0" -frames:v 1 -c:v libwebp -quality 73 public/assets/making-chiseling-scroll-frames-v1.webp
       - name: Publish derived archival assets only
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/assets/making-chiseling-scrub-v1.mp4 public/assets/making-chiseling-poster-v1.jpg
+          git add public/assets/making-chiseling-scrub-v1.mp4 public/assets/making-chiseling-poster-v1.jpg public/assets/making-chiseling-scroll-frames-v1.webp
           git diff --cached --quiet || git commit -m "Add verified chiseling-only scrub asset"
           git fetch origin main
           git rebase origin/main
