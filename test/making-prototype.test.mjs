@@ -90,6 +90,22 @@ test('natural springstone, synchronized chisel and traditional finish stages',()
  assert.match(js,/host\.dataset\.modelReady='true'/);
 });
 
+test('high-resolution mobile sculpture frames preserve detail without live WebGL',()=>{
+ const manifest=JSON.parse(readFileSync(new URL('../public/assets/making-mobile-atlas-v2-manifest.json',import.meta.url),'utf8'));
+ assert.equal(manifest.frameCount,192);
+ assert.equal(manifest.columns,2);
+ assert.equal(manifest.rows,3);
+ assert.equal(manifest.generated.length,32);
+ assert(manifest.tileWidth>=450 && manifest.tileHeight>=950,'Phone source image must have native-size detail');
+ assert(statSync(new URL('../public/assets/making-mobile-atlas-v2-00.webp',import.meta.url)).size>10000);
+ assert(statSync(new URL('../public/assets/making-mobile-atlas-v2-31.webp',import.meta.url)).size>10000);
+ assert.match(js,/atlasColumns=2,atlasRows=3,atlasGroupSize=6/);
+ assert.match(js,/making-mobile-atlas-v2-/);
+ assert.match(css,/background-size:200% 300%/);
+ assert.match(js,/if\(mobile\(\)&&!atlasCapture\)setupMobileAtlas\(\)/);
+ assert.match(js,/atlasCapture\?1\.5/);
+});
+
 test('review remains unlinked and delivers mobile and reduced-motion support',async()=>{
  assert.match(html,/THE MAKING \/ A PRIVATE STUDY/);
  assert.match(html,/works\/zsa-page-6/);
