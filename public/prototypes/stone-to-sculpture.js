@@ -45,7 +45,7 @@ const fract=n=>n-Math.floor(n);
 const hash=(a,b=0,c=0)=>fract(Math.sin(a*127.1+b*311.7+c*74.7)*43758.5453);
 const mobile=()=>innerWidth<=800;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-const active=()=>{const r=journey.getBoundingClientRect();return clamp(-r.top/Math.max(1,journey.offsetHeight-innerHeight));};
+const active=()=>{const r=journey.getBoundingClientRect();return clamp(-r.top/Math.max(1,journey.offsetHeight-stage.offsetHeight));};
 const phaseFor=p=>{for(let i=0;i<stops.length-1;i++)if(p<stops[i+1])return i;return 10;};
 const phaseT=(p,i)=>clamp((p-stops[i])/Math.max(.001,stops[i+1]-stops[i]));
 const impactVector=new THREE.Vector3();
@@ -61,6 +61,16 @@ const e={renderer:null,scene:null,camera:null,root:null,canvas:null,renderWidth:
 // A faithful vector country outline (Natural Earth simplified data), not a road map.
 const routeLength=route.getTotalLength();
 function updateMap(p){
+ if(p>.40){
+  if(!e.mapDone){
+   e.mapDone=true;
+   stage.style.setProperty('--mapOpacity','0');
+   stage.style.setProperty('--sceneOpacity','1');
+   map.setAttribute('aria-hidden','true');
+  }
+  return;
+ }
+ e.mapDone=false;
  const approach=smooth((p-.052)/.105);
  const travel=smooth((p-.17)/.135);
  const arrival=smooth((p-.29)/.085);
@@ -272,9 +282,16 @@ function shadowTexture(){
 function makeStudio(){
  const shadow=new THREE.Mesh(new THREE.PlaneGeometry(5.4,4.4),new THREE.MeshBasicMaterial({map:shadowTexture(),transparent:true,depthWrite:false}));
  shadow.rotation.x=-Math.PI/2;shadow.position.y=-.055;e.scene.add(shadow);e.shadow=shadow;
+ // Gallery limestone pedestal, geometrically centered on the approved sculpture.
  const base=new THREE.Group();
- const podium=new THREE.Mesh(new THREE.BoxGeometry(2,.52,1.5,8,2,8),new THREE.MeshStandardMaterial({color:0x575a53,roughness:.86}));
- podium.position.y=-.27;base.add(podium);base.visible=false;e.scene.add(base);e.plinth=base;
+ const limestone=new THREE.MeshStandardMaterial({color:0x938f85,roughness:.91});
+ const column=new THREE.Mesh(new THREE.CylinderGeometry(.90,.93,.49,64),limestone);
+ column.position.y=-.255;base.add(column);
+ const lip=new THREE.Mesh(new THREE.CylinderGeometry(.915,.915,.027,64),new THREE.MeshStandardMaterial({color:0xa39b8d,roughness:.72}));
+ lip.position.y=-.024;base.add(lip);
+ const foot=new THREE.Mesh(new THREE.CylinderGeometry(.945,.945,.036,64),new THREE.MeshStandardMaterial({color:0x6e6b63,roughness:.84}));
+ foot.position.y=-.51;base.add(foot);
+ base.visible=false;e.root.add(base);e.plinth=base;
 }
 function makeChiselAndHammer(){
   const metal=new THREE.MeshStandardMaterial({color:0x8d9898,metalness:.68,roughness:.39});
@@ -294,10 +311,12 @@ function makeChiselAndHammer(){
   const tip=new THREE.Object3D();chisel.add(tip);e.chiselTip=tip;
   const pivot=new THREE.Group();pivot.position.set(.70,1.49,.02);toolRig.add(pivot);
   const hammer=new THREE.Group();pivot.add(hammer);
-  const beam=new THREE.Mesh(new THREE.CylinderGeometry(.045,.052,.67,11),wood);
-  beam.position.set(-.29,-.14,0);beam.rotation.z=-1.18;hammer.add(beam);
-  const hammerHead=new THREE.Mesh(new THREE.CylinderGeometry(.115,.115,.38,12),darkMetal);
-  hammerHead.rotation.z=Math.PI/2;
+  // Short-handled sculptor's mallet: grip runs diagonally from head to palm.
+  const beam=new THREE.Mesh(new THREE.CylinderGeometry(.049,.057,.92,14),wood);
+  beam.position.set(-.40,.22,-.02);beam.rotation.z=-.66;hammer.add(beam);
+  const band=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.08,16),metal);
+  band.position.set(-.69,-.09,-.02);hammer.add(band);
+  const hammerHead=new THREE.Mesh(new THREE.CylinderGeometry(.123,.115,.23,20),darkMetal);
   // At impact, the lower face of the hammer head meets the chisel's top,
   // not its center. Both are located in world-space in the browser QA.
   hammerHead.position.set(-.70,-.145,-.02);hammer.add(hammerHead);
@@ -306,13 +325,13 @@ function makeChiselAndHammer(){
   const chips=[];
   const mat=stoneMaterial({color:0x575e55,flat:true});
   const geometry=new THREE.TetrahedronGeometry(.044,0);
-  for(let i=0;i<34;i++){
+  for(let i=0;i<(mobile()?12:34);i++){
     const chip=new THREE.Mesh(geometry,mat);
     chip.userData={seed:hash(i,2),dir:hash(i,7)*Math.PI*2,energy:hash(i,11)};
     e.root.add(chip);chips.push(chip);
   }
   e.chips=chips;
-  const n=80;const cloud=new THREE.BufferGeometry();cloud.setAttribute('position',new THREE.BufferAttribute(new Float32Array(n*3),3));
+  const n=mobile()?28:80;const cloud=new THREE.BufferGeometry();cloud.setAttribute('position',new THREE.BufferAttribute(new Float32Array(n*3),3));
   e.dust=new THREE.Points(cloud,new THREE.PointsMaterial({color:0xb1b5a8,size:.012,transparent:true,opacity:.65,depthWrite:false}));
   e.root.add(e.dust);
 }
@@ -540,7 +559,7 @@ function setup(){
  e.renderer=new THREE.WebGLRenderer({canvas,context:ctx,alpha:true,antialias:true,powerPreference:'low-power'});
  e.renderer.setClearColor(0x000000,0);e.renderer.localClippingEnabled=true;
  e.renderer.outputColorSpace=THREE.SRGBColorSpace;e.renderer.toneMapping=THREE.ACESFilmicToneMapping;
- e.renderer.toneMappingExposure=1.07;e.renderer.setPixelRatio(Math.min(devicePixelRatio,mobile()?1:1.5));
+ e.renderer.toneMappingExposure=1.07;e.renderer.setPixelRatio(Math.min(devicePixelRatio,mobile()?.85:1.5));
  e.scene=new THREE.Scene();e.camera=new THREE.PerspectiveCamera(34,1,.1,100);
  e.scene.add(new THREE.HemisphereLight(0xe6e8dd,0x33362e,2.6));
  for(const [color,intensity,x,y,z] of [[0xf6e6cf,3.2,-4,7,6],[0xdde6f0,1.5,4,5,2],[0xf6f1e7,2,1,6,-5]]){
@@ -560,7 +579,7 @@ function resize(){
  if(!e.renderer)return;
  const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);
  if(e.renderWidth!==w||e.renderHeight!==h||e.renderMobile!==mobile()){
-  e.renderer.setPixelRatio(Math.min(devicePixelRatio,mobile()?1:1.5));e.renderer.setSize(w,h,false);
+  e.renderer.setPixelRatio(Math.min(devicePixelRatio,mobile()?.85:1.5));e.renderer.setSize(w,h,false);
   e.renderWidth=w;e.renderHeight=h;e.renderMobile=mobile();
  }
  e.camera.aspect=w/h;e.camera.fov=mobile()?38:33;e.camera.updateProjectionMatrix();schedule();
@@ -573,12 +592,13 @@ function schedule(){
 function tick(now){
  e.frame=0;
  const next=active();desiredProgress=next;
- if(mobile()&&!reduced.matches&&e.lastRenderTime&&now-e.lastRenderTime<29){e.frame=requestAnimationFrame(tick);return;}
+ if(mobile()&&!reduced.matches&&e.lastRenderTime&&now-e.lastRenderTime<31){e.frame=requestAnimationFrame(tick);return;}
  e.lastRenderTime=now;
  const delta=e.lastTick?Math.min(300,Math.max(1,now-e.lastTick)):16;
  e.lastTick=now;
- const blend=1-Math.exp(-delta/(mobile()?70:48));
- if(reduced.matches)shownProgress=next;
+ const blend=1-Math.exp(-delta/48);
+ // Mobile browser momentum is already interpolated; never add scroll lag.
+ if(reduced.matches||mobile())shownProgress=next;
  else shownProgress+=(next-shownProgress)*blend;
  if(Math.abs(next-shownProgress)<.0004)shownProgress=next;
  render(shownProgress);
@@ -646,10 +666,12 @@ function render(p){
  e.rock.material.depthWrite=carve<.09;
  if(e.intermediate){
    e.intermediate.visible=carve>.005&&carve<.996;
-   updateCarvingBlank(removed);
+   if(e.intermediate.visible)updateCarvingBlank(removed);
    e.intermediate.material.opacity=toBlank*(1-toRough);
    e.intermediate.material.depthWrite=toRough<.55;
-   updateBlankCap(workingHeight);
+   if(e.intermediate.visible&&Math.abs((e.lastCapHeight??-10)-workingHeight)>(mobile()?.025:.006)){
+    updateBlankCap(workingHeight);e.lastCapHeight=workingHeight;
+   }
    e.blankCap.visible=e.intermediate.visible&&workingHeight>.035;
    e.blankCap.material.opacity=e.intermediate.material.opacity;
    e.blankCap.material.depthWrite=e.intermediate.material.depthWrite;
