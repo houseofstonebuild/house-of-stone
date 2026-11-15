@@ -326,3 +326,29 @@
   top:clamp(142px,21svh,168px);left:21px;width:min(55vw,210px)
  }
 }
+
+
+/* V7: tool contact belongs inside the stone image, not in a competing video. */
+#render>.carving-tools{
+ position:absolute;display:block;z-index:4;pointer-events:none;
+ visibility:hidden;opacity:0;overflow:visible;will-change:transform,opacity;
+ filter:drop-shadow(0 7px 9px rgba(0,0,0,.30));
+}
+#render>.carving-tools svg{display:block;width:100%;height:100%;overflow:visible}
+#render>.approved-coil-reveal>.approved-mobile-workshop,
+#render>.approved-coil-reveal>.approved-mobile-still{
+ position:absolute;inset:0;display:block;width:100%;height:100%;
+ object-fit:contain;object-position:center;
+ pointer-events:none;background:transparent;
+}
+#render>.approved-coil-reveal>.approved-mobile-workshop{z-index:1}
+#render>.approved-coil-reveal>.approved-mobile-still{z-index:2;opacity:0}
+/* The animated hammer and chisel carry the visual story on phones. The real
+   footage remains in the documentary section below, without covering the stone. */
+@media(max-width:800px){
+ .stage[data-phase="6"] #archive-cutaway{display:none!important}
+ #render>.carving-tools{filter:drop-shadow(0 3px 5px rgba(0,0,0,.3))}
+}
+@media(prefers-reduced-motion:reduce){
+ #render>.carving-tools{display:none!important}
+}

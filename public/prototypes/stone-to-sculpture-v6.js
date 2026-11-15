@@ -1,3 +1,4 @@
+import {createCarvingTools} from '/prototypes/carving-tools.js';
 // The Making V6: source-preserving 3D solid carving rendered offline and scrubbed as images.
 // The improved geographic introduction remains identical to the original approved study.
 const host=document.getElementById('render'),stage=document.querySelector('.stage'),journey=document.querySelector('.journey');
@@ -18,7 +19,7 @@ const texts=[
  ['HARARE','Into the workshop.','The raw stone becomes the starting point for a sculptor’s decisions.'],
  ['THE RAW STONE','Before the first cut.','A weathered block of springstone, before its outer material is removed.'],
  ['MARKING THE FORM','Marking the contours.','The sculptor maps the outer shape and identifies the stone that needs to be removed.'],
- ['CARVING','The form takes shape.','Stone is worked away to reveal the sculptor’s design. The workshop footage shows real chiseling; the transformation is an illustration.'],
+ ['CARVING','The form takes shape.','Every chisel blow removes stone. Real workshop footage is available below; the changing form is an illustration.'],
  ['FINER WORK','Refining the curves.','Rasps and wet abrasives smooth the tool marks while retaining the hand-carved form.'],
  ['HEATING','Preparing the surface.','Gentle, controlled heating is sometimes used before a clear-wax finish.'],
  ['WAX AND BUFFING','Bringing out the stone.','Clear wax and buffing deepen the colour and reveal the stone’s natural sheen.'],
@@ -89,11 +90,12 @@ function updateMap(p){
 
 const v6={manifest:null,profile:null,cache:new Map(),current:-1,requested:-1,raf:0,phase:-1,playing:false,error:false};
 const currentImage=new Image(),oldImage=new Image();
+const physicalTools=createCarvingTools(host);
 // Restore the final presentation from the exact approved GLB, never an offline
 // rendering with a replacement procedural material.
 let approvedReveal=null,approvedRequest=null;
 function updateApprovedReveal(p){
- if(p>=.875&&!approvedRequest){
+ if(p>=.815&&!approvedRequest){
   approvedRequest=import('/prototypes/approved-coil-reveal.js').then(module=>{
    approvedReveal=module.createApprovedCoilReveal(host);
    approvedReveal.update(active());
@@ -198,10 +200,11 @@ function render(p){
  ui.progress.style.width=(p*100).toFixed(2)+'%';
  updateFrames(p);
  const documentary=smooth((p-.565)/.020)*(1-smooth((p-.750)/.015));
- const show=!!v6.manifest&&!reduced.matches&&document.visibilityState==='visible'&&documentary>.10;
+ const show=!!v6.manifest&&!mobile()&&!reduced.matches&&document.visibilityState==='visible'&&documentary>.10;
  stage.style.setProperty('--archiveOpacity',show?documentary.toFixed(4):'0');
  setDocumentary(show);host.dataset.documentaryCutaway=documentary.toFixed(3);
  updateCraft(p);
+ physicalTools.update(p,reduced.matches);
  updateApprovedReveal(p);
  host.dataset.renderMode='precomputed-v6';
  host.dataset.modelReady=String(Boolean(v6.manifest&&v6.current>=0));

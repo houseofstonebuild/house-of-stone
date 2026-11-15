@@ -9,7 +9,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
 
   const mobile=()=>window.innerWidth<=800;
   const state={started:false,ready:false,error:false,scene:null,renderer:null,camera:null,
-    model:null,root:null,canvas:null,plinth:null,lastWidth:0,lastHeight:0,lastRatio:0,lastP:0};
+    model:null,root:null,canvas:null,plinth:null,shadow:null,workingStill:null,finalStill:null,lastWidth:0,lastHeight:0,lastRatio:0,lastP:0};
   const emit=(value)=>{host.dataset.approvedModelState=value;onState(value)};
 
   async function initialize(){
@@ -20,25 +20,33 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
     // The explicit capture flag keeps the automated render source on live WebGL.
     const capture=new URLSearchParams(location.search).has('capture-approved-coil');
     if(mobile()&&!capture){
-      const still=document.createElement('img');
+      // Both images are rendered from the exact original GLB at the same camera:
+      // unmounted workshop stone and the gallery shot with its plinth. Only the
+      // plinth changes; the actual artwork does not transform or jump.
+      const workshop=document.createElement('img'),still=document.createElement('img');
+      workshop.className='approved-mobile-workshop';
+      workshop.alt='';
       still.className='approved-mobile-still';
-      still.alt='The approved Coil 3D model and original stone finish';
+      still.alt='Coil, with its original approved stone finish and gallery plinth';
       host.dataset.approvedModelUrl='/models/coil-uploaded-v1.glb';
       host.dataset.approvedMaterialsPreserved='true';
       host.dataset.approvedPresentation='baked-original-glb';
-      still.onload=()=>{
-        state.ready=true;
-        emit('ready');
-        update(state.lastP);
+      state.workingStill=workshop;state.finalStill=still;
+      let loaded=0;
+      const done=()=>{loaded++;if(loaded===2){state.ready=true;emit('ready');update(state.lastP)}};
+      const fail=event=>{
+        const image=event.currentTarget;
+        if(image.dataset.fallback)return;
+        image.dataset.fallback='true';host.dataset.approvedPresentation='studio-photo-fallback';
+        image.src='/assets/zsa-006-studio-front-v2.webp';
       };
-      still.onerror=()=>{
-        if(still.dataset.fallback)return;
-        still.dataset.fallback='true';
-        host.dataset.approvedPresentation='studio-photo-fallback';
-        still.src='/assets/zsa-006-studio-front-v2.webp';
-      };
+      workshop.addEventListener('load',done,{once:true});
+      still.addEventListener('load',done,{once:true});
+      workshop.addEventListener('error',fail);
+      still.addEventListener('error',fail);
+      workshop.src='/assets/making-coil-approved-workshop-v1.png';
       still.src='/assets/making-coil-approved-mobile-v1.png';
-      layer.append(still);
+      layer.append(workshop,still);
       return;
     }
     let THREE,GLTFLoader,MeshoptDecoder;
@@ -97,6 +105,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
       geometry.rotateX(-Math.PI/2);geometry.translate(0,-.20,0);
       const slab=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color:0x8d897c,roughness:.89,metalness:0}));
       root.add(slab);state.plinth=slab;
+      slab.material.transparent=true;slab.material.opacity=0;slab.material.depthWrite=false;
       // A subtle grounded contact shadow, rendered independently of the stone.
       const shadowCanvas=document.createElement('canvas');
       shadowCanvas.width=shadowCanvas.height=128;
@@ -105,7 +114,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
       ctx.fillStyle=g;ctx.fillRect(0,0,128,128);
       const shadow=new THREE.Mesh(new THREE.PlaneGeometry(width*1.4,depth*1.8),
         new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(shadowCanvas),transparent:true,depthWrite:false}));
-      shadow.rotation.x=-Math.PI/2;shadow.position.y=-.215;root.add(shadow);
+      shadow.rotation.x=-Math.PI/2;shadow.position.y=-.215;root.add(shadow);state.shadow=shadow;
       let meshes=0,materials=0;
       original.traverse(node=>{if(node.isMesh){meshes++;materials+=Array.isArray(node.material)?node.material.length:1;}});
       if(meshes<1||materials<1)throw Error('Approved GLB contains no renderable materials');
@@ -156,10 +165,31 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
     state.lastP=p;
     // Prewarm the 3D asset before its reveal; zero per-scroll GPU work
     // throughout Zimbabwe, transport, marking, chiseling and heating.
-    if(p>=.875&&!state.started)initialize();
-    const level=state.ready||state.error?Math.min(1,Math.max(0,(p-.954)/.026)):0;
-    const opacity=level*level*(3-2*level);
+    if(p>=.815&&!state.started)initialize();
+    // Continuity: the same approved stone gradually takes over during the
+    // heating pass and darkens under wax. Never swap at the final stage.
+    const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)};
+    const level=(state.ready||state.error)?smooth((p-.828)/.081):0;
+    const opacity=level;
     layer.style.opacity=opacity.toFixed(4);
+    const wax=smooth((p-.891)/.076);
+    const brightness=(.82+.18*wax).toFixed(3);
+    const saturation=(.48+.52*wax).toFixed(3);
+    const contrast=(.90+.10*wax).toFixed(3);
+    layer.style.filter='brightness('+brightness+') saturate('+saturation+') contrast('+contrast+')';
+    const gallery=smooth((p-.943)/.045);
+    if(state.workingStill&&state.finalStill){
+      state.finalStill.style.opacity=gallery.toFixed(4);
+      state.workingStill.style.opacity='1';
+    }
+    if(state.plinth){
+      state.plinth.visible=gallery>.001&&!new URLSearchParams(location.search).has('capture-no-plinth');
+      state.plinth.material.opacity=gallery;
+    }
+    if(state.shadow)state.shadow.material.opacity=gallery;
+    host.dataset.approvedRevealBlend=opacity.toFixed(4);
+    host.dataset.approvedFinishProgress=wax.toFixed(4);
+    host.dataset.approvedPlinthBlend=gallery.toFixed(4);
     layer.style.visibility=opacity<=.0005?'hidden':'visible';
     layer.setAttribute('aria-hidden',String(opacity<=.0005));
     host.dataset.approvedModelVisible=String(opacity>.98);
