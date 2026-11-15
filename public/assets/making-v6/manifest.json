@@ -1,0 +1,739 @@
+{
+  "version": 6,
+  "source_sha256": "60d62a56f20c38f3f7fef16c226288c3347404139a2ea03e5802739ce264bc33",
+  "frames": 144,
+  "first": 0.305,
+  "last": 1,
+  "profiles": {
+    "desktop": {
+      "width": 1280,
+      "height": 720
+    },
+    "mobile": {
+      "width": 720,
+      "height": 1560
+    }
+  },
+  "entries": [
+    {
+      "index": 0,
+      "progress": 0.305,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 1,
+      "progress": 0.30986,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 2,
+      "progress": 0.31472,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 3,
+      "progress": 0.31958,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 4,
+      "progress": 0.32444,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 5,
+      "progress": 0.3293,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 6,
+      "progress": 0.33416,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 7,
+      "progress": 0.33902,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 8,
+      "progress": 0.34388,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 9,
+      "progress": 0.34874,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 10,
+      "progress": 0.3536,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 11,
+      "progress": 0.35846,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 12,
+      "progress": 0.36332,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 13,
+      "progress": 0.36818,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 14,
+      "progress": 0.37304,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 15,
+      "progress": 0.3779,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 16,
+      "progress": 0.38276,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 17,
+      "progress": 0.38762,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 18,
+      "progress": 0.39248,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 19,
+      "progress": 0.39734,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 20,
+      "progress": 0.4022,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 21,
+      "progress": 0.40706,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 22,
+      "progress": 0.41192,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 23,
+      "progress": 0.41678,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 24,
+      "progress": 0.42164,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 25,
+      "progress": 0.4265,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 26,
+      "progress": 0.43136,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 27,
+      "progress": 0.43622,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 28,
+      "progress": 0.44108,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 29,
+      "progress": 0.44594,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 30,
+      "progress": 0.4508,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 31,
+      "progress": 0.45566,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 32,
+      "progress": 0.46052,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 33,
+      "progress": 0.46538,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 34,
+      "progress": 0.47024,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 35,
+      "progress": 0.4751,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 36,
+      "progress": 0.47997,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 37,
+      "progress": 0.48483,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 38,
+      "progress": 0.48969,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 39,
+      "progress": 0.49455,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 40,
+      "progress": 0.49941,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 41,
+      "progress": 0.50427,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 42,
+      "progress": 0.50913,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 43,
+      "progress": 0.51399,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 44,
+      "progress": 0.51885,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 45,
+      "progress": 0.52371,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 46,
+      "progress": 0.52857,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 47,
+      "progress": 0.53343,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 48,
+      "progress": 0.53829,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 49,
+      "progress": 0.54315,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 50,
+      "progress": 0.54801,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 51,
+      "progress": 0.55287,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 52,
+      "progress": 0.55773,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 53,
+      "progress": 0.56259,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 54,
+      "progress": 0.56745,
+      "remaining_voxels": 1119661
+    },
+    {
+      "index": 55,
+      "progress": 0.57231,
+      "remaining_voxels": 1119615
+    },
+    {
+      "index": 56,
+      "progress": 0.57717,
+      "remaining_voxels": 1119316
+    },
+    {
+      "index": 57,
+      "progress": 0.58203,
+      "remaining_voxels": 1118388
+    },
+    {
+      "index": 58,
+      "progress": 0.58689,
+      "remaining_voxels": 1116333
+    },
+    {
+      "index": 59,
+      "progress": 0.59175,
+      "remaining_voxels": 1112572
+    },
+    {
+      "index": 60,
+      "progress": 0.59661,
+      "remaining_voxels": 1106490
+    },
+    {
+      "index": 61,
+      "progress": 0.60147,
+      "remaining_voxels": 1097484
+    },
+    {
+      "index": 62,
+      "progress": 0.60633,
+      "remaining_voxels": 1084986
+    },
+    {
+      "index": 63,
+      "progress": 0.61119,
+      "remaining_voxels": 1068514
+    },
+    {
+      "index": 64,
+      "progress": 0.61605,
+      "remaining_voxels": 1047681
+    },
+    {
+      "index": 65,
+      "progress": 0.62091,
+      "remaining_voxels": 1022230
+    },
+    {
+      "index": 66,
+      "progress": 0.62577,
+      "remaining_voxels": 992038
+    },
+    {
+      "index": 67,
+      "progress": 0.63063,
+      "remaining_voxels": 957132
+    },
+    {
+      "index": 68,
+      "progress": 0.63549,
+      "remaining_voxels": 917689
+    },
+    {
+      "index": 69,
+      "progress": 0.64035,
+      "remaining_voxels": 874029
+    },
+    {
+      "index": 70,
+      "progress": 0.64521,
+      "remaining_voxels": 826611
+    },
+    {
+      "index": 71,
+      "progress": 0.65007,
+      "remaining_voxels": 776011
+    },
+    {
+      "index": 72,
+      "progress": 0.65493,
+      "remaining_voxels": 722916
+    },
+    {
+      "index": 73,
+      "progress": 0.65979,
+      "remaining_voxels": 668087
+    },
+    {
+      "index": 74,
+      "progress": 0.66465,
+      "remaining_voxels": 612346
+    },
+    {
+      "index": 75,
+      "progress": 0.66951,
+      "remaining_voxels": 556545
+    },
+    {
+      "index": 76,
+      "progress": 0.67437,
+      "remaining_voxels": 501533
+    },
+    {
+      "index": 77,
+      "progress": 0.67923,
+      "remaining_voxels": 448140
+    },
+    {
+      "index": 78,
+      "progress": 0.68409,
+      "remaining_voxels": 397137
+    },
+    {
+      "index": 79,
+      "progress": 0.68895,
+      "remaining_voxels": 349222
+    },
+    {
+      "index": 80,
+      "progress": 0.69381,
+      "remaining_voxels": 304990
+    },
+    {
+      "index": 81,
+      "progress": 0.69867,
+      "remaining_voxels": 264917
+    },
+    {
+      "index": 82,
+      "progress": 0.70353,
+      "remaining_voxels": 229345
+    },
+    {
+      "index": 83,
+      "progress": 0.70839,
+      "remaining_voxels": 198469
+    },
+    {
+      "index": 84,
+      "progress": 0.71325,
+      "remaining_voxels": 172341
+    },
+    {
+      "index": 85,
+      "progress": 0.71811,
+      "remaining_voxels": 150856
+    },
+    {
+      "index": 86,
+      "progress": 0.72297,
+      "remaining_voxels": 133776
+    },
+    {
+      "index": 87,
+      "progress": 0.72783,
+      "remaining_voxels": 120735
+    },
+    {
+      "index": 88,
+      "progress": 0.73269,
+      "remaining_voxels": 111259
+    },
+    {
+      "index": 89,
+      "progress": 0.73755,
+      "remaining_voxels": 104793
+    },
+    {
+      "index": 90,
+      "progress": 0.74241,
+      "remaining_voxels": 100736
+    },
+    {
+      "index": 91,
+      "progress": 0.74727,
+      "remaining_voxels": 98473
+    },
+    {
+      "index": 92,
+      "progress": 0.75213,
+      "remaining_voxels": 97415
+    },
+    {
+      "index": 93,
+      "progress": 0.75699,
+      "remaining_voxels": 97052
+    },
+    {
+      "index": 94,
+      "progress": 0.76185,
+      "remaining_voxels": 96988
+    },
+    {
+      "index": 95,
+      "progress": 0.76671,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 96,
+      "progress": 0.77157,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 97,
+      "progress": 0.77643,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 98,
+      "progress": 0.78129,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 99,
+      "progress": 0.78615,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 100,
+      "progress": 0.79101,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 101,
+      "progress": 0.79587,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 102,
+      "progress": 0.80073,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 103,
+      "progress": 0.80559,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 104,
+      "progress": 0.81045,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 105,
+      "progress": 0.81531,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 106,
+      "progress": 0.82017,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 107,
+      "progress": 0.82503,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 108,
+      "progress": 0.8299,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 109,
+      "progress": 0.83476,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 110,
+      "progress": 0.83962,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 111,
+      "progress": 0.84448,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 112,
+      "progress": 0.84934,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 113,
+      "progress": 0.8542,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 114,
+      "progress": 0.85906,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 115,
+      "progress": 0.86392,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 116,
+      "progress": 0.86878,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 117,
+      "progress": 0.87364,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 118,
+      "progress": 0.8785,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 119,
+      "progress": 0.88336,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 120,
+      "progress": 0.88822,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 121,
+      "progress": 0.89308,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 122,
+      "progress": 0.89794,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 123,
+      "progress": 0.9028,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 124,
+      "progress": 0.90766,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 125,
+      "progress": 0.91252,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 126,
+      "progress": 0.91738,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 127,
+      "progress": 0.92224,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 128,
+      "progress": 0.9271,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 129,
+      "progress": 0.93196,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 130,
+      "progress": 0.93682,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 131,
+      "progress": 0.94168,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 132,
+      "progress": 0.94654,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 133,
+      "progress": 0.9514,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 134,
+      "progress": 0.95626,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 135,
+      "progress": 0.96112,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 136,
+      "progress": 0.96598,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 137,
+      "progress": 0.97084,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 138,
+      "progress": 0.9757,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 139,
+      "progress": 0.98056,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 140,
+      "progress": 0.98542,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 141,
+      "progress": 0.99028,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 142,
+      "progress": 0.99514,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 143,
+      "progress": 1.0,
+      "remaining_voxels": 96986
+    }
+  ]
+}
