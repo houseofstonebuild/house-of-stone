@@ -35,6 +35,10 @@ test('natural springstone, synchronized chisel and traditional finish stages',()
  assert.match(js,/const centerX=lerp/);
  assert.match(js,/const sceneOpacity=smooth/);
  assert.match(js,/const strokeCount=28/);
+ assert.match(js,/function makeCarvingBlank\(rows\)/);
+ assert.match(js,/updateCarvingBlank\(removed\)/);
+ assert.match(js,/const toBlank=smooth/);
+ assert.match(js,/const toRough=smooth/);
  assert.match(js,/float bandStart=\(1\.0-localHeight\)\*\.83/);
  assert.match(js,/float frontCut=mix\(\.95,\.13,bandT\)/);
  assert.match(js,/const invSmooth|const part=fract|const phase=fract/);

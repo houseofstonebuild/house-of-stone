@@ -49,7 +49,7 @@ const phaseT=(p,i)=>clamp((p-stops[i])/Math.max(.001,stops[i+1]-stops[i]));
 const impactVector=new THREE.Vector3();
 let shownProgress=0,desiredProgress=0;
 const e={renderer:null,scene:null,camera:null,root:null,canvas:null,
-  rock:null,rockCap:null,cut:{value:1.95},carveMargin:{value:2},carveMask:{value:null},rawMaterial:null,polished:null,rough:null,contourRows:[],
+  rock:null,rockCap:null,intermediate:null,intermediateGeo:null,intermediateRings:[],cut:{value:1.95},carveMargin:{value:2},carveMask:{value:null},rawMaterial:null,polished:null,rough:null,contourRows:[],
   carvePlane:null,roughPlane:null,polishedPlane:null,marks:null,hammerRig:null,
   chiselHead:null,chiselTop:null,hammerHead:null,hammerContact:null,hammerPivot:null,toolRig:null,chips:[],dust:null,
   rasp:null,sanding:null,torch:null,torchLight:null,wax:null,waxLight:null,
@@ -172,6 +172,53 @@ function makeRock(){
  surface.computeVertexNormals();
  const cap=new THREE.Mesh(surface,stoneMaterial({color:0x454e49,roughness:1}));
  cap.visible=false;e.root.add(cap);e.rockCap=cap;
+}
+
+// An actual connected three-dimensional blank, not floating fragments or a
+// horizontal clipping plane. Its cross sections are calculated from Coil's
+// approved silhouette; every chisel strike reduces excess stone toward them.
+function makeCarvingBlank(rows){
+ const rings=84,radial=32,positions=[],indices=[],data=[];
+ for(let j=0;j<=rings;j++){
+   const y=.025+3.31*j/rings;
+   const rowIndex=Math.min(rows.length-1,Math.max(0,Math.round((1-y/3.48)*(rows.length-1))));
+   const range=rows[rowIndex]||{left:-.6,right:.6};
+   let left=range.left,right=range.right;
+   if(!Number.isFinite(left)||!Number.isFinite(right)||right<left){left=-.35;right=.35;}
+   const targetCenter=(left+right)/2;
+   const targetWidth=Math.max(.14,(right-left)/2+.08);
+   const taper=Math.max(.24,Math.pow(Math.max(0,1-Math.pow(Math.abs((y-1.69)/1.77),3.2)),.19));
+   for(let i=0;i<=radial;i++){
+     const a=2*Math.PI*i/radial;
+     data.push({y,a,center:targetCenter,width:targetWidth,taper,seed:hash(j,i)});
+     positions.push(0,y,0);
+   }
+ }
+ for(let j=0;j<rings;j++)for(let i=0;i<radial;i++){
+   const a=j*(radial+1)+i,b=a+radial+1;
+   indices.push(a,b,a+1,b,b+1,a+1);
+ }
+ const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geo.setIndex(indices);
+ const material=stoneMaterial({color:0x454b45,roughness:1});material.transparent=true;material.opacity=0;material.depthWrite=true;
+ const blank=new THREE.Mesh(geo,material);blank.frustumCulled=false;blank.visible=false;e.root.add(blank);
+ e.intermediate=blank;e.intermediateGeo=geo;e.intermediateRings=data;
+ updateCarvingBlank(0);
+}
+function updateCarvingBlank(t){
+ if(!e.intermediate)return;
+ const data=e.intermediateRings,pos=e.intermediateGeo.attributes.position;
+ const eased=smooth(t);
+ for(let i=0;i<data.length;i++){
+   const v=data[i],c=Math.cos(v.a),sn=Math.sin(v.a);
+   const startWidth=1.18*v.taper,finishWidth=v.width;
+   const center=lerp(0,v.center,eased);
+   // No jump between the geological block and the gradually hand-shaped form.
+   const width=lerp(startWidth,finishWidth,eased);
+   const depth=lerp(.76*v.taper,.40+Math.min(.12,finishWidth*.15),eased);
+   const texture=(v.seed-.5)*lerp(.045,.017,eased);
+   pos.setXYZ(i,center+c*(width+texture),v.y+texture*.5,sn*(depth+texture));
+ }
+ pos.needsUpdate=true;e.intermediateGeo.computeVertexNormals();
 }
 function shadowTexture(){
  const c=document.createElement('canvas');c.width=c.height=128;const ctx=c.getContext('2d');
@@ -313,6 +360,7 @@ function makeChalkFromModel(model){
  const field=new THREE.DataTexture(bytes,W,H,THREE.RedFormat);
  field.magFilter=THREE.LinearFilter;field.minFilter=THREE.LinearFilter;field.wrapS=field.wrapT=THREE.ClampToEdgeWrapping;
  field.needsUpdate=true;e.carveMask.value=field;e.contourRows=rows;
+  makeCarvingBlank(rows);
  host.dataset.carveMaskReady='true';
  const segments=[];
  for(let y=2;y<H-2;y+=2)for(let x=2;x<W-2;x+=2){
@@ -347,7 +395,7 @@ function loadCoil(){
   rough.traverse(n=>{if(n.isMesh){
     // A coarse, granular interim surface that retains Coil's true silhouette.
     const materials=Array.isArray(n.material)?n.material:[n.material];
-    n.material=materials.map(()=>{const m=stoneMaterial({color:0x555a52,roughness:.99,flat:true});m.clippingPlanes=[roughPlane,carvePlane];return m;});
+    n.material=materials.map(()=>{const m=stoneMaterial({color:0x555a52,roughness:.99,flat:true});m.transparent=true;m.opacity=0;m.depthWrite=true;m.clippingPlanes=[roughPlane];return m;});
     if(n.material.length===1)n.material=n.material[0];
   }});
   e.polished=original;e.rough=rough;e.polishedPlane=polishedPlane;e.roughPlane=roughPlane;e.carvePlane=carvePlane;
@@ -430,18 +478,30 @@ function render(p){
  // Increase the constraint in world units: the central opening is physically cut out.
  // Preserve the continuous parent mass while upper contours emerge, then
  // cut the negative spaces progressively during the final third of the strikes.
- e.carveMargin.value=lerp(1.72,-.04,removed);
- e.rock.visible=carve<.9995&&handoff>.02;
+ // A continuous irregular stone blank stays whole as the form is carved out.
+ // The boundary follows the actual approved model's silhouette at every height.
+ e.carveMargin.value=1.72; // the raw parent rock fades into the connected carving blank
+ const toBlank=smooth((carve-.007)/.13),toRough=smooth((carve-.53)/.39);
+ e.rock.visible=handoff>.02&&carve<.15;
+ e.rock.material.transparent=true;
+ e.rock.material.opacity=1-toBlank;
+ e.rock.material.depthWrite=carve<.09;
+ if(e.intermediate){
+   e.intermediate.visible=carve>.005&&carve<.996;
+   updateCarvingBlank(removed);
+   e.intermediate.material.opacity=toBlank*(1-toRough);
+   e.intermediate.material.depthWrite=toRough<.55;
+ }
  e.rockCap.visible=false;
  if(e.marks){e.marks.visible=mark>.025;e.marks.material.opacity=.82*mark;}
  if(e.rough){
-  e.rough.visible=carve>.04&&wax<.997;
-  // The top of Coil is uncovered first. The lower portion stays inside the stone.
-  // Match the front's .83 height coefficient used in the cut shader.
-  const exposedY=3.38*(1-clamp((removed-.09)/.83));
-  e.carvePlane.constant=-exposedY;
-  e.roughPlane.constant=lerp(4.5,-.26,wax);
+   e.rough.visible=carve>.45&&wax<.997;
+   e.rough.traverse(mesh=>{if(mesh.isMesh){for(const mat of Array.isArray(mesh.material)?mesh.material:[mesh.material]){
+     mat.opacity=toRough;mat.depthWrite=toRough>.85;
+   }}});
+   e.roughPlane.constant=lerp(4.5,-.26,wax);
  }
+
  if(e.polished){
   e.polished.visible=wax>.004;
   e.polishedPlane.constant=-(lerp(3.35,-.25,wax));
@@ -453,9 +513,11 @@ function render(p){
  const edge=e.contourRows[index]||{left:-.65,right:.65};
  const side=Math.floor(strokes)%2===0?-1:1;
  const boundary=side<0?edge.left:edge.right;
- const impactX=clamp(boundary+side*(.06+.08*(1-carve)),-1.18,1.18);
+ const targetEdge=side<0?edge.left:edge.right;
+ const outerWidth=lerp(1.0,Math.abs(targetEdge)+.06,smooth(removed));
+ const impactX=clamp(side*outerWidth*.9,-1.18,1.18);
  const impactY=lerp(3.16,.36,carve);
- const impactZ=.77; // front of the parent slab, not in front of the artwork
+ const impactZ=lerp(.74,.48,smooth(removed)); // surface of the shrinking stone blank
  if(e.toolRig){
   e.toolRig.visible=carve>.008&&carve<.985&&!reduced.matches;
   if(e.toolRig.visible){
@@ -514,6 +576,8 @@ function render(p){
  e.camera.lookAt(mobile()?0:.28,1.68,0);
  e.renderer.render(e.scene,e.camera);
  host.dataset.carveProgress=removed.toFixed(4);
- host.dataset.materialMargin=e.carveMargin.value.toFixed(4);
+ host.dataset.blankReady=String(Boolean(e.intermediate));
+ host.dataset.blankOpacity=e.intermediate?e.intermediate.material.opacity.toFixed(3):'0';
+ host.dataset.materialMargin=lerp(1.72,-.04,removed).toFixed(4);
 }
 try{setup()}catch(err){fallback.hidden=false;host.dataset.modelError='true';console.warn('3D process unavailable',err)}
