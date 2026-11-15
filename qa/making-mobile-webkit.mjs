@@ -9,7 +9,7 @@ import {randomUUID} from 'node:crypto';
 import {webkit} from 'playwright';
 import {createApp} from '../server.mjs';
 
-const manifest=JSON.parse(readFileSync(new URL('../public/assets/making-mobile-atlas-v2-manifest.json',import.meta.url)));
+const manifest=JSON.parse(readFileSync(new URL('../public/assets/making-mobile-atlas-v3-manifest.json',import.meta.url)));
 assert.equal(manifest.frameCount,192);
 assert.equal(manifest.columns,2);
 assert.equal(manifest.rows,3);
@@ -56,7 +56,7 @@ try{
    assert(!info.liveWebGL,'WebKit phone unexpectedly instantiated a WebGL renderer');
    assert(manifest.tileWidth>=view.width,'Baked sculpture image must never be enlarged beyond its pixel width on phones');
    assert(info.docWidth<=info.viewportWidth+2,'WebKit page has horizontal overflow');
-   if(progress>=.305)assert.match(info.atlas,/making-mobile-atlas-v2-/);
+   if(progress>=.305)assert.match(info.atlas,/making-mobile-atlas-v3-/);
    samples.push({progress,frame:info.frame,phase:info.phase});
   }
   assert(samples[7].frame>samples[8].frame,'Backward scroll did not rewind in WebKit');
