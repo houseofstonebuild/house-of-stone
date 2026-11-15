@@ -64,7 +64,7 @@ const phaseT=(p,i)=>clamp((p-stops[i])/Math.max(.001,stops[i+1]-stops[i]));
 const impactVector=new THREE.Vector3();
 let shownProgress=0,desiredProgress=0;
 const e={renderer:null,scene:null,camera:null,root:null,canvas:null,renderWidth:0,renderHeight:0,renderMobile:null,lastRenderTime:0,
-  rock:null,rockCap:null,intermediate:null,intermediateGeo:null,intermediateRings:[],blankCap:null,cut:{value:1.95},carveMargin:{value:2},carveProgress:{value:0},carveMask:{value:null},finishProgress:{value:0},rawMaterial:null,polished:null,rough:null,contourRows:[],
+  rock:null,rockCap:null,intermediate:null,intermediateGeo:null,intermediateRings:[],blankCap:null,cut:{value:1.95},carveMargin:{value:2},carveProgress:{value:0},carveMask:{value:null},finishProgress:{value:0},rawMaterial:null,polished:null,rough:null,contourRows:[],finishingMaterials:[],finishLight:null,
   carvePlane:null,roughPlane:null,polishedPlane:null,blankHidePlane:null,carveRevealPlane:null,marks:null,hammerRig:null,
   chiselHead:null,chiselTop:null,chiselTip:null,hammerHead:null,hammerContact:null,hammerPivot:null,toolRig:null,chips:[],dust:null,
   rasp:null,sanding:null,torch:null,torchLight:null,wax:null,waxLight:null,surfaceSamples:[],roughMaterials:[],
@@ -149,30 +149,17 @@ function stoneMaterial({raw=false,blank=false,color=0x656b62,roughness=.95,flat=
        ${raw?`float oxide=mno(vLocalStone*9.5+vec3(11.0,-4.0,6.0));
           float rind=smoothstep(.67,.89,oxide)*.075;
           diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.30,.27,.23),rind);
-         float chip=mno(vLocalStone*vec3(10.0,7.0,8.0));
-          // Distance to Coil's actual projected mesh (including its central opening).
+         // Projected silhouette data remains available for chalk mapping.
           vec2 silhouetteUV=clamp(vec2((vLocalStone.x+1.70)/3.40,(vLocalStone.y+1.74)/3.48),vec2(.001),vec2(.999));
           float outside=texture2D(uCarveMask,silhouetteUV).r*1.5;
            // A physical-looking sculpting front works down the SINGLE parent mass.
            // Uncarved lower sections remain solid; the tool reveals no floating islands.
-           float carveT=clamp((1.72-uCarveMargin)/1.76,0.0,1.0);
-           float localHeight=clamp((vLocalStone.y+1.69)/3.38,0.0,1.0);
-           float bandStart=(1.0-localHeight)*.83;
-           float bandT=smoothstep(bandStart,bandStart+.16,carveT);
-           float marginHere=mix(1.80,-.035,bandT);
-           float fracturedEdge=(chip-.5)*.030+.008*sin(vLocalStone.y*24.0+vLocalStone.x*17.0);
-           if(outside>marginHere+fracturedEdge)discard;
-           // Strip off the outer rind where the chisel has passed, so the approved
-           // rough geometry appears at the same frontier instead of suddenly popping in.
-           float frontCut=mix(.95,.13,bandT);
-           if(bandT>.001 && vLocalStone.z>frontCut)discard;
-           // Irregular removal through the geological skin, not a planar cylinder cut.
-           float localY=clamp((vLocalStone.y+1.69)/3.38,0.0,1.0);
-           float tooth=mno(vLocalStone*6.8)*.14+mno(vLocalStone*27.0)*.07;
-           // The cut travels from the upper contours toward the foot of the stone;
-           // a larger height gradient prevents the entire model popping out at once.
-           float removal=uCarveProgress+localY*.42+tooth-.105;
-           if(removal>.72)discard;`:blank?`
+           // One connected top-down working face. No arbitrary holes, tile-like
+           // shards, or unsupported fragments detached from the parent stone.
+           float chip=mno(vLocalStone*vec3(10.0,7.0,8.0));
+           float cutY=3.46-3.65*smoothstep(.015,.985,uCarveProgress);
+           float ridge=.10*(chip-.5)+.037*sin(vLocalStone.x*15.0+vLocalStone.z*7.0);
+           if(uCarveProgress>.002 && vLocalStone.y+1.69>cutY+ridge)discard;`:blank?`
           // Do not punch holes in the parent shell. The approved three-dimensional
           // Coil mesh supplies the true openings as material is taken away.
           float localHeight=clamp(vLocalStone.y/3.35,0.0,1.0);
@@ -181,7 +168,7 @@ function stoneMaterial({raw=false,blank=false,color=0x656b62,roughness=.95,flat=
           float chiselScars=mno(vLocalStone*34.0);
           diffuseColor.rgb*=1.0-.045*layerProgress*(.4+.6*chiselScars);`:''}`);
  };
- mat.customProgramCacheKey=()=>raw?'hos-springstone-rind-cut-v4':blank?'hos-solid-carving-parent-v6':'hos-springstone-detail-v3';
+ mat.customProgramCacheKey=()=>raw?'hos-topdown-carving-v9':blank?'hos-solid-carving-parent-v6':'hos-springstone-detail-v3';
  return mat;
 }
 function rockGeometry(){
@@ -194,16 +181,31 @@ function rockGeometry(){
     const superZ=Math.sign(z)*Math.pow(Math.abs(z),.61);
     const broad=fbm(x*3.5+2.2,y*3.3+3.5,z*3.8+5.2)-.5;
     const grain=fbm(x*13+6,y*11+7,z*13+4)-.5;
-    const chip=0.17*broad+0.071*grain;
+    const chip=.155*broad+.061*grain;
     const edge=1+.045*Math.sin(y*19+x*8)+.065*broad;
     pos.setXYZ(i,(superX*1.08+x*.15+chip*x)*edge,
       superY*1.67+chip*y+.036*Math.sin(x*20+z*14),
       (superZ*.75+chip*z)*edge);
   }
-  pos.needsUpdate=true;geo.computeVertexNormals();return geo;
+  pos.needsUpdate=true;
+ // IcosahedronGeometry duplicates face vertices. Smooth shared-vertex
+ // normals without eliminating genuinely irregular rock geometry.
+ geo.computeVertexNormals();
+ const normals=geo.attributes.normal,groups=new Map();
+ for(let i=0;i<pos.count;i++){
+  const key=[pos.getX(i),pos.getY(i),pos.getZ(i)].map(v=>Math.round(v*10000)).join(',');
+  if(!groups.has(key))groups.set(key,{indices:[],sum:new THREE.Vector3()});
+  const v=groups.get(key);v.indices.push(i);
+  v.sum.add(new THREE.Vector3(normals.getX(i),normals.getY(i),normals.getZ(i)));
+ }
+ for(const v of groups.values()){
+  v.sum.normalize();
+  for(const i of v.indices)normals.setXYZ(i,v.sum.x,v.sum.y,v.sum.z);
+ }
+ normals.needsUpdate=true;return geo;
 }
 function makeRock(){
- const rock=new THREE.Mesh(rockGeometry(),stoneMaterial({raw:true,color:0x353c36}));
+ const rock=new THREE.Mesh(rockGeometry(),stoneMaterial({raw:true,color:0x2c352d}));
  rock.position.y=1.69;e.root.add(rock);e.rock=rock;
  const surface=new THREE.PlaneGeometry(2.1,1.47,26,18);surface.rotateX(-Math.PI/2);
  const pos=surface.attributes.position;
@@ -509,13 +511,18 @@ function loadCoil(){
   const carvePlane=new THREE.Plane(new THREE.Vector3(0,1,0),.28);
   original.traverse(n=>{if(n.isMesh){
     const originalMaterials=Array.isArray(n.material)?n.material:[n.material];
-    const materials=originalMaterials.map(m=>{const c=m.clone();c.clippingPlanes=[];c.clipShadows=true;applyFinishMask(c,true);return c;});
+    const materials=originalMaterials.map(m=>{
+      const c=m.clone();c.clippingPlanes=[];c.clipShadows=true;
+      c.userData.approvedColor=c.color?.clone();
+      c.userData.approvedRoughness=Number.isFinite(c.roughness)?c.roughness:.4;
+      e.finishingMaterials.push(c);return c;
+    });
     n.material=materials.length===1?materials[0]:materials;
   }});
   rough.traverse(n=>{if(n.isMesh){
     // A coarse, granular interim surface that retains Coil's true silhouette.
     const materials=Array.isArray(n.material)?n.material:[n.material];
-    n.material=materials.map(()=>{const m=stoneMaterial({color:0x30362f,roughness:.99,flat:true});m.transparent=true;m.opacity=0;m.depthWrite=true;m.clippingPlanes=[e.carveRevealPlane];applyFinishMask(m,false);return m;});
+    n.material=materials.map(()=>{const m=stoneMaterial({color:0x30362f,roughness:.99,flat:true});m.transparent=true;m.opacity=0;m.depthWrite=true;m.clippingPlanes=[e.carveRevealPlane];return m;});
     if(n.material.length===1)n.material=n.material[0];
   }});
   e.polished=original;e.rough=rough;e.polishedPlane=polishedPlane;e.roughPlane=roughPlane;e.carvePlane=carvePlane;
@@ -697,8 +704,11 @@ function setup(){
    const light=new THREE.DirectionalLight(color,intensity);light.position.set(x,y,z);e.scene.add(light);
  }
  e.root=new THREE.Group();e.scene.add(e.root);
- // Real workshop footage conveys physical toolwork. No simulated floating mallets.
- makeRock();makeStudio();makeFinishingTools();loadCoil();
+ // The documentary inset supplies the real physical handwork.
+ // The animation changes stone and light, not imaginary tools floating over it.
+ makeRock();makeStudio();loadCoil();
+ e.finishLight=new THREE.PointLight(0xffc38d,0,5.4,1.4);
+ e.finishLight.position.set(-1.4,2.5,2.5);e.scene.add(e.finishLight);
  canvas.addEventListener('webglcontextlost',ev=>{ev.preventDefault();e.contextLost=true;fallback.hidden=false},{passive:false});
  canvas.addEventListener('webglcontextrestored',()=>{e.contextLost=false;schedule()});
  measureScrollRange();
@@ -805,18 +815,19 @@ function render(p){
  const workingHeight=clamp(frontier+supportOverlap,.025,3.34);
  e.blankHidePlane.constant=workingHeight;
  // Only expose portions that have cleared the still-solid working surface.
- // No horizontal reveal plane or disembodied upper sculpture.
- e.carveRevealPlane.constant=.55;
+ // The approved rough form emerges only as the parent stone is worked down.
+ const revealHeight=lerp(3.45,-.18,smooth((removed-.01)/.98));
+ e.carveRevealPlane.constant=-revealHeight+.09;
  host.dataset.supportOverlap=supportOverlap.toFixed(4);
- const rockFade=smooth((carve-.69)/.20),roughFade=smooth((carve-.09)/.55);
+ const rockFade=smooth((carve-.94)/.06),roughFade=smooth((carve-.025)/.16);
  host.dataset.carveFrontier=frontier.toFixed(4);
  host.dataset.realShapeReveal=clamp((3.05-frontier)/3.23).toFixed(4);
  host.dataset.blankCapReady=String(Boolean(e.blankCap));
  host.dataset.blankCapHeight=workingHeight.toFixed(4);
- e.rock.visible=handoff>.02&&carve<.90;
+ e.rock.visible=handoff>.02&&carve<.995;
  e.rock.material.transparent=true;
  e.rock.material.opacity=1-rockFade;
- e.rock.material.depthWrite=carve<.38;
+ e.rock.material.depthWrite=carve<.95;
  host.dataset.rockVisible=String(e.rock.visible);
  host.dataset.rockOpacity=e.rock.material.opacity.toFixed(3);
  // Retire the unsupported cylindrical intermediate and its flat disk cap.
@@ -827,13 +838,13 @@ function render(p){
  if(e.marks){e.marks.visible=mark>.025;e.marks.material.opacity=.94*mark;}
  host.dataset.markingVisibility=mark.toFixed(4);
  if(e.rough){
-   e.rough.visible=carve>.025&&wax<.997;
+   e.rough.visible=carve>.012&&p<.90;
    const roughOpacity=roughFade;
    host.dataset.roughOpacity=roughOpacity.toFixed(3);
    host.dataset.roughVisible=String(e.rough.visible);
    if(Math.abs((e.lastRoughOpacity??-1)-roughOpacity)>.004){
     e.lastRoughOpacity=roughOpacity;
-    for(const mat of e.roughMaterials){mat.opacity=roughOpacity;mat.depthWrite=roughOpacity>.85;}
+    for(const mat of e.roughMaterials){mat.opacity=roughOpacity;mat.depthWrite=roughOpacity>.45;}
    }
    // Dry tooling gives way to the slightly darker, smoother wet-sanded stone.
    // The final approved material remains untouched and is revealed by buffing.
@@ -841,45 +852,56 @@ function render(p){
    if(Math.abs((e.lastWet??-1)-wet)>.012){
     e.lastWet=wet;
     for(const mat of e.roughMaterials){
-      mat.roughness=lerp(.99,.83,wet);
-      mat.color.setRGB(lerp(.14,.085,wet),lerp(.16,.10,wet),lerp(.14,.09,wet));
+      mat.roughness=lerp(.99,.76,wet);
+      // Three.js setRGB uses linear values. .14 made the stone look pale grey.
+      mat.color.setRGB(lerp(.032,.019,wet),lerp(.040,.024,wet),lerp(.033,.019,wet));
     }
    }
    e.roughPlane.constant=lerp(4.5,-.26,wax);
  }
 
  if(e.polished){
-  e.polished.visible=wax>.004;
-  e.polishedPlane.constant=-(lerp(3.35,-.25,wax));
-  if(wax>.996)e.polishedPlane.constant=.4;
+  e.polished.visible=p>=.90;
+  // Hand-working is illustrated by the surface itself: rough to deep polish.
+  // No straight black-and-ivory dividing line or hovering wax pad.
+  for(const mat of e.finishingMaterials){
+   const base=mat.userData.approvedColor;
+   if(base&&mat.color)mat.color.copy(base).multiplyScalar(lerp(.72,1,wax));
+   if(Number.isFinite(mat.roughness))mat.roughness=lerp(.94,mat.userData.approvedRoughness,wax);
+  }
  }
  // Documentary footage supplies physical toolwork; no floating simulated hammers.
  host.dataset.toolsHidden='true';
  if(e.toolRig)e.toolRig.visible=false;
  for(const chip of e.chips)chip.visible=false;
  if(e.dust)e.dust.visible=false;
- if(e.rasp){e.rasp.visible=p>.77&&p<.813&&!reduced.matches;
+ if(false&&e.rasp){e.rasp.visible=p>.77&&p<.813&&!reduced.matches;
   const point=finishingPoint(clamp((p-.77)/.043));
   e.rasp.position.set(point.x,point.y-.25,point.z+.035);
   e.rasp.rotation.z=-.46+Math.sin(file*67)*.11;
  }
- if(e.sanding){e.sanding.visible=p>.812&&p<.832&&!reduced.matches;
+ if(false&&e.sanding){e.sanding.visible=p>.812&&p<.832&&!reduced.matches;
   const point=finishingPoint(clamp((p-.812)/.02));
   e.sanding.position.set(point.x+.036*Math.sin(file*95),point.y+.018*Math.sin(file*41),point.z+.035);
   e.sanding.rotation.z=Math.sin(file*60)*.12;
  }
- if(e.torch){e.torch.visible=p>.839&&p<.897&&!reduced.matches;
+ if(false&&e.torch){e.torch.visible=p>.839&&p<.897&&!reduced.matches;
   const point=finishingPoint(heating);
   e.torch.position.set(point.x+.65,point.y+.10,point.z+.42);e.torch.rotation.z=.88;
   e.torchLight.intensity=e.torch.visible?1.10:0;
   e.torchLight.position.set(point.x,point.y,point.z+.34);
  }
- if(e.wax){e.wax.visible=p>.904&&p<.958&&!reduced.matches;
+ if(false&&e.wax){e.wax.visible=p>.904&&p<.958&&!reduced.matches;
   const point=finishingPoint(wax);
   e.wax.position.set(point.x+.04*Math.sin(wax*130),point.y+.018*Math.cos(wax*91),point.z+.065);
   e.wax.rotation.z=Math.sin(wax*56)*.08;
   e.waxLight.intensity=e.wax.visible?1.0:0;
   e.waxLight.position.set(e.wax.position.x,e.wax.position.y,e.wax.position.z+.60);
+ }
+ if(e.finishLight){
+  const warming=smooth((p-.837)/.024)*(1-smooth((p-.892)/.012));
+  e.finishLight.intensity=warming*.75;
+  e.finishLight.position.set(lerp(-1.5,1.3,warming),lerp(2.7,.9,warming),2.7);
  }
  if(e.plinth){
   e.plinth.visible=gallery>.55;
