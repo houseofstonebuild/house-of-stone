@@ -16,9 +16,10 @@ test('scroll-driven source map is factual but does not imply a verified Coil qua
  assert.match(html,/HARARE/);
  assert.match(html,/Illustrative region and transfer|a regional illustration/i);
  assert.match(html,/specific quarry, transport route and workshop location for Coil have not been verified/);
- assert.match(js,/const stops=\[0,\.075,\.17,\.29,\.37,\.45,\.53,\.765,\.835,\.90,\.96,1\]/);
+ assert.match(js,/const stops=\[0,\.075,\.17,\.29,\.37,\.45,\.565,\.765,\.835,\.90,\.96,1\]/);
  assert.match(js,/svg\.setAttribute\('viewBox'/);
  assert.match(js,/route\.getPointAtLength/);
+ assert.doesNotMatch(js,/truck\.setAttribute\('transform',[^\n]*rotate/);
  assert.match(html,/class="pin-halo"/);
 });
 
@@ -30,6 +31,8 @@ test('natural springstone, synchronized chisel and traditional finish stages',()
  assert.match(js,/hammerHead\.position\.set\(-\.70,-\.145,-\.02\)/);
  assert.match(js,/contact\.position\.set\(-\.70,-\.26,-\.02\)/);
  assert.match(js,/host\.dataset\.contactError=/);
+ assert.match(js,/host\.dataset\.chiselStoneContact=/);
+ assert.match(js,/host\.dataset\.markingVisibility=/);
  assert.match(js,/const distances=new Float32Array\(W\*H\)/);
  assert.match(js,/uCarveMask/);
  assert.match(js,/const centerX=lerp/);
@@ -65,6 +68,9 @@ test('natural springstone, synchronized chisel and traditional finish stages',()
  assert.match(js,/wet abrasives|wet sanding|Wet sanding/);
  assert.match(js,/Clear wax|clear wax/);
  assert.match(js,/makeFinishingTools/);
+ assert.match(js,/function cacheFinishingSurface\(\)/);
+ assert.match(js,/function finishingPoint\(t\)/);
+ assert.match(js,/e\.surfaceSamples=points/);
  assert.match(js,/if\(e\.torch\)/);
  assert.match(js,/if\(e\.wax\)/);
  assert.match(js,/\/models\/coil-uploaded-v1\.glb/);
@@ -77,9 +83,12 @@ test('review remains unlinked and delivers mobile and reduced-motion support',as
  assert.match(html,/designers-coil-v2\.webp/);
  assert.match(html,/house-of-mabwe-making-web-v1\.mp4/);
  assert.match(html,/id="archive-cutaway" aria-hidden="true"/);
- assert.match(html,/id="archive-film" muted loop playsinline/);
+ assert.match(html,/id="archive-film" muted playsinline/);
  assert.match(js,/const documentary=smooth/);
- assert.match(js,/archiveFilm\.play\(\)\.catch/);
+ assert.match(js,/function seekArchiveVideo\(p\)/);
+ assert.match(js,/archiveFilm\.currentTime=archiveDesiredTime/);
+ assert.match(js,/archiveFilm\.addEventListener\('seeked',flushArchiveSeek\)/);
+ assert.doesNotMatch(js,/archiveFilm\.play\(\)/);
  assert.match(js,/archiveFilm\.pause\(\)/);
  assert.match(css,/\.archive-cutaway\{/);
  assert.match(html,/not as a verified record of Coil being carved/);
