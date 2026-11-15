@@ -49,7 +49,7 @@ const phaseT=(p,i)=>clamp((p-stops[i])/Math.max(.001,stops[i+1]-stops[i]));
 const impactVector=new THREE.Vector3();
 let shownProgress=0,desiredProgress=0;
 const e={renderer:null,scene:null,camera:null,root:null,canvas:null,
-  rock:null,rockCap:null,intermediate:null,intermediateGeo:null,intermediateRings:[],cut:{value:1.95},carveMargin:{value:2},carveProgress:{value:0},carveMask:{value:null},rawMaterial:null,polished:null,rough:null,contourRows:[],
+  rock:null,rockCap:null,intermediate:null,intermediateGeo:null,intermediateRings:[],blankCap:null,cut:{value:1.95},carveMargin:{value:2},carveProgress:{value:0},carveMask:{value:null},rawMaterial:null,polished:null,rough:null,contourRows:[],
   carvePlane:null,roughPlane:null,polishedPlane:null,blankHidePlane:null,carveRevealPlane:null,marks:null,hammerRig:null,
   chiselHead:null,chiselTop:null,hammerHead:null,hammerContact:null,hammerPivot:null,toolRig:null,chips:[],dust:null,
   rasp:null,sanding:null,torch:null,torchLight:null,wax:null,waxLight:null,
@@ -214,6 +214,7 @@ function makeCarvingBlank(rows){
  material.clippingPlanes=[e.blankHidePlane];
  const blank=new THREE.Mesh(geo,material);blank.frustumCulled=false;blank.visible=false;e.root.add(blank);
  e.intermediate=blank;e.intermediateGeo=geo;e.intermediateRings=data;
+ makeBlankCap();
  updateCarvingBlank(0);
 }
 function updateCarvingBlank(t){
@@ -233,6 +234,32 @@ function updateCarvingBlank(t){
    pos.setXYZ(i,center+c*(width+texture),v.y+texture*.5,sn*(depth+texture));
  }
  pos.needsUpdate=true;e.intermediateGeo.computeVertexNormals();
+}
+// The exposed cut is solid stone. A dynamic disk follows the deformed blank's
+// contour at the tool's working height instead of leaving a hollow-cylinder rim.
+function makeBlankCap(){
+ const radial=32,capGeo=new THREE.BufferGeometry();
+ capGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array((radial+2)*3),3));
+ const indices=[];for(let i=0;i<radial;i++)indices.push(0,i+1,i+2);
+ capGeo.setIndex(indices);
+ const material=stoneMaterial({color:0x454b45,roughness:1});
+ material.transparent=true;material.opacity=0;material.depthWrite=true;
+ const cap=new THREE.Mesh(capGeo,material);cap.frustumCulled=false;cap.visible=false;
+ e.root.add(cap);e.blankCap=cap;
+}
+function updateBlankCap(y){
+ if(!e.blankCap||!e.intermediateGeo)return;
+ const sample=clamp((y-.025)/3.31)*84,lo=Math.floor(sample),hi=Math.min(84,lo+1),t=sample-lo;
+ const shell=e.intermediateGeo.attributes.position,cap=e.blankCap.geometry.attributes.position;
+ let cx=0,cz=0;
+ for(let i=0;i<=32;i++){
+   const a=lo*33+i,b=hi*33+i;
+   const x=lerp(shell.getX(a),shell.getX(b),t),z=lerp(shell.getZ(a),shell.getZ(b),t);
+   cap.setXYZ(i+1,x,y+.004,z);
+   if(i<32){cx+=x;cz+=z;}
+ }
+ cap.setXYZ(0,cx/32,y+.004,cz/32);
+ cap.needsUpdate=true;e.blankCap.geometry.computeVertexNormals();
 }
 function shadowTexture(){
  const c=document.createElement('canvas');c.width=c.height=128;const ctx=c.getContext('2d');
@@ -503,11 +530,18 @@ function render(p){
  // Reveal Coil's real thickness and inner walls as the cut travels down the stone.
  // The upper finished portion and the unworked lower mass share one moving frontier.
  const frontier=lerp(3.45,-.18,smooth((removed-.014)/.96));
- e.blankHidePlane.constant=frontier+.055;
+ // Retain an uncarved bridge around the new shape until the last chisel cuts.
+ // Without this overlap, disconnected upper lobes appear to float above the mass.
+ const supportOverlap=.72*(1-smooth((carve-.68)/.30));
+ const workingHeight=clamp(frontier+supportOverlap,.025,3.34);
+ e.blankHidePlane.constant=workingHeight;
  e.carveRevealPlane.constant=-frontier;
+ host.dataset.supportOverlap=supportOverlap.toFixed(4);
  const toBlank=smooth((carve-.007)/.13),toRough=smooth((carve-.82)/.17);
  host.dataset.carveFrontier=frontier.toFixed(4);
  host.dataset.realShapeReveal=clamp((3.05-frontier)/3.23).toFixed(4);
+ host.dataset.blankCapReady=String(Boolean(e.blankCap));
+ host.dataset.blankCapHeight=workingHeight.toFixed(4);
  e.rock.visible=handoff>.02&&carve<.15;
  e.rock.material.transparent=true;
  e.rock.material.opacity=1-toBlank;
@@ -517,6 +551,10 @@ function render(p){
    updateCarvingBlank(removed);
    e.intermediate.material.opacity=toBlank*(1-toRough);
    e.intermediate.material.depthWrite=toRough<.55;
+   updateBlankCap(workingHeight);
+   e.blankCap.visible=e.intermediate.visible&&workingHeight>.035;
+   e.blankCap.material.opacity=e.intermediate.material.opacity;
+   e.blankCap.material.depthWrite=e.intermediate.material.depthWrite;
  }
  e.rockCap.visible=false;
  if(e.marks){e.marks.visible=mark>.025;e.marks.material.opacity=.82*mark;}
@@ -536,7 +574,7 @@ function render(p){
  // Tool tip tracks the current silhouette layer; the hammer's true contact point
  // is rigged to touch the cap when the strike closes (rather than passing beside it).
  const side=Math.floor(strokes)%2===0?-1:1;
- const impactHeight=clamp(frontier-.055,.22,3.22);
+ const impactHeight=clamp(workingHeight-.035,.22,3.22);
  // Land on a front-facing vertex of the current carving blank.
  const ring=Math.round(clamp((impactHeight-.025)/3.31)*84);
  const vertex=ring*33+(side<0?12:4);
