@@ -54,7 +54,7 @@ test('post-Harare process follows original Coil and credible material transition
  assert.doesNotMatch(js,/makeFinishingTools\(\);loadCoil\(\)/);
  assert.match(js,/\/models\/coil-uploaded-v1\.glb/);
  assert.match(js,/host\.dataset\.modelReady='true'/);
- assert.match(js,/mat\.color\.setRGB\(lerp\(\.082/);
+ assert.match(js,/mat\.color\.setRGB\(lerp\(lerp\(\.092/);
  assert.match(js,/e\.polished\.visible=p>=\.90/);
  assert.match(js,/approvedRoughness/);
  assert.match(js,/e\.finishLight\.intensity=warming/);
