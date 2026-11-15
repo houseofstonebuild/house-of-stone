@@ -1,45 +1,30 @@
-// Publish only a validated, versioned private-process media build.
-// GITHUB_TOKEN must have contents:write; no database or public page is changed.
-import {readFileSync} from 'node:fs';
-import {join} from 'node:path';
-const token=process.env.GITHUB_TOKEN,repository=process.env.GITHUB_REPOSITORY;
-if(!token||!repository||process.env.GITHUB_REF!=='refs/heads/main')throw new Error('Main-branch publisher only');
-const root='https://api.github.com/repos/'+repository;
-async function call(path,method='GET',body,tries=3){
- for(let attempt=0;attempt<tries;attempt++){
-  const response=await fetch(root+path,{method,headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'house-mabwe-carving-publisher',...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
-  const raw=await response.text();let data;
-  try{data=JSON.parse(raw)}catch{data={message:raw.slice(0,150)}}
-  if(response.ok)return data;
-  if(attempt<tries-1&&[429,502,503,504].includes(response.status)){await new Promise(r=>setTimeout(r,1200*(attempt+1)));continue}
-  throw new Error(method+' '+path+': HTTP '+response.status+' '+data.message);
- }
+// Publish the completed local v6 frame set in ONE git commit and ONE push.
+// Avoid hundreds of GitHub API blob requests, which trigger secondary rate limits.
+import {readFileSync,mkdirSync,copyFileSync,statSync} from 'node:fs';
+import {join,dirname} from 'node:path';
+import {spawnSync} from 'node:child_process';
+function git(...args){
+ const r=spawnSync('git',args,{encoding:'utf8'});
+ if(r.status!==0)throw Error('git '+args.join(' ')+': '+(r.stderr||r.stdout));
+ return r.stdout.trim();
 }
-const directory='build/making-v6';
-const manifest=JSON.parse(readFileSync(join(directory,'manifest.json'),'utf8'));
-if(manifest.version!==6||manifest.frames<100)throw new Error('Invalid v6 media manifest');
-const filenames=['manifest.json',...['desktop','mobile'].flatMap(p=>Array.from({length:manifest.frames},(_,i)=>p+'/frame_'+String(i).padStart(3,'0')+'.webp'))];
-const entries=Array(filenames.length);
-let next=0,failed=null;
-async function worker(){
- while(next<filenames.length&&!failed){
-  const i=next++,filename=filenames[i],bytes=readFileSync(join(directory,filename));
-  if(bytes.length<1000)throw new Error('Missing or empty render '+filename);
-  const blob=await call('/git/blobs','POST',{content:bytes.toString('base64'),encoding:'base64'});
-  entries[i]={path:'public/assets/making-v6/'+filename,mode:'100644',type:'blob',sha:blob.sha};
-  if(i%35===0)console.log('Prepared',i+1,'/',filenames.length);
- }
+if(process.env.GITHUB_REF!=='refs/heads/main')throw Error('Main-branch publisher only');
+const src='build/making-v6',dst='public/assets/making-v6';
+const manifest=JSON.parse(readFileSync(join(src,'manifest.json'),'utf8'));
+if(manifest.version!==6||manifest.frames!==144)throw Error('Refusing to publish incomplete v6 media');
+const files=['manifest.json',...['desktop','mobile'].flatMap(p=>Array.from({length:manifest.frames},(_,i)=>p+'/frame_'+String(i).padStart(3,'0')+'.webp'))];
+for(const file of files){
+ const from=join(src,file),to=join(dst,file);
+ if(statSync(from).size<1000)throw Error('Empty frame '+file);
+ mkdirSync(dirname(to),{recursive:true});copyFileSync(from,to);
 }
-try{await Promise.all(Array.from({length:4},()=>worker()))}catch(err){failed=err}
-if(failed)throw failed;
-for(let attempt=0;attempt<3;attempt++){
- const head=(await call('/git/ref/heads/main')).object.sha;
- const parent=await call('/git/commits/'+head);
- const tree=await call('/git/trees','POST',{base_tree:parent.tree.sha,tree:entries});
- const commit=await call('/git/commits','POST',{message:'Publish verified Coil making v6 offline frame assets',tree:tree.sha,parents:[head]});
- try{
-  await call('/git/refs/heads/main','PATCH',{sha:commit.sha,force:false});
-  console.log('Published',filenames.length,'versioned frames to main:',commit.sha);
-  process.exit(0);
- }catch(err){if(attempt===2)throw err}
-}
+git('config','user.name','github-actions[bot]');
+git('config','user.email','41898282+github-actions[bot]@users.noreply.github.com');
+git('add','--','public/assets/making-v6');
+const diff=spawnSync('git',['diff','--cached','--quiet']);
+if(diff.status===0){console.log('Already published: all',files.length,'files are unchanged');process.exit(0)}
+if(diff.status!==1)throw Error('git diff failed '+diff.status);
+git('commit','-m','Publish verified Making v6 Coil animation frames');
+const first=spawnSync('git',['push','origin','HEAD:main'],{encoding:'utf8'});
+if(first.status!==0)throw Error('Atomic media push failed: '+first.stderr);
+console.log('Published',files.length,'media files to main in one Git push:',git('rev-parse','HEAD'));
