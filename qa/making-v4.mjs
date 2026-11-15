@@ -85,7 +85,7 @@ try{
      assert.equal(info.intermediateVisible,'false','Do not show an unsupported cylindrical blank');
      assert.equal(info.toolsHidden,'true','Real workshop film replaces floating simulated hammers');
      assert(info.roughOpacity>.8&&info.roughOpacity<=1,'Dark rough Coil must be visible wherever the parent stone has been worked');
-     assert.equal(info.rockVisible,'true','Unworked parent stone must stay under the revealed Coil');
+     assert.equal(info.rockVisible,'false','The boulder must not overlap Coil as a bag-like shell');
      assert.equal(info.roughVisible,'true','The approved Coil model is the revealed form');
     }
     assert(info.cutawayOpacity>.95,'Archival chiseling supplements the sculpture');
