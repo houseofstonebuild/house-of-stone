@@ -147,7 +147,7 @@ function stoneMaterial({raw=false,blank=false,color=0x656b62,roughness=.95,flat=
        float vein=pow(1.0-abs(sin(vLocalStone.y*13.3+vLocalStone.x*4.9+mno(vLocalStone*2.7)*5.0)),35.0);
        diffuseColor.rgb*=mix(.84,1.11,g)*(1.0-.075*vein);
        ${raw?`float oxide=mno(vLocalStone*9.5+vec3(11.0,-4.0,6.0));
-          float rind=smoothstep(.67,.89,oxide)*.075;
+          float rind=smoothstep(.74,.91,oxide)*.025;
           diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.30,.27,.23),rind);
          // Projected silhouette data remains available for chalk mapping.
           vec2 silhouetteUV=clamp(vec2((vLocalStone.x+1.70)/3.40,(vLocalStone.y+1.74)/3.48),vec2(.001),vec2(.999));
@@ -871,7 +871,7 @@ function render(p){
     for(const mat of e.roughMaterials){
       mat.roughness=lerp(.99,.76,wet);
       // Three.js setRGB uses linear values. .14 made the stone look pale grey.
-      mat.color.setRGB(lerp(.032,.019,wet),lerp(.040,.024,wet),lerp(.033,.019,wet));
+      mat.color.setRGB(lerp(.082,.047,wet),lerp(.090,.052,wet),lerp(.078,.045,wet));
     }
    }
    e.roughPlane.constant=lerp(4.5,-.26,wax);
@@ -916,9 +916,10 @@ function render(p){
   e.waxLight.position.set(e.wax.position.x,e.wax.position.y,e.wax.position.z+.60);
  }
  if(e.finishLight){
-  const warming=smooth((p-.837)/.024)*(1-smooth((p-.892)/.012));
-  e.finishLight.intensity=warming*.75;
-  e.finishLight.position.set(lerp(-1.5,1.3,warming),lerp(2.7,.9,warming),2.7);
+  const heatingT=smooth((p-.836)/.062);
+  const warming=smooth((p-.837)/.026)*(1-smooth((p-.892)/.020));
+  e.finishLight.intensity=warming*1.55;
+  e.finishLight.position.set(lerp(-1.6,1.25,heatingT),lerp(2.7,1.2,heatingT),2.7);
  }
  if(e.plinth){
   e.plinth.visible=gallery>.55;
@@ -930,10 +931,12 @@ function render(p){
  const focus=smooth((p-.53)/.20)*(1-smooth((p-.77)/.08));
  const mobileFinal=mobile()?smooth((p-.928)/.05):0;
  const mobileFrame=mobile()?smooth((p-.545)/.065):0;
- const dist=mobile()?lerp(8.7,lerp(12.15,11.0,mobileFinal),mobileFrame):8.55;
- e.camera.position.set(mobile()?.04:1.38,3.12,dist-.12*focus);
- // Leave a calm, uninterrupted lower area for the title on small screens.
- e.camera.lookAt(mobile()?0:.28,lerp(1.68,lerp(1.32,.70,mobileFinal),mobileFrame),0);
+ const detailFocus=smooth((p-.768)/.028)*(1-smooth((p-.842)/.027));
+ const dist=(mobile()?lerp(8.7,lerp(12.15,11.0,mobileFinal),mobileFrame):8.55)-detailFocus*(mobile()?.70:.45);
+ e.camera.position.set((mobile()?.04:1.38)+detailFocus*.24,3.12+detailFocus*.06,dist-.12*focus);
+ // During refinement, move slightly closer to reveal form and rough surface
+ // texture, then return to the composed final-gallery viewpoint.
+ e.camera.lookAt((mobile()?0:.28)+detailFocus*.08,lerp(1.68,lerp(1.32,.70,mobileFinal),mobileFrame)+detailFocus*.09,0);
  e.renderer.render(e.scene,e.camera);
  host.dataset.surfaceSampleCount=String(e.surfaceSamples.length);
  host.dataset.carveProgress=removed.toFixed(4);
