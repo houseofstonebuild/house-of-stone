@@ -500,7 +500,7 @@ function applyFinishMask(material,polished){
   shader.uniforms.uFinishProgress=e.finishProgress;
   shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vFinishWorld;')
     .replace('#include <begin_vertex>','#include <begin_vertex>\nvFinishWorld=(modelMatrix*vec4(transformed,1.0)).xyz;');
-  const rule=polished?'if(vFinishWorld.y<edge)discard;':'if(vFinishWorld.y>=edge)discard;';
+  const rule=polished?'if(vFinishWorld.y<edge)discard;':'if(uFinishProgress>.0001 && vFinishWorld.y>=edge)discard;';
   shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vFinishWorld;\nuniform float uFinishProgress;')
     .replace('#include <clipping_planes_fragment>','#include <clipping_planes_fragment>\nfloat edge=mix(3.30,-.28,clamp(uFinishProgress,0.0,1.0))+.10*sin(vFinishWorld.x*4.4+vFinishWorld.z*1.7)+.045*sin(vFinishWorld.x*10.0-vFinishWorld.y*6.1);\n'+rule);
  };
@@ -524,6 +524,7 @@ function loadCoil(){
       const c=m.clone();c.clippingPlanes=[];c.clipShadows=true;
       c.userData.approvedColor=c.color?.clone();
       c.userData.approvedRoughness=Number.isFinite(c.roughness)?c.roughness:.4;
+      applyFinishMask(c,true);
       e.finishingMaterials.push(c);return c;
     });
     n.material=materials.length===1?materials[0]:materials;
@@ -531,7 +532,7 @@ function loadCoil(){
   rough.traverse(n=>{if(n.isMesh){
     // A coarse, granular interim surface that retains Coil's true silhouette.
     const materials=Array.isArray(n.material)?n.material:[n.material];
-    n.material=materials.map(()=>{const m=stoneMaterial({color:0x30362f,roughness:.99,flat:true});m.transparent=true;m.opacity=0;m.depthWrite=true;m.clippingPlanes=[e.carveRevealPlane];return m;});
+    n.material=materials.map(()=>{const m=stoneMaterial({color:0x30362f,roughness:.99,flat:true});m.transparent=true;m.opacity=0;m.depthWrite=true;m.clippingPlanes=[e.carveRevealPlane];applyFinishMask(m,false);return m;});
     if(n.material.length===1)n.material=n.material[0];
   }});
   e.polished=original;e.rough=rough;e.polishedPlane=polishedPlane;e.roughPlane=roughPlane;e.carvePlane=carvePlane;
@@ -855,7 +856,7 @@ function render(p){
  }
  host.dataset.markingVisibility=mark.toFixed(4);
  if(e.rough){
-   e.rough.visible=carve>.012&&p<.90;
+   e.rough.visible=carve>.012&&wax<.999;
    const roughOpacity=roughFade;
    host.dataset.roughOpacity=roughOpacity.toFixed(3);
    host.dataset.roughVisible=String(e.rough.visible);
@@ -879,6 +880,8 @@ function render(p){
 
  if(e.polished){
   e.polished.visible=p>=.90;
+   host.dataset.finishBlend=wax.toFixed(4);
+   host.dataset.finishMasksApplied=String(e.finishingMaterials.every(m=>Boolean(m.userData.approvedColor)&&m.customProgramCacheKey().includes('hos-finish-polished')));
   // Hand-working is illustrated by the surface itself: rough to deep polish.
   // No straight black-and-ivory dividing line or hovering wax pad.
   for(const mat of e.finishingMaterials){
