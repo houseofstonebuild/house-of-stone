@@ -129,3 +129,42 @@
   background:linear-gradient(0deg,rgba(8,12,10,.96),rgba(8,12,10,.48) 27%,transparent 57%);
  }
 }
+
+/* V6: offline single-volume stone frame player. No CSS mask or crossfaded rock shell. */
+#render>.making-v6-image{display:block;position:absolute;inset:0;width:100%;height:100%;
+ object-fit:cover;object-position:center;pointer-events:none;visibility:visible;z-index:2;opacity:1}
+#render>.making-v6-previous{opacity:0;z-index:1}
+#render>#mobile-sculpture-frames,#render>#mobile-sculpture-next{display:none!important}
+#render>.fallback{z-index:4}
+.stage .archive-cutaway[data-frame-ready="true"] video{opacity:1}
+.archive-cutaway[data-frame-ready="false"] video{opacity:0}
+@media(max-width:800px){
+ #render{filter:none!important}
+ .archive-cutaway .archive-mobile-frames{display:none!important}
+ .archive-cutaway video{display:block!important;z-index:1}
+ .archive-cutaway .archive-fallback{z-index:0}
+ .archive-cutaway[data-frame-ready="true"] video{opacity:1!important}
+ .stage-info{bottom:110px}
+ .stage[data-phase="6"] .archive-cutaway{top:110px;right:23px;width:min(49vw,194px)}
+ .stage[data-phase="6"] .stage-info{bottom:108px}
+}
+@media(prefers-reduced-motion:reduce){
+ .archive-cutaway{display:none!important}
+ #render>.making-v6-image{transition:none!important}
+}
+
+/* During real chiseling, documentary film and the carving occupy separate
+   editorial zones. The authentic film never covers the actual stone. */
+@media(min-width:801px){
+ .stage[data-phase="6"] .archive-cutaway{
+  left:clamp(28px,6.7vw,120px);right:auto;
+  top:clamp(110px,14svh,180px);width:min(31vw,410px);aspect-ratio:16/10;
+  border-color:rgba(221,204,180,.32);
+ }
+ .stage[data-phase="6"] .stage-info{
+  top:auto;bottom:clamp(98px,14svh,180px);transform:none;
+  width:min(31vw,410px);
+ }
+ .stage[data-phase="6"] .stage-info h1{font-size:clamp(49px,4.7vw,73px)}
+ .stage[data-phase="6"] .counter{margin-bottom:12px}
+}
