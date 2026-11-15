@@ -82,7 +82,10 @@ try{
      assert.equal(state.documentaryMode,'mobile-standalone','Phone video must occupy its own scene');
      assert(state.cutawayOpacity>0,'Phone work must show real footage');
      assert.equal(getComputedStyle(document.getElementById('archive-cutaway')).display,'block');
-     assert(Number(state.mobileStoneOpacity)>0,'Stone must return after the documentary beat');
+     assert(Number(state.mobileStoneOpacity)<.01,'Mobile film must not overlap a visible sculpture');
+     await move(page,.688);
+     await page.waitForFunction(()=>Number(getComputedStyle(document.querySelector('.stage')).getPropertyValue('--processStoneOpacity'))>.9,{timeout:15000});
+     await move(page,.64);
      const atlas=await page.evaluate(()=>getComputedStyle(document.querySelector('#archive-cutaway .archive-mobile-frames')).display);
      assert.equal(atlas,'block','Mobile footage must use the scroll-synced real-film atlas');
     }
