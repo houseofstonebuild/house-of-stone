@@ -210,7 +210,7 @@ function makeCarvingBlank(rows){
    indices.push(a,b,a+1,b,b+1,a+1);
  }
  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geo.setIndex(indices);
- const material=stoneMaterial({color:0x454b45,roughness:1,blank:true});material.transparent=true;material.opacity=0;material.depthWrite=true;
+ const material=stoneMaterial({color:0x454b45,roughness:1,blank:true,flat:true});material.transparent=true;material.opacity=0;material.depthWrite=true;
  material.clippingPlanes=[e.blankHidePlane];
  const blank=new THREE.Mesh(geo,material);blank.frustumCulled=false;blank.visible=false;e.root.add(blank);
  e.intermediate=blank;e.intermediateGeo=geo;e.intermediateRings=data;
@@ -226,13 +226,13 @@ function updateCarvingBlank(t){
    const v=data[i],c=Math.cos(v.a),sn=Math.sin(v.a);
    // Work down the original parent stone instead of shrinking all rows at once.
    const localHeight=clamp(v.y/3.35);
-   const eased=smooth((t-(1-localHeight)*.84)/.16);
-   const startWidth=1.18*v.taper,finishWidth=v.width;
+   const eased=Math.max(smooth((t-(1-localHeight)*.84)/.16),.58*smooth(t/.70));
+   const startWidth=1.11*v.taper*(.94+.05*Math.sin(v.y*3.1)),finishWidth=v.width;
    const center=lerp(0,v.center,eased);
    // No jump between the geological block and the gradually hand-shaped form.
    const width=lerp(startWidth,finishWidth,eased);
-   const depth=lerp(.76*v.taper,.40+Math.min(.12,finishWidth*.15),eased);
-   const texture=(.011*Math.sin(v.a*5+v.y*4.3)+.004*Math.sin(v.a*9-v.y*10))*lerp(1,.38,eased);
+   const depth=lerp(.71*v.taper,.40+Math.min(.12,finishWidth*.15),eased);
+   const texture=(.029*Math.sin(v.a*5+v.y*4.3)+.013*Math.sin(v.a*9-v.y*10))*lerp(1,.24,eased);
    pos.setXYZ(i,center+c*(width+texture),v.y+texture*.5,sn*(depth+texture));
  }
  pos.needsUpdate=true;e.intermediateGeo.computeVertexNormals();
@@ -280,7 +280,7 @@ function makeChiselAndHammer(){
   const metal=new THREE.MeshStandardMaterial({color:0x8d9898,metalness:.68,roughness:.39});
   const darkMetal=new THREE.MeshStandardMaterial({color:0x4d5353,metalness:.48,roughness:.53});
   const wood=new THREE.MeshStandardMaterial({color:0x765d43,roughness:.83});
-  const toolRig=new THREE.Group();e.root.add(toolRig);
+  const toolRig=new THREE.Group();toolRig.scale.setScalar(.66);e.root.add(toolRig);
   const chisel=new THREE.Group();toolRig.add(chisel);
   const point=new THREE.Mesh(new THREE.ConeGeometry(.042,.19,9),metal);
   point.rotation.x=Math.PI;point.position.y=.095;chisel.add(point);
@@ -635,15 +635,15 @@ function render(p){
  // Only expose portions that have cleared the still-solid working surface.
  e.carveRevealPlane.constant=-(workingHeight-.015);
  host.dataset.supportOverlap=supportOverlap.toFixed(4);
- const toBlank=smooth((carve-.007)/.13),toRough=smooth((carve-.82)/.17);
+ const toBlank=smooth((carve-.012)/.68),toRough=smooth((carve-.82)/.17);
  host.dataset.carveFrontier=frontier.toFixed(4);
  host.dataset.realShapeReveal=clamp((3.05-frontier)/3.23).toFixed(4);
  host.dataset.blankCapReady=String(Boolean(e.blankCap));
  host.dataset.blankCapHeight=workingHeight.toFixed(4);
- e.rock.visible=handoff>.02&&carve<.15;
+ e.rock.visible=handoff>.02&&carve<.71;
  e.rock.material.transparent=true;
  e.rock.material.opacity=1-toBlank;
- e.rock.material.depthWrite=carve<.09;
+ e.rock.material.depthWrite=carve<.38;
  if(e.intermediate){
    e.intermediate.visible=carve>.005&&carve<.996;
    updateCarvingBlank(removed);
