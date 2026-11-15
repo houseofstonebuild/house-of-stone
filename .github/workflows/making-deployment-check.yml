@@ -1,0 +1,35 @@
+name: Verify private making preview deployment
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa/check-making-live.mjs'
+      - '.github/workflows/making-deployment-check.yml'
+      - 'public/assets/making-mobile-atlas-v4-manifest.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: making-private-live-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - name: Compare live bytes of HTML, JS, CSS and baked images
+        run: node qa/check-making-live.mjs
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: making-live-source-verification
+          path: test-results/live-making/verification.json
+          retention-days: 7
+          if-no-files-found: warn
