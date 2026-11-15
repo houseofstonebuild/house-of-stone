@@ -20,6 +20,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: true
+      - name: Install verified video extraction tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
       - name: Build 48 high-resolution frames from real documentary film
         run: sh scripts/build-making-cinema-frames.sh
       - name: Verify generated files
