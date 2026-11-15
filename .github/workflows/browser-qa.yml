@@ -34,6 +34,13 @@ jobs:
         if: matrix.engine != 'firefox'
       - run: sh scripts/run-browser-qa.sh qa/making-v4.mjs
         if: matrix.engine == 'chromium'
+      - uses: actions/upload-artifact@v5
+        if: always() && matrix.engine == 'chromium'
+        with:
+          name: stone-process-visual-review
+          path: test-results/browser/making-v4/
+          retention-days: 7
+          if-no-files-found: warn
       - run: sh scripts/run-browser-qa.sh qa/light-theme.mjs
       - run: sh scripts/run-browser-qa.sh qa/browser.mjs
       - run: sh scripts/run-browser-qa.sh qa/collections.mjs
