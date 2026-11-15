@@ -82,6 +82,12 @@ function updateFilm(p,visible){
  desiredFilmFrame=n;
  $filmMedia.dataset.requestedFrame=String(n);
  $filmMedia.dataset.scrollPosition=p.toFixed(4);
+ // Portrait footage reframes the actual chisel contact first, then travels
+ // across the worked stone. No small inset and no synthetic hammer image.
+ const pan=lerp(18,47,p);
+ $mobileFrame.style.objectPosition=pan.toFixed(2)+'% 47%';
+ $poster.style.objectPosition=pan.toFixed(2)+'% 47%';
+ $filmMedia.dataset.filmPan=pan.toFixed(2);
  const x=sprite%7,y=Math.floor(sprite/7);
  $atlas.style.backgroundPosition=(x/6*100).toFixed(3)+'% '+(y/5*100).toFixed(3)+'%';
  $atlas.dataset.spriteFrame=String(sprite);
