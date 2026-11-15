@@ -1,0 +1,45 @@
+name: Bake sculpture mobile frames
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa/build-mobile-sculpture-atlas.mjs'
+      - '.github/workflows/sculpture-mobile-atlas.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: sculpture-mobile-atlas
+  cancel-in-progress: false
+jobs:
+  bake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - run: npm install --prefix qa --no-audit --no-fund
+      - name: Bake 192 process frames at the approved mobile camera position
+        run: node qa/build-mobile-sculpture-atlas.mjs
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: mobile-sculpture-frame-manifest
+          path: test-results/mobile-sculpture-atlas/manifest.json
+          if-no-files-found: warn
+      - name: Publish baked mobile frame sheets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/assets/making-mobile-atlas-v1-*.webp public/assets/making-mobile-atlas-v1-manifest.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Publish pre-rendered mobile Coil making sequence"
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
