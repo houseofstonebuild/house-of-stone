@@ -80,9 +80,9 @@ export function createCarvingTools(host){
   const phase=fract(t*26);
   const strike=smooth((phase-.45)/.10)*(1-smooth((phase-.60)/.13));
   const lift=1-strike;
-  const px=phone?w*(.645+.027*Math.sin(t*15)):w*(.686+.025*Math.sin(t*17));
-  const py=phone?h*(.49+.065*t):h*(.37+.19*t);
-  const width=phone?Math.min(w*.71,275):Math.min(w*.29,374);
+  const px=phone?w*(.49+.010*Math.sin(t*15)):w*(.686+.025*Math.sin(t*17));
+  const py=phone?h*(.515+.050*t):h*(.37+.19*t);
+  const width=phone?Math.min(w*.60,240):Math.min(w*.29,374);
   const height=width*330/360;
   wrapper.style.width=width.toFixed(1)+'px';
   wrapper.style.height=height.toFixed(1)+'px';

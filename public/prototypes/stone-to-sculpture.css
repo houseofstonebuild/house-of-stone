@@ -352,3 +352,15 @@
 @media(prefers-reduced-motion:reduce){
  #render>.carving-tools{display:none!important}
 }
+
+/* Short iPhones: keep the complete plinth clear of the final-stage heading. */
+@media(max-width:800px) and (max-height:720px){
+ #render>.approved-coil-reveal>.approved-mobile-workshop,
+ #render>.approved-coil-reveal>.approved-mobile-still{
+  transform:translate3d(0,-47px,0);
+ }
+}
+/* Torch nozzle heats the outer stone surface instead of pointing through Coil's opening. */
+@media(max-width:800px){
+ .heating-torch{right:-68vw}
+}

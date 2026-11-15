@@ -169,7 +169,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
     // Continuity: the same approved stone gradually takes over during the
     // heating pass and darkens under wax. Never swap at the final stage.
     const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)};
-    const level=(state.ready||state.error)?smooth((p-.828)/.081):0;
+    const level=(state.ready||state.error)?smooth((p-.826)/.022):0;
     const opacity=level;
     layer.style.opacity=opacity.toFixed(4);
     const wax=smooth((p-.891)/.076);
@@ -181,6 +181,16 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
     if(state.workingStill&&state.finalStill){
       state.finalStill.style.opacity=gallery.toFixed(4);
       state.workingStill.style.opacity='1';
+    }
+    if(state.canvas){
+      // The offline carving frame is centered on the workshop (right third),
+      // while the final gallery camera is centered. Match those positions
+      // before revealing Coil, then pan smoothly into the final presentation.
+      const pan=smooth((p-.850)/.110);
+      const dx=host.clientWidth*.215*(1-pan);
+      const dy=-host.clientHeight*.04*(1-pan);
+      state.canvas.style.transform='translate3d('+dx.toFixed(2)+'px,'+dy.toFixed(2)+'px,0)';
+      host.dataset.approvedCameraPan=pan.toFixed(4);
     }
     if(state.plinth){
       state.plinth.visible=gallery>.001&&!new URLSearchParams(location.search).has('capture-no-plinth');
