@@ -67,6 +67,9 @@ def main():
  ap=argparse.ArgumentParser();ap.add_argument('--mesh',required=True);ap.add_argument('--out',default='build/coil-pilot');ap.add_argument('--resolution',type=int,default=64);a=ap.parse_args()
  os.makedirs(a.out,exist_ok=True)
  coil=trimesh.load(a.mesh,force='mesh',process=False)
+ # Preserve the actual triangle positions and weld ONLY the derived working copy.
+ # OBJ was exported with duplicated seam vertices, making a topologically closed model appear open.
+ coil.merge_vertices(digits_vertex=5)
  if not(coil.is_watertight and coil.is_winding_consistent and coil.is_volume):
   raise SystemExit('STOP: approved mesh is not a consistent watertight volume; create and validate a DERIVED watertight working mesh before volumetric generation.')
  if a.resolution<40 or a.resolution>128:raise SystemExit('Pilot resolution must be 40..128')
