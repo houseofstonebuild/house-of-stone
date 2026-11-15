@@ -7,15 +7,19 @@ import trimesh
 p=argparse.ArgumentParser();p.add_argument('--mesh',required=True);p.add_argument('--out',default='build/coil-pilot');a=p.parse_args()
 os.makedirs(a.out,exist_ok=True)
 mesh=trimesh.load(a.mesh,force='mesh',process=False)
-components=mesh.split(only_watertight=False)
+source_components=mesh.split(only_watertight=False)
+# Triangle strips have coincident but unwelded seam vertices. Weld only a DERIVED in-memory copy.
+working=mesh.copy();working.merge_vertices(digits_vertex=5)
+components=working.split(only_watertight=False)
 report={'input':a.mesh,'sha256':hashlib.sha256(open(a.mesh,'rb').read()).hexdigest(),
  'vertices':len(mesh.vertices),'faces':len(mesh.faces),
- 'watertight':bool(mesh.is_watertight),'winding_consistent':bool(mesh.is_winding_consistent),
- 'is_volume':bool(mesh.is_volume),'components':len(components),
+ 'unwelded_components':len(source_components),'welded_vertices':len(working.vertices),
+ 'watertight':bool(working.is_watertight),'winding_consistent':bool(working.is_winding_consistent),
+ 'is_volume':bool(working.is_volume),'components':len(components),
  'component_faces':sorted([int(len(x.faces)) for x in components],reverse=True)[:20],
  'bounds':mesh.bounds.tolist(),'extents':mesh.extents.tolist(),
- 'signed_volume':float(mesh.volume),'euler_number':int(mesh.euler_number)}
-report['suitable_for_sdf']=bool(mesh.is_watertight and mesh.is_winding_consistent and mesh.is_volume)
+ 'signed_volume':float(working.volume),'euler_number':int(working.euler_number)}
+report['suitable_for_sdf']=bool(working.is_watertight and working.is_winding_consistent and working.is_volume)
 with open(os.path.join(a.out,'audit.json'),'w') as f:json.dump(report,f,indent=2)
 print(json.dumps(report,indent=2))
 if not report['suitable_for_sdf']:
