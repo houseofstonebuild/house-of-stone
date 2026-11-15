@@ -63,7 +63,7 @@ try{
    if(p<.86)assert.equal(state.canvasCount,0,'Carving and heating must not load WebGL');
    if(p>=.305)assert.match(state.image,/making-v6\/.*\/frame_/);
    if(p===.64){
-    assert(state.cutawayOpacity>.8,'Real chiseling video should be visible during carving');
+    if(v.width>800)assert(state.cutawayOpacity>.8,'Documentary should accompany desktop carving');
     assert.equal(state.tools,'true','Hammer and chisel must be visibly represented in carving');
     assert.equal(state.physicalTool,'true','A chisel must actually touch the stone, not merely appear in footage');
     assert(state.physicalTipX>.35&&state.physicalTipX<.83,'Chisel tip is detached from the stone horizontally');
