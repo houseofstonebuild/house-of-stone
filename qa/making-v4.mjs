@@ -29,7 +29,7 @@ try{
   const errors=[];
   page.on('pageerror',err=>errors.push(err.message));
   page.on('console',msg=>{if(msg.type()==='error')errors.push(msg.text())});
-  page.on('response',r=>{if(r.status()>=400&&/coil-uploaded|stone-to-sculpture/.test(r.url()))errors.push(r.status()+' '+r.url())});
+  page.on('response',r=>{if(r.status()>=400&&/coil-uploaded|stone-to-sculpture|making-chiseling/.test(r.url()))errors.push(r.status()+' '+r.url())});
   await page.goto(origin+'/prototypes/stone-to-sculpture.html',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.querySelector('#render')?.dataset.modelReady==='true'||document.querySelector('#render')?.dataset.modelError==='true',{timeout:45000});
   assert.equal(await page.locator('#render').getAttribute('data-model-ready'),'true','Approved Coil GLB must load');
@@ -53,7 +53,8 @@ try{
     marking:Number(document.getElementById('render').dataset.markingVisibility),markSegments:Number(document.getElementById('render').dataset.chalkSegmentCount),stoneContact:Number(document.getElementById('render').dataset.chiselStoneContact),
     archiveTarget:Number(document.getElementById('render').dataset.archiveTarget),videoTime:document.getElementById('archive-film').currentTime,
     videoPaused:document.getElementById('archive-film').paused,surfaceSamples:Number(document.getElementById('render').dataset.surfaceSampleCount),
-    truckTransform:document.getElementById('transport-marker').getAttribute('transform')}));
+    truckTransform:document.getElementById('transport-marker').getAttribute('transform'),
+    stillLoaded:document.querySelector('.archive-fallback')?.naturalWidth>0,plinthAligned:document.getElementById('render').dataset.plinthAligned}));
    assert.equal(info.phase,expected,`Incorrect stage ${view.width}px at ${p}: ${JSON.stringify(info)}`);
    assert(info.docWidth<=info.viewport+2,`Unexpected horizontal overflow: ${JSON.stringify(info)}`);
    assert(info.canvasWidth>0,'WebGL canvas must remain allocated');
@@ -63,6 +64,7 @@ try{
    assert.equal(info.maskReady,'true','Coil geometry silhouette field unavailable');
    if(i===5){assert(info.marking>.85,'Chalk marking must remain clearly visible before chiseling');assert(info.markSegments>20,'Contour extraction must create actual visible chalk geometry');}
    if(i>=7)assert(info.surfaceSamples>=5,'Finishing tools need precomputed contact samples');
+   if(i===10)assert.equal(info.plinthAligned,'true','Gallery pedestal must be mounted at sculpture origin');
    if(i===6){
     assert(Number(info.carve)>.07&&Number(info.carve)<.98,'Stone needs to be shaped progressively');
     assert(Number(info.aperture)>.07&&Number(info.aperture)<.98,'Opening must reveal with the chiseling sequence');
@@ -73,6 +75,7 @@ try{
     assert.equal(info.blankCapReady,'true','Unfinished parent stone must have a solid cutting surface');
     assert(Number(info.blankCapHeight)>Number(info.carveFrontier)+.3,'Stone needs a supporting bridge beneath emerging lobes');
     assert(info.cutawayOpacity>.95,'Supporting workshop footage should be visible during mid-carving');
+    assert(info.stillLoaded,'Phone and desktop must load the video fallback still');
     assert(info.videoPaused,'Scroll-scrubbed footage must never play autonomously');
     assert(info.archiveTarget>0,'Scroll progress should drive video currentTime');
     assert.equal(info.cutawayHidden,'false','Documentary cutaway should be exposed while visible');
@@ -129,12 +132,14 @@ try{
   const backward=await page.locator('#archive-film').evaluate(v=>({time:v.currentTime,paused:v.paused}));
   assert(forward.paused&&backward.paused,'Scroll-scrubbed documentary must stay paused');
   if(Number.isFinite(forward.duration)&&forward.duration>.5){
+    assert(forward.duration<22,'Inset must exclude the final lion reveal');
     assert(backward.time<forward.time,'Scrolling upward should rewind the workshop video');
   }
   const film=page.locator('.film-note video');
   assert.equal(await film.count(),1,'House of Mabwe workshop film should accompany the finished sculpture');
   assert.equal(await film.getAttribute('autoplay'),null,'Archive footage must not autoplay');
-  assert.match(await film.locator('source').getAttribute('src'),/house-of-mabwe-making-web-v1\.mp4/);
+  assert.match(await film.locator('source').getAttribute('src'),/making-chiseling-scrub-v1\.mp4/);
+  assert.match(await page.locator('#archive-film source').getAttribute('src'),/making-chiseling-scrub-v1\.mp4/);
   assert.deepEqual(errors,[],`Browser errors: ${errors.join('; ')}`);
   await page.close();
  }
