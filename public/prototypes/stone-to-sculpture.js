@@ -9,6 +9,8 @@ const stage=document.querySelector('.stage');
 const journey=document.querySelector('.journey');
 const fallback=document.getElementById('fallback');
 const map=document.getElementById('map-scene');
+const archiveCutaway=document.getElementById('archive-cutaway');
+const archiveFilm=document.getElementById('archive-film');
 const svg=document.getElementById('origin-map');
 const route=document.getElementById('travel-route');
 const truck=document.getElementById('transport-marker');
@@ -468,6 +470,7 @@ function setup(){
  canvas.addEventListener('webglcontextrestored',()=>{e.contextLost=false;schedule()});
  window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',resize,{passive:true});
  reduced.addEventListener?.('change',schedule);
+ document.addEventListener('visibilitychange',schedule);
  document.getElementById('skip').addEventListener('click',()=>document.getElementById('finished').scrollIntoView({behavior:reduced.matches?'instant':'smooth'}));
  resize();schedule();
 }
@@ -502,6 +505,15 @@ function render(p){
   ui.counter.textContent=String(step+1).padStart(2,'0')+' / 11';
  }
  ui.progress.style.width=(p*100).toFixed(2)+'%';
+ // This film is context for typical working methods, not a recording of Coil's making.
+ // Use real workshop imagery during the least documentary-looking interim geometry.
+ const documentary=smooth((p-.565)/.035)*(1-smooth((p-.715)/.037));
+ const showFilm=!reduced.matches&&document.visibilityState==='visible'&&documentary>.05;
+ stage.style.setProperty('--archiveOpacity',showFilm?documentary.toFixed(4):'0');
+ archiveCutaway.setAttribute('aria-hidden',String(!showFilm));
+ if(showFilm&&archiveFilm.paused)archiveFilm.play().catch(()=>{});
+ if(!showFilm&&!archiveFilm.paused)archiveFilm.pause();
+ host.dataset.documentaryCutaway=documentary.toFixed(3);
  if(!e.renderer||e.contextLost)return;
  const handoff=smooth((p-.31)/.088);
  // Continuous camera handoff: the Harare marker grows into the same physical block.
