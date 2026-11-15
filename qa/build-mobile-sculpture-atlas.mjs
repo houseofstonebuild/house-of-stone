@@ -54,7 +54,8 @@ try{
    return {data:sheet.toDataURL('image/webp',.87),alphaSum};
   },{group,first,last,frameCount,perGroup,columns,rows,tileWidth,tileHeight});
   if(!atlasData.data.startsWith('data:image/webp;base64,'))throw new Error('Browser does not support WebP atlas export');
-  if(group>1&&atlasData.alphaSum===0)throw new Error('WebGL framebuffer was transparent for atlas '+group);
+  const groupStart=first+(last-first)*(group*perGroup)/(frameCount-1);
+  if(groupStart>.45&&atlasData.alphaSum===0)throw new Error('Visible sculpture framebuffer was transparent for atlas '+group);
   const bytes=Buffer.from(atlasData.data.slice('data:image/webp;base64,'.length),'base64');
   if(bytes.length<4000)throw new Error('Empty atlas '+group);
   const fileName='making-mobile-atlas-v2-'+String(group).padStart(2,'0')+'.webp';
