@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'qa/build-mobile-sculpture-atlas.mjs'
+      - 'qa/publish-mobile-sculpture-atlas.mjs'
       - '.github/workflows/sculpture-mobile-atlas.yml'
   workflow_dispatch:
 permissions:
@@ -25,7 +26,7 @@ jobs:
           node-version: '24.19.0'
           package-manager-cache: false
       - run: npm install --prefix qa --no-audit --no-fund
-      - name: Bake 192 process frames at the approved mobile camera position
+      - name: Bake 192 high-resolution Coil process frames (468x1013 each)
         run: node qa/build-mobile-sculpture-atlas.mjs
       - uses: actions/upload-artifact@v5
         if: always()
