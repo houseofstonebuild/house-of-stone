@@ -76,6 +76,12 @@ test('review remains unlinked and delivers mobile and reduced-motion support',as
  assert.match(html,/works\/zsa-page-6/);
  assert.match(html,/designers-coil-v2\.webp/);
  assert.match(html,/house-of-mabwe-making-web-v1\.mp4/);
+ assert.match(html,/id="archive-cutaway" aria-hidden="true"/);
+ assert.match(html,/id="archive-film" muted loop playsinline/);
+ assert.match(js,/const documentary=smooth/);
+ assert.match(js,/archiveFilm\.play\(\)\.catch/);
+ assert.match(js,/archiveFilm\.pause\(\)/);
+ assert.match(css,/\.archive-cutaway\{/);
  assert.match(html,/not as a verified record of Coil being carved/);
  assert.match(html,/<video controls playsinline preload="metadata"/);
  assert.doesNotMatch(html,/<video[^>]*autoplay/);
