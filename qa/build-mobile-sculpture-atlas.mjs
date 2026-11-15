@@ -58,14 +58,14 @@ try{
   if(groupStart>.45&&atlasData.alphaSum===0)throw new Error('Visible sculpture framebuffer was transparent for atlas '+group);
   const bytes=Buffer.from(atlasData.data.slice('data:image/webp;base64,'.length),'base64');
   if(bytes.length<4000)throw new Error('Empty atlas '+group);
-  const fileName='making-mobile-atlas-v2-'+String(group).padStart(2,'0')+'.webp';
+  const fileName='making-mobile-atlas-v3-'+String(group).padStart(2,'0')+'.webp';
   writeFileSync(new URL(fileName,output),bytes);
   generated.push({name:fileName,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});
   process.stdout.write(fileName+' '+bytes.length+' bytes\n');
  }
  if(errors.length)throw new Error('Capture browser exceptions: '+errors.join('; '));
- const manifest={version:2,quality:0.87,capturePixelRatio:1.5,source:'/models/coil-uploaded-v1.glb',script:'/prototypes/stone-to-sculpture.js',frameCount,first,last,columns,rows,tileWidth,tileHeight,generated};
- writeFileSync(new URL('making-mobile-atlas-v2-manifest.json',output),JSON.stringify(manifest,null,2)+'\n');
+ const manifest={version:3,quality:0.87,capturePixelRatio:1.5,source:'/models/coil-uploaded-v1.glb',script:'/prototypes/stone-to-sculpture.js',frameCount,first,last,columns,rows,tileWidth,tileHeight,generated};
+ writeFileSync(new URL('making-mobile-atlas-v3-manifest.json',output),JSON.stringify(manifest,null,2)+'\n');
  writeFileSync(new URL('manifest.json',qaDir),JSON.stringify(manifest,null,2)+'\n');
  console.log('Mobile Coil atlas complete:',generated.reduce((total,x)=>total+x.bytes,0),'bytes for',frameCount,'frames');
 }finally{
