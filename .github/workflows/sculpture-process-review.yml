@@ -4,10 +4,11 @@ on:
     branches: [main]
     paths:
       - 'public/prototypes/stone-to-sculpture.*'
+      - 'qa/making-v6.mjs'
+      - 'public/prototypes/stone-to-sculpture-v6.js'
       - 'qa/making-v4.mjs'
-      - 'qa/making-mobile-webkit.mjs'
-      - 'public/assets/making-mobile-atlas-v5-*.webp'
-      - 'public/assets/making-mobile-atlas-v5-manifest.json'
+      - 'public/assets/making-v6/**'
+      - 'public/assets/making-v6/manifest.json'
       - 'test/making-prototype.test.mjs'
       - '.github/workflows/sculpture-process-review.yml'
   workflow_dispatch:
@@ -32,14 +33,12 @@ jobs:
           node-version: '24.19.0'
           package-manager-cache: false
       - run: npm install --prefix qa --no-audit --no-fund
-      - run: sh scripts/run-browser-qa.sh qa/making-v4.mjs
-      - run: sh scripts/run-browser-qa.sh qa/making-mobile-webkit.mjs
+      - run: sh scripts/run-browser-qa.sh qa/making-v6.mjs
       - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: sculpture-process-desktop-mobile-review
           path: |
-            test-results/browser/making-v4/
-            test-results/browser/mobile-webkit/
+            test-results/browser/making-v6/
           retention-days: 14
           if-no-files-found: warn
