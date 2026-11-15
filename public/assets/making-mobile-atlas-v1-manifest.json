@@ -1,0 +1,73 @@
+{
+  "source": "/models/coil-uploaded-v1.glb",
+  "script": "/prototypes/stone-to-sculpture.js",
+  "frameCount": 192,
+  "first": 0.305,
+  "last": 1,
+  "columns": 4,
+  "rows": 4,
+  "tileWidth": 240,
+  "tileHeight": 520,
+  "generated": [
+    {
+      "name": "making-mobile-atlas-v1-00.webp",
+      "bytes": 52452,
+      "sha256": "ace8ed73469d4b832028a9f15ef2230ad2a6c7ee72985ccc007ad2c07ee1cae3"
+    },
+    {
+      "name": "making-mobile-atlas-v1-01.webp",
+      "bytes": 84396,
+      "sha256": "be1403f23a65cb05047371aa74ffc9a8bbdf9567aaad1dd84b166869c8f290fe"
+    },
+    {
+      "name": "making-mobile-atlas-v1-02.webp",
+      "bytes": 86512,
+      "sha256": "05641febc1547829476a3bce36e3e34862103113876871dff42f3ee0ddaa1a00"
+    },
+    {
+      "name": "making-mobile-atlas-v1-03.webp",
+      "bytes": 108486,
+      "sha256": "fbaaaa584e9fdd07da15a11507801ed56e569d40b2e14438e37b93e886bdbbcd"
+    },
+    {
+      "name": "making-mobile-atlas-v1-04.webp",
+      "bytes": 162856,
+      "sha256": "7fa90ac788f8e59c35121f96084e4370546f907623e17626aa5b90d74c3ef0af"
+    },
+    {
+      "name": "making-mobile-atlas-v1-05.webp",
+      "bytes": 119090,
+      "sha256": "4f6d5418f5cb20e5f07f018c6c570b02ff5b7e59a678ca1934bfa6adb312f63a"
+    },
+    {
+      "name": "making-mobile-atlas-v1-06.webp",
+      "bytes": 121748,
+      "sha256": "78e0e2c8b27cefee1517cc0dea4a350b552bc8257fc11088ec26d3e97b2d8698"
+    },
+    {
+      "name": "making-mobile-atlas-v1-07.webp",
+      "bytes": 138580,
+      "sha256": "90c6b8c8c9ca6cc6b6ce4fb2e42970cfcaa3e6d76810a67b4e96ae94b04c5b6e"
+    },
+    {
+      "name": "making-mobile-atlas-v1-08.webp",
+      "bytes": 148708,
+      "sha256": "46932279536ad814a7debe52646fd25c172fd9a11c1347b120a62ffef860396f"
+    },
+    {
+      "name": "making-mobile-atlas-v1-09.webp",
+      "bytes": 94484,
+      "sha256": "8d86dc558c9652e485e9093a8783f4d3a4c08f90562cb1bbda55554f8ebe97e0"
+    },
+    {
+      "name": "making-mobile-atlas-v1-10.webp",
+      "bytes": 108958,
+      "sha256": "1f793f886646bebfca8a810b6a21fefd25fd2dff816bfa64df57144c6c0b3ec7"
+    },
+    {
+      "name": "making-mobile-atlas-v1-11.webp",
+      "bytes": 163230,
+      "sha256": "839f5a006b7fe8a746a34f398f571f28ebb02d60f5b8ecdad6d585be287e4e11"
+    }
+  ]
+}
