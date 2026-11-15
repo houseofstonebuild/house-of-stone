@@ -28,3 +28,12 @@
 #render{filter:contrast(1.045) saturate(.88)}
 @media(max-width:800px){.journey{height:1150svh}}
 @media(prefers-reduced-motion:reduce){.journey{height:350svh}}
+
+
+/* Documentary context accompanies the sculpture; it is user-initiated, never autoplayed. */
+.film-note{width:min(1110px,93vw);display:grid;grid-template-columns:minmax(240px,.75fr) minmax(0,1.25fr);align-items:center;gap:clamp(28px,5vw,78px);text-align:left;margin:78px auto 16px;padding:60px 0;border-top:1px solid #d8d0c5;border-bottom:1px solid #d8d0c5}
+.film-heading .eyebrow{margin:0 0 15px;color:#89796c}
+.film-heading h3{font:300 clamp(40px,4.1vw,62px)/1 'Cormorant Garamond',Georgia,serif;letter-spacing:-.032em;margin:0 0 18px;color:#312f29}
+.film-heading p:not(.eyebrow){font:400 12px/1.95 Manrope,Arial,sans-serif;color:#746b62;max-width:340px;margin:0}
+.film-note video{display:block;width:100%;aspect-ratio:16/9;background:#1b211d;object-fit:contain;border:0}
+@media(max-width:800px){.film-note{width:calc(100vw - 38px);display:flex;flex-direction:column;align-items:stretch;gap:23px;margin:48px 0 8px;padding:36px 0}.film-heading h3{font-size:46px;margin-bottom:13px}.film-heading p:not(.eyebrow){max-width:360px}.film-note video{width:100%}}
