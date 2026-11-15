@@ -211,6 +211,7 @@ function documentarySeek(t,force=false){
  const duration=Number.isFinite(archiveFilm.duration)&&archiveFilm.duration>0?archiveFilm.duration:8;
  const desired=clamp(t)*(Math.max(.1,duration-.08));
  documentary.desired=desired;
+ documentary.targetProgress=t;
  if(!documentary.ready)return;
  if(archiveFilm.seeking)return;
  const now=performance.now();
@@ -225,7 +226,7 @@ archiveFilm.addEventListener('loadedmetadata',()=>{
  documentary.ready=true;
  archiveCutaway.dataset.frameReady='true';
  archiveFilm.pause();
- documentarySeek(documentary.desired/(Math.max(.1,archiveFilm.duration-.08)),true);
+ documentarySeek(documentary.targetProgress||0,true);
 });
 archiveFilm.addEventListener('seeked',()=>{
  if(!documentary.active||mobile())return;
