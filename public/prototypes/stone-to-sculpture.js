@@ -298,7 +298,7 @@ function makeChiselAndHammer(){
   const metal=new THREE.MeshStandardMaterial({color:0x8d9898,metalness:.68,roughness:.39});
   const darkMetal=new THREE.MeshStandardMaterial({color:0x4d5353,metalness:.48,roughness:.53});
   const wood=new THREE.MeshStandardMaterial({color:0x765d43,roughness:.83});
-  const toolRig=new THREE.Group();toolRig.scale.setScalar(.66);e.root.add(toolRig);
+  const toolRig=new THREE.Group();toolRig.scale.setScalar(.58);e.root.add(toolRig);
   const chisel=new THREE.Group();toolRig.add(chisel);
   const point=new THREE.Mesh(new THREE.ConeGeometry(.042,.19,9),metal);
   point.rotation.x=Math.PI;point.position.y=.095;chisel.add(point);
@@ -344,7 +344,7 @@ function makeFinishingTools(){
  handle.position.y=.81;file.add(handle);e.root.add(file);e.rasp=file;
  const paper=new THREE.Mesh(new THREE.PlaneGeometry(.43,.23,8,4),new THREE.MeshStandardMaterial({color:0xc7bba6,roughness:1,side:THREE.DoubleSide}));
  paper.rotation.x=-.17;e.root.add(paper);e.sanding=paper;
- const torch=new THREE.Group();
+ const torch=new THREE.Group();torch.scale.setScalar(.76);
  const nozzle=new THREE.Mesh(new THREE.CylinderGeometry(.069,.062,.38,12),new THREE.MeshStandardMaterial({color:0x676c6b,metalness:.56,roughness:.37}));
  nozzle.position.y=-.17;torch.add(nozzle);
  const stem=new THREE.Mesh(new THREE.CylinderGeometry(.046,.056,.22,10),new THREE.MeshStandardMaterial({color:0x444744,roughness:.7}));
@@ -481,7 +481,7 @@ function loadCoil(){
   rough.traverse(n=>{if(n.isMesh){
     // A coarse, granular interim surface that retains Coil's true silhouette.
     const materials=Array.isArray(n.material)?n.material:[n.material];
-    n.material=materials.map(()=>{const m=stoneMaterial({color:0x555a52,roughness:.99,flat:true});m.transparent=true;m.opacity=0;m.depthWrite=true;m.clippingPlanes=[e.carveRevealPlane,roughPlane];return m;});
+    n.material=materials.map(()=>{const m=stoneMaterial({color:0x30362f,roughness:.99,flat:true});m.transparent=true;m.opacity=0;m.depthWrite=true;m.clippingPlanes=[e.carveRevealPlane,roughPlane];return m;});
     if(n.material.length===1)n.material=n.material[0];
   }});
   e.polished=original;e.rough=rough;e.polishedPlane=polishedPlane;e.roughPlane=roughPlane;e.carvePlane=carvePlane;
@@ -716,7 +716,7 @@ function render(p){
     e.lastWet=wet;
     for(const mat of e.roughMaterials){
       mat.roughness=lerp(.99,.83,wet);
-      mat.color.setRGB(lerp(.36,.27,wet),lerp(.39,.30,wet),lerp(.35,.28,wet));
+      mat.color.setRGB(lerp(.14,.085,wet),lerp(.16,.10,wet),lerp(.14,.09,wet));
     }
    }
    e.roughPlane.constant=lerp(4.5,-.26,wax);
@@ -730,7 +730,7 @@ function render(p){
  // Tool tip tracks the current silhouette layer; the hammer's true contact point
  // is rigged to touch the cap when the strike closes (rather than passing beside it).
  const side=Math.floor(strokes)%2===0?-1:1;
- const impactHeight=clamp(workingHeight-.035,.22,3.22);
+ const impactHeight=clamp(Math.min(workingHeight-.035,2.30),.22,2.30);
  // Land on a front-facing vertex of the current carving blank.
  const ring=Math.round(clamp((impactHeight-.025)/3.31)*84);
  const vertex=ring*33+(side<0?12:4);
@@ -788,9 +788,9 @@ function render(p){
  }
  if(e.torch){e.torch.visible=p>.839&&p<.897&&!reduced.matches;
   const point=finishingPoint(heating);
-  e.torch.position.set(point.x+.36,point.y-.16,point.z+.44);e.torch.rotation.z=-.84;
+  e.torch.position.set(point.x+.65,point.y+.10,point.z+.42);e.torch.rotation.z=.88;
   e.torchLight.intensity=e.torch.visible?1.10:0;
-  e.torchLight.position.set(e.torch.position.x,e.torch.position.y+.20,e.torch.position.z+.12);
+  e.torchLight.position.set(point.x,point.y,point.z+.34);
  }
  if(e.wax){e.wax.visible=p>.904&&p<.958&&!reduced.matches;
   const point=finishingPoint(wax);
@@ -808,10 +808,11 @@ function render(p){
  e.root.rotation.set(.007*Math.sin(p*5),lerp(-.18,.14,smooth((p-.43)/.56)),0);
  const focus=smooth((p-.53)/.20)*(1-smooth((p-.77)/.08));
  const mobileFinal=mobile()?smooth((p-.928)/.05):0;
- const dist=mobile()?lerp(8.7,9.05,mobileFinal):8.55;
+ const mobileReveal=mobile()?smooth((p-.75)/.06):0;
+ const dist=mobile()?lerp(8.7,lerp(9.65,11.0,mobileFinal),mobileReveal):8.55;
  e.camera.position.set(mobile()?.04:1.38,3.12,dist-.16*focus);
  // The final work rises clear of the title on narrow phone screens.
- e.camera.lookAt(mobile()?0:.28,lerp(1.68,.94,mobileFinal),0);
+ e.camera.lookAt(mobile()?0:.28,lerp(1.68,.84,mobileFinal),0);
  e.renderer.render(e.scene,e.camera);
  host.dataset.surfaceSampleCount=String(e.surfaceSamples.length);
  host.dataset.carveProgress=removed.toFixed(4);
