@@ -53,7 +53,7 @@ let shownProgress=0,desiredProgress=0;
 const e={renderer:null,scene:null,camera:null,root:null,canvas:null,renderWidth:0,renderHeight:0,renderMobile:null,lastRenderTime:0,
   rock:null,rockCap:null,intermediate:null,intermediateGeo:null,intermediateRings:[],blankCap:null,cut:{value:1.95},carveMargin:{value:2},carveProgress:{value:0},carveMask:{value:null},rawMaterial:null,polished:null,rough:null,contourRows:[],
   carvePlane:null,roughPlane:null,polishedPlane:null,blankHidePlane:null,carveRevealPlane:null,marks:null,hammerRig:null,
-  chiselHead:null,chiselTop:null,hammerHead:null,hammerContact:null,hammerPivot:null,toolRig:null,chips:[],dust:null,
+  chiselHead:null,chiselTop:null,chiselTip:null,hammerHead:null,hammerContact:null,hammerPivot:null,toolRig:null,chips:[],dust:null,
   rasp:null,sanding:null,torch:null,torchLight:null,wax:null,waxLight:null,surfaceSamples:[],roughMaterials:[],
   shadow:null,plinth:null,modelReady:false,contextLost:false,lastPhase:-1,frame:0,now:0,
   tempP:new THREE.Vector3(),tempQ:new THREE.Vector3()};
@@ -291,6 +291,7 @@ function makeChiselAndHammer(){
   const cap=new THREE.Mesh(new THREE.CylinderGeometry(.077,.077,.07,14),darkMetal);
   cap.position.y=1.195;chisel.add(cap);e.chiselHead=cap;
   const chiselTop=new THREE.Object3D();chiselTop.position.y=1.23;chisel.add(chiselTop);e.chiselTop=chiselTop;
+  const tip=new THREE.Object3D();chisel.add(tip);e.chiselTip=tip;
   const pivot=new THREE.Group();pivot.position.set(.70,1.49,.02);toolRig.add(pivot);
   const hammer=new THREE.Group();pivot.add(hammer);
   const beam=new THREE.Mesh(new THREE.CylinderGeometry(.045,.052,.67,11),wood);
@@ -619,7 +620,8 @@ function render(p){
    e.blankCap.material.depthWrite=e.intermediate.material.depthWrite;
  }
  e.rockCap.visible=false;
- if(e.marks){e.marks.visible=mark>.025;e.marks.material.opacity=.82*mark;}
+ if(e.marks){e.marks.visible=mark>.025;e.marks.material.opacity=.94*mark;}
+ host.dataset.markingVisibility=mark.toFixed(4);
  if(e.rough){
    e.rough.visible=carve>.035&&wax<.997;
    const roughOpacity=smooth((carve-.045)/.11);
@@ -645,7 +647,7 @@ function render(p){
  const positions=e.intermediateGeo?.attributes.position;
  const impactX=positions?positions.getX(vertex):side*.6;
  const impactY=positions?positions.getY(vertex):impactHeight;
- const impactZ=positions?positions.getZ(vertex)+.012:.68;
+ const impactZ=positions?positions.getZ(vertex)+.003:.68;
  host.dataset.tipSurfaceError=positions?Math.abs(impactZ-positions.getZ(vertex)).toFixed(4):'unavailable';
  if(e.toolRig){
   e.toolRig.visible=carve>.008&&carve<.985&&!reduced.matches;
@@ -658,6 +660,10 @@ function render(p){
    e.chiselTop.getWorldPosition(e.tempP);e.hammerContact.getWorldPosition(e.tempQ);
    const contact=e.tempP.distanceTo(e.tempQ);
    host.dataset.contactError=contact.toFixed(4);
+    e.chiselTip.getWorldPosition(e.tempP);
+    const stoneTarget=new THREE.Vector3(impactX,impactY,positions?positions.getZ(vertex):impactZ);
+    e.root.localToWorld(stoneTarget);
+    host.dataset.chiselStoneContact=e.tempP.distanceTo(stoneTarget).toFixed(4);
    host.dataset.hammerClosed=String(open<.035);
    host.dataset.hitPhase=phase.toFixed(4);
    host.dataset.strike=Math.floor(strokes).toString();
