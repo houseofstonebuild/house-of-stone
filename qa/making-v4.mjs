@@ -144,7 +144,7 @@ try{
  await reducedPage.locator('#skip').click();
  assert((await reducedPage.locator('#finished').boundingBox()).y<844,'Skip button should move to finished work');
  await reducedPage.close();
- console.log('Making geological erosion and mobile documentary QA passed:',JSON.stringify(rows));
+ console.log('Making rebuilt workshop and high-resolution mobile documentary QA passed:',JSON.stringify(rows));
 }finally{
  await browser?.close();
  await new Promise(ok=>app.server.close(ok));
