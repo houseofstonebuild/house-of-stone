@@ -34,7 +34,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: approved-coil-mobile-portrait
-          path: public/assets/making-coil-approved-mobile-v1.png
+          path: |
+            public/assets/making-coil-approved-mobile-v2.png
+            public/assets/making-coil-approved-workshop-v1.png
           retention-days: 14
           if-no-files-found: warn
   publish:
@@ -53,7 +55,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add public/assets/making-coil-approved-mobile-v1.png
+          git add public/assets/making-coil-approved-mobile-v2.png public/assets/making-coil-approved-workshop-v1.png
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'Publish original-Coil mobile final render from approved GLB'
           git pull --rebase origin main

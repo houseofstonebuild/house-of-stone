@@ -10,7 +10,8 @@ import {chromium} from 'playwright';
 import {createApp} from '../server.mjs';
 
 const dir=mkdtempSync(join(tmpdir(),'approved-coil-poster-'));
-const target=new URL('../public/assets/making-coil-approved-mobile-v1.png',import.meta.url).pathname;
+const target=new URL('../public/assets/making-coil-approved-mobile-v2.png',import.meta.url).pathname;
+const workshopTarget=new URL('../public/assets/making-coil-approved-workshop-v1.png',import.meta.url).pathname;
 mkdirSync(new URL('../public/assets/',import.meta.url),{recursive:true});
 const app=createApp({dataDir:dir,env:{ADMIN_PASSWORD:'test-only-'+randomUUID()},backgroundNotifications:false});
 await new Promise(done=>app.server.listen(0,'127.0.0.1',done));
@@ -27,7 +28,7 @@ try{
  await page.waitForFunction(()=>document.getElementById('render')?.dataset.renderMode==='precomputed-v6');
  await page.evaluate(()=>{
   const journey=document.querySelector('.journey'),stage=document.querySelector('.stage');
-  scrollTo(0,Math.round(journey.getBoundingClientRect().top+scrollY+.983*(journey.offsetHeight-stage.offsetHeight)));
+  scrollTo(0,Math.round(journey.getBoundingClientRect().top+scrollY+.993*(journey.offsetHeight-stage.offsetHeight)));
  });
  await page.waitForFunction(()=>{
   const host=document.getElementById('render');
@@ -52,8 +53,17 @@ try{
  });
  await page.screenshot({path:target,animations:'disabled'});
  assert(statSync(target).size>35000,'Approved final poster is unexpectedly small');
+ await page.evaluate(()=>{
+  const url=new URL(location.href);
+  url.searchParams.set('capture-no-plinth','1');
+  history.replaceState(null,'',url);
+  dispatchEvent(new Event('scroll'));
+ });
+ await page.waitForFunction(()=>document.querySelector('#render').dataset.approvedPlinthVisible==='false',{timeout:16000});
+ await page.screenshot({path:workshopTarget,animations:'disabled'});
+ assert(statSync(workshopTarget).size>35000,'Approved workshop poster is unexpectedly small');
  assert.deepEqual(errors,[],'Approved GLB browser loading errors');
- console.log(JSON.stringify({approvedModel:model,poster:target,bytes:statSync(target).size}));
+ console.log(JSON.stringify({approvedModel:model,poster:target,bytes:statSync(target).size,workshop:workshopTarget,workshopBytes:statSync(workshopTarget).size}));
 }finally{
  await browser?.close();
  await new Promise(resolve=>app.server.close(resolve));

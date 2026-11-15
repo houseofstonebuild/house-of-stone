@@ -45,7 +45,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
       workshop.addEventListener('error',fail);
       still.addEventListener('error',fail);
       workshop.src='/assets/making-coil-approved-workshop-v1.png';
-      still.src='/assets/making-coil-approved-mobile-v1.png';
+      still.src='/assets/making-coil-approved-mobile-v2.png';
       layer.append(workshop,still);
       return;
     }
@@ -187,6 +187,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
       state.plinth.material.opacity=gallery;
     }
     if(state.shadow)state.shadow.material.opacity=gallery;
+    host.dataset.approvedPlinthVisible=String(Boolean(state.plinth?.visible));
     host.dataset.approvedRevealBlend=opacity.toFixed(4);
     host.dataset.approvedFinishProgress=wax.toFixed(4);
     host.dataset.approvedPlinthBlend=gallery.toFixed(4);

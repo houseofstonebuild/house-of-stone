@@ -67,10 +67,13 @@ test('final stage uses exact owner-approved Coil GLB and keeps its materials unt
 });
 
 test('mobile final poster is baked from the real approved GLB',()=>{
- const poster=readFileSync(asset('assets/making-coil-approved-mobile-v1.png'));
+ const poster=readFileSync(asset('assets/making-coil-approved-mobile-v2.png'));
+ const workshop=readFileSync(asset('assets/making-coil-approved-workshop-v1.png'));
+ assert(workshop.length>35000,'Approved Coil pre-gallery workshop asset missing');
  assert(poster.length>35000,'High-resolution approved Coil mobile poster missing');
  assert.equal(poster.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
- assert.match(approved,/making-coil-approved-mobile-v1\.png/);
+ assert.match(approved,/making-coil-approved-mobile-v2\.png/);
+ assert.match(approved,/making-coil-approved-workshop-v1\.png/);
  assert.match(approved,/capture-approved-coil/);
  assert.match(approved,/approvedPresentation='baked-original-glb'/);
 });
