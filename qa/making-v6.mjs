@@ -160,13 +160,14 @@ try{
    const player=await page.evaluate(()=>({paused:document.getElementById('archive-film').paused,loop:document.getElementById('archive-film').loop}));
    assert(player.paused&&!player.loop,'The film must stop and reverse rather than free-run');
   }else{
-   await move(page,.60);
-   const early=await page.locator('#archive-cutaway').getAttribute('data-work-frame');
-   await move(page,.70);
-   const later=await page.locator('#archive-cutaway').getAttribute('data-work-frame');
-   assert(Number(later)>Number(early),'Mobile documentary frames must scrub forward');
    await move(page,.59);
-   await page.waitForFunction(early=>Number(document.querySelector('#archive-cutaway').dataset.workFrame)<Number(early),early,{timeout:15000});
+   await page.waitForFunction(()=>document.getElementById('archive-cutaway').dataset.scrollControlled==='true');
+   const early=Number(await page.locator('#archive-cutaway').getAttribute('data-work-frame'));
+   await move(page,.64);
+   await page.waitForFunction(early=>Number(document.querySelector('#archive-cutaway').dataset.workFrame)>early,early,{timeout:15000});
+   const later=Number(await page.locator('#archive-cutaway').getAttribute('data-work-frame'));
+   await move(page,.578);
+   await page.waitForFunction(later=>Number(document.querySelector('#archive-cutaway').dataset.workFrame)<later,later,{timeout:15000});
   }
   await move(page,.40);
   await move(page,.91);
