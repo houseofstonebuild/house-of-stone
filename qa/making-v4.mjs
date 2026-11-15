@@ -51,7 +51,7 @@ try{
     blankCapReady:document.getElementById('render').dataset.blankCapReady,blankCapHeight:document.getElementById('render').dataset.blankCapHeight,supportOverlap:document.getElementById('render').dataset.supportOverlap,
     cutawayOpacity:Number(getComputedStyle(document.getElementById('archive-cutaway')).opacity),cutawayHidden:document.getElementById('archive-cutaway').getAttribute('aria-hidden'),
     marking:Number(document.getElementById('render').dataset.markingVisibility),markSegments:Number(document.getElementById('render').dataset.chalkSegmentCount),stoneContact:Number(document.getElementById('render').dataset.chiselStoneContact),
-    archiveTarget:Number(document.getElementById('render').dataset.archiveTarget),videoTime:document.getElementById('archive-film').currentTime,
+    archiveTarget:Number(document.getElementById('render').dataset.archiveTarget),mobileFrame:Number(document.getElementById('render').dataset.mobileFilmFrame),videoTime:document.getElementById('archive-film').currentTime,
     videoPaused:document.getElementById('archive-film').paused,surfaceSamples:Number(document.getElementById('render').dataset.surfaceSampleCount),
     truckTransform:document.getElementById('transport-marker').getAttribute('transform'),
     stillLoaded:document.querySelector('.archive-fallback')?.naturalWidth>0,plinthAligned:document.getElementById('render').dataset.plinthAligned}));
@@ -126,13 +126,18 @@ try{
   // Rewind via scroll as well as advance: the source must remain paused.
   await scrollTo(page,.690);
   await page.waitForFunction(()=>{const v=document.getElementById('archive-film');return !Number.isFinite(v.duration)||v.duration===0||(!v.seeking&&Math.abs(v.currentTime-Number(document.getElementById('render').dataset.archiveTarget))<.6);},{timeout:10000}).catch(()=>{});
-  const forward=await page.locator('#archive-film').evaluate(v=>({time:v.currentTime,duration:v.duration,paused:v.paused}));
+  const forward=await page.locator('#archive-film').evaluate(v=>({time:v.currentTime,duration:v.duration,paused:v.paused,frame:Number(document.getElementById('render').dataset.mobileFilmFrame)}));
   await scrollTo(page,.615);
   await page.waitForFunction(()=>{const v=document.getElementById('archive-film');return !Number.isFinite(v.duration)||v.duration===0||(!v.seeking&&Math.abs(v.currentTime-Number(document.getElementById('render').dataset.archiveTarget))<.6);},{timeout:10000}).catch(()=>{});
-  const backward=await page.locator('#archive-film').evaluate(v=>({time:v.currentTime,paused:v.paused}));
+  const backward=await page.locator('#archive-film').evaluate(v=>({time:v.currentTime,paused:v.paused,frame:Number(document.getElementById('render').dataset.mobileFilmFrame)}));
   assert(forward.paused&&backward.paused,'Scroll-scrubbed documentary must stay paused');
   if(Number.isFinite(forward.duration)&&forward.duration>.5){
     assert(forward.duration<22,'Inset must exclude the final lion reveal');
+  }
+  if(view.width<800){
+    assert(forward.frame>backward.frame, 'Phone scroll should rewind documentary storyboard without video decoding');
+    assert(forward.frame<42&&backward.frame>=0,'Phone storyboard frame must be in bounds');
+  }else if(Number.isFinite(forward.duration)&&forward.duration>.5){
     assert(backward.time<forward.time,'Scrolling upward should rewind the workshop video');
   }
   const film=page.locator('.film-note video');
