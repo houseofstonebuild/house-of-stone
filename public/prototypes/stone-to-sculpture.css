@@ -302,3 +302,9 @@
 @media(prefers-reduced-motion:reduce){
  .heating-study,.craft-detail-cutaway{display:none!important}
 }
+
+/* Phone finale is baked from exactly the same approved GLB and stone material. */
+#render>.approved-coil-reveal>.approved-mobile-still{
+ display:block;position:absolute;inset:0;width:100%;height:100%;
+ object-fit:contain;background:#161d19;pointer-events:none;
+}

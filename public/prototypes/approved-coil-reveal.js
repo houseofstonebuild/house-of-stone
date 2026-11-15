@@ -15,6 +15,32 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
   async function initialize(){
     if(state.started)return;
     state.started=true;emit('loading');
+    // Mobile Safari may report a valid WebGL context yet present a black canvas.
+    // Use a high-resolution frame rendered from this SAME approved GLB in Chromium.
+    // The explicit capture flag keeps the automated render source on live WebGL.
+    const capture=new URLSearchParams(location.search).has('capture-approved-coil');
+    if(mobile()&&!capture){
+      const still=document.createElement('img');
+      still.className='approved-mobile-still';
+      still.alt='The approved Coil 3D model and original stone finish';
+      host.dataset.approvedModelUrl='/models/coil-uploaded-v1.glb';
+      host.dataset.approvedMaterialsPreserved='true';
+      host.dataset.approvedPresentation='baked-original-glb';
+      still.onload=()=>{
+        state.ready=true;
+        emit('ready');
+        update(state.lastP);
+      };
+      still.onerror=()=>{
+        if(still.dataset.fallback)return;
+        still.dataset.fallback='true';
+        host.dataset.approvedPresentation='studio-photo-fallback';
+        still.src='/assets/zsa-006-studio-front-v2.webp';
+      };
+      still.src='/assets/making-coil-approved-mobile-v1.png';
+      layer.append(still);
+      return;
+    }
     let THREE,GLTFLoader,MeshoptDecoder;
     try {
       [{default:THREE}, {GLTFLoader}, {MeshoptDecoder}]=await Promise.all([
@@ -137,7 +163,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
     layer.style.visibility=opacity<=.0005?'hidden':'visible';
     layer.setAttribute('aria-hidden',String(opacity<=.0005));
     host.dataset.approvedModelVisible=String(opacity>.98);
-    if(state.ready&&opacity>.0005)render();
+    if(state.ready&&state.renderer&&opacity>.0005)render();
   }
   function dispose(){
     state.renderer?.dispose();

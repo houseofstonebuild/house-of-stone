@@ -72,13 +72,17 @@ try{
      url:document.querySelector('#render').dataset.approvedModelUrl,
      materials:document.querySelector('#render').dataset.approvedMaterialsPreserved,
      visible:document.querySelector('#render').dataset.approvedModelVisible,
-     canvas:document.querySelectorAll('#render .approved-coil-canvas').length
+     canvas:document.querySelectorAll('#render .approved-coil-canvas').length,
+     presentation:document.querySelector('#render').dataset.approvedPresentation
     }));
     assert.equal(approved.status,'ready','The final artwork must use actual GLB, not a pre-render fallback');
     assert.equal(approved.url,'/models/coil-uploaded-v1.glb');
     assert.equal(approved.materials,'true','Original Coil materials must be preserved');
     assert.equal(approved.visible,'true');
-    assert.equal(approved.canvas,1);
+    if(v.width<=800){
+     assert.equal(approved.canvas,0,'Phone ending must avoid unreliable WebKit canvas');
+     assert(['baked-original-glb','studio-photo-fallback'].includes(approved.presentation),'Missing approved Coil mobile final image');
+    }else assert.equal(approved.canvas,1);
    }
    if(p===.983)assert(state.videoPaused,'Documentary must pause outside the carving interval');
    await page.screenshot({path:new URL(v.engine+'-'+v.width+'-'+String(i).padStart(2,'0')+'.png',output).pathname});

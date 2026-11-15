@@ -23,7 +23,7 @@ try{
   isMobile:true,hasTouch:true
  });
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
- await page.goto(origin+'/prototypes/stone-to-sculpture.html',{waitUntil:'domcontentloaded'});
+ await page.goto(origin+'/prototypes/stone-to-sculpture.html?capture-approved-coil=1',{waitUntil:'domcontentloaded'});
  await page.waitForFunction(()=>document.getElementById('render')?.dataset.renderMode==='precomputed-v6');
  await page.evaluate(()=>{
   const journey=document.querySelector('.journey'),stage=document.querySelector('.stage');
