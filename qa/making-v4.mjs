@@ -17,7 +17,7 @@ const scrollTo=async(page,p)=>{
  await page.evaluate(f=>{
   const element=document.querySelector('.journey');
   const top=element.getBoundingClientRect().top+scrollY;
-  window.scrollTo(0,Math.round(top+f*(element.offsetHeight-innerHeight)));
+  window.scrollTo(0,Math.round(top+f*(element.offsetHeight-document.querySelector('.stage').offsetHeight)));
  },p);
  await page.waitForTimeout(360);
 };
@@ -25,18 +25,23 @@ try{
  browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  const rows=[];
  for(const view of [{width:1440,height:900},{width:390,height:844}]){
-  const page=await browser.newPage({viewport:view,deviceScaleFactor:1,hasTouch:view.width<800});
+  const isAtlas=view.width<800;
+  const page=await browser.newPage({viewport:view,deviceScaleFactor:1,hasTouch:isAtlas});
   const errors=[];
   page.on('pageerror',err=>errors.push(err.message));
   page.on('console',msg=>{if(msg.type()==='error')errors.push(msg.text())});
   page.on('response',r=>{if(r.status()>=400&&/coil-uploaded|stone-to-sculpture|making-chiseling/.test(r.url()))errors.push(r.status()+' '+r.url())});
   await page.goto(origin+'/prototypes/stone-to-sculpture.html',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.querySelector('#render')?.dataset.modelReady==='true'||document.querySelector('#render')?.dataset.modelError==='true',{timeout:45000});
-  assert.equal(await page.locator('#render').getAttribute('data-model-ready'),'true','Approved Coil GLB must load');
+  assert.equal(await page.locator('#render').getAttribute('data-model-ready'),'true','Approved Coil animation must load');
+  if(isAtlas)assert.equal(await page.locator('#render').getAttribute('data-render-mode'),'precomputed-mobile','Phones must not create a live WebGL renderer');
   const steps=[[0,0],[.12,1],[.22,2],[.33,3],[.405,4],[.49,5],[.64,6],[.8,7],[.865,8],[.928,9],[.983,10]];
   let countryBox,regionBox;
   for(const [i,[p,expected]] of steps.entries()){
    await scrollTo(page,p);
+   if(isAtlas&&p>=.305){
+    await page.waitForFunction(()=>{const h=document.getElementById('render');return h.dataset.mobileAtlasPending===''&&Number.isFinite(Number(h.dataset.mobileAtlasFrame))&&Number(h.dataset.mobileAtlasFrame)>0;},{timeout:20000});
+   }
    const info=await page.evaluate(()=>({phase:Number(document.querySelector('.stage').dataset.phase),
     docWidth:document.documentElement.scrollWidth,viewport:innerWidth,
     countryBox:document.getElementById('origin-map').getAttribute('viewBox'),
@@ -54,18 +59,23 @@ try{
     archiveTarget:Number(document.getElementById('render').dataset.archiveTarget),mobileFrame:Number(document.getElementById('render').dataset.mobileFilmFrame),videoTime:document.getElementById('archive-film').currentTime,
     videoPaused:document.getElementById('archive-film').paused,surfaceSamples:Number(document.getElementById('render').dataset.surfaceSampleCount),
     truckTransform:document.getElementById('transport-marker').getAttribute('transform'),
+    renderMode:document.getElementById('render').dataset.renderMode,mobileAtlasFrame:Number(document.getElementById('render').dataset.mobileAtlasFrame),mobileAtlasPending:document.getElementById('render').dataset.mobileAtlasPending,
+    mobileAtlasDisplay:getComputedStyle(document.getElementById('mobile-sculpture-frames')).backgroundImage,
     stillLoaded:document.querySelector('.archive-fallback')?.naturalWidth>0,plinthAligned:document.getElementById('render').dataset.plinthAligned}));
    assert.equal(info.phase,expected,`Incorrect stage ${view.width}px at ${p}: ${JSON.stringify(info)}`);
    assert(info.docWidth<=info.viewport+2,`Unexpected horizontal overflow: ${JSON.stringify(info)}`);
-   assert(info.canvasWidth>0,'WebGL canvas must remain allocated');
+   if(isAtlas){assert.equal(info.canvasWidth,0,'Mobile route should never allocate a WebGL canvas');}
+   else assert(info.canvasWidth>0,'Desktop WebGL canvas must remain allocated');
    if(i===0){countryBox=info.countryBox;assert(info.cutawayOpacity<.01,'Documentary film should not cover geographic introduction');}
    if(i===1){regionBox=info.countryBox;assert.notEqual(regionBox,countryBox,'Map should zoom into the Guruve region');}
    if(i===2){assert.equal(info.markerOpacity,'1','Illustrative stone transport marker should follow route');assert(!info.truckTransform.includes('rotate'),'Transport marker should never invert');}
-   assert.equal(info.maskReady,'true','Coil geometry silhouette field unavailable');
-   if(i===5){assert(info.marking>.85,'Chalk marking must remain clearly visible before chiseling');assert(info.markSegments>20,'Contour extraction must create actual visible chalk geometry');}
-   if(i>=7)assert(info.surfaceSamples>=5,'Finishing tools need precomputed contact samples');
-   if(i===10)assert.equal(info.plinthAligned,'true','Gallery pedestal must be mounted at sculpture origin');
+   if(!isAtlas)assert.equal(info.maskReady,'true','Coil geometry silhouette field unavailable');
+   if(isAtlas&&p>=.305){assert(info.mobileAtlasFrame>0&&info.mobileAtlasFrame<192,'Invalid mobile sculpture frame');assert.match(info.mobileAtlasDisplay,/making-mobile-atlas-v1-/,'Sculpture frame atlas not composited');}
+   if(!isAtlas&&i===5){assert(info.marking>.85,'Chalk marking must remain clearly visible before chiseling');assert(info.markSegments>20,'Contour extraction must create actual visible chalk geometry');}
+   if(!isAtlas&&i>=7)assert(info.surfaceSamples>=5,'Finishing tools need precomputed contact samples');
+   if(!isAtlas&&i===10)assert.equal(info.plinthAligned,'true','Gallery pedestal must be mounted at sculpture origin');
    if(i===6){
+    if(!isAtlas){
     assert(Number(info.carve)>.07&&Number(info.carve)<.98,'Stone needs to be shaped progressively');
     assert(Number(info.aperture)>.07&&Number(info.aperture)<.98,'Opening must reveal with the chiseling sequence');
     assert(Number(info.tipError)<.025,'Chisel tip should follow current fitted stone surface');
@@ -74,13 +84,14 @@ try{
     assert(Number(info.carveFrontier)>.3&&Number(info.carveFrontier)<3.1,'Stone removal frontier should be inside the unfinished parent block');
     assert.equal(info.blankCapReady,'true','Unfinished parent stone must have a solid cutting surface');
     assert(Number(info.blankCapHeight)>Number(info.carveFrontier)+.3,'Stone needs a supporting bridge beneath emerging lobes');
+    }
     assert(info.cutawayOpacity>.95,'Supporting workshop footage should be visible during mid-carving');
     assert(info.stillLoaded,'Phone and desktop must load the video fallback still');
     assert(info.videoPaused,'Scroll-scrubbed footage must never play autonomously');
     assert(info.archiveTarget>0,'Scroll progress should drive video currentTime');
     assert.equal(info.cutawayHidden,'false','Documentary cutaway should be exposed while visible');
    }
-   if(i===5 && info.hammerClosed==='true')assert(Number(info.contactError)<.06,'Hammer head misses the chisel cap');
+   if(!isAtlas&&i===5 && info.hammerClosed==='true')assert(Number(info.contactError)<.06,'Hammer head misses the chisel cap');
    const file=new URL(`${view.width}-${String(i).padStart(2,'0')}.png`,screenshots).pathname;
    await page.screenshot({path:file,fullPage:false});
    rows.push({width:view.width,p,phase:info.phase,contact:info.contactError||null});
@@ -90,7 +101,7 @@ try{
   const invSmooth=value=>{let lo=0,hi=1;for(let i=0;i<24;i++){
     const m=(lo+hi)*.5;if(m*m*(3-2*m)<value)lo=m;else hi=m;
   }return (lo+hi)*.5;};
-  for(const n of [3,9,15,21,26]){
+  for(const n of isAtlas?[]:[3,9,15,21,26]){
     const desiredCarve=(n+.82)/28;
     const p=.565+.20*invSmooth(desiredCarve);
     await scrollTo(page,p);
@@ -154,7 +165,7 @@ try{
  await reducedPage.locator('#skip').click();
  assert((await reducedPage.locator('#finished').boundingBox()).y<844,'Skip button should move to finished work');
  await reducedPage.close();
- console.log('Making v4 geographic camera, 3D carving and contact QA passed:',JSON.stringify(rows));
+ console.log('Making desktop 3D carving and mobile atlas scroll QA passed:',JSON.stringify(rows));
 }finally{
  await browser?.close();
  await new Promise(ok=>app.server.close(ok));
