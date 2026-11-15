@@ -52,7 +52,7 @@ const phaseT=(p,i)=>clamp((p-stops[i])/Math.max(.001,stops[i+1]-stops[i]));
 const impactVector=new THREE.Vector3();
 let shownProgress=0,desiredProgress=0;
 const e={renderer:null,scene:null,camera:null,root:null,canvas:null,renderWidth:0,renderHeight:0,renderMobile:null,lastRenderTime:0,
-  rock:null,rockCap:null,intermediate:null,intermediateGeo:null,intermediateRings:[],blankCap:null,cut:{value:1.95},carveMargin:{value:2},carveProgress:{value:0},carveMask:{value:null},rawMaterial:null,polished:null,rough:null,contourRows:[],
+  rock:null,rockCap:null,intermediate:null,intermediateGeo:null,intermediateRings:[],blankCap:null,cut:{value:1.95},carveMargin:{value:2},carveProgress:{value:0},carveMask:{value:null},finishProgress:{value:0},rawMaterial:null,polished:null,rough:null,contourRows:[],
   carvePlane:null,roughPlane:null,polishedPlane:null,blankHidePlane:null,carveRevealPlane:null,marks:null,hammerRig:null,
   chiselHead:null,chiselTop:null,chiselTip:null,hammerHead:null,hammerContact:null,hammerPivot:null,toolRig:null,chips:[],dust:null,
   rasp:null,sanding:null,torch:null,torchLight:null,wax:null,waxLight:null,surfaceSamples:[],roughMaterials:[],
@@ -315,9 +315,8 @@ function makeChiselAndHammer(){
   // Short-handled sculptor's mallet: grip runs diagonally from head to palm.
   const beam=new THREE.Mesh(new THREE.CylinderGeometry(.049,.057,.92,14),wood);
   beam.position.set(-.40,.22,-.02);beam.rotation.z=-.66;hammer.add(beam);
-  const band=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.08,16),metal);
-  band.position.set(-.69,-.09,-.02);hammer.add(band);
-  const hammerHead=new THREE.Mesh(new THREE.CylinderGeometry(.123,.115,.23,20),darkMetal);
+  const hammerHead=new THREE.Mesh(new THREE.CylinderGeometry(.115,.115,.36,18),metal);
+  hammerHead.rotation.z=Math.PI/2;
   // At impact, the lower face of the hammer head meets the chisel's top,
   // not its center. Both are located in world-space in the browser QA.
   hammerHead.position.set(-.70,-.145,-.02);hammer.add(hammerHead);
@@ -356,7 +355,7 @@ function makeFinishingTools(){
  e.root.add(torch);e.torch=torch;
  const light=new THREE.PointLight(0xffa460,0,2.4,1.5);e.scene.add(light);e.torchLight=light;
  const cloth=new THREE.Group();
- const pad=new THREE.Mesh(new THREE.BoxGeometry(.35,.19,.12,6,3,4),new THREE.MeshStandardMaterial({color:0xe0d5c2,roughness:1}));
+ const pad=new THREE.Mesh(new THREE.BoxGeometry(.27,.12,.08,6,3,4),new THREE.MeshStandardMaterial({color:0xd5ccbd,roughness:1}));
  const pos=pad.geometry.attributes.position;
  for(let i=0;i<pos.count;i++)pos.setY(i,pos.getY(i)+.02*Math.sin(pos.getX(i)*26+pos.getZ(i)*17));
  pad.geometry.computeVertexNormals();pad.rotation.z=-.15;cloth.add(pad);
@@ -461,6 +460,22 @@ function makeChalkFromModel(model){
  e.marks=new THREE.LineSegments(g,m);e.marks.renderOrder=4;
  e.root.add(e.marks);e.marks.visible=false;
 }
+// Match both rough and approved materials to the same feathered, irregular
+// finishing frontier. This retains Coil's original material and its geometry.
+function applyFinishMask(material,polished){
+ const prior=material.onBeforeCompile;
+ const previousKey=material.customProgramCacheKey?.bind(material);
+ material.onBeforeCompile=shader=>{
+  prior?.(shader);
+  shader.uniforms.uFinishProgress=e.finishProgress;
+  shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vFinishWorld;')
+    .replace('#include <begin_vertex>','#include <begin_vertex>\nvFinishWorld=(modelMatrix*vec4(transformed,1.0)).xyz;');
+  const rule=polished?'if(vFinishWorld.y<edge)discard;':'if(vFinishWorld.y>=edge)discard;';
+  shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vFinishWorld;\nuniform float uFinishProgress;')
+    .replace('#include <clipping_planes_fragment>','#include <clipping_planes_fragment>\nfloat edge=mix(3.30,-.28,clamp(uFinishProgress,0.0,1.0))+.10*sin(vFinishWorld.x*4.4+vFinishWorld.z*1.7)+.045*sin(vFinishWorld.x*10.0-vFinishWorld.y*6.1);\n'+rule);
+ };
+ material.customProgramCacheKey=()=>String(previousKey?.()||'stone')+'-hos-finish-'+(polished?'polished':'rough')+'-v1';
+}
 function loadCoil(){
  const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
  loader.load('/models/coil-uploaded-v1.glb',gltf=>{
@@ -475,25 +490,25 @@ function loadCoil(){
   const carvePlane=new THREE.Plane(new THREE.Vector3(0,1,0),.28);
   original.traverse(n=>{if(n.isMesh){
     const originalMaterials=Array.isArray(n.material)?n.material:[n.material];
-    const materials=originalMaterials.map(m=>{const c=m.clone();c.clippingPlanes=[polishedPlane];c.clipShadows=true;return c;});
+    const materials=originalMaterials.map(m=>{const c=m.clone();c.clippingPlanes=[];c.clipShadows=true;applyFinishMask(c,true);return c;});
     n.material=materials.length===1?materials[0]:materials;
   }});
   rough.traverse(n=>{if(n.isMesh){
     // A coarse, granular interim surface that retains Coil's true silhouette.
     const materials=Array.isArray(n.material)?n.material:[n.material];
-    n.material=materials.map(()=>{const m=stoneMaterial({color:0x30362f,roughness:.99,flat:true});m.transparent=true;m.opacity=0;m.depthWrite=true;m.clippingPlanes=[e.carveRevealPlane,roughPlane];return m;});
+    n.material=materials.map(()=>{const m=stoneMaterial({color:0x30362f,roughness:.99,flat:true});m.transparent=true;m.opacity=0;m.depthWrite=true;m.clippingPlanes=[e.carveRevealPlane];applyFinishMask(m,false);return m;});
     if(n.material.length===1)n.material=n.material[0];
   }});
   e.polished=original;e.rough=rough;e.polishedPlane=polishedPlane;e.roughPlane=roughPlane;e.carvePlane=carvePlane;
   original.visible=false;rough.visible=false;
   e.root.add(rough);e.root.add(original);e.modelReady=true;
-  cacheFinishingSurface();
   host.dataset.modelReady='true';
   // Project the actual Coil triangles before applying any cinematic map camera transform.
   const sourcePosition=e.root.position.clone(),sourceRotation=e.root.rotation.clone(),sourceScale=e.root.scale.clone();
   e.root.position.set(0,0,0);e.root.rotation.set(0,0,0);e.root.scale.setScalar(1);
   e.root.updateMatrixWorld(true);
   try{makeChalkFromModel(original)}catch(err){console.warn('Contour extraction unavailable',err)}
+  cacheFinishingSurface();
   finally{
     e.root.position.copy(sourcePosition);e.root.rotation.copy(sourceRotation);e.root.scale.copy(sourceScale);
     e.root.updateMatrixWorld(true);
@@ -536,8 +551,10 @@ function cacheFinishingSurface(){
  const points=[];
  for(let i=0;i<18;i++){
   const y=lerp(2.92,.34,i/17);
-  const nominal=.18*Math.sin(i*.65)+.30*Math.sin(i*.19);
-  for(const dx of [0,-.22,.22,-.45,.45,-.72,.72]){
+  const row=e.contourRows[Math.min(e.contourRows.length-1,Math.max(0,Math.round((1-y/3.48)*(e.contourRows.length-1))))];
+  const nominal=row&&Number.isFinite(row.right)?row.right-Math.min(.17,Math.max(.04,(row.right-row.left)*.18)):.42;
+  // Follow the actual outside edge; avoid reaching through Coil's hollow center.
+  for(const dx of [0,-.10,-.20,-.33,-.46,-.60,-.75,.08]){
    ray.set(new THREE.Vector3(nominal+dx,y,5),direction);
    const hits=ray.intersectObject(e.rough,true);
    if(hits.length){points.push(hits[0].point.clone());break;}
@@ -654,6 +671,7 @@ function render(p){
  const carve=smooth((p-.565)/.20);
  const file=smooth((p-.765)/.07),heating=smooth((p-.835)/.065);
  const wax=smooth((p-.90)/.06),gallery=smooth((p-.96)/.04);
+ e.finishProgress.value=wax;
  // Each impact removes a discrete band of unwanted material, then holds.
  const strokeCount=28,strokes=carve*strokeCount;
  const phase=fract(strokes);
@@ -812,7 +830,7 @@ function render(p){
  const dist=mobile()?lerp(8.7,lerp(9.65,11.0,mobileFinal),mobileReveal):8.55;
  e.camera.position.set(mobile()?.04:1.38,3.12,dist-.16*focus);
  // The final work rises clear of the title on narrow phone screens.
- e.camera.lookAt(mobile()?0:.28,lerp(1.68,.84,mobileFinal),0);
+ e.camera.lookAt(mobile()?0:.28,lerp(1.68,.70,mobileFinal),0);
  e.renderer.render(e.scene,e.camera);
  host.dataset.surfaceSampleCount=String(e.surfaceSamples.length);
  host.dataset.carveProgress=removed.toFixed(4);
