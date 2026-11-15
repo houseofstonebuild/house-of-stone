@@ -23,8 +23,8 @@ async function call(endpoint,{method='GET',body}={}){
  }
  return parsed;
 }
-const prefix='making-mobile-atlas-v1-';
-const names=Array.from({length:12},(_,i)=>prefix+String(i).padStart(2,'0')+'.webp');
+const prefix='making-mobile-atlas-v2-';
+const names=Array.from({length:32},(_,i)=>prefix+String(i).padStart(2,'0')+'.webp');
 names.push(prefix+'manifest.json');
 const items=[];
 for(const name of names){
@@ -39,7 +39,7 @@ for(let attempt=0;attempt<4;attempt++){
  const parent=head.object.sha;
  const previous=await call('/git/commits/'+parent);
  const tree=await call('/git/trees',{method:'POST',body:{base_tree:previous.tree.sha,tree:items}});
- const commit=await call('/git/commits',{method:'POST',body:{message:'Publish verified mobile Coil frame atlas',tree:tree.sha,parents:[parent]}});
+ const commit=await call('/git/commits',{method:'POST',body:{message:'Publish high-resolution mobile Coil frame atlas v2',tree:tree.sha,parents:[parent]}});
  try{
   await call('/git/refs/heads/main',{method:'PATCH',body:{sha:commit.sha,force:false}});
   console.log('Published',names.length,'mobile sculpture atlas files:',commit.sha);
