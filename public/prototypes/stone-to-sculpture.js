@@ -54,7 +54,7 @@ const e={renderer:null,scene:null,camera:null,root:null,canvas:null,renderWidth:
   rock:null,rockCap:null,intermediate:null,intermediateGeo:null,intermediateRings:[],blankCap:null,cut:{value:1.95},carveMargin:{value:2},carveProgress:{value:0},carveMask:{value:null},rawMaterial:null,polished:null,rough:null,contourRows:[],
   carvePlane:null,roughPlane:null,polishedPlane:null,blankHidePlane:null,carveRevealPlane:null,marks:null,hammerRig:null,
   chiselHead:null,chiselTop:null,hammerHead:null,hammerContact:null,hammerPivot:null,toolRig:null,chips:[],dust:null,
-  rasp:null,sanding:null,torch:null,torchLight:null,wax:null,waxLight:null,
+  rasp:null,sanding:null,torch:null,torchLight:null,wax:null,waxLight:null,surfaceSamples:[],roughMaterials:[],
   shadow:null,plinth:null,modelReady:false,contextLost:false,lastPhase:-1,frame:0,now:0,
   tempP:new THREE.Vector3(),tempQ:new THREE.Vector3()};
 
@@ -444,6 +444,7 @@ function loadCoil(){
   e.polished=original;e.rough=rough;e.polishedPlane=polishedPlane;e.roughPlane=roughPlane;e.carvePlane=carvePlane;
   original.visible=false;rough.visible=false;
   e.root.add(rough);e.root.add(original);e.modelReady=true;
+  cacheFinishingSurface();
   host.dataset.modelReady='true';
   try{makeChalkFromModel(original)}catch(err){console.warn('Contour extraction unavailable',err)}
   schedule();
@@ -465,6 +466,32 @@ function seekArchiveVideo(p){
 archiveFilm.addEventListener('seeked',flushArchiveSeek);
 archiveFilm.addEventListener('loadedmetadata',schedule);
 archiveFilm.addEventListener('play',()=>archiveFilm.pause());
+// Raycast the original mesh at load time only. Finishing tools stay on the stone,
+// including its changing front depth, without per-frame raycast cost.
+function cacheFinishingSurface(){
+ const ray=new THREE.Raycaster(),direction=new THREE.Vector3(0,0,-1);
+ e.root.updateMatrixWorld(true);
+ const points=[];
+ for(let i=0;i<18;i++){
+  const y=lerp(2.92,.34,i/17);
+  const nominal=.18*Math.sin(i*.65)+.30*Math.sin(i*.19);
+  for(const dx of [0,-.22,.22,-.45,.45,-.72,.72]){
+   ray.set(new THREE.Vector3(nominal+dx,y,5),direction);
+   const hits=ray.intersectObject(e.rough,true);
+   if(hits.length){points.push(hits[0].point.clone());break;}
+  }
+ }
+ e.surfaceSamples=points;
+ e.rough.traverse(node=>{
+  if(node.isMesh)for(const mat of Array.isArray(node.material)?node.material:[node.material])e.roughMaterials.push(mat);
+ });
+}
+function finishingPoint(t){
+ const points=e.surfaceSamples;
+ if(!points.length)return new THREE.Vector3(.1,lerp(2.7,.6,t),.75);
+ const pos=clamp(t)*(points.length-1),i=Math.floor(pos),j=Math.min(points.length-1,i+1);
+ return points[i].clone().lerp(points[j],smooth(pos-i));
+}
 function setup(){
  // Two facing cut planes let the real rough GLB grow out of the single working blank.
  // No replacement artwork is generated; the approved Coil geometry is never edited.
@@ -595,9 +622,11 @@ function render(p){
  if(e.marks){e.marks.visible=mark>.025;e.marks.material.opacity=.82*mark;}
  if(e.rough){
    e.rough.visible=carve>.035&&wax<.997;
-   e.rough.traverse(mesh=>{if(mesh.isMesh){for(const mat of Array.isArray(mesh.material)?mesh.material:[mesh.material]){
-     mat.opacity=smooth((carve-.045)/.11);mat.depthWrite=carve>.16;
-   }}});
+   const roughOpacity=smooth((carve-.045)/.11);
+   if(Math.abs((e.lastRoughOpacity??-1)-roughOpacity)>.004){
+    e.lastRoughOpacity=roughOpacity;
+    for(const mat of e.roughMaterials){mat.opacity=roughOpacity;mat.depthWrite=carve>.16;}
+   }
    e.roughPlane.constant=lerp(4.5,-.26,wax);
  }
 
@@ -652,22 +681,26 @@ function render(p){
   }
  }
  if(e.rasp){e.rasp.visible=p>.77&&p<.813&&!reduced.matches;
-  e.rasp.position.set(.5*Math.sin(file*9),lerp(2.8,.74,file),.86);
+  const point=finishingPoint(clamp((p-.77)/.043));
+  e.rasp.position.set(point.x,point.y-.25,point.z+.035);
   e.rasp.rotation.z=-.46+Math.sin(file*67)*.11;
  }
  if(e.sanding){e.sanding.visible=p>.812&&p<.832&&!reduced.matches;
-  e.sanding.position.set(.39*Math.sin(file*13),lerp(2.7,.56,file),.90);
+  const point=finishingPoint(clamp((p-.812)/.02));
+  e.sanding.position.set(point.x,point.y,point.z+.04);
   e.sanding.rotation.z=Math.sin(file*60)*.12;
  }
  if(e.torch){e.torch.visible=p>.839&&p<.897&&!reduced.matches;
-  e.torch.position.set(.52,lerp(2.75,.67,heating),.98);e.torch.rotation.z=-.84;
+  const point=finishingPoint(heating);
+  e.torch.position.set(point.x+.36,point.y-.16,point.z+.44);e.torch.rotation.z=-.84;
   e.torchLight.intensity=e.torch.visible?1.10:0;
-  e.torchLight.position.set(.30,lerp(2.7,.65,heating),1.85);
+  e.torchLight.position.set(e.torch.position.x,e.torch.position.y+.20,e.torch.position.z+.12);
  }
  if(e.wax){e.wax.visible=p>.904&&p<.958&&!reduced.matches;
-  e.wax.position.set(.46*Math.sin(wax*11),lerp(2.95,.37,wax),.97);
+  const point=finishingPoint(wax);
+  e.wax.position.set(point.x,point.y,point.z+.07);
   e.wax.rotation.z=Math.sin(wax*56)*.08;
-  e.waxLight.intensity=e.wax.visible?.5:0;
+  e.waxLight.intensity=e.wax.visible?1.0:0;
   e.waxLight.position.set(e.wax.position.x,e.wax.position.y,1.8);
  }
  if(e.plinth)e.plinth.visible=gallery>.55;
@@ -679,6 +712,7 @@ function render(p){
  // The final work rises clear of the title on narrow phone screens.
  e.camera.lookAt(mobile()?0:.28,lerp(1.68,.94,mobileFinal),0);
  e.renderer.render(e.scene,e.camera);
+ host.dataset.surfaceSampleCount=String(e.surfaceSamples.length);
  host.dataset.carveProgress=removed.toFixed(4);
  host.dataset.blankReady=String(Boolean(e.intermediate));
  host.dataset.blankOpacity=e.intermediate?e.intermediate.material.opacity.toFixed(3):'0';
