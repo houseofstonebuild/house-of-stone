@@ -414,6 +414,7 @@ function makeChalkFromModel(model){
    const px=x/W*(maxX-minX)+minX,py=maxY-y/H*maxY;
    segments.push(px,py,.82,px+(.008+hash(x,y,1)*.012),py+.006,.82);
  }
+ host.dataset.chalkSegmentCount=String(segments.length/6);
  if(segments.length<20)return;
  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(segments,3));
  const m=new THREE.LineBasicMaterial({color:0xd4d5bc,transparent:true,opacity:.88,depthTest:false});
@@ -447,7 +448,15 @@ function loadCoil(){
   e.root.add(rough);e.root.add(original);e.modelReady=true;
   cacheFinishingSurface();
   host.dataset.modelReady='true';
+  // Project the actual Coil triangles before applying any cinematic map camera transform.
+  const sourcePosition=e.root.position.clone(),sourceRotation=e.root.rotation.clone(),sourceScale=e.root.scale.clone();
+  e.root.position.set(0,0,0);e.root.rotation.set(0,0,0);e.root.scale.setScalar(1);
+  e.root.updateMatrixWorld(true);
   try{makeChalkFromModel(original)}catch(err){console.warn('Contour extraction unavailable',err)}
+  finally{
+    e.root.position.copy(sourcePosition);e.root.rotation.copy(sourceRotation);e.root.scale.copy(sourceScale);
+    e.root.updateMatrixWorld(true);
+  }
   schedule();
  },undefined,err=>{host.dataset.modelError='true';fallback.hidden=false;console.warn('Coil model unavailable',err)});
 }
