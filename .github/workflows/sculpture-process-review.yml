@@ -5,6 +5,7 @@ on:
     paths:
       - 'public/prototypes/stone-to-sculpture.*'
       - 'qa/making-v4.mjs'
+      - 'qa/making-mobile-webkit.mjs'
       - 'public/assets/making-mobile-atlas-v1-*.webp'
       - 'public/assets/making-mobile-atlas-v1-manifest.json'
       - 'test/making-prototype.test.mjs'
@@ -32,10 +33,13 @@ jobs:
           package-manager-cache: false
       - run: npm install --prefix qa --no-audit --no-fund
       - run: sh scripts/run-browser-qa.sh qa/making-v4.mjs
+      - run: sh scripts/run-browser-qa.sh qa/making-mobile-webkit.mjs
       - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: sculpture-process-desktop-mobile-review
-          path: test-results/browser/making-v4/
+          path: |
+            test-results/browser/making-v4/
+            test-results/browser/mobile-webkit/
           retention-days: 14
           if-no-files-found: warn
