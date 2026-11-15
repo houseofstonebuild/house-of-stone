@@ -32,7 +32,7 @@ jobs:
       - run: npm install --prefix qa --no-audit --no-fund
       - run: sh scripts/run-browser-qa.sh qa/room-preview.mjs
         if: matrix.engine != 'firefox'
-      - run: sh scripts/run-browser-qa.sh qa/making-v3.mjs
+      - run: sh scripts/run-browser-qa.sh qa/making-v4.mjs
         if: matrix.engine == 'chromium'
       - run: sh scripts/run-browser-qa.sh qa/light-theme.mjs
       - run: sh scripts/run-browser-qa.sh qa/browser.mjs

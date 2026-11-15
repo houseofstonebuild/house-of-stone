@@ -22,18 +22,20 @@ const ui={
   progress:document.getElementById('progress-fill')
 };
 const texts=[
- ['ZIMBABWE','The story begins in Zimbabwe.','Discover the landscape and the stone tradition behind an extraordinary sculptural practice.'],
- ['GURUVE DISTRICT','A region known for springstone.','In northern Zimbabwe, Guruve is among the regions where dark, dense springstone is quarried.'],
- ['FROM THE REGION TO THE WORKSHOP','The stone begins its journey.','Follow an illustrative transfer toward the Harare region, home to many sculptors and studios.'],
- ['THE RAW MATERIAL','One block. Many possibilities.','Springstone is exceptionally dense. Its weathered surface can conceal a dark, fine-grained interior.'],
- ['MARKING','A form is considered.','The intended contours are marked on the raw material. The artist works with the shape of the stone.'],
- ['CARVING','Hammer and chisel.','Successive controlled strikes remove unwanted material and reveal a sculptural silhouette.'],
- ['REFINEMENT','Then the finer work.','Files and rasps define the curves. Wet sanding gradually removes tool marks.'],
- ['HEATING','The stone is warmed.','Traditionally, a controlled heat source prepares the stone for a clear wax finish.'],
- ['WAX AND BUFF','The natural finish emerges.','Clear wax is applied, then buffed after cooling. The stone takes on its deep natural sheen.'],
- ['THE FINISHED SCULPTURE','Coil.','The finished work is the approved Coil sculpture by Douglas Musekiwa.']
+ ['ZIMBABWE','The story begins in Zimbabwe.','The material and the people who shape it are inseparable from the place.'],
+ ['GURUVE DISTRICT','Stone from the earth.','Guruve is among the northern Zimbabwean regions known for dense springstone.'],
+ ['TOWARD HARARE','A journey south.','Trace an illustrative journey from the stone-producing region to the capital.'],
+ ['HARARE','From landscape to workshop.','Our view follows the stone into Harare, where generations of sculptors have developed their craft.'],
+ ['THE RAW STONE','One block. Many possibilities.','An irregular mass of springstone, with its weathered rind and dark mineral interior.'],
+ ['MARKING THE FORM','The artist decides where to begin.','Contour lines indicate where stone will be removed; the form must be found inside.'],
+ ['CARVING','Each strike changes the form.','Hammer meets chisel. Material is removed progressively, uncovering contours and the central opening.'],
+ ['FINER WORK','The marks are refined.','Rasping and wet sanding soften the tooling marks and expose the smoother grain.'],
+ ['HEATING','Preparing the stone.','A controlled heat source can prepare stone for a traditional clear wax finish.'],
+ ['WAX AND BUFFING','The surface comes to life.','Clear wax and patient buffing bring out the stone’s natural dark sheen.'],
+ ['THE FINISHED SCULPTURE','Coil.','An original work by Douglas Musekiwa, presented with its approved 3D model.']
 ];
-const stops=[0,.10,.20,.30,.40,.50,.63,.74,.84,.94,1];
+// Deliberately reserve nearly one quarter of the journey for detailed hand-carving.
+const stops=[0,.075,.17,.29,.37,.45,.53,.765,.835,.90,.96,1];
 const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
 const smooth=x=>{x=clamp(x);return x*x*(3-2*x)};
 const lerp=(a,b,t)=>a+(b-a)*t;
@@ -42,11 +44,12 @@ const hash=(a,b=0,c=0)=>fract(Math.sin(a*127.1+b*311.7+c*74.7)*43758.5453);
 const mobile=()=>innerWidth<=800;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const active=()=>{const r=journey.getBoundingClientRect();return clamp(-r.top/Math.max(1,journey.offsetHeight-innerHeight));};
-const phaseFor=p=>Math.min(9,stops.findIndex((x,i)=>i<stops.length-1&&p>=x&&p<stops[i+1])<0?9:stops.findIndex((x,i)=>i<stops.length-1&&p>=x&&p<stops[i+1]));
+const phaseFor=p=>{for(let i=0;i<stops.length-1;i++)if(p<stops[i+1])return i;return 10;};
 const phaseT=(p,i)=>clamp((p-stops[i])/Math.max(.001,stops[i+1]-stops[i]));
-const v3=new THREE.Vector3();
+const impactVector=new THREE.Vector3();
+let shownProgress=0,desiredProgress=0;
 const e={renderer:null,scene:null,camera:null,root:null,canvas:null,
-  rock:null,rockCap:null,cut:{value:1.95},rawMaterial:null,polished:null,rough:null,
+  rock:null,rockCap:null,cut:{value:1.95},carveMargin:{value:2},carveMask:{value:null},rawMaterial:null,polished:null,rough:null,contourRows:[],
   carvePlane:null,roughPlane:null,polishedPlane:null,marks:null,hammerRig:null,
   chiselHead:null,chiselTop:null,hammerHead:null,hammerContact:null,hammerPivot:null,toolRig:null,chips:[],dust:null,
   rasp:null,sanding:null,torch:null,torchLight:null,wax:null,waxLight:null,
@@ -56,29 +59,36 @@ const e={renderer:null,scene:null,camera:null,root:null,canvas:null,
 // A faithful vector country outline (Natural Earth simplified data), not a road map.
 const routeLength=route.getTotalLength();
 function updateMap(p){
-  const z=smooth((p-.085)/.07);
-  const transport=smooth((p-.205)/.07);
-  const vanish=smooth((p-.276)/.055);
-  stage.style.setProperty('--mapOpacity',(1-vanish).toFixed(3));
-  stage.style.setProperty('--sceneOpacity',vanish.toFixed(3));
-  map.setAttribute('aria-hidden',String(vanish>.99));
-  const w=lerp(1100,390,z)*(1+transport*.27);
-  const h=lerp(680,275,z)*(1+transport*.27);
-  const cx=lerp(550,775,z)+transport*8;
-  const cy=lerp(340,195,z)+transport*15;
-  svg.setAttribute('viewBox',`${(cx-w/2).toFixed(1)} ${(cy-h/2).toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`);
-  guruvePin.style.opacity=p<.285?'1':'0';
-  hararePin.style.opacity=smooth((p-.165)/.045).toFixed(3);
-  const routeP=smooth((p-.20)/.082);
-  route.setAttribute('stroke-dasharray',`${(routeLength*routeP).toFixed(1)} ${routeLength.toFixed(1)}`);
-  truck.setAttribute('opacity',p>.20&&p<.283?'1':'0');
-  if(p>.20&&p<.283){
-    const v=route.getPointAtLength(routeLength*routeP);
-    truck.setAttribute('transform',`translate(${v.x.toFixed(2)} ${v.y.toFixed(2)})`);
-  }
-  coords.textContent=p<.13?'19° S / 30° E':'16.7° S / 30.7° E';
-  mapContext.textContent=p<.16?'Springstone is quarried in northern Zimbabwe.':
-    'Illustrative region and transfer. Coil’s individual stone source is not documented.';
+ const approach=smooth((p-.052)/.105);
+ const travel=smooth((p-.17)/.135);
+ const arrival=smooth((p-.29)/.085);
+ const materialize=smooth((p-.337)/.092);
+ // Follow the moving shipment rather than changing views at a fixed waypoint.
+ const waypoint=route.getPointAtLength(routeLength*travel);
+ const countryX=550,countryY=340,guruveX=773.3,guruveY=169.4;
+ const centerX=lerp(lerp(countryX,guruveX,approach),waypoint.x,travel);
+ const centerY=lerp(lerp(countryY,guruveY,approach),waypoint.y,travel);
+ const w0=lerp(1100,310,approach),h0=lerp(680,205,approach);
+ const w1=lerp(w0,190,travel),h1=lerp(h0,135,travel);
+ const w=lerp(w1,72,arrival),h=lerp(h1,51,arrival);
+ const cx=lerp(centerX,790.8,arrival),cy=lerp(centerY,258.7,arrival);
+ svg.setAttribute('viewBox',`${(cx-w/2).toFixed(2)} ${(cy-h/2).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)}`);
+ route.setAttribute('stroke-dasharray',`${(routeLength*travel).toFixed(2)} ${routeLength.toFixed(2)}`);
+ truck.setAttribute('opacity',String(approach>.84&&travel<.995?1:0));
+ truck.setAttribute('transform',`translate(${waypoint.x.toFixed(2)} ${waypoint.y.toFixed(2)}) rotate(${(Math.atan2(waypoint.y-guruveY,waypoint.x-guruveX)*180/Math.PI-45).toFixed(2)})`);
+ guruvePin.style.opacity=String(1-smooth((p-.22)/.07));
+ hararePin.style.opacity=String(smooth((p-.17)/.08)*(1-smooth((p-.375)/.035)));
+ const portal=document.getElementById('harare-arrival');
+ if(portal){portal.style.opacity=String(smooth((p-.295)/.033)*(1-materialize));portal.setAttribute('transform',`translate(802.4 258.7) scale(${(lerp(.9,4.6,arrival)).toFixed(3)})`);}
+ const mapOpacity=1-smooth((p-.355)/.069);
+ const sceneOpacity=smooth((p-.334)/.090);
+ stage.style.setProperty('--mapOpacity',mapOpacity.toFixed(4));
+ stage.style.setProperty('--sceneOpacity',sceneOpacity.toFixed(4));
+ stage.style.setProperty('--handoff',materialize.toFixed(4));
+ map.setAttribute('aria-hidden',String(mapOpacity<.01));
+ coords.textContent=p<.18?'19° S / 30° E':p<.30?'GURUVE — HARARE':'17° 49′ S / 31° 03′ E';
+ mapContext.textContent=p<.18?'A region known for springstone.':p<.30?'Illustrative transport — not Coil’s documented shipment.':
+   'The journey reaches Harare. The camera follows the stone into the workshop.';
 }
 function noise(x,y,z){
   const X=Math.floor(x),Y=Math.floor(y),Z=Math.floor(z);x-=X;y-=Y;z-=Z;
@@ -91,12 +101,12 @@ function fbm(x,y,z){return .57*noise(x,y,z)+.27*noise(x*2.11+17,y*2.11,z*2.11)+.
 function stoneMaterial({raw=false,color=0x656b62,roughness=.95,flat=false}={}){
  const mat=new THREE.MeshStandardMaterial({color,metalness:0,roughness,flatShading:flat,side:THREE.DoubleSide});
  mat.onBeforeCompile=shader=>{
-   if(raw)shader.uniforms.uCut=e.cut;
+   if(raw){shader.uniforms.uCut=e.cut;shader.uniforms.uCarveMargin=e.carveMargin;shader.uniforms.uCarveMask=e.carveMask;}
    shader.vertexShader=shader.vertexShader.replace('#include <common>',`#include <common>\nvarying vec3 vLocalStone;`)
      .replace('#include <begin_vertex>',`#include <begin_vertex>\nvLocalStone=position;`);
    shader.fragmentShader=shader.fragmentShader.replace('#include <common>',`#include <common>
      varying vec3 vLocalStone;
-     ${raw?'uniform float uCut;':''}
+     ${raw?'uniform float uCut;uniform float uCarveMargin;uniform sampler2D uCarveMask;':''}
      float msh(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
      float mno(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
        float a=mix(msh(i),msh(i+vec3(1,0,0)),f.x),b=mix(msh(i+vec3(0,1,0)),msh(i+vec3(1,1,0)),f.x);
@@ -111,8 +121,11 @@ function stoneMaterial({raw=false,color=0x656b62,roughness=.95,flat=false}={}){
          float rind=smoothstep(.40,.81,oxide)*.58;
          diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.36,.235,.15),rind);
          float chip=mno(vLocalStone*vec3(10.0,7.0,8.0));
-         float edge=(chip-.5)*.12+.035*sin(vLocalStone.x*13.0+vLocalStone.z*7.0);
-         if(vLocalStone.y>uCut+edge)discard;`:''}`);
+          // Distance to Coil's actual projected mesh (including its central opening).
+          vec2 silhouetteUV=clamp(vec2((vLocalStone.x+1.70)/3.40,(vLocalStone.y+1.74)/3.48),vec2(.001),vec2(.999));
+          float outside=texture2D(uCarveMask,silhouetteUV).r*1.5;
+          float fracturedEdge=(chip-.5)*.045+.014*sin(vLocalStone.y*24.0+vLocalStone.x*17.0);
+          if(outside>uCarveMargin+fracturedEdge)discard;`:''}`);
  };
  mat.customProgramCacheKey=()=>raw?'hos-springstone-rind-cut-v3':'hos-springstone-detail-v3';
  return mat;
@@ -136,7 +149,7 @@ function rockGeometry(){
   pos.needsUpdate=true;geo.computeVertexNormals();return geo;
 }
 function makeRock(){
- const rock=new THREE.Mesh(rockGeometry(),stoneMaterial({raw:true,color:0x484d46}));
+ const rock=new THREE.Mesh(rockGeometry(),stoneMaterial({raw:true,color:0x414a42}));
  rock.position.y=1.69;e.root.add(rock);e.rock=rock;
  const surface=new THREE.PlaneGeometry(2.1,1.47,26,18);surface.rotateX(-Math.PI/2);
  const pos=surface.attributes.position;
@@ -229,7 +242,7 @@ function makeFinishingTools(){
 }
 function makeChalkFromModel(model){
  // Extract real front-facing geometry of Coil, including its negative space.
- const W=168,H=225,minX=-1.43,maxX=1.43,maxY=3.25;
+ const W=256,H=320,minX=-1.70,maxX=1.70,maxY=3.48;
  const c=document.createElement('canvas');c.width=W;c.height=H;
  const ctx=c.getContext('2d',{willReadFrequently:true});ctx.fillStyle='#fff';
  model.updateMatrixWorld(true);
@@ -253,6 +266,41 @@ function makeChalkFromModel(model){
  });
  const pixels=ctx.getImageData(0,0,W,H).data;
  const inside=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&pixels[(y*W+x)*4+3]>60;
+ // A world-space distance field, generated from the original mesh's front projection.
+ // It allows the raw stone's actual silhouette and through-hole to emerge at each strike.
+ const distances=new Float32Array(W*H);
+ const rows=[];
+ for(let y=0;y<H;y++){
+   let min=Infinity,max=-Infinity;
+   for(let x=0;x<W;x++){
+     const hit=inside(x,y);distances[y*W+x]=hit?0:10000;
+     if(hit){min=Math.min(min,x);max=Math.max(max,x);}
+   }
+   rows[y]={left:min===Infinity?-.7:min/W*3.4-1.7,right:max<0?.7:max/W*3.4-1.7};
+ }
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+   const i=y*W+x;
+   if(x)distances[i]=Math.min(distances[i],distances[i-1]+1);
+   if(y){distances[i]=Math.min(distances[i],distances[i-W]+1);
+     if(x)distances[i]=Math.min(distances[i],distances[i-W-1]+1.4142);
+     if(x+1<W)distances[i]=Math.min(distances[i],distances[i-W+1]+1.4142);}
+ }
+ for(let y=H-1;y>=0;y--)for(let x=W-1;x>=0;x--){
+   const i=y*W+x;
+   if(x+1<W)distances[i]=Math.min(distances[i],distances[i+1]+1);
+   if(y+1<H){distances[i]=Math.min(distances[i],distances[i+W]+1);
+     if(x)distances[i]=Math.min(distances[i],distances[i+W-1]+1.4142);
+     if(x+1<W)distances[i]=Math.min(distances[i],distances[i+W+1]+1.4142);}
+ }
+ // Texture row zero represents stone bottom, hence the canvas row inversion.
+ const bytes=new Uint8Array(W*H);
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+   bytes[(H-1-y)*W+x]=Math.min(255,Math.round(distances[y*W+x]*3.4/W/1.5*255));
+ }
+ const field=new THREE.DataTexture(bytes,W,H,THREE.RedFormat);
+ field.magFilter=THREE.LinearFilter;field.minFilter=THREE.LinearFilter;field.wrapS=field.wrapT=THREE.ClampToEdgeWrapping;
+ field.needsUpdate=true;e.carveMask.value=field;e.contourRows=rows;
+ host.dataset.carveMaskReady='true';
  const segments=[];
  for(let y=2;y<H-2;y+=2)for(let x=2;x<W-2;x+=2){
    if(!inside(x,y))continue;
@@ -277,7 +325,7 @@ function loadCoil(){
   const rough=original.clone(true);
   const polishedPlane=new THREE.Plane(new THREE.Vector3(0,1,0),-3.35);
   const roughPlane=new THREE.Plane(new THREE.Vector3(0,-1,0),4.5);
-  const carvePlane=new THREE.Plane(new THREE.Vector3(0,1,0),-3.35);
+  const carvePlane=new THREE.Plane(new THREE.Vector3(0,1,0),.28);
   original.traverse(n=>{if(n.isMesh){
     const originalMaterials=Array.isArray(n.material)?n.material:[n.material];
     const materials=originalMaterials.map(m=>{const c=m.clone();c.clippingPlanes=[polishedPlane];c.clipShadows=true;return c;});
@@ -298,6 +346,7 @@ function loadCoil(){
  },undefined,err=>{host.dataset.modelError='true';fallback.hidden=false;console.warn('Coil model unavailable',err)});
 }
 function setup(){
+ e.carveMask.value=new THREE.DataTexture(new Uint8Array([0]),1,1,THREE.RedFormat);e.carveMask.value.needsUpdate=true;
  const canvas=document.createElement('canvas');host.prepend(canvas);e.canvas=canvas;
  const ctx=canvas.getContext('webgl2',{antialias:true,alpha:true,powerPreference:'low-power'});
  if(!ctx)throw new Error('WebGL2 unavailable');
@@ -325,105 +374,125 @@ function resize(){
  e.renderer.setPixelRatio(Math.min(devicePixelRatio,mobile()?1.25:1.75));e.renderer.setSize(w,h,false);
  e.camera.aspect=w/h;e.camera.fov=mobile()?38:33;e.camera.updateProjectionMatrix();schedule();
 }
-function schedule(){if(e.frame)return;e.frame=requestAnimationFrame(()=>{e.frame=0;render()})}
-function render(){
- const p=active(),step=phaseFor(p);
- updateMap(p);
+function schedule(){
+ desiredProgress=active();
+ if(e.frame)return;
+ e.frame=requestAnimationFrame(tick);
+}
+function tick(){
+ e.frame=0;
+ const next=active();desiredProgress=next;
+ if(reduced.matches)shownProgress=next;
+ else shownProgress+=clamp((next-shownProgress)*.31,-.08,.08);
+ if(Math.abs(next-shownProgress)<.00035)shownProgress=next;
+ render(shownProgress);
+ if(Math.abs(next-shownProgress)>.00035&&document.visibilityState!=='hidden')e.frame=requestAnimationFrame(tick);
+}
+function render(p){
+ const step=phaseFor(p);updateMap(p);
  if(step!==e.lastPhase){
   e.lastPhase=step;stage.dataset.phase=String(step);
   ui.phase.textContent=texts[step][0];ui.title.textContent=texts[step][1];ui.description.textContent=texts[step][2];
-  ui.counter.textContent=String(step+1).padStart(2,'0')+' / 10';
+  ui.counter.textContent=String(step+1).padStart(2,'0')+' / 11';
  }
- ui.progress.style.width=(p*100).toFixed(1)+'%';
+ ui.progress.style.width=(p*100).toFixed(2)+'%';
  if(!e.renderer||e.contextLost)return;
- const mark=smooth(phaseT(p,4))*(1-smooth((p-.505)/.035));
- const carve=smooth((p-.50)/.13),file=smooth((p-.63)/.11);
- const heating=smooth((p-.74)/.10),wax=smooth((p-.84)/.10),gallery=smooth((p-.94)/.06);
- const blockFade=smooth((p-.29)/.025);
- const strokes=carve*20;
- const part=fract(strokes),open=part<.68?1-smooth((part-.30)/.38):smooth((part-.68)/.30);
- // Removal advances at the chisel impact rather than eroding continuously as the user scrolls.
- const removed=(Math.floor(strokes)+smooth((part-.67)/.19))/20;
- const cutY=lerp(1.82,-1.9,removed);
- e.cut.value=cutY;
- e.rock.visible=blockFade>.01&&carve<.998;
- if(e.rock){e.rock.scale.setScalar(lerp(.93,1,blockFade));e.rock.material.opacity=1;}
- e.rockCap.visible=carve>.018&&carve<.96;
- e.rockCap.position.y=1.69+cutY;
- e.rockCap.scale.setScalar(1-.16*carve);
- if(e.marks){e.marks.visible=mark>.02;e.marks.material.opacity=.82*mark;}
+ const handoff=smooth((p-.338)/.090);
+ // Continuous camera handoff: the Harare marker grows into the same physical block.
+ e.root.scale.setScalar(lerp(.20,1,handoff));
+ e.root.position.set(lerp(.85,0,handoff),lerp(-.66,0,handoff),0);
+ const mark=smooth((p-.455)/.055)*(1-smooth((p-.536)/.022));
+ const carve=smooth((p-.53)/.235);
+ const file=smooth((p-.765)/.07),heating=smooth((p-.835)/.065);
+ const wax=smooth((p-.90)/.06),gallery=smooth((p-.96)/.04);
+ // Each impact removes a discrete band of unwanted material, then holds.
+ const strokeCount=28,strokes=carve*strokeCount;
+ const phase=fract(strokes);
+ const open=smooth((phase-.06)/.30)*(1-smooth((phase-.56)/.19));
+ const impact=smooth((phase-.75)/.18);
+ const removed=(Math.floor(strokes)+impact)/strokeCount;
+ // Increase the constraint in world units: the central opening is physically cut out.
+ e.carveMargin.value=lerp(1.72,-.04,removed);
+ e.rock.visible=p<.765&&handoff>.02;
+ e.rockCap.visible=false;
+ if(e.marks){e.marks.visible=mark>.025;e.marks.material.opacity=.82*mark;}
  if(e.rough){
-   e.rough.visible=carve>.01&&wax<.999;
-   e.carvePlane.constant=-(lerp(3.38,-.25,removed));
-   e.roughPlane.constant=lerp(4.5,-.25,wax);
+  e.rough.visible=carve>.012&&wax<.997;
+  e.carvePlane.constant=.28;
+  e.roughPlane.constant=lerp(4.5,-.26,wax);
  }
  if(e.polished){
-   e.polished.visible=wax>.001;
-   e.polishedPlane.constant=-(lerp(3.35,-.25,wax));
-   if(wax>.995)e.polishedPlane.constant=.4;
+  e.polished.visible=wax>.004;
+  e.polishedPlane.constant=-(lerp(3.35,-.25,wax));
+  if(wax>.996)e.polishedPlane.constant=.4;
  }
- const impactY=clamp(1.69+cutY,.18,3.25);
- const impactX=.38*Math.sin(strokes*.63)+.19;
+ // Tool tip tracks the current silhouette layer; the hammer's true contact point
+ // is rigged to touch the cap when the strike closes (rather than passing beside it).
+ const index=Math.max(0,Math.min(e.contourRows.length-1,Math.round((.12+.79*carve)*e.contourRows.length)));
+ const edge=e.contourRows[index]||{left:-.65,right:.65};
+ const side=Math.floor(strokes)%2===0?-1:1;
+ const boundary=side<0?edge.left:edge.right;
+ const impactX=clamp(boundary+side*(e.carveMargin.value*.45+.025),-1.24,1.24);
+ const impactY=lerp(3.16,.36,carve);
+ const impactZ=.77;
  if(e.toolRig){
-   e.toolRig.visible=carve>.012&&carve<.985&&!reduced.matches;
-   if(e.toolRig.visible){
-     e.toolRig.position.set(impactX,impactY,.81);
-     e.toolRig.rotation.set(.10,-.12,.03);
-     e.hammerPivot.rotation.z=-.53*open;
-     e.toolRig.updateMatrixWorld(true);
-     e.chiselTop.getWorldPosition(e.tempP);e.hammerContact.getWorldPosition(e.tempQ);
-     host.dataset.contactError=e.tempP.distanceTo(e.tempQ).toFixed(4);
-     host.dataset.hammerClosed=String(open<.035);
-   }
+  e.toolRig.visible=carve>.008&&carve<.985&&!reduced.matches;
+  if(e.toolRig.visible){
+   e.toolRig.position.set(impactX,impactY,impactZ);
+   e.toolRig.rotation.set(.10,-.12,side*.025);
+   e.hammerPivot.rotation.z=-.53*open;
+   e.toolRig.updateMatrixWorld(true);
+   e.chiselTop.getWorldPosition(e.tempP);e.hammerContact.getWorldPosition(e.tempQ);
+   const contact=e.tempP.distanceTo(e.tempQ);
+   host.dataset.contactError=contact.toFixed(4);
+   host.dataset.hammerClosed=String(open<.035);
+   host.dataset.hitPhase=phase.toFixed(4);
+   host.dataset.strike=Math.floor(strokes).toString();
+  }
  }
+ const burst=smooth((phase-.71)/.10)*(1-smooth((phase-.92)/.08));
  for(let i=0;i<e.chips.length;i++){
-   const c=e.chips[i],d=c.userData,age=fract(strokes-.68+d.seed*.21),fall=age*age;
-   c.visible=e.toolRig.visible&&age<.82;
-   if(c.visible){
-     c.position.set(impactX+Math.cos(d.dir)*(age*.42+.04),impactY+age*.28-fall*.9,.87+Math.sin(d.dir)*age*.21);
-     const size=lerp(1,.08,smooth((age-.28)/.53));c.scale.setScalar(size*(.7+d.energy*.65));
-     c.rotation.set(age*10,age*3,age*7*d.energy);
-   }
+  const c=e.chips[i],d=c.userData,age=clamp((phase-.73)/.26);c.visible=e.toolRig.visible&&burst>.025;
+  if(!c.visible)continue;
+  const radius=(.08+.42*age)*(.35+d.energy*.7);
+  c.position.set(impactX+Math.cos(d.dir)*radius,impactY+age*.23-age*age*.42,.82+Math.sin(d.dir)*radius);
+  c.rotation.set(age*13,age*8,age*9);c.scale.setScalar((1-age)*(.6+d.energy*.7));
  }
  if(e.dust){
-   e.dust.visible=e.toolRig.visible;
-   if(e.dust.visible){
-     const a=e.dust.geometry.attributes.position;
-     for(let i=0;i<a.count;i++){
-       const age=fract(strokes-.68+hash(i,19)*.28),ang=hash(i,7)*6.283;
-       a.setXYZ(i,impactX+Math.cos(ang)*age*.34,impactY+Math.sin(ang)*age*.16+age*.13,.87+Math.cos(ang)*age*.2);
-     }a.needsUpdate=true;
-   }
+  e.dust.visible=e.toolRig.visible&&burst>.025;
+  if(e.dust.visible){const a=e.dust.geometry.attributes.position;
+   for(let i=0;i<a.count;i++){
+    const ang=hash(i,7)*6.283,rad=(.08+hash(i,19)*.48)*burst;
+    a.setXYZ(i,impactX+Math.cos(ang)*rad,impactY+Math.sin(ang)*rad*.5,.87+Math.sin(ang)*rad);
+   }a.needsUpdate=true;
+  }
  }
- if(e.rasp){
-   e.rasp.visible=p>.637&&p<.704&&!reduced.matches;
-   e.rasp.position.set(.52*Math.sin(file*7),lerp(2.85,.75,file),.85);
-   e.rasp.rotation.z=-.5+Math.sin(file*65)*.11;
+ if(e.rasp){e.rasp.visible=p>.77&&p<.813&&!reduced.matches;
+  e.rasp.position.set(.5*Math.sin(file*9),lerp(2.8,.74,file),.86);
+  e.rasp.rotation.z=-.46+Math.sin(file*67)*.11;
  }
- if(e.sanding){
-   e.sanding.visible=p>.695&&p<.742&&!reduced.matches;
-   e.sanding.position.set(.35*Math.sin(file*12),lerp(2.6,.6,file),.91);
-   e.sanding.rotation.z=Math.sin(file*55)*.13;
+ if(e.sanding){e.sanding.visible=p>.812&&p<.832&&!reduced.matches;
+  e.sanding.position.set(.39*Math.sin(file*13),lerp(2.7,.56,file),.90);
+  e.sanding.rotation.z=Math.sin(file*60)*.12;
  }
- if(e.torch){
-   e.torch.visible=p>.748&&p<.835&&!reduced.matches;
-   e.torch.position.set(.54,lerp(2.6,.75,heating),.98);
-   e.torch.rotation.z=-.83;
-   e.torchLight.intensity=e.torch.visible?1.15:0;
-   e.torchLight.position.set(.35,lerp(2.7,.75,heating),1.85);
+ if(e.torch){e.torch.visible=p>.839&&p<.897&&!reduced.matches;
+  e.torch.position.set(.52,lerp(2.75,.67,heating),.98);e.torch.rotation.z=-.84;
+  e.torchLight.intensity=e.torch.visible?1.10:0;
+  e.torchLight.position.set(.30,lerp(2.7,.65,heating),1.85);
  }
- if(e.wax){
-   e.wax.visible=p>.846&&p<.938&&!reduced.matches;
-   e.wax.position.set(.48*Math.sin(wax*11),lerp(3.0,.40,wax),.95);
-   e.wax.rotation.z=Math.sin(wax*65)*.09;
-   e.waxLight.intensity=e.wax.visible?.42:0;
-   e.waxLight.position.set(e.wax.position.x,e.wax.position.y,1.82);
+ if(e.wax){e.wax.visible=p>.904&&p<.958&&!reduced.matches;
+  e.wax.position.set(.46*Math.sin(wax*11),lerp(2.95,.37,wax),.97);
+  e.wax.rotation.z=Math.sin(wax*56)*.08;
+  e.waxLight.intensity=e.wax.visible?.5:0;
+  e.waxLight.position.set(e.wax.position.x,e.wax.position.y,1.8);
  }
  if(e.plinth)e.plinth.visible=gallery>.55;
- e.root.rotation.set(.009*Math.sin(p*6),lerp(-.22,.14,smooth((p-.33)/.65)),0);
- const focus=smooth((p-.5)/.14),dist=mobile()?8.7:8.0;
- e.camera.position.set(mobile()?.04:1.38,3.12,dist-.35*focus);
+ e.root.rotation.set(.007*Math.sin(p*5),lerp(-.18,.14,smooth((p-.43)/.56)),0);
+ const focus=smooth((p-.53)/.20),dist=mobile()?8.7:8.0;
+ e.camera.position.set(mobile()?.04:1.38,3.12,dist-.3*focus);
  e.camera.lookAt(mobile()?0:.28,1.68,0);
  e.renderer.render(e.scene,e.camera);
+ host.dataset.carveProgress=removed.toFixed(4);
+ host.dataset.materialMargin=e.carveMargin.value.toFixed(4);
 }
 try{setup()}catch(err){fallback.hidden=false;host.dataset.modelError='true';console.warn('3D process unavailable',err)}

@@ -16,7 +16,7 @@
 <main>
 <section class="journey" aria-label="Scroll through Zimbabwean stone sculpture: source, shaping, finishing and finished work">
 <div class="stage" data-phase="0">
-  <div class="map-scene" id="map-scene" aria-label="Map showing Zimbabwe, the Guruve region, and an illustrative transfer to Harare">
+  <div class="map-scene" id="map-scene" aria-label="Scroll-controlled geographic view following an illustrative stone journey from Guruve to Harare">
     <div class="map-texture" aria-hidden="true"></div>
     <svg id="origin-map" viewBox="0 0 1100 680" preserveAspectRatio="xMidYMid meet" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -37,7 +37,17 @@
       <path id="travel-route" d="M 773.3,169.4 Q 826.7,188.5 802.4,258.7" fill="none" stroke="#d5b89a" stroke-width="2.1" stroke-linecap="round" stroke-dasharray="0 400"/>
       <g id="guruve-node" transform="translate(773.3 169.4)"><circle class="pin-halo" r="34"/><circle class="pin-outline" r="7"/><circle class="pin-center" r="2.7"/><text x="20" y="-13" class="pin-label">GURUVE</text><text x="20" y="4" class="pin-secondary">SPRINGSTONE REGION</text></g>
       <g id="harare-node" transform="translate(802.4 258.7)"><circle class="pin-halo" r="24"/><circle class="pin-outline" r="5"/><circle class="pin-center" r="2.2"/><text x="19" y="-11" class="pin-label">HARARE</text><text x="19" y="6" class="pin-secondary">WORKSHOP REGION</text></g>
-      <g id="transport-marker" transform="translate(773.3 169.4)" opacity="0"><path d="M -8,-11 L -4,-16 L 3,-15 L 7,-11 L 7,-5 L -8,-5 Z" fill="#4c5147" stroke="#bdad8b" stroke-width=".8"/><path d="M -4,-16 L 1,-14 L 7,-11" fill="none" stroke="#9b8670" stroke-width=".65"/><rect x="-10" y="-5" width="14" height="9" rx="2" fill="#e0ccb5"/><path d="M 4,-3 H 10 L 14,0 V 4 H 4 Z" fill="#e0ccb5"/><circle cx="-5" cy="6" r="2.4" fill="#17221c"/><circle cx="9" cy="6" r="2.4" fill="#17221c"/></g>
+      <g id="transport-marker" transform="translate(773.3 169.4)" opacity="0">
+  <circle r="15" fill="#1c2b24" stroke="#dfc4a1" stroke-width="1.2"/>
+  <path d="M -6,-4 L -2,-10 L 5,-9 L 9,-4 L 7,6 L -4,7 L -8,2 Z" fill="#656e61" stroke="#d6c6ac" stroke-width=".9"/>
+  <path d="M -6,-4 L 1,-1 L 9,-4 M 1,-1 L 1,7" stroke="#383e36" stroke-width=".7" fill="none"/>
+  <circle r="19" stroke="#d7b994" stroke-opacity=".23" fill="none" stroke-width=".8"/>
+ </g>
+ <g id="harare-arrival" transform="translate(802.4 258.7)" opacity="0">
+   <circle r="6.5" fill="none" stroke="#e1c5a6" stroke-opacity=".48" stroke-width=".55"/>
+   <circle r="3.5" fill="none" stroke="#e1c5a6" stroke-opacity=".48" stroke-width=".8"/>
+   <path d="M -11 0 H 11 M 0 -11 V 11" fill="none" stroke="#e1c5a6" stroke-opacity=".43" stroke-width=".5"/>
+ </g>
     </svg>
     <div class="map-coordinates" id="map-coordinates">19° S / 30° E</div>
     <div class="map-scale" aria-hidden="true"><span></span> ZIMBABWE / SOUTHERN AFRICA</div>
@@ -45,7 +55,7 @@
   </div>
   <div id="render" role="img" aria-label="3D study of rough springstone being marked, carved, sanded, heated, waxed and finished into the approved Coil sculpture"><div id="fallback" class="fallback" hidden><img src="/assets/zsa-006-studio-front-v2.webp" alt="Coil, a black stone sculpture by Douglas Musekiwa"/><p>3D is unavailable on this device. The original artwork remains viewable.</p></div></div>
   <div class="stage-vignette" aria-hidden="true"></div>
-  <div class="stage-info" aria-live="off"><p class="counter" id="counter">01 / 10</p><p class="eyebrow" id="phase">ZIMBABWE</p><h1 id="stage-title">The story begins in Zimbabwe.</h1><p id="stage-description" class="description">Discover the landscape and the stone tradition behind an extraordinary sculptural practice.</p></div>
+  <div class="stage-info" aria-live="off"><p class="counter" id="counter">01 / 11</p><p class="eyebrow" id="phase">ZIMBABWE</p><h1 id="stage-title">The story begins in Zimbabwe.</h1><p id="stage-description" class="description">Discover the landscape and the stone tradition behind an extraordinary sculptural practice.</p></div>
   <div class="stage-footer"><div class="progress-track" aria-hidden="true"><span id="progress-fill"></span></div><span class="scroll-help">SCROLL TO FOLLOW THE JOURNEY</span></div>
   <button id="skip" class="skip" type="button">Skip to the finished work <span aria-hidden="true">↗</span></button>
 </div>

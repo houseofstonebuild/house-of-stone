@@ -16,7 +16,7 @@ test('scroll-driven source map is factual but does not imply a verified Coil qua
  assert.match(html,/HARARE/);
  assert.match(html,/Illustrative region and transfer|a regional illustration/i);
  assert.match(html,/specific quarry, transport route and workshop location for Coil have not been verified/);
- assert.match(js,/const stops=\[0,\.10,\.20,\.30,\.40,\.50,\.63,\.74,\.84,\.94,1\]/);
+ assert.match(js,/const stops=\[0,\.075,\.17,\.29,\.37,\.45,\.53,\.765,\.835,\.90,\.96,1\]/);
  assert.match(js,/svg\.setAttribute\('viewBox'/);
  assert.match(js,/route\.getPointAtLength/);
  assert.match(html,/class="pin-halo"/);
@@ -25,11 +25,17 @@ test('scroll-driven source map is factual but does not imply a verified Coil qua
 test('natural springstone, synchronized chisel and traditional finish stages',()=>{
  assert.match(js,/new THREE\.IcosahedronGeometry\(1,5\)/);
  assert.doesNotMatch(js,/const rows=5,cols=3/);
- assert.match(js,/if\(vLocalStone\.y>uCut\+edge\)discard/);
- assert.match(js,/const removed=\(Math\.floor\(strokes\)\+smooth/);
+ assert.match(js,/if\(outside>uCarveMargin\+fracturedEdge\)discard/);
+ assert.match(js,/const removed=\(Math\.floor\(strokes\)\+impact\)\/strokeCount/);
  assert.match(js,/hammerHead\.position\.set\(-\.70,-\.145,-\.02\)/);
  assert.match(js,/contact\.position\.set\(-\.70,-\.26,-\.02\)/);
  assert.match(js,/host\.dataset\.contactError=/);
+ assert.match(js,/const distances=new Float32Array\(W\*H\)/);
+ assert.match(js,/uCarveMask/);
+ assert.match(js,/const centerX=lerp/);
+ assert.match(js,/const sceneOpacity=smooth/);
+ assert.match(js,/const strokeCount=28/);
+ assert.match(js,/const invSmooth|const part=fract|const phase=fract/);
  assert.match(js,/makeChalkFromModel\(original\)/);
  assert.match(js,/wet sanding|Wet sanding/);
  assert.match(js,/Clear wax|clear wax/);
@@ -50,7 +56,7 @@ test('review remains unlinked and delivers mobile and reduced-motion support',as
  assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
  const index=readFileSync(new URL('../public/index.html',import.meta.url),'utf8');
  assert.doesNotMatch(index,/prototypes\/stone-to-sculpture/);
- const dataDir=mkdtempSync(join(tmpdir(),'hos-making-v3-test-'));
+ const dataDir=mkdtempSync(join(tmpdir(),'hos-making-v4-test-'));
  const app=createApp({dataDir,env:{ADMIN_PASSWORD:'test-only-prototype-password'},backgroundNotifications:false});
  await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));
  try{

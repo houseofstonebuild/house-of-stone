@@ -2,7 +2,7 @@
 *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--forest);color:var(--ink);font-family:Manrope,Arial,sans-serif;overflow-x:clip}a{color:inherit;text-decoration:none}button{font:inherit}
 .topbar{position:absolute;inset:0 0 auto 0;height:90px;z-index:30;display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;padding:0 clamp(23px,5vw,86px);color:#f5f3ef;pointer-events:none}
 .topbar a{pointer-events:auto}.wordmark{letter-spacing:.24em;font-size:12px;white-space:nowrap}.top-note{text-align:center;letter-spacing:.16em;font-size:9px;opacity:.58}.exit{justify-self:end;font-size:11px;letter-spacing:.04em;border-bottom:1px solid rgba(245,242,237,.35);padding-bottom:8px}
-.journey{position:relative;height:1020svh}.stage{height:100svh;position:sticky;top:0;overflow:hidden;background:radial-gradient(ellipse at 66% 43%,#414a40 0%,#232b26 50%,#101614 100%);isolation:isolate;--mapOpacity:1;--sceneOpacity:0;--copyLight:1}
+.journey{position:relative;height:1180svh}.stage{height:100svh;position:sticky;top:0;overflow:hidden;background:radial-gradient(ellipse at 66% 43%,#414a40 0%,#232b26 50%,#101614 100%);isolation:isolate;--mapOpacity:1;--sceneOpacity:0;--copyLight:1}
 .map-scene,#render,.stage-vignette{position:absolute;inset:0}.map-scene{z-index:1;opacity:var(--mapOpacity);background:radial-gradient(ellipse at 57% 49%,#394e3d 0%,#1a2c25 43%,#101d18 84%);overflow:hidden;pointer-events:none}
 .map-texture{position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent 0px,transparent 37px,rgba(220,219,199,.025) 38px),radial-gradient(circle at 63% 28%,rgba(197,159,118,.16),transparent 48%),radial-gradient(circle at 15% 85%,rgba(205,187,146,.05),transparent 47%)}
 #origin-map{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible;filter:drop-shadow(0 17px 40px rgba(0,0,0,.13))}
@@ -18,3 +18,13 @@
 @media(max-width:380px){.stage-info h1{font-size:43px}.topbar{padding-left:20px;padding-right:20px}.wordmark{font-size:10px}.scroll-help{letter-spacing:.08em}}
 @media(max-height:550px) and (orientation:landscape){.stage-info{top:55%;bottom:auto;transform:translateY(-50%)}.stage-info h1{font-size:48px}.stage-info .description{font-size:11px;line-height:1.5}.skip{top:56px}.topbar{height:48px}.stage-footer{bottom:15px}}
 @media(prefers-reduced-motion:reduce){.journey{height:350svh}.map-scene,#render,.stage-vignette{transition:none!important}.stage-info h1{transition:none!important}}
+
+/* V4: one uninterrupted camera movement from region to capital, then into workshop. */
+#origin-map{will-change:transform;transform:translateZ(0)}
+#transport-marker{filter:drop-shadow(0 0 6px rgba(221,196,157,.65))}
+#harare-arrival{pointer-events:none}
+.map-scene,#render{transition:none;will-change:opacity}
+.stage-info{will-change:opacity}
+#render{filter:contrast(1.045) saturate(.88)}
+@media(max-width:800px){.journey{height:1150svh}}
+@media(prefers-reduced-motion:reduce){.journey{height:350svh}}
