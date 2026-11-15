@@ -148,7 +148,7 @@ try{
     return Math.abs(Number(host.dataset.frameIndex)-wanted)<=2&&host.dataset.staleFrameHidden==='true';
    },wanted,{timeout:30000});
    if(Math.abs(p-.64623)<.0001){
-    await page.waitForFunction(()=>document.getElementById('render').dataset.physicalStrikeContact==='true',{timeout:15000});
+    await page.waitForFunction(()=>Number(document.getElementById('archive-cutaway').dataset.workFrame)>1,{timeout:15000});
    }
    await page.screenshot({path:new URL(v.engine+'-'+v.width+'-carve-'+Math.round(p*1000)+'.png',output).pathname});
   }
