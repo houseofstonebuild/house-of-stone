@@ -1,0 +1,43 @@
+name: Coil volumetric geometry pilot (private review)
+on:
+  pull_request:
+    paths:
+      - 'tools/carving-pilot/**'
+      - '.github/workflows/coil-volumetric-pilot.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install geometry and offline preview dependencies
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund @gltf-transform/core @gltf-transform/extensions meshoptimizer
+          python -m pip install numpy scipy scikit-image trimesh libigl vtk
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1 libxrender1 libxext6
+      - name: Decode exact approved Coil mesh without modifying source
+        run: node tools/carving-pilot/decode-coil.mjs public/models/coil-uploaded-v1.glb build/coil-pilot/coil.obj
+      - name: Audit mesh and write source geometry report
+        run: python tools/carving-pilot/audit_coil.py --mesh build/coil-pilot/coil.obj --out build/coil-pilot
+      - name: Produce raw, half-carved, and final solid geometry and comparison renders
+        run: xvfb-run -a python tools/carving-pilot/pilot.py --mesh build/coil-pilot/coil.obj --out build/coil-pilot --resolution 64
+      - name: Always retain diagnostics and pilot previews for inspection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coil-volumetric-pilot-review
+          path: build/coil-pilot/
+          retention-days: 14
+          if-no-files-found: warn
