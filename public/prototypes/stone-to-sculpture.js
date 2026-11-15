@@ -37,7 +37,7 @@ const texts=[
  ['THE FINISHED SCULPTURE','Coil, by Douglas Musekiwa.','The finished work shown with its approved model from our collection.']
 ];
 // Deliberately reserve nearly one quarter of the journey for detailed hand-carving.
-const stops=[0,.075,.17,.29,.37,.45,.53,.765,.835,.90,.96,1];
+const stops=[0,.075,.17,.29,.37,.45,.565,.765,.835,.90,.96,1];
 const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
 const smooth=x=>{x=clamp(x);return x*x*(3-2*x)};
 const lerp=(a,b,t)=>a+(b-a)*t;
@@ -50,7 +50,7 @@ const phaseFor=p=>{for(let i=0;i<stops.length-1;i++)if(p<stops[i+1])return i;ret
 const phaseT=(p,i)=>clamp((p-stops[i])/Math.max(.001,stops[i+1]-stops[i]));
 const impactVector=new THREE.Vector3();
 let shownProgress=0,desiredProgress=0;
-const e={renderer:null,scene:null,camera:null,root:null,canvas:null,
+const e={renderer:null,scene:null,camera:null,root:null,canvas:null,renderWidth:0,renderHeight:0,renderMobile:null,lastRenderTime:0,
   rock:null,rockCap:null,intermediate:null,intermediateGeo:null,intermediateRings:[],blankCap:null,cut:{value:1.95},carveMargin:{value:2},carveProgress:{value:0},carveMask:{value:null},rawMaterial:null,polished:null,rough:null,contourRows:[],
   carvePlane:null,roughPlane:null,polishedPlane:null,blankHidePlane:null,carveRevealPlane:null,marks:null,hammerRig:null,
   chiselHead:null,chiselTop:null,hammerHead:null,hammerContact:null,hammerPivot:null,toolRig:null,chips:[],dust:null,
@@ -77,7 +77,8 @@ function updateMap(p){
  svg.setAttribute('viewBox',`${(cx-w/2).toFixed(2)} ${(cy-h/2).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)}`);
  route.setAttribute('stroke-dasharray',`${(routeLength*travel).toFixed(2)} ${routeLength.toFixed(2)}`);
  truck.setAttribute('opacity',String(approach>.84&&travel<.995?1:0));
- truck.setAttribute('transform',`translate(${waypoint.x.toFixed(2)} ${waypoint.y.toFixed(2)}) rotate(${(Math.atan2(waypoint.y-guruveY,waypoint.x-guruveX)*180/Math.PI-45).toFixed(2)})`);
+ // Keep the map marker upright, regardless of which way the route bends.
+ truck.setAttribute('transform',`translate(${waypoint.x.toFixed(2)} ${waypoint.y.toFixed(2)})`);
  guruvePin.style.opacity=String(1-smooth((p-.22)/.07));
  hararePin.style.opacity=String(smooth((p-.17)/.08)*(1-smooth((p-.285)/.052)));
  const labelOpacity=(1-smooth((p-.24)/.085)).toFixed(3);
@@ -218,6 +219,8 @@ function makeCarvingBlank(rows){
 }
 function updateCarvingBlank(t){
  if(!e.intermediate)return;
+ if(Number.isFinite(e.lastBlankT)&&Math.abs(e.lastBlankT-t)<(mobile()?.007:.002))return;
+ e.lastBlankT=t;
  const data=e.intermediateRings,pos=e.intermediateGeo.attributes.position;
  for(let i=0;i<data.length;i++){
    const v=data[i],c=Math.cos(v.a),sn=Math.sin(v.a);
@@ -446,6 +449,22 @@ function loadCoil(){
   schedule();
  },undefined,err=>{host.dataset.modelError='true';fallback.hidden=false;console.warn('Coil model unavailable',err)});
 }
+// Paused video is driven by scroll position. Coalesce asynchronous decoder seeks.
+let archiveDesiredTime=0;
+function flushArchiveSeek(){
+ if(!Number.isFinite(archiveFilm.duration)||archiveFilm.duration<=0||archiveFilm.seeking)return;
+ if(Math.abs(archiveFilm.currentTime-archiveDesiredTime)<.045)return;
+ archiveFilm.currentTime=archiveDesiredTime;
+}
+function seekArchiveVideo(p){
+ if(!Number.isFinite(archiveFilm.duration)||archiveFilm.duration<=0)return;
+ archiveDesiredTime=clamp((p-.590)/.141)*Math.max(0,archiveFilm.duration-.04);
+ flushArchiveSeek();
+ host.dataset.archiveTarget=archiveDesiredTime.toFixed(3);
+}
+archiveFilm.addEventListener('seeked',flushArchiveSeek);
+archiveFilm.addEventListener('loadedmetadata',schedule);
+archiveFilm.addEventListener('play',()=>archiveFilm.pause());
 function setup(){
  // Two facing cut planes let the real rough GLB grow out of the single working blank.
  // No replacement artwork is generated; the approved Coil geometry is never edited.
@@ -458,7 +477,7 @@ function setup(){
  e.renderer=new THREE.WebGLRenderer({canvas,context:ctx,alpha:true,antialias:true,powerPreference:'low-power'});
  e.renderer.setClearColor(0x000000,0);e.renderer.localClippingEnabled=true;
  e.renderer.outputColorSpace=THREE.SRGBColorSpace;e.renderer.toneMapping=THREE.ACESFilmicToneMapping;
- e.renderer.toneMappingExposure=1.07;e.renderer.setPixelRatio(Math.min(devicePixelRatio,mobile()?1.25:1.75));
+ e.renderer.toneMappingExposure=1.07;e.renderer.setPixelRatio(Math.min(devicePixelRatio,mobile()?1:1.5));
  e.scene=new THREE.Scene();e.camera=new THREE.PerspectiveCamera(34,1,.1,100);
  e.scene.add(new THREE.HemisphereLight(0xe6e8dd,0x33362e,2.6));
  for(const [color,intensity,x,y,z] of [[0xf6e6cf,3.2,-4,7,6],[0xdde6f0,1.5,4,5,2],[0xf6f1e7,2,1,6,-5]]){
@@ -477,7 +496,10 @@ function setup(){
 function resize(){
  if(!e.renderer)return;
  const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);
- e.renderer.setPixelRatio(Math.min(devicePixelRatio,mobile()?1.25:1.75));e.renderer.setSize(w,h,false);
+ if(e.renderWidth!==w||e.renderHeight!==h||e.renderMobile!==mobile()){
+  e.renderer.setPixelRatio(Math.min(devicePixelRatio,mobile()?1:1.5));e.renderer.setSize(w,h,false);
+  e.renderWidth=w;e.renderHeight=h;e.renderMobile=mobile();
+ }
  e.camera.aspect=w/h;e.camera.fov=mobile()?38:33;e.camera.updateProjectionMatrix();schedule();
 }
 function schedule(){
@@ -488,9 +510,11 @@ function schedule(){
 function tick(now){
  e.frame=0;
  const next=active();desiredProgress=next;
+ if(mobile()&&!reduced.matches&&e.lastRenderTime&&now-e.lastRenderTime<29){e.frame=requestAnimationFrame(tick);return;}
+ e.lastRenderTime=now;
  const delta=e.lastTick?Math.min(300,Math.max(1,now-e.lastTick)):16;
  e.lastTick=now;
- const blend=1-Math.exp(-delta/48);
+ const blend=1-Math.exp(-delta/(mobile()?70:48));
  if(reduced.matches)shownProgress=next;
  else shownProgress+=(next-shownProgress)*blend;
  if(Math.abs(next-shownProgress)<.0004)shownProgress=next;
@@ -507,20 +531,21 @@ function render(p){
  ui.progress.style.width=(p*100).toFixed(2)+'%';
  // This film is context for typical working methods, not a recording of Coil's making.
  // Use real workshop imagery during the least documentary-looking interim geometry.
- const documentary=smooth((p-.565)/.035)*(1-smooth((p-.715)/.037));
+ const documentary=smooth((p-.590)/.025)*(1-smooth((p-.731)/.028));
  const showFilm=!reduced.matches&&document.visibilityState==='visible'&&documentary>.05;
  stage.style.setProperty('--archiveOpacity',showFilm?documentary.toFixed(4):'0');
  archiveCutaway.setAttribute('aria-hidden',String(!showFilm));
- if(showFilm&&archiveFilm.paused)archiveFilm.play().catch(()=>{});
- if(!showFilm&&!archiveFilm.paused)archiveFilm.pause();
+ archiveFilm.pause();
+ if(showFilm)seekArchiveVideo(p);
  host.dataset.documentaryCutaway=documentary.toFixed(3);
  if(!e.renderer||e.contextLost)return;
  const handoff=smooth((p-.31)/.088);
  // Continuous camera handoff: the Harare marker grows into the same physical block.
  e.root.scale.setScalar(lerp(.28,1,handoff));
  e.root.position.set(lerp(.85,0,handoff),lerp(-.60,0,handoff),0);
- const mark=smooth((p-.455)/.055)*(1-smooth((p-.536)/.022));
- const carve=smooth((p-.53)/.235);
+ // Hold the chalk drawing long enough to inspect before stone removal begins.
+ const mark=smooth((p-.445)/.034)*(1-smooth((p-.572)/.031));
+ const carve=smooth((p-.565)/.20);
  const file=smooth((p-.765)/.07),heating=smooth((p-.835)/.065);
  const wax=smooth((p-.90)/.06),gallery=smooth((p-.96)/.04);
  // Each impact removes a discrete band of unwanted material, then holds.
@@ -596,8 +621,9 @@ function render(p){
  if(e.toolRig){
   e.toolRig.visible=carve>.008&&carve<.985&&!reduced.matches;
   if(e.toolRig.visible){
-   e.toolRig.position.set(impactX,impactY-.021*impact,impactZ);
-   e.toolRig.rotation.set(.10,-.12,side*.025);
+   // Chisel's cone tip is the tool rig origin: align directly with the surface.
+   e.toolRig.position.set(impactX,impactY,impactZ);
+   e.toolRig.rotation.set(.07,-.08,side*.016);
    e.hammerPivot.rotation.z=-.53*open;
    e.toolRig.updateMatrixWorld(true);
    e.chiselTop.getWorldPosition(e.tempP);e.hammerContact.getWorldPosition(e.tempQ);
