@@ -1,0 +1,39 @@
+name: Sculpture process visual review
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/prototypes/stone-to-sculpture.*'
+      - 'qa/making-v4.mjs'
+      - 'test/making-prototype.test.mjs'
+      - '.github/workflows/sculpture-process-review.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sculpture-process-review-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  making:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - run: npm install --prefix qa --no-audit --no-fund
+      - run: sh scripts/run-browser-qa.sh qa/making-v4.mjs
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: sculpture-process-desktop-mobile-review
+          path: test-results/browser/making-v4/
+          retention-days: 14
+          if-no-files-found: warn
