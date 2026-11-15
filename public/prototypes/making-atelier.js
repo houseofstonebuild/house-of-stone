@@ -62,6 +62,10 @@ async function checkHdFrames(){
   if(manifest.version!==2||manifest.frames!==48||manifest.end_seconds>8.5||manifest.width<1280)return;
   hdFramesReady=true;
   frameRoot='/assets/making-cinema-frames-v2';
+  // Select HD source only once the matching media assets are published.
+  const hdSource=$film.querySelector('source');
+  hdSource.src='/assets/making-chiseling-atelier-hd-v2.mp4';
+  $film.load();
   frameCache.clear();
   activeFilmFrame=-1;
   $filmMedia.dataset.mediaQuality='hd-master';
@@ -165,6 +169,18 @@ $film.addEventListener('seeked',()=>{
 $film.addEventListener('error',()=>{
  $filmMedia.dataset.videoReady='false';
  $filmMedia.dataset.fallback='photo';
+ if(hdFramesReady){
+  // Remain functional if the deployment contains frames before the HD MP4.
+  hdFramesReady=false;
+  frameRoot='/assets/making-cinema-frames';
+  frameCache.clear();
+  activeFilmFrame=-1;
+  $filmMedia.dataset.mediaQuality='original-fallback';
+  const source=$film.querySelector('source');
+  source.src='/assets/making-chiseling-scrub-v1.mp4';
+  $film.load();
+  queueUpdate();
+ }
 });
 if($film.readyState>=1){videoMetadata=true;filmDuration=$film.duration||0;}
 if(!mobile()&&!saveData)$film.load();

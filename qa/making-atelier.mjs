@@ -73,7 +73,7 @@ try{
      return {paused:v.paused,loop:v.loop,progress:document.querySelector('.carving-media').dataset.scrollPosition};
     });
     assert(state.paused&&!state.loop,'Archival documentary must never independently play or loop');
-    assert(await page.locator('#cinemaFilm source').first().getAttribute('src')==='/assets/making-chiseling-atelier-hd-v2.mp4');
+    assert(['/assets/making-chiseling-scrub-v1.mp4','/assets/making-chiseling-atelier-hd-v2.mp4'].includes(await page.locator('#cinemaFilm source').first().getAttribute('src')));
     assert((await page.evaluate(()=>window.__mabweMaking.film.maxSeconds))<=8.4,'Lion footage must be excluded');
     assert(Math.abs(Number(state.progress)-p)<.03);
     if(c.mobile){
