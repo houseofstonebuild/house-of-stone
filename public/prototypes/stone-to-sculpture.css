@@ -364,3 +364,86 @@
 @media(max-width:800px){
  .heating-torch{right:-68vw}
 }
+
+
+/* V8 documentary composition: full-bleed editorial film, never a bordered
+   floating inset. Footage is paused, not looped, and scrubbed by the same
+   scroll timeline as stone material removal. */
+.stage[data-phase="6"] #archive-cutaway{
+ display:block;position:absolute;left:clamp(20px,2.4vw,42px);right:auto;
+ top:clamp(100px,14svh,154px);
+ width:min(47vw,720px);height:clamp(240px,39svh,455px);
+ aspect-ratio:auto;max-height:none;
+ border:0;outline:0;box-shadow:none;border-radius:0;
+ overflow:hidden;background:transparent;
+ pointer-events:none;z-index:4;transform:none;
+ mask-image:linear-gradient(90deg,#000 0%,#000 67%,transparent 99%);
+ -webkit-mask-image:linear-gradient(90deg,#000 0%,#000 67%,transparent 99%);
+}
+.stage[data-phase="6"] #archive-cutaway .archive-fallback,
+.stage[data-phase="6"] #archive-cutaway video,
+.stage[data-phase="6"] #archive-cutaway .archive-mobile-frames{
+ position:absolute;inset:0;width:100%;height:100%;
+ object-fit:cover;object-position:center 44%;
+}
+.stage[data-phase="6"] #archive-cutaway video{
+ display:block!important;opacity:1;filter:grayscale(.19) contrast(1.025);
+}
+.stage[data-phase="6"] #archive-cutaway .archive-mobile-frames{display:none!important}
+.stage[data-phase="6"] #archive-cutaway::after{
+ content:"";inset:0;position:absolute;pointer-events:none;
+ background:linear-gradient(0deg,rgba(13,20,17,.44),transparent 30%,rgba(13,20,17,.06) 74%);
+ box-shadow:none;
+}
+.stage[data-phase="6"] #archive-cutaway .archive-cutaway-label{
+ left:clamp(18px,3.7vw,57px);bottom:22px;right:auto;
+ padding:0;background:none;letter-spacing:.18em;font-size:9px;
+ color:#efe7da;text-shadow:0 1px 9px rgba(0,0,0,.7);
+}
+.stage[data-phase="6"] .stage-info{
+ top:auto;bottom:clamp(91px,10svh,132px);transform:none;
+ left:clamp(28px,6.7vw,120px);
+ width:min(34vw,460px);
+}
+.stage[data-phase="6"] .stage-info h1{
+ font-size:clamp(53px,5vw,78px)
+}
+#render>.carving-tools{display:none!important}
+/* On phones, show documentary footage as its OWN full-width visual beat,
+   then hand off to the stone; the two never cover one another. */
+@media(max-width:800px){
+ .stage[data-phase="6"] #archive-cutaway{
+  display:block!important;
+  top:clamp(140px,22svh,200px);left:0;right:0;
+  width:100%;height:clamp(215px,35svh,350px);
+  mask-image:linear-gradient(0deg,transparent 0%,#000 20%,#000 81%,transparent 100%);
+  -webkit-mask-image:linear-gradient(0deg,transparent 0%,#000 20%,#000 81%,transparent 100%);
+ }
+ .stage[data-phase="6"] #archive-cutaway video{display:none!important}
+ .stage[data-phase="6"] #archive-cutaway .archive-mobile-frames{
+  display:block!important;
+  position:absolute;inset:0;width:100%;height:100%;
+  background-image:url('/assets/making-chiseling-scroll-frames-v1.webp');
+  background-size:700% 600%;background-repeat:no-repeat;
+  background-color:#19201d;
+  z-index:1;
+ }
+ .stage[data-phase="6"] #archive-cutaway .archive-cutaway-label{
+  position:absolute;left:25px;bottom:22px;font-size:8px;z-index:3;
+  line-height:1.55;max-width:220px;
+ }
+ .stage[data-phase="6"] #render>.making-v6-image{
+  opacity:var(--processStoneOpacity,1)!important;
+ }
+ .stage[data-phase="6"] .stage-info{
+  left:25px;right:25px;bottom:74px!important;
+  width:calc(100% - 50px);max-width:360px;
+ }
+ .stage[data-phase="6"] .stage-info h1{
+  font-size:clamp(41px,10vw,54px);margin-bottom:11px
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .stage[data-phase="6"] #archive-cutaway{display:none!important}
+ .stage[data-phase="6"] #render>.making-v6-image{opacity:1!important}
+}
