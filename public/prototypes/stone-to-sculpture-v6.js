@@ -129,7 +129,7 @@ function updateCraft(p){
  const column=cutFrame%7,row=Math.floor(cutFrame/7);
  archiveMobileFrames.style.backgroundPosition=(column/6*100).toFixed(3)+'% '+(row/5*100).toFixed(3)+'%';
  archiveMobileFrames.dataset.workFrame=String(cutFrame);
- stage.dataset.craftToolsVisible=String(!reducedMotion&&p>=.565&&p<.765);
+ stage.dataset.craftToolsVisible='false';
  stage.dataset.heatingVisible=String(!reducedMotion&&heat>.12);
  stage.dataset.refiningVisible=String(!reducedMotion&&refine>.12);
 }
@@ -266,8 +266,14 @@ function render(p){
  ui.progress.style.width=(p*100).toFixed(2)+'%';
  updateFrames(p);
  const documentary=smooth((p-.565)/.020)*(1-smooth((p-.750)/.015));
- const show=!!v6.manifest&&!reduced.matches&&document.visibilityState==='visible'&&documentary>.10;
- stage.style.setProperty('--archiveOpacity',show?documentary.toFixed(4):'0');
+ const mobileFilm=mobile();
+ const handoff=smooth((p-.625)/.037);
+ const filmOpacity=mobileFilm?documentary*(1-handoff):documentary;
+ const stoneOpacity=mobileFilm&&p>=.565&&p<.765?handoff:1;
+ const show=!!v6.manifest&&!reduced.matches&&document.visibilityState==='visible'&&filmOpacity>.01;
+ stage.style.setProperty('--archiveOpacity',show?filmOpacity.toFixed(4):'0');
+ stage.style.setProperty('--processStoneOpacity',stoneOpacity.toFixed(4));
+ stage.dataset.documentaryLayout=mobileFilm?'mobile-standalone':'desktop-integrated';
  setDocumentary(show,p);host.dataset.documentaryCutaway=documentary.toFixed(3);
  updateCraft(p);
 
