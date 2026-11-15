@@ -292,6 +292,13 @@
  .heating-caption strong{font-size:37px}
  .heating-caption small{font-size:9px}
 }
+/* Avoid the narrow-screen heating headline competing with the Skip control. */
+@media(max-width:800px){
+ .heating-caption{top:145px;max-width:178px;gap:5px}
+ .heating-caption strong{display:none}
+ .heating-caption span{font-size:8px}
+ .heating-caption small{font-size:9px;line-height:1.45}
+}
 @media(prefers-reduced-motion:reduce){
  .heating-study,.craft-detail-cutaway{display:none!important}
 }
