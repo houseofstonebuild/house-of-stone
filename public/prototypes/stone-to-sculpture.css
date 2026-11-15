@@ -447,3 +447,16 @@
  .stage[data-phase="6"] #archive-cutaway{display:none!important}
  .stage[data-phase="6"] #render>.making-v6-image{opacity:1!important}
 }
+
+/* A real-film frame atlas is the deterministic backup when a browser delays
+   video metadata or does not support efficient frame-accurate MP4 seeking. */
+@media(min-width:801px){
+ .stage[data-phase="6"] #archive-cutaway[data-seek-ready="false"] video{opacity:0!important}
+ .stage[data-phase="6"] #archive-cutaway[data-seek-ready="false"] .archive-mobile-frames{
+  display:block!important;
+  position:absolute;inset:0;width:100%;height:100%;
+  background-image:url('/assets/making-chiseling-scroll-frames-v1.webp');
+  background-size:700% 600%;background-repeat:no-repeat;
+  z-index:1;opacity:1;
+ }
+}
