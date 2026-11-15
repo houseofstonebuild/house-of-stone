@@ -88,6 +88,7 @@ test('review remains unlinked and delivers mobile and reduced-motion support',as
  assert.doesNotMatch(html,/house-of-mabwe-making-web-v1\.mp4/);
  assert(statSync(new URL('../public/assets/making-chiseling-scrub-v1.mp4',import.meta.url)).size>50000,'Verified chiseling-only clip must exist');
  assert(statSync(new URL('../public/assets/making-chiseling-poster-v1.jpg',import.meta.url)).size>5000,'Mobile first-frame fallback must exist');
+ assert(statSync(new URL('../public/assets/making-chiseling-scroll-frames-v1.webp',import.meta.url)).size>10000,'Mobile scroll atlas must exist');
  assert.match(html,/id="archive-cutaway" aria-hidden="true"/);
  assert.match(html,/id="archive-film" muted playsinline/);
  assert.match(js,/const documentary=smooth/);
@@ -98,6 +99,10 @@ test('review remains unlinked and delivers mobile and reduced-motion support',as
  assert.match(js,/archiveFilm\.pause\(\)/);
  assert.match(css,/\.archive-cutaway\{/);
  assert.match(css,/\.archive-cutaway\[data-frame-ready/);
+ assert.match(css,/\.archive-mobile-frames\{/);
+ assert.match(css,/background-size:700% 600%/);
+ assert.match(js,/archiveMobileFrames\.style\.backgroundPosition/);
+ assert.match(html,/id="archive-mobile-frames"/);
  assert.match(js,/journey\.offsetHeight-stage\.offsetHeight/);
  assert.match(js,/if\(reduced\.matches\|\|mobile\(\)\)shownProgress=next/);
  assert.match(html,/not a record of Coil being carved/);
