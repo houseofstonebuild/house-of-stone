@@ -316,3 +316,13 @@
  .heating-caption strong{display:none}
  .heating-caption small{font-size:10px;max-width:300px}
 }
+
+/* Completed review: documentary/close-up remain below Skip on narrow phones. */
+@media(max-width:800px){
+ .stage[data-phase="6"] .archive-cutaway{
+  top:clamp(142px,21svh,168px);left:21px;width:min(55vw,210px)
+ }
+ .craft-detail-cutaway{
+  top:clamp(142px,21svh,168px);left:21px;width:min(55vw,210px)
+ }
+}

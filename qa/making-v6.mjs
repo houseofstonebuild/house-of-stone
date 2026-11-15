@@ -81,7 +81,7 @@ try{
     assert.equal(approved.visible,'true');
     if(v.width<=800){
      assert.equal(approved.canvas,0,'Phone ending must avoid unreliable WebKit canvas');
-     assert(['baked-original-glb','studio-photo-fallback'].includes(approved.presentation),'Missing approved Coil mobile final image');
+     assert.equal(approved.presentation,'baked-original-glb','Mobile finale must use the approved-GLB poster, not a generic or fallback image');
     }else assert.equal(approved.canvas,1);
    }
    if(p===.983)assert(state.videoPaused,'Documentary must pause outside the carving interval');

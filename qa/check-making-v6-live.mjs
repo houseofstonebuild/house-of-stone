@@ -10,6 +10,7 @@ const paths=[
  '/prototypes/stone-to-sculpture-v6.js',
  '/prototypes/approved-coil-reveal.js',
  '/models/coil-uploaded-v1.glb',
+ '/assets/making-coil-approved-mobile-v1.png',
  '/assets/making-chiseling-scroll-frames-v1.webp',
  '/assets/making-v6/manifest.json',
  '/assets/making-v6/desktop/frame_000.webp',
