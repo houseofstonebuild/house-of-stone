@@ -6,6 +6,8 @@ on:
       - 'public/prototypes/stone-to-sculpture.*'
       - 'qa/making-v6.mjs'
       - 'public/prototypes/stone-to-sculpture-v6.js'
+      - 'public/prototypes/approved-coil-reveal.js'
+      - 'test/making-v6.test.mjs'
       - 'qa/making-v4.mjs'
       - 'public/assets/making-v6/**'
       - 'public/assets/making-v6/manifest.json'
