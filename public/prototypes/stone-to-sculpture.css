@@ -168,3 +168,13 @@
  .stage[data-phase="6"] .stage-info h1{font-size:clamp(49px,4.7vw,73px)}
  .stage[data-phase="6"] .counter{margin-bottom:12px}
 }
+
+/* V6 visual QA: give the artifact its full vertical space on narrow phones.
+   The original bottom-aligned copy overlapped Coil's actual base. */
+@media(max-width:800px){
+ .stage-info,.stage[data-phase="6"] .stage-info{bottom:50px!important}
+ .stage[data-phase="6"] .archive-cutaway{
+  left:22px;right:auto;top:88px;width:min(44vw,170px);
+ }
+ .stage[data-phase="6"] .skip{top:70px;right:23px}
+}
