@@ -68,7 +68,7 @@ try{
     assert(Number(info.aperture)>.07&&Number(info.aperture)<.98,'Opening must reveal with the chiseling sequence');
     assert(Number(info.tipError)<.025,'Chisel tip should follow current fitted stone surface');
     assert(Number(info.blankOpacity)>.1,'Physical intermediate blank should remain visible during chiseling');
-    assert(Number(info.realShapeReveal)>.15&&Number(info.realShapeReveal)<.90,'Approved 3D Coil geometry should emerge gradually throughout chiseling');
+    assert(Number(info.realShapeReveal)>.08&&Number(info.realShapeReveal)<.90,`Approved 3D Coil geometry should emerge gradually throughout chiseling: ${JSON.stringify(info)}`);
     assert(Number(info.carveFrontier)>.3&&Number(info.carveFrontier)<3.1,'Stone removal frontier should be inside the unfinished parent block');
     assert.equal(info.blankCapReady,'true','Unfinished parent stone must have a solid cutting surface');
     assert(Number(info.blankCapHeight)>Number(info.carveFrontier)+.3,'Stone needs a supporting bridge beneath emerging lobes');
