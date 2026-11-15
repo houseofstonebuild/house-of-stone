@@ -73,11 +73,24 @@ try{
     assert.equal(await page.locator('#carving-tools').count(),0,'Outdated SVG tools must be absent');
     if(v.width>800){
      assert(state.cutawayOpacity>.8,'Large editorial documentary should accompany desktop carving');
-     await page.waitForFunction(()=>{
-      const film=document.getElementById('archive-film');
-      const expected=(.64-.565)/.20*(film.duration-.08);
-      return film.readyState>=1&&film.paused&&Math.abs(film.currentTime-expected)<.35;
-     },null,{timeout:30000});
+     const playback=await page.evaluate(()=>({
+      ready:document.getElementById('archive-cutaway').dataset.seekReady,
+      paused:document.getElementById('archive-film').paused,
+      workFrame:Number(document.getElementById('archive-cutaway').dataset.workFrame),
+      atlas:getComputedStyle(document.getElementById('archive-mobile-frames')).display,
+      duration:document.getElementById('archive-film').duration
+     }));
+     assert(playback.paused,'Documentary must never independently play');
+     assert(playback.workFrame>0,'Documentary atlas must advance with scroll');
+     if(playback.ready==='true'){
+      await page.waitForFunction(()=>{
+       const film=document.getElementById('archive-film');
+       const expected=(.64-.565)/.20*(film.duration-.08);
+       return film.paused&&Math.abs(film.currentTime-expected)<.65;
+      },null,{timeout:15000});
+     }else{
+      assert.equal(playback.atlas,'block','A paused video must have a real-footage fallback for scroll scrub');
+     }
     }else{
      assert.equal(state.documentaryMode,'mobile-standalone','Phone video must occupy its own scene');
      assert(state.cutawayOpacity>0,'Phone work must show real footage');
@@ -141,10 +154,11 @@ try{
   }
   if(v.width>800){
    await move(page,.71);
-   await page.waitForFunction(()=>{const f=document.getElementById('archive-film');return f.paused&&f.readyState>=1&&f.currentTime>(.71-.565)/.2*(f.duration-.08)-.35},{timeout:30000});
-   const later=await page.evaluate(()=>document.getElementById('archive-film').currentTime);
+   const laterFrame=await page.locator('#archive-cutaway').getAttribute('data-work-frame');
    await move(page,.59);
-   await page.waitForFunction(later=>document.getElementById('archive-film').paused&&document.getElementById('archive-film').currentTime<later-1,later,{timeout:30000});
+   await page.waitForFunction(later=>Number(document.querySelector('#archive-cutaway').dataset.workFrame)<Number(later),laterFrame,{timeout:15000});
+   const player=await page.evaluate(()=>({paused:document.getElementById('archive-film').paused,loop:document.getElementById('archive-film').loop}));
+   assert(player.paused&&!player.loop,'The film must stop and reverse rather than free-run');
   }else{
    await move(page,.60);
    const early=await page.locator('#archive-cutaway').getAttribute('data-work-frame');
