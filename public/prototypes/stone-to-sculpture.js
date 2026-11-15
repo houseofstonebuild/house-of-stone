@@ -162,7 +162,7 @@ function rockGeometry(){
   pos.needsUpdate=true;geo.computeVertexNormals();return geo;
 }
 function makeRock(){
- const rock=new THREE.Mesh(rockGeometry(),stoneMaterial({raw:true,color:0x454b46}));
+ const rock=new THREE.Mesh(rockGeometry(),stoneMaterial({raw:true,color:0x353c36}));
  rock.position.y=1.69;e.root.add(rock);e.rock=rock;
  const surface=new THREE.PlaneGeometry(2.1,1.47,26,18);surface.rotateX(-Math.PI/2);
  const pos=surface.attributes.position;
@@ -207,7 +207,7 @@ function makeCarvingBlank(rows){
 function updateCarvingBlank(t){
  if(!e.intermediate)return;
  const data=e.intermediateRings,pos=e.intermediateGeo.attributes.position;
- const eased=smooth(t);
+ const eased=smooth(clamp(t*1.35));
  for(let i=0;i<data.length;i++){
    const v=data[i],c=Math.cos(v.a),sn=Math.sin(v.a);
    const startWidth=1.18*v.taper,finishWidth=v.width;
@@ -215,7 +215,7 @@ function updateCarvingBlank(t){
    // No jump between the geological block and the gradually hand-shaped form.
    const width=lerp(startWidth,finishWidth,eased);
    const depth=lerp(.76*v.taper,.40+Math.min(.12,finishWidth*.15),eased);
-   const texture=(v.seed-.5)*lerp(.045,.017,eased);
+   const texture=(.011*Math.sin(v.a*5+v.y*4.3)+.004*Math.sin(v.a*9-v.y*10))*lerp(1,.38,eased);
    pos.setXYZ(i,center+c*(width+texture),v.y+texture*.5,sn*(depth+texture));
  }
  pos.needsUpdate=true;e.intermediateGeo.computeVertexNormals();
@@ -481,7 +481,7 @@ function render(p){
  // A continuous irregular stone blank stays whole as the form is carved out.
  // The boundary follows the actual approved model's silhouette at every height.
  e.carveMargin.value=1.72; // the raw parent rock fades into the connected carving blank
- const toBlank=smooth((carve-.007)/.13),toRough=smooth((carve-.53)/.39);
+ const toBlank=smooth((carve-.007)/.13),toRough=smooth((carve-.21)/.57);
  e.rock.visible=handoff>.02&&carve<.15;
  e.rock.material.transparent=true;
  e.rock.material.opacity=1-toBlank;
@@ -571,8 +571,8 @@ function render(p){
  }
  if(e.plinth)e.plinth.visible=gallery>.55;
  e.root.rotation.set(.007*Math.sin(p*5),lerp(-.18,.14,smooth((p-.43)/.56)),0);
- const focus=smooth((p-.53)/.20),dist=mobile()?8.7:8.0;
- e.camera.position.set(mobile()?.04:1.38,3.12,dist-.3*focus);
+ const focus=smooth((p-.53)/.20)*(1-smooth((p-.77)/.08)),dist=mobile()?8.7:8.0;
+ e.camera.position.set(mobile()?.04:1.38,3.12,dist-.65*focus);
  e.camera.lookAt(mobile()?0:.28,1.68,0);
  e.renderer.render(e.scene,e.camera);
  host.dataset.carveProgress=removed.toFixed(4);
