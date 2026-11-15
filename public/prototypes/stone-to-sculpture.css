@@ -92,9 +92,10 @@
 
 /* The phone path displays original, pre-rendered Coil process frames instead of
    running a GLB, 3D material shader, and per-scroll normal recalculation. */
-#mobile-sculpture-frames{display:none;position:absolute;inset:0;visibility:hidden;pointer-events:none;background-repeat:no-repeat;background-size:400% 400%;background-position:0 0}
+#mobile-sculpture-frames,#mobile-sculpture-next{display:none;position:absolute;inset:0;visibility:hidden;pointer-events:none;background-repeat:no-repeat;background-size:400% 400%;background-position:0 0}
+#mobile-sculpture-next{opacity:0}
 @media(max-width:800px){
- .stage.mobile-atlas-mode #mobile-sculpture-frames{display:block}
+ .stage.mobile-atlas-mode #mobile-sculpture-frames,.stage.mobile-atlas-mode #mobile-sculpture-next{display:block}
  .stage.mobile-atlas-mode #render canvas{display:none!important}
  .stage.mobile-atlas-mode #render{filter:none;will-change:auto}
 }
