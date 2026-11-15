@@ -45,12 +45,41 @@ try{
     phase:Number(document.querySelector('.stage').dataset.phase),
     image:document.querySelector('.making-v6-image:not(.making-v6-previous)').currentSrc,
     videoPaused:document.getElementById('archive-film').paused,
-    cutawayOpacity:parseFloat(getComputedStyle(document.getElementById('archive-cutaway')).opacity)}));
+    cutawayOpacity:parseFloat(getComputedStyle(document.getElementById('archive-cutaway')).opacity),
+    tools:document.querySelector('.stage').dataset.craftToolsVisible,
+    heat:document.querySelector('.stage').dataset.heatingVisible,
+    refine:document.querySelector('.stage').dataset.refiningVisible,
+    approved:document.getElementById('render').dataset.approvedModelState,
+    approvedMaterials:document.getElementById('render').dataset.approvedMaterialsPreserved,
+    approvedModelUrl:document.getElementById('render').dataset.approvedModelUrl}));
    assert.equal(state.phase,expected,'Incorrect stage at '+p+' in '+v.width);
    assert(state.overflow<=2,'Horizontal overflow '+v.width);
-   assert.equal(state.canvasCount,0,'No WebGL should run during scroll on any device');
+   if(p<.86)assert.equal(state.canvasCount,0,'Carving and heating must not load WebGL');
    if(p>=.305)assert.match(state.image,/making-v6\/.*\/frame_/);
-   if(p===.64)assert(state.cutawayOpacity>.8,'Real chiseling video should be visible during carving');
+   if(p===.64){
+    assert(state.cutawayOpacity>.8,'Real chiseling video should be visible during carving');
+    assert.equal(state.tools,'true','Hammer and chisel must be visibly represented in carving');
+   }
+   if(p===.8)assert.equal(state.refine,'true','Hand-refinement panel must appear');
+   if(p===.865)assert.equal(state.heat,'true','Heating visual must appear during surface preparation');
+   if(p===.983){
+    await page.waitForFunction(()=>{
+     const status=document.querySelector('#render').dataset.approvedModelState;
+     return status==='ready'||status==='error';
+    },null,{timeout:30000});
+    const approved=await page.evaluate(()=>({
+     status:document.querySelector('#render').dataset.approvedModelState,
+     url:document.querySelector('#render').dataset.approvedModelUrl,
+     materials:document.querySelector('#render').dataset.approvedMaterialsPreserved,
+     visible:document.querySelector('#render').dataset.approvedModelVisible,
+     canvas:document.querySelectorAll('#render .approved-coil-canvas').length
+    }));
+    assert.equal(approved.status,'ready','The final artwork must use actual GLB, not a pre-render fallback');
+    assert.equal(approved.url,'/models/coil-uploaded-v1.glb');
+    assert.equal(approved.materials,'true','Original Coil materials must be preserved');
+    assert.equal(approved.visible,'true');
+    assert.equal(approved.canvas,1);
+   }
    if(p===.983)assert(state.videoPaused,'Documentary must pause outside the carving interval');
    await page.screenshot({path:new URL(v.engine+'-'+v.width+'-'+String(i).padStart(2,'0')+'.png',output).pathname});
   }
