@@ -14,43 +14,43 @@
   "generated": [
     {
       "name": "making-mobile-atlas-v5-00.webp",
-      "bytes": 49242,
-      "sha256": "f239a0089a5ad4ad585f546406f2471566ccdf83aec051e0f6413bc8bba70d0e"
+      "bytes": 49174,
+      "sha256": "b1c7677e78b1d0d3da602452f84d34ceb7b1bfae69f0c9d51793bfc2707a0c35"
     },
     {
       "name": "making-mobile-atlas-v5-01.webp",
-      "bytes": 56602,
-      "sha256": "97f73fa6ad45065e8bab29dedf64eedf3f6411b47ceb16004b5a35258e324cca"
+      "bytes": 56406,
+      "sha256": "f2063c5cc7e503dae8d4454bb404623e1864aaec8a8fd29964f4cb7b5c7747ec"
     },
     {
       "name": "making-mobile-atlas-v5-02.webp",
-      "bytes": 66166,
-      "sha256": "7077bbc453fc8f557aca098bf8910d633d8265484e5970ee4de98200cd6a0fef"
+      "bytes": 66214,
+      "sha256": "9bbb132f245635c61d31c1ee47fb61fd4f0c9e91bb32db06bf735919dab94d6e"
     },
     {
       "name": "making-mobile-atlas-v5-03.webp",
-      "bytes": 78086,
-      "sha256": "77ff5c58025fdfee2649c4be65efd790fe90a0edcd5bdce36c821fecfeb5a8c3"
+      "bytes": 78066,
+      "sha256": "8d1c438da6794e743cf1ee966beb523e3755a4896ade65af37a18e626c719308"
     },
     {
       "name": "making-mobile-atlas-v5-04.webp",
-      "bytes": 75022,
-      "sha256": "6dcfdf8bb4eec6b75d1038afc8c08c63155f876ba7384b3179920df066f0201b"
+      "bytes": 75034,
+      "sha256": "088c552b5c26832d204d2663c891d6b5c564aefa41e961b5c92ada757b41dc88"
     },
     {
       "name": "making-mobile-atlas-v5-05.webp",
-      "bytes": 71686,
-      "sha256": "fd301871c169390144970530ec9a757386b28b5b3df4d4e4cb0d129387f78f7a"
+      "bytes": 71730,
+      "sha256": "ed185865573cf74d9feaf1144735c41693f086e9fb6d4be50d6179178f7cc44b"
     },
     {
       "name": "making-mobile-atlas-v5-06.webp",
-      "bytes": 73144,
-      "sha256": "d5da1537434c4614b4f4df673b08819f3160b8e4a1f88cfb6dd63a07cc7d71ce"
+      "bytes": 73166,
+      "sha256": "472e26655dc301771dbff2a6965264de279260df430058dd9d3b1837c654c4e6"
     },
     {
       "name": "making-mobile-atlas-v5-07.webp",
-      "bytes": 77322,
-      "sha256": "5c0fa2a8d69138d0e6013e5c435fe59e7a1fb7549b525184246dc816ccbf7eb3"
+      "bytes": 77334,
+      "sha256": "ffb4d51c9d6e33f013a38015bbdc5c57e6d14dd6d678d0018aa748a26a8db816"
     },
     {
       "name": "making-mobile-atlas-v5-08.webp",
@@ -59,108 +59,108 @@
     },
     {
       "name": "making-mobile-atlas-v5-09.webp",
-      "bytes": 94832,
-      "sha256": "ca31cc9c4b57b6dbd50ebebbf962b74785c2aa62d65f0bb0fb489dbb03e7a20e"
+      "bytes": 94840,
+      "sha256": "de8126ddccea5b5fbbe97d66960a25f923a61f7f6589b04adefd0d890b2c1af7"
     },
     {
       "name": "making-mobile-atlas-v5-10.webp",
-      "bytes": 103850,
-      "sha256": "a9654b8bd184dd31cbe717ac9416485f64195563fd7ca8b58fd7199186d3946e"
+      "bytes": 103300,
+      "sha256": "153b15ad03ff60f50d32dbea4a8efac88118a8c90e3932c09cc7fc53303dad33"
     },
     {
       "name": "making-mobile-atlas-v5-11.webp",
-      "bytes": 120890,
-      "sha256": "ae99acab21dfcdb81c6753c5231da6b468c96d043da7e279bc03de8080b92dfa"
+      "bytes": 111198,
+      "sha256": "ee2d62e498279002e99443150cd513176312b11c9883957a70664f3525076033"
     },
     {
       "name": "making-mobile-atlas-v5-12.webp",
-      "bytes": 105496,
-      "sha256": "c8d21082ee97930c10740eec5d1f85f8555fa9ed7ccaea6be53049afd0a96e8e"
+      "bytes": 119190,
+      "sha256": "7cb71cced6f582157524fc067bb70a00579930b7b54c12cc521f17c33321f06e"
     },
     {
       "name": "making-mobile-atlas-v5-13.webp",
-      "bytes": 79058,
-      "sha256": "8e29fcd6ed1f606405255acdcc03488beacf81e6db0bfee7221f7aedf20b4c38"
+      "bytes": 100948,
+      "sha256": "be541b0a02674919c2c32d601f680ceea1f061072b1b95b5bb37db97a5f48e67"
     },
     {
       "name": "making-mobile-atlas-v5-14.webp",
-      "bytes": 66312,
-      "sha256": "038c4b5b80b3747d5de5cc152999584423e2d014e857de613ab5991eb03d9c1d"
+      "bytes": 88742,
+      "sha256": "b3d2ea6a7bdd19351b65a9933b8c68d4ec81315d328c918ea1ce8068c884184a"
     },
     {
       "name": "making-mobile-atlas-v5-15.webp",
-      "bytes": 67830,
-      "sha256": "b8e465f0283b1357805d0ecab7ef46cfa7981979c828448767a907232c284ea5"
+      "bytes": 89180,
+      "sha256": "3b826391d26cbcb81e889a37459c373ef98032a7640cc449fa7f7ea47f87c9ba"
     },
     {
       "name": "making-mobile-atlas-v5-16.webp",
-      "bytes": 75528,
-      "sha256": "a1eb2be672f8e9b6cbe533fba8cc2c93b1466a80fa7d319891283d621ad3812b"
+      "bytes": 87784,
+      "sha256": "64cf45b1028abace729455163397b250e12e186c66e17777b56cfae6b08f09f0"
     },
     {
       "name": "making-mobile-atlas-v5-17.webp",
-      "bytes": 88212,
-      "sha256": "d8a6a60558671f5e997df5e0b6a6bcf816488f6dfa0eee49c8290889237ee0c2"
+      "bytes": 87830,
+      "sha256": "9105e5f179c1a2e8efa5a7e622d8492f7c0e96fddade1dd680de347e5c01c9d4"
     },
     {
       "name": "making-mobile-atlas-v5-18.webp",
-      "bytes": 87326,
-      "sha256": "962a18e03c869eb33396a7a08cf787cae3918ef737294a2be5af2e71b852a044"
+      "bytes": 84548,
+      "sha256": "09599dc0355402f6e24a562e62e1e8549c45c108c611cdebb065798814c7873e"
     },
     {
       "name": "making-mobile-atlas-v5-19.webp",
-      "bytes": 76624,
-      "sha256": "8aad6a266780ac05050332a4b8ac0b95311d3d372bb610f502c9465d5652193e"
+      "bytes": 76344,
+      "sha256": "816d9912cc3e6eee262cd1e4c284df265daca76d5a06646b4ea2e3e0763cf19e"
     },
     {
       "name": "making-mobile-atlas-v5-20.webp",
-      "bytes": 76020,
-      "sha256": "fe3c186484ef85535c90afb97af87c4283680985ed811ecb4b99be8e1bb0a6ed"
+      "bytes": 75638,
+      "sha256": "f04f16fe1e8a408869c619e783852c453234ffa5c585ccef3e9c6ba4edd77420"
     },
     {
       "name": "making-mobile-atlas-v5-21.webp",
-      "bytes": 93162,
-      "sha256": "eab0f8cb0ba0c0364040f8f6cd5c39ceb289fa3e228f3f6603736d8f2c126084"
+      "bytes": 92636,
+      "sha256": "37af0ef1e8f2817c82ec34bc42b33d4d7c44168dc3dc698b108dee1d206ddde6"
     },
     {
       "name": "making-mobile-atlas-v5-22.webp",
-      "bytes": 104070,
-      "sha256": "68cba03cf9e6d54f0651829e17106c669809f260039933376d470e37e70ca2fc"
+      "bytes": 103466,
+      "sha256": "22f15d1fc1f0bc7894a6d2eba882d22384735cee5a09dbea34865881758455c8"
     },
     {
       "name": "making-mobile-atlas-v5-23.webp",
-      "bytes": 100408,
-      "sha256": "76f031b2b96d114209206e6cd9ada48d67abc5bb317070390fc83583c5408727"
+      "bytes": 99642,
+      "sha256": "2421248a9fc9117982f3d58ee4b2ef39616ca83f3a08d6928b147ab7fb65e216"
     },
     {
       "name": "making-mobile-atlas-v5-24.webp",
-      "bytes": 99932,
-      "sha256": "2d1ba9319d1467742d58780e0baba434e6e38312db4c7e3445d0e1ee3abedd93"
+      "bytes": 99226,
+      "sha256": "e865c57e905370eab23baef5b3144568f81e37364896ce19bb6219b6a1f06f2f"
     },
     {
       "name": "making-mobile-atlas-v5-25.webp",
-      "bytes": 98440,
-      "sha256": "8e79479cc603f9825458cf8624dddbbf2167882e1bcb0d5e1113b23ce2b6928f"
+      "bytes": 97598,
+      "sha256": "462932fab6b89b4d2ae2ec7e89ee25f276203ca9b8805884754c9d5bb9641152"
     },
     {
       "name": "making-mobile-atlas-v5-26.webp",
-      "bytes": 71700,
-      "sha256": "68b8a251a1c668de212147b2942c09b2ead9b67c6790f672348856c541122119"
+      "bytes": 71102,
+      "sha256": "4ab40321213769ed0304868a46259ed094e2a9f736ed430066570dca3de6ef64"
     },
     {
       "name": "making-mobile-atlas-v5-27.webp",
-      "bytes": 72886,
-      "sha256": "b66cb9bc85e5151e103ad23cc673ba2524b712ade9b6a95a1421e442d06dbb77"
+      "bytes": 72384,
+      "sha256": "61a081693bc1225b7d8102d45bce1ab0a4d1e25dbbb79a373ebaf080fce2003c"
     },
     {
       "name": "making-mobile-atlas-v5-28.webp",
-      "bytes": 101578,
-      "sha256": "53d3a3b5fb0cdf9b4c93d9e8118cb3f464c60b1871c05fe8d85297cfb02391b7"
+      "bytes": 101114,
+      "sha256": "3bdc4bd63744727becf258c11b5290c4b459b50650588a3658d55351372c83b6"
     },
     {
       "name": "making-mobile-atlas-v5-29.webp",
-      "bytes": 158548,
-      "sha256": "9c23e668a81ce89674b11af96069d3565098d51527e74c5bcad1d367f51073c6"
+      "bytes": 158538,
+      "sha256": "d61c1d11253a9c1c48107cd7fb1bbda1226a40d42fc4e2ed44204b111e7e28c7"
     },
     {
       "name": "making-mobile-atlas-v5-30.webp",
