@@ -6,15 +6,13 @@ on:
       - '.github/workflows/sculpture-process-video-review.yml'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   analyze:
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
       - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
       - name: Install video inspection utilities
         run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
       - name: Describe original workshop footage
@@ -24,6 +22,17 @@ jobs:
         run: |
           mkdir -p test-results/process-footage
           ffmpeg -hide_banner -loglevel error -i public/assets/house-of-mabwe-making-web-v1.mp4 -vf "fps=2/3,scale=240:-2,tile=5x5:padding=6:margin=8" -frames:v 10 -update 0 test-results/process-footage/frames-%02d.jpg
+      - name: Produce scrub-friendly chiseling-only clip
+        run: |
+          ffmpeg -hide_banner -loglevel error -y -ss 0 -t 21.4 -i public/assets/house-of-mabwe-making-web-v1.mp4 -an -vf "scale=640:360:flags=lanczos,format=yuv420p" -r 24 -c:v libx264 -preset veryfast -crf 27 -g 6 -keyint_min 6 -sc_threshold 0 -movflags +faststart public/assets/making-chiseling-scrub-v1.mp4
+          ffmpeg -hide_banner -loglevel error -y -ss 7 -i public/assets/house-of-mabwe-making-web-v1.mp4 -frames:v 1 -vf "scale=640:-2" -q:v 3 public/assets/making-chiseling-poster-v1.jpg
+          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 public/assets/making-chiseling-scrub-v1.mp4
+      - name: Publish derived archival assets only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/assets/making-chiseling-scrub-v1.mp4 public/assets/making-chiseling-poster-v1.jpg
+          git diff --cached --quiet || (git commit -m "Add verified chiseling-only scrub asset" && git push origin HEAD:main)
       - uses: actions/upload-artifact@v5
         if: always()
         with:
