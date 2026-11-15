@@ -48,7 +48,9 @@
  border:1px solid rgba(221,204,180,.48);box-shadow:0 18px 54px rgba(0,0,0,.39);
  background:#17201d;will-change:opacity;
 }
-.archive-cutaway video{display:block;width:100%;height:100%;object-fit:cover;object-position:center;filter:saturate(.76) contrast(1.04)}
+.archive-cutaway .archive-fallback{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.archive-cutaway video{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0;filter:saturate(.76) contrast(1.04)}
+.archive-cutaway[data-frame-ready="true"] video{opacity:1}
 .archive-cutaway::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 40px rgba(0,0,0,.14);pointer-events:none}
 .archive-cutaway-label{
  position:absolute;bottom:0;left:0;right:0;padding:20px 12px 10px;
@@ -61,3 +63,13 @@
  #render{filter:none}
 }
 @media(prefers-reduced-motion:reduce){.archive-cutaway{display:none!important}}
+
+/* Avoid costly CSS filters and image reflows while iOS browser chrome is resizing. */
+@media(max-width:800px){
+ .stage{overflow:hidden;contain:layout paint;overscroll-behavior-y:contain}
+ #render{filter:none;will-change:auto}
+ .archive-cutaway{z-index:4;top:clamp(100px,17svh,165px);right:14px;width:min(47vw,184px);max-height:155px;transform:translateZ(0)}
+ .archive-cutaway video,.archive-cutaway .archive-fallback{object-position:center}
+ .archive-cutaway-label{font-size:7px;line-height:1.25;padding:13px 7px 6px}
+ .stage-info h1{overflow-wrap:normal}
+}
