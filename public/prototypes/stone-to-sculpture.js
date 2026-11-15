@@ -13,6 +13,7 @@ const archiveCutaway=document.getElementById('archive-cutaway');
 const archiveFilm=document.getElementById('archive-film');
 const archiveMobileFrames=document.getElementById('archive-mobile-frames');
 const sculptureAtlas=document.getElementById('mobile-sculpture-frames');
+const sculptureAtlasNext=document.getElementById('mobile-sculpture-next');
 const svg=document.getElementById('origin-map');
 const route=document.getElementById('travel-route');
 const truck=document.getElementById('transport-marker');
@@ -599,32 +600,50 @@ function requestMobileAtlas(group){
  img.onerror=()=>{entry.failed=true;host.dataset.mobileAtlasError=String(group);schedule();};
  img.src=mobileAtlasUrl(group);
 }
+function paintAtlasTile(layer,frame,suffix){
+ const group=Math.floor(frame/atlasGroupSize),within=frame%atlasGroupSize;
+ const entry=atlasCache.get(group);
+ if(!entry?.ready)return false;
+ const groupKey='paintGroup'+suffix,frameKey='paintFrame'+suffix;
+ if(e[groupKey]!==group){
+  e[groupKey]=group;
+  layer.style.backgroundImage='url("'+mobileAtlasUrl(group)+'")';
+ }
+ if(e[frameKey]!==frame){
+  e[frameKey]=frame;
+  const col=within%atlasColumns,row=Math.floor(within/atlasColumns);
+  layer.style.backgroundPosition=(col/(atlasColumns-1)*100).toFixed(4)+'% '+(row/(atlasRows-1)*100).toFixed(4)+'%';
+ }
+ layer.style.visibility='visible';
+ return true;
+}
 function paintMobileSculpture(p){
- if(!sculptureAtlas)return;
+ if(!sculptureAtlas||!sculptureAtlasNext)return;
  if(p<atlasStart){
   sculptureAtlas.style.visibility='hidden';
+  sculptureAtlasNext.style.visibility='hidden';
   return;
  }
- const frame=clamp(Math.round((p-atlasStart)/(1-atlasStart)*(atlasFrames-1)),0,atlasFrames-1);
- const group=Math.floor(frame/atlasGroupSize),within=frame%atlasGroupSize;
+ // Crossfade the two neighboring baked poses. Unlike snapping the sprite, this
+ // preserves continuously reversible motion even while the user scrolls slowly.
+ const position=clamp((p-atlasStart)/(1-atlasStart)*(atlasFrames-1),0,atlasFrames-1);
+ const first=Math.floor(position),second=Math.min(atlasFrames-1,first+1),blend=position-first;
+ const group=Math.floor(first/atlasGroupSize),nextGroup=Math.floor(second/atlasGroupSize);
  requestMobileAtlas(group);
  requestMobileAtlas(group-1);
  requestMobileAtlas(group+1);
- const entry=atlasCache.get(group);
- if(!entry?.ready){host.dataset.mobileAtlasPending=String(group);return;}
- if(e.lastMobileAtlasGroup!==group){
-  e.lastMobileAtlasGroup=group;
-  sculptureAtlas.style.backgroundImage='url("'+mobileAtlasUrl(group)+'")';
+ requestMobileAtlas(nextGroup);
+ if(!paintAtlasTile(sculptureAtlas,first,'Base')){
+  host.dataset.mobileAtlasPending=String(group);return;
  }
- const col=within%atlasColumns,row=Math.floor(within/atlasColumns);
- if(e.lastMobileAtlasFrame!==frame){
-  e.lastMobileAtlasFrame=frame;
-  sculptureAtlas.style.backgroundPosition=(col/(atlasColumns-1)*100).toFixed(4)+'% '+(row/(atlasRows-1)*100).toFixed(4)+'%';
-  host.dataset.mobileAtlasFrame=String(frame);
- }
- sculptureAtlas.style.visibility='visible';
+ const secondReady=second!==first&&paintAtlasTile(sculptureAtlasNext,second,'Next');
+ sculptureAtlasNext.style.visibility=secondReady?'visible':'hidden';
+ sculptureAtlasNext.style.opacity=secondReady?blend.toFixed(4):'0';
+ host.dataset.mobileAtlasFrame=String(Math.round(position));
+ host.dataset.mobileAtlasBlend=blend.toFixed(4);
  host.dataset.mobileAtlasPending='';
- // Release atlas decoders far outside the active stage to protect iOS memory.
+ // Retain the adjacent sheets for smooth reverse scrubbing; release distant
+ // decoded atlases so Safari does not accumulate many large backing textures.
  for(const [idx,item] of atlasCache){
   if(Math.abs(idx-group)>2){
    item.img.onload=null;item.img.onerror=null;item.img.src='';
