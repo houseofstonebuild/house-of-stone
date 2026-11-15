@@ -75,7 +75,7 @@ try{
    if(!isAtlas)assert.equal(info.maskReady,'true','Coil geometry silhouette field unavailable');
    if(isAtlas&&p>=.305){assert(info.mobileAtlasFrame>0&&info.mobileAtlasFrame<192,'Invalid mobile sculpture frame');assert(info.mobileAtlasBlend>=0&&info.mobileAtlasBlend<=1,'Invalid adjacent-frame opacity');assert.match(info.mobileAtlasDisplay,/making-mobile-atlas-v4-/,'High-detail sculpture frame atlas not composited');}
    if(!isAtlas&&i===5){assert(info.marking>.85,'Chalk marking must remain clearly visible before chiseling');assert(info.markSegments>20,'Contour extraction must create actual visible chalk geometry');}
-   if(!isAtlas&&i>=7)assert(info.surfaceSamples>=5,'Finishing tools need precomputed contact samples');
+   if(!isAtlas&&i>=7)assert(info.surfaceSamples>=5,'Approved Coil geometry should provide a stable surface');
    if(!isAtlas&&i===10)assert.equal(info.plinthAligned,'true','Gallery pedestal must be mounted at sculpture origin');
    if(i===6){
     if(!isAtlas){
@@ -83,7 +83,8 @@ try{
      assert(Number(info.aperture)>.07&&Number(info.aperture)<.98,'Carving follows scroll');
      assert.equal(info.intermediateVisible,'false','Do not show an unsupported cylindrical blank');
      assert.equal(info.toolsHidden,'true','Real workshop film replaces floating simulated hammers');
-     assert(info.roughOpacity>.05&&info.roughOpacity<1,'Original Coil geometry emerges gradually');
+     assert(info.roughOpacity>.8&&info.roughOpacity<=1,'Dark rough Coil must be visible wherever the parent stone has been worked');
+     assert.equal(info.rockVisible,'true','Unworked parent stone must stay under the revealed Coil');
      assert.equal(info.roughVisible,'true','The approved Coil model is the revealed form');
     }
     assert(info.cutawayOpacity>.95,'Archival chiseling supplements the sculpture');
