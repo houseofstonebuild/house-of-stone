@@ -34,19 +34,6 @@ jobs:
           path: test-results/mobile-sculpture-atlas/manifest.json
           if-no-files-found: warn
       - name: Publish baked mobile frame sheets
-        working-directory: ${{ github.workspace }}
-        run: |
-          REPO_DIR="$GITHUB_WORKSPACE"
-          if [ ! -d "$REPO_DIR/.git" ]; then
-            REPO_DIR="/__w/${GITHUB_REPOSITORY##*/}/${GITHUB_REPOSITORY##*/}"
-          fi
-          test -d "$REPO_DIR/.git" || (echo "Repository worktree missing: $REPO_DIR" && exit 1)
-          cd "$REPO_DIR"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/assets/making-mobile-atlas-v1-*.webp public/assets/making-mobile-atlas-v1-manifest.json
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m "Publish pre-rendered mobile Coil making sequence"
-          git fetch origin main
-          git rebase origin/main
-          git push origin HEAD:main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node qa/publish-mobile-sculpture-atlas.mjs
