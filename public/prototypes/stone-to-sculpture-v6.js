@@ -222,12 +222,14 @@ function documentarySeek(t,force=false){
  try{archiveFilm.pause();archiveFilm.currentTime=desired}
  catch(err){documentary.seekFailures++;archiveCutaway.dataset.seekFailure=String(documentary.seekFailures)}
 }
-archiveFilm.addEventListener('loadedmetadata',()=>{
+function onDocumentaryMetadata(){
  documentary.ready=true;
  archiveCutaway.dataset.frameReady='true';
  archiveFilm.pause();
  documentarySeek(documentary.targetProgress||0,true);
-});
+}
+archiveFilm.addEventListener('loadedmetadata',onDocumentaryMetadata);
+if(archiveFilm.readyState>=1)onDocumentaryMetadata();
 archiveFilm.addEventListener('seeked',()=>{
  if(!documentary.active||mobile())return;
  if(Math.abs(archiveFilm.currentTime-documentary.desired)>.14)documentarySeek(
