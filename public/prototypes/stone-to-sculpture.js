@@ -595,7 +595,7 @@ function requestMobileAtlas(group){
  const img=new Image();img.decoding='async';
  const entry={img,ready:false,failed:false};
  atlasCache.set(group,entry);
- img.onload=()=>{entry.ready=true;schedule();};
+ img.onload=()=>{const done=()=>{entry.ready=true;schedule();};const decoded=img.decode?.();if(decoded?.then)decoded.then(done,done);else done();};
  img.onerror=()=>{entry.failed=true;host.dataset.mobileAtlasError=String(group);schedule();};
  img.src=mobileAtlasUrl(group);
 }
@@ -608,6 +608,7 @@ function paintMobileSculpture(p){
  const frame=clamp(Math.round((p-atlasStart)/(1-atlasStart)*(atlasFrames-1)),0,atlasFrames-1);
  const group=Math.floor(frame/atlasGroupSize),within=frame%atlasGroupSize;
  requestMobileAtlas(group);
+ requestMobileAtlas(group-1);
  requestMobileAtlas(group+1);
  const entry=atlasCache.get(group);
  if(!entry?.ready){host.dataset.mobileAtlasPending=String(group);return;}
