@@ -60,7 +60,7 @@ test('natural springstone reveals the approved Coil without a cylindrical proxy 
 });
 
 test('high-resolution mobile sculpture frames preserve detail without live WebGL',()=>{
- const manifest=JSON.parse(readFileSync(new URL('../public/assets/making-mobile-atlas-v3-manifest.json',import.meta.url),'utf8'));
+ const manifest=JSON.parse(readFileSync(new URL('../public/assets/making-mobile-atlas-v4-manifest.json',import.meta.url),'utf8'));
  assert.equal(manifest.frameCount,192);
  assert.equal(manifest.columns,2);
  assert.equal(manifest.rows,3);
@@ -71,10 +71,10 @@ test('high-resolution mobile sculpture frames preserve detail without live WebGL
   assert.equal(createHash('sha256').update(bytes).digest('hex'),asset.sha256,'Baked frame checksum differs from manifest: '+asset.name);
  }
  assert(manifest.tileWidth>=450 && manifest.tileHeight>=950,'Phone source image must have native-size detail');
- assert(statSync(new URL('../public/assets/making-mobile-atlas-v3-00.webp',import.meta.url)).size>10000);
- assert(statSync(new URL('../public/assets/making-mobile-atlas-v3-31.webp',import.meta.url)).size>10000);
+ assert(statSync(new URL('../public/assets/making-mobile-atlas-v4-00.webp',import.meta.url)).size>10000);
+ assert(statSync(new URL('../public/assets/making-mobile-atlas-v4-31.webp',import.meta.url)).size>10000);
  assert.match(js,/atlasColumns=2,atlasRows=3,atlasGroupSize=6/);
- assert.match(js,/making-mobile-atlas-v3-/);
+ assert.match(js,/making-mobile-atlas-v4-/);
  assert.match(css,/background-size:200% 300%/);
  assert.match(js,/if\(mobile\(\)&&!atlasCapture\)setupMobileAtlas\(\)/);
  assert.match(js,/atlasCapture\?1\.5/);
