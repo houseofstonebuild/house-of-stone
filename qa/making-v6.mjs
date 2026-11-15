@@ -116,6 +116,11 @@ try{
   }
   for(const p of [.586,.616,.64623,.65,.688,.728,.760]){
    await move(page,p);
+   const wanted=Math.round((p-.305)/.695*143);
+   await page.waitForFunction(wanted=>{
+    const host=document.getElementById('render');
+    return Math.abs(Number(host.dataset.frameIndex)-wanted)<=2&&host.dataset.staleFrameHidden==='true';
+   },wanted,{timeout:30000});
    if(Math.abs(p-.64623)<.0001){
     await page.waitForFunction(()=>document.getElementById('render').dataset.physicalStrikeContact==='true',{timeout:15000});
    }
@@ -124,6 +129,18 @@ try{
   await move(page,.40);
   await move(page,.91);
   await move(page,.50);
+  await page.waitForFunction(()=>Math.abs(Number(document.getElementById('render').dataset.frameIndex)-40)<=2,{timeout:30000});
+  await move(page,.98);
+  await move(page,.64);
+  const reverse=await page.evaluate(()=>{
+   const host=document.getElementById('render');
+   const requested=Number(host.dataset.frameRequested),shown=Number(host.dataset.frameIndex);
+   const hidden=getComputedStyle(document.querySelector('.making-v6-image:not(.making-v6-previous)')).opacity==='0';
+   return {requested,shown,hidden};
+  });
+  assert(reverse.hidden||Math.abs(reverse.shown-reverse.requested)<=14,
+   'Rapid reverse scrolling exposed a finished frame during carving: '+JSON.stringify(reverse));
+  await page.waitForFunction(()=>Math.abs(Number(document.getElementById('render').dataset.frameIndex)-Number(document.getElementById('render').dataset.frameRequested))<=2,{timeout:30000});
   assert.deepEqual(errors,[],'Browser errors');
   await page.close();await browser.close();browser=null;
  }

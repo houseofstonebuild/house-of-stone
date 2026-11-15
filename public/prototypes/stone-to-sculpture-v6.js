@@ -88,6 +88,7 @@ function updateMap(p){
 }
 
 
+const safeFrames=new Set([0,49,70,100,143]);
 const v6={manifest:null,profile:null,cache:new Map(),current:-1,requested:-1,raf:0,phase:-1,playing:false,error:false};
 const currentImage=new Image(),oldImage=new Image();
 const physicalTools=createCarvingTools(host);
@@ -160,7 +161,7 @@ function paint(frame){
  host.dataset.mobileAtlasFrame=String(frame);
  host.dataset.mobileAtlasPending='';
  if(v6.cache.size>18)for(const [key,asset] of v6.cache){
-  if(Math.abs(key-frame)>8&&key!==v6.requested){
+  if(Math.abs(key-frame)>8&&key!==v6.requested&&!safeFrames.has(key)){
    asset.img.onload=null;asset.img.onerror=null;v6.cache.delete(key);
   }
  }
@@ -170,17 +171,34 @@ function updateFrames(p){
  if(!v6.manifest||p<v6.manifest.first)return;
  const m=v6.manifest;
  const frame=Math.round(clamp((p-m.first)/(m.last-m.first))*(m.frames-1));
- v6.requested=frame;loadFrame(frame);
+ v6.requested=frame;
+ host.dataset.frameRequested=String(frame);
+ loadFrame(frame);
  for(const n of [1,-1,2,-2])loadFrame(frame+n);
- if(!paint(frame)){
-  host.dataset.mobileAtlasPending=String(frame);
-  // During a fast flick keep a fully decoded frame rather than flash black.
-  if(v6.current<0){
-   let nearest=null;
-   for(const [idx,item] of v6.cache)if(item.ready&&(nearest===null||Math.abs(idx-frame)<Math.abs(nearest-frame)))nearest=idx;
-   if(nearest!==null)paint(nearest);
-  }
+ if(paint(frame)){
+  host.dataset.mobileAtlasPending='';
+  host.dataset.staleFrameHidden='true';
+  return;
  }
+ host.dataset.mobileAtlasPending=String(frame);
+ // Fast reverse scrubs must never briefly show a finished sculpture while the
+ // user is viewing rough carving. Use a nearby decoded frame, or temporarily
+ // hide the stale layer until the requested frame decodes. Workshop and
+ // gallery anchors are pinned but distant anchors never masquerade as progress.
+ let nearest=null;
+ for(const [idx,item] of v6.cache){
+  if(item.ready&&Math.abs(idx-frame)<=14&&
+    (nearest===null||Math.abs(idx-frame)<Math.abs(nearest-frame)))nearest=idx;
+ }
+ if(nearest!==null){
+  paint(nearest);
+  host.dataset.mobileAtlasPending=String(frame);
+  host.dataset.staleFrameHidden='true';
+ }else if(v6.current<0||Math.abs(v6.current-frame)>14){
+  currentImage.style.opacity='0';
+  oldImage.style.opacity='0';
+  host.dataset.staleFrameHidden='true';
+ }else host.dataset.staleFrameHidden='true';
 }
 function setDocumentary(visible){
  archiveCutaway.setAttribute('aria-hidden',String(!visible));
@@ -219,7 +237,8 @@ async function boot(){
   const m=await r.json();
   if(m.version!==6||m.frames<100)throw Error('Incomplete Coil animation');
   v6.manifest=m;v6.profile=mobile()?'mobile':'desktop';
-  loadFrame(0);loadFrame(m.frames-1);schedule();
+  for(const anchor of safeFrames)loadFrame(anchor);
+  schedule();
  }catch(err){v6.error=true;fallback.hidden=false;host.dataset.modelError='true';console.warn(err)}
 }
 let oldWidth=innerWidth;

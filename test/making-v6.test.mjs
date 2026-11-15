@@ -92,3 +92,10 @@ test('the on-stone hammer and chisel are real animated scene elements, not a tes
  const result=spawnSync(process.execPath,['--check',asset('prototypes/carving-tools.js').pathname],{encoding:'utf8'});
  assert.equal(result.status,0,result.stderr);
 });
+
+test('rapid reverse scrubbing never leaves the approved final frame visible during carving',()=>{
+ assert.match(player,/safeFrames=new Set\(\[0,49,70,100,143\]\)/);
+ assert.match(player,/Math\.abs\(v6\.current-frame\)>14/);
+ assert.match(player,/currentImage\.style\.opacity='0'/);
+ assert.match(player,/host\.dataset\.frameRequested/);
+});
