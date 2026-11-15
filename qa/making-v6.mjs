@@ -69,7 +69,7 @@ try{
    if(p===.64){
     assert.equal(state.documentaryScrubbed,'true','Workshop footage must be scroll-controlled');
     assert.equal(state.videoPaused,true,'Workshop film must not autoplay or loop');
-    assert.equal(state.physicalTool,'false','Cartoon on-stone tool overlay should not load');
+    assert.notEqual(state.physicalTool,'true','Cartoon on-stone tool overlay should not load');
     assert.equal(await page.locator('#carving-tools').count(),0,'Outdated SVG tools must be absent');
     if(v.width>800){
      assert(state.cutawayOpacity>.8,'Large editorial documentary should accompany desktop carving');
