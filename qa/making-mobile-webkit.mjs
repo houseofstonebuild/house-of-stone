@@ -38,12 +38,17 @@ try{
     const top=journey.getBoundingClientRect().top+scrollY;
     scrollTo(0,Math.round(top+(journey.offsetHeight-stage.offsetHeight)*progress));
    },progress);
-   await page.waitForFunction(progress=>{
+   // Scroll events are delivered asynchronously in WebKit. A decoded atlas
+   // from the preceding checkpoint is not proof the requested frame has painted.
+   const expected=Math.round(Math.min(1,Math.max(0,(progress-.305)/.695))*191);
+   await page.waitForFunction(({progress,expected})=>{
     const host=document.getElementById('render'),scene=document.getElementById('mobile-sculpture-frames');
-    const visible=progress>=.305;
-    return !visible||(Number.isInteger(Number(host.dataset.mobileAtlasFrame))&&
-      host.dataset.mobileAtlasPending===''&&getComputedStyle(scene).backgroundImage.includes('making-mobile-atlas-v3'));
-   },progress,{timeout:20000});
+    if(progress<.305)return true;
+    const frame=Number(host.dataset.mobileAtlasFrame);
+    return host.dataset.mobileAtlasPending===''&&
+      Number.isInteger(frame)&&Math.abs(frame-expected)<=2&&
+      getComputedStyle(scene).backgroundImage.includes('making-mobile-atlas-v3');
+   },{progress,expected},{timeout:20000});
    await page.waitForTimeout(120);
    const info=await page.evaluate(()=>({
     frame:Number(document.getElementById('render').dataset.mobileAtlasFrame),
@@ -60,7 +65,7 @@ try{
    samples.push({progress,frame:info.frame,phase:info.phase});
   }
   assert(samples[7].frame>samples[8].frame,'Backward scroll did not rewind in WebKit');
-  assert(samples[8].frame>samples[9].frame,'WebKit phone failed to rewind further');
+  assert(samples[8].frame>samples[9].frame,`WebKit phone failed to rewind further: ${JSON.stringify(samples)}`);
   assert.deepEqual(errors,[],'iOS WebKit script or image failures');
   await page.screenshot({path:new URL(String(view.width)+'-final.png',output).pathname});
   console.log('WebKit mobile sculpture frame test',view.width,JSON.stringify(samples));
