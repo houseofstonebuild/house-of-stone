@@ -48,11 +48,15 @@ test('natural springstone, synchronized chisel and traditional finish stages',()
  assert.match(js,/const toBlank=smooth\(\(carve-\.007\)\/\.13\),toRough=smooth\(\(carve-\.82\)\/\.17\)/);
  assert.match(js,/host\.dataset\.tipSurfaceError=/);
  assert.match(js,/host\.dataset\.apertureProgress=/);
+ assert.match(js,/e\.blankHidePlane\.constant=frontier/);
+ assert.match(js,/e\.carveRevealPlane\.constant=-frontier/);
+ assert.match(js,/e\.rough\.visible=carve>\.035/);
+ assert.match(js,/host\.dataset\.realShapeReveal=/);
  assert.match(js,/float bandStart=\(1\.0-localHeight\)\*\.83/);
  assert.match(js,/float frontCut=mix\(\.95,\.13,bandT\)/);
  assert.match(js,/const invSmooth|const part=fract|const phase=fract/);
  assert.match(js,/makeChalkFromModel\(original\)/);
- assert.match(js,/wet sanding|Wet sanding/);
+ assert.match(js,/wet abrasives|wet sanding|Wet sanding/);
  assert.match(js,/Clear wax|clear wax/);
  assert.match(js,/makeFinishingTools/);
  assert.match(js,/if\(e\.torch\)/);
@@ -65,6 +69,11 @@ test('review remains unlinked and delivers mobile and reduced-motion support',as
  assert.match(html,/THE MAKING \/ A PRIVATE STUDY/);
  assert.match(html,/works\/zsa-page-6/);
  assert.match(html,/designers-coil-v2\.webp/);
+ assert.match(html,/house-of-mabwe-making-web-v1\.mp4/);
+ assert.match(html,/not as a verified record of Coil being carved/);
+ assert.match(html,/<video controls playsinline preload="metadata"/);
+ assert.doesNotMatch(html,/<video[^>]*autoplay/);
+ assert.match(css,/\.film-note\{/);
  assert.match(js,/prefers-reduced-motion/);
  assert.match(js,/scrollIntoView/);
  assert.match(css,/@media\(max-width:800px\)/);
