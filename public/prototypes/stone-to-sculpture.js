@@ -33,7 +33,7 @@ const texts=[
  ['HARARE','Into the workshop.','The raw stone becomes the starting point for a sculptor’s decisions.'],
  ['THE RAW STONE','Before the first cut.','A weathered block of springstone, before its outer material is removed.'],
  ['MARKING THE FORM','Marking the contours.','The sculptor maps the outer shape and identifies the stone that needs to be removed.'],
- ['CARVING','Carving by subtraction.','Repeated chisel strikes take away material as the upper curve and inner opening emerge.'],
+ ['CARVING','The form takes shape.','Stone is worked away to reveal the sculptor’s design. The workshop footage shows real chiseling; the transformation is an illustration.'],
  ['FINER WORK','Refining the curves.','Rasps and wet abrasives smooth the tool marks while retaining the hand-carved form.'],
  ['HEATING','Preparing the surface.','Gentle, controlled heating is sometimes used before a clear-wax finish.'],
  ['WAX AND BUFFING','Bringing out the stone.','Clear wax and buffing deepen the colour and reveal the stone’s natural sheen.'],
@@ -49,6 +49,7 @@ const hash=(a,b=0,c=0)=>fract(Math.sin(a*127.1+b*311.7+c*74.7)*43758.5453);
 const mobile=()=>innerWidth<=800;
 const atlasCapture=mobile()&&new URLSearchParams(location.search).has('capture-mobile-atlas');
 // V2: six near-native phone-resolution frames per sheet; decoded neighbors stay bounded.
+// V3: rebuilt mobile frames without the artificial barrel and floating tools.
 const atlasStart=.305,atlasFrames=192,atlasColumns=2,atlasRows=3,atlasGroupSize=6;
 const atlasCache=new Map();
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
@@ -128,13 +129,13 @@ function fbm(x,y,z){return .57*noise(x,y,z)+.27*noise(x*2.11+17,y*2.11,z*2.11)+.
 function stoneMaterial({raw=false,blank=false,color=0x656b62,roughness=.95,flat=false}={}){
  const mat=new THREE.MeshStandardMaterial({color,metalness:0,roughness,flatShading:flat,side:THREE.DoubleSide});
  mat.onBeforeCompile=shader=>{
-   if(raw){shader.uniforms.uCut=e.cut;shader.uniforms.uCarveMargin=e.carveMargin;shader.uniforms.uCarveMask=e.carveMask;}
+   if(raw){shader.uniforms.uCut=e.cut;shader.uniforms.uCarveMargin=e.carveMargin;shader.uniforms.uCarveMask=e.carveMask;shader.uniforms.uCarveProgress=e.carveProgress;}
    if(blank){shader.uniforms.uCarveProgress=e.carveProgress;shader.uniforms.uCarveMask=e.carveMask;}
    shader.vertexShader=shader.vertexShader.replace('#include <common>',`#include <common>\nvarying vec3 vLocalStone;`)
      .replace('#include <begin_vertex>',`#include <begin_vertex>\nvLocalStone=position;`);
    shader.fragmentShader=shader.fragmentShader.replace('#include <common>',`#include <common>
      varying vec3 vLocalStone;
-     ${raw?'uniform float uCut;uniform float uCarveMargin;uniform sampler2D uCarveMask;':blank?'uniform float uCarveProgress;uniform sampler2D uCarveMask;':''}
+     ${raw?'uniform float uCut;uniform float uCarveMargin;uniform float uCarveProgress;uniform sampler2D uCarveMask;':blank?'uniform float uCarveProgress;uniform sampler2D uCarveMask;':''}
      float msh(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
      float mno(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
        float a=mix(msh(i),msh(i+vec3(1,0,0)),f.x),b=mix(msh(i+vec3(0,1,0)),msh(i+vec3(1,1,0)),f.x);
@@ -164,7 +165,12 @@ function stoneMaterial({raw=false,blank=false,color=0x656b62,roughness=.95,flat=
            // Strip off the outer rind where the chisel has passed, so the approved
            // rough geometry appears at the same frontier instead of suddenly popping in.
            float frontCut=mix(.95,.13,bandT);
-           if(bandT>.001 && vLocalStone.z>frontCut)discard;`:blank?`
+           if(bandT>.001 && vLocalStone.z>frontCut)discard;
+           // Irregular removal through the geological skin, not a planar cylinder cut.
+           float localY=clamp((vLocalStone.y+1.69)/3.38,0.0,1.0);
+           float tooth=mno(vLocalStone*6.8)*.14+mno(vLocalStone*27.0)*.07;
+           float removal=uCarveProgress+localY*.22+tooth-.105;
+           if(removal>.745)discard;`:blank?`
           // Do not punch holes in the parent shell. The approved three-dimensional
           // Coil mesh supplies the true openings as material is taken away.
           float localHeight=clamp(vLocalStone.y/3.35,0.0,1.0);
@@ -590,7 +596,7 @@ function finishingPoint(t){
 // Keep just the active/neighbor atlases decoded; do not seek video or shade
 // a deforming mesh during touch momentum.
 function mobileAtlasUrl(group){
- return '/assets/making-mobile-atlas-v2-'+String(group).padStart(2,'0')+'.webp';
+ return '/assets/making-mobile-atlas-v3-'+String(group).padStart(2,'0')+'.webp';
 }
 function requestMobileAtlas(group){
  if(group<0||group>=atlasFrames/atlasGroupSize||atlasCache.has(group))return;
@@ -689,7 +695,8 @@ function setup(){
    const light=new THREE.DirectionalLight(color,intensity);light.position.set(x,y,z);e.scene.add(light);
  }
  e.root=new THREE.Group();e.scene.add(e.root);
- makeRock();makeStudio();makeChiselAndHammer();makeFinishingTools();loadCoil();
+ // Real workshop footage conveys physical toolwork. No simulated floating mallets.
+ makeRock();makeStudio();makeFinishingTools();loadCoil();
  canvas.addEventListener('webglcontextlost',ev=>{ev.preventDefault();e.contextLost=true;fallback.hidden=false},{passive:false});
  canvas.addEventListener('webglcontextrestored',()=>{e.contextLost=false;schedule()});
  measureScrollRange();
@@ -784,7 +791,8 @@ function render(p){
  // cut the negative spaces progressively during the final third of the strikes.
  // A continuous irregular stone blank stays whole as the form is carved out.
  // The boundary follows the actual approved model's silhouette at every height.
- e.carveMargin.value=lerp(1.72,-.04,removed);
+ // Retain the original geological stone until the erosion shader removes it.
+ e.carveMargin.value=2.25;
  e.carveProgress.value=removed;
  // Reveal Coil's real thickness and inner walls as the cut travels down the stone.
  // The upper finished portion and the unworked lower mass share one moving frontier.
@@ -795,38 +803,30 @@ function render(p){
  const workingHeight=clamp(frontier+supportOverlap,.025,3.34);
  e.blankHidePlane.constant=workingHeight;
  // Only expose portions that have cleared the still-solid working surface.
- e.carveRevealPlane.constant=-(workingHeight-.015);
+ // No horizontal reveal plane or disembodied upper sculpture.
+ e.carveRevealPlane.constant=.55;
  host.dataset.supportOverlap=supportOverlap.toFixed(4);
- const toBlank=smooth((carve-.007)/.13),toRough=smooth((carve-.82)/.17);
+ const rockFade=smooth((carve-.69)/.20),roughFade=smooth((carve-.13)/.57);
  host.dataset.carveFrontier=frontier.toFixed(4);
  host.dataset.realShapeReveal=clamp((3.05-frontier)/3.23).toFixed(4);
  host.dataset.blankCapReady=String(Boolean(e.blankCap));
  host.dataset.blankCapHeight=workingHeight.toFixed(4);
- e.rock.visible=handoff>.02&&carve<.15;
+ e.rock.visible=handoff>.02&&carve<.90;
  e.rock.material.transparent=true;
- e.rock.material.opacity=1-toBlank;
- e.rock.material.depthWrite=carve<.09;
- if(e.intermediate){
-   e.intermediate.visible=carve>.005&&carve<.996;
-   if(e.intermediate.visible)updateCarvingBlank(removed);
-   e.intermediate.material.opacity=toBlank*(1-toRough);
-   e.intermediate.material.depthWrite=toRough<.55;
-   if(e.intermediate.visible&&Math.abs((e.lastCapHeight??-10)-workingHeight)>(mobile()?.025:.006)){
-    updateBlankCap(workingHeight);e.lastCapHeight=workingHeight;
-   }
-   e.blankCap.visible=e.intermediate.visible&&workingHeight>.035;
-   e.blankCap.material.opacity=e.intermediate.material.opacity;
-   e.blankCap.material.depthWrite=e.intermediate.material.depthWrite;
- }
+ e.rock.material.opacity=1-rockFade;
+ e.rock.material.depthWrite=carve<.38;
+ // Retire the unsupported cylindrical intermediate and its flat disk cap.
+ if(e.intermediate)e.intermediate.visible=false;
+ if(e.blankCap)e.blankCap.visible=false;
  e.rockCap.visible=false;
  if(e.marks){e.marks.visible=mark>.025;e.marks.material.opacity=.94*mark;}
  host.dataset.markingVisibility=mark.toFixed(4);
  if(e.rough){
-   e.rough.visible=carve>.035&&wax<.997;
-   const roughOpacity=smooth((carve-.045)/.11);
+   e.rough.visible=carve>.025&&wax<.997;
+   const roughOpacity=roughFade;
    if(Math.abs((e.lastRoughOpacity??-1)-roughOpacity)>.004){
     e.lastRoughOpacity=roughOpacity;
-    for(const mat of e.roughMaterials){mat.opacity=roughOpacity;mat.depthWrite=carve>.16;}
+    for(const mat of e.roughMaterials){mat.opacity=roughOpacity;mat.depthWrite=roughOpacity>.85;}
    }
    // Dry tooling gives way to the slightly darker, smoother wet-sanded stone.
    // The final approved material remains untouched and is revealed by buffing.
@@ -846,55 +846,11 @@ function render(p){
   e.polishedPlane.constant=-(lerp(3.35,-.25,wax));
   if(wax>.996)e.polishedPlane.constant=.4;
  }
- // Tool tip tracks the current silhouette layer; the hammer's true contact point
- // is rigged to touch the cap when the strike closes (rather than passing beside it).
- const side=Math.floor(strokes)%2===0?-1:1;
- const impactHeight=clamp(Math.min(workingHeight-.035,2.30),.22,2.30);
- // Land on a front-facing vertex of the current carving blank.
- const ring=Math.round(clamp((impactHeight-.025)/3.31)*84);
- const vertex=ring*33+(side<0?12:4);
- const positions=e.intermediateGeo?.attributes.position;
- const impactX=positions?positions.getX(vertex):side*.6;
- const impactY=positions?positions.getY(vertex):impactHeight;
- const impactZ=positions?positions.getZ(vertex)+.003:.68;
- host.dataset.tipSurfaceError=positions?Math.abs(impactZ-positions.getZ(vertex)).toFixed(4):'unavailable';
- if(e.toolRig){
-  e.toolRig.visible=carve>.008&&carve<.985&&!reduced.matches;
-  if(e.toolRig.visible){
-   // Chisel's cone tip is the tool rig origin: align directly with the surface.
-   e.toolRig.position.set(impactX,impactY,impactZ);
-   e.toolRig.rotation.set(.07,-.08,side*.016);
-   e.hammerPivot.rotation.z=-.53*open;
-   e.toolRig.updateMatrixWorld(true);
-   e.chiselTop.getWorldPosition(e.tempP);e.hammerContact.getWorldPosition(e.tempQ);
-   const contact=e.tempP.distanceTo(e.tempQ);
-   host.dataset.contactError=contact.toFixed(4);
-    e.chiselTip.getWorldPosition(e.tempP);
-    const stoneTarget=new THREE.Vector3(impactX,impactY,positions?positions.getZ(vertex):impactZ);
-    e.root.localToWorld(stoneTarget);
-    host.dataset.chiselStoneContact=e.tempP.distanceTo(stoneTarget).toFixed(4);
-   host.dataset.hammerClosed=String(open<.035);
-   host.dataset.hitPhase=phase.toFixed(4);
-   host.dataset.strike=Math.floor(strokes).toString();
-  }
- }
- const burst=smooth((phase-.71)/.10)*(1-smooth((phase-.92)/.08));
- for(let i=0;i<e.chips.length;i++){
-  const c=e.chips[i],d=c.userData,age=clamp((phase-.73)/.26);c.visible=e.toolRig.visible&&burst>.025;
-  if(!c.visible)continue;
-  const radius=(.08+.42*age)*(.35+d.energy*.7);
-  c.position.set(impactX+Math.cos(d.dir)*radius,impactY+age*.23-age*age*.42,impactZ+Math.sin(d.dir)*radius);
-  c.rotation.set(age*13,age*8,age*9);c.scale.setScalar((1-age)*(.6+d.energy*.7));
- }
- if(e.dust){
-  e.dust.visible=e.toolRig.visible&&burst>.025;
-  if(e.dust.visible){const a=e.dust.geometry.attributes.position;
-   for(let i=0;i<a.count;i++){
-    const ang=hash(i,7)*6.283,rad=(.08+hash(i,19)*.48)*burst;
-    a.setXYZ(i,impactX+Math.cos(ang)*rad,impactY+Math.sin(ang)*rad*.5,impactZ+.025+Math.sin(ang)*rad);
-   }a.needsUpdate=true;
-  }
- }
+ // Documentary footage supplies physical toolwork; no floating simulated hammers.
+ host.dataset.toolsHidden='true';
+ if(e.toolRig)e.toolRig.visible=false;
+ for(const chip of e.chips)chip.visible=false;
+ if(e.dust)e.dust.visible=false;
  if(e.rasp){e.rasp.visible=p>.77&&p<.813&&!reduced.matches;
   const point=finishingPoint(clamp((p-.77)/.043));
   e.rasp.position.set(point.x,point.y-.25,point.z+.035);
@@ -927,11 +883,11 @@ function render(p){
  e.root.rotation.set(.007*Math.sin(p*5),lerp(-.18,.14,smooth((p-.43)/.56)),0);
  const focus=smooth((p-.53)/.20)*(1-smooth((p-.77)/.08));
  const mobileFinal=mobile()?smooth((p-.928)/.05):0;
- const mobileReveal=mobile()?smooth((p-.75)/.06):0;
- const dist=mobile()?lerp(8.7,lerp(9.65,11.0,mobileFinal),mobileReveal):8.55;
- e.camera.position.set(mobile()?.04:1.38,3.12,dist-.16*focus);
- // The final work rises clear of the title on narrow phone screens.
- e.camera.lookAt(mobile()?0:.28,lerp(1.68,.70,mobileFinal),0);
+ const mobileFrame=mobile()?smooth((p-.545)/.065):0;
+ const dist=mobile()?lerp(8.7,lerp(10.75,11.0,mobileFinal),mobileFrame):8.55;
+ e.camera.position.set(mobile()?.04:1.38,3.12,dist-.12*focus);
+ // Leave a calm, uninterrupted lower area for the title on small screens.
+ e.camera.lookAt(mobile()?0:.28,lerp(1.68,lerp(.80,.70,mobileFinal),mobileFrame),0);
  e.renderer.render(e.scene,e.camera);
  host.dataset.surfaceSampleCount=String(e.surfaceSamples.length);
  host.dataset.carveProgress=removed.toFixed(4);
