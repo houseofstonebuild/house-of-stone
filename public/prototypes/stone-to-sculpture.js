@@ -116,20 +116,31 @@ function stoneMaterial({raw=false,color=0x656b62,roughness=.95,flat=false}={}){
        return mix(mix(a,b,f.y),mix(c,d,f.y),f.z);
      }`)
      .replace('#include <color_fragment>',`#include <color_fragment>
-       float g=mno(vLocalStone*12.0)*.48+mno(vLocalStone*42.0)*.35+mno(vLocalStone*121.0)*.17;
+       float g=mno(vLocalStone*8.0)*.40+mno(vLocalStone*36.0)*.34+mno(vLocalStone*107.0)*.26;
        float vein=pow(1.0-abs(sin(vLocalStone.y*13.3+vLocalStone.x*4.9+mno(vLocalStone*2.7)*5.0)),35.0);
-       diffuseColor.rgb*=mix(.94,1.06,g)*(1.0-.055*vein);
-       ${raw?`float oxide=mno(vLocalStone*7.2+vec3(11.0,-4.0,6.0));
-         float rind=smoothstep(.66,.88,oxide)*.11;
-         diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.22,.185,.145),rind);
+       diffuseColor.rgb*=mix(.84,1.11,g)*(1.0-.075*vein);
+       ${raw?`float oxide=mno(vLocalStone*4.1+vec3(11.0,-4.0,6.0));
+          float rind=smoothstep(.54,.79,oxide)*.20;
+          diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.30,.27,.23),rind);
          float chip=mno(vLocalStone*vec3(10.0,7.0,8.0));
           // Distance to Coil's actual projected mesh (including its central opening).
           vec2 silhouetteUV=clamp(vec2((vLocalStone.x+1.70)/3.40,(vLocalStone.y+1.74)/3.48),vec2(.001),vec2(.999));
           float outside=texture2D(uCarveMask,silhouetteUV).r*1.5;
-          float fracturedEdge=(chip-.5)*.045+.014*sin(vLocalStone.y*24.0+vLocalStone.x*17.0);
-          if(outside>uCarveMargin+fracturedEdge)discard;`:''}`);
+           // A physical-looking sculpting front works down the SINGLE parent mass.
+           // Uncarved lower sections remain solid; the tool reveals no floating islands.
+           float carveT=clamp((1.72-uCarveMargin)/1.76,0.0,1.0);
+           float localHeight=clamp((vLocalStone.y+1.69)/3.38,0.0,1.0);
+           float bandStart=(1.0-localHeight)*.83;
+           float bandT=smoothstep(bandStart,bandStart+.16,carveT);
+           float marginHere=mix(1.80,-.035,bandT);
+           float fracturedEdge=(chip-.5)*.030+.008*sin(vLocalStone.y*24.0+vLocalStone.x*17.0);
+           if(outside>marginHere+fracturedEdge)discard;
+           // Strip off the outer rind where the chisel has passed, so the approved
+           // rough geometry appears at the same frontier instead of suddenly popping in.
+           float frontCut=mix(.95,.13,bandT);
+           if(bandT>.001 && vLocalStone.z>frontCut)discard;`:''}`);
  };
- mat.customProgramCacheKey=()=>raw?'hos-springstone-rind-cut-v3':'hos-springstone-detail-v3';
+ mat.customProgramCacheKey=()=>raw?'hos-springstone-rind-cut-v4':'hos-springstone-detail-v3';
  return mat;
 }
 function rockGeometry(){
@@ -151,7 +162,7 @@ function rockGeometry(){
   pos.needsUpdate=true;geo.computeVertexNormals();return geo;
 }
 function makeRock(){
- const rock=new THREE.Mesh(rockGeometry(),stoneMaterial({raw:true,color:0x353934}));
+ const rock=new THREE.Mesh(rockGeometry(),stoneMaterial({raw:true,color:0x454b46}));
  rock.position.y=1.69;e.root.add(rock);e.rock=rock;
  const surface=new THREE.PlaneGeometry(2.1,1.47,26,18);surface.rotateX(-Math.PI/2);
  const pos=surface.attributes.position;
@@ -402,10 +413,10 @@ function render(p){
  }
  ui.progress.style.width=(p*100).toFixed(2)+'%';
  if(!e.renderer||e.contextLost)return;
- const handoff=smooth((p-.30)/.06);
+ const handoff=smooth((p-.31)/.088);
  // Continuous camera handoff: the Harare marker grows into the same physical block.
- e.root.scale.setScalar(lerp(.24,1,handoff));
- e.root.position.set(lerp(.85,0,handoff),lerp(-.66,0,handoff),0);
+ e.root.scale.setScalar(lerp(.28,1,handoff));
+ e.root.position.set(lerp(.85,0,handoff),lerp(-.60,0,handoff),0);
  const mark=smooth((p-.455)/.055)*(1-smooth((p-.536)/.022));
  const carve=smooth((p-.53)/.235);
  const file=smooth((p-.765)/.07),heating=smooth((p-.835)/.065);
@@ -419,13 +430,16 @@ function render(p){
  // Increase the constraint in world units: the central opening is physically cut out.
  // Preserve the continuous parent mass while upper contours emerge, then
  // cut the negative spaces progressively during the final third of the strikes.
- e.carveMargin.value=lerp(1.72,-.04,smooth((removed-.64)/.36));
- e.rock.visible=p<.765&&handoff>.02;
+ e.carveMargin.value=lerp(1.72,-.04,removed);
+ e.rock.visible=carve<.9995&&handoff>.02;
  e.rockCap.visible=false;
  if(e.marks){e.marks.visible=mark>.025;e.marks.material.opacity=.82*mark;}
  if(e.rough){
-  e.rough.visible=carve>.012&&wax<.997;
-  e.carvePlane.constant=-lerp(3.38,-.20,removed);
+  e.rough.visible=carve>.04&&wax<.997;
+  // The top of Coil is uncovered first. The lower portion stays inside the stone.
+  // Match the front's .83 height coefficient used in the cut shader.
+  const exposedY=3.38*(1-clamp((removed-.09)/.83));
+  e.carvePlane.constant=-exposedY;
   e.roughPlane.constant=lerp(4.5,-.26,wax);
  }
  if(e.polished){
@@ -439,13 +453,13 @@ function render(p){
  const edge=e.contourRows[index]||{left:-.65,right:.65};
  const side=Math.floor(strokes)%2===0?-1:1;
  const boundary=side<0?edge.left:edge.right;
- const impactX=clamp(boundary+side*(.075+.09*(1-carve)),-1.24,1.24);
+ const impactX=clamp(boundary+side*(.06+.08*(1-carve)),-1.18,1.18);
  const impactY=lerp(3.16,.36,carve);
- const impactZ=.77;
+ const impactZ=.77; // front of the parent slab, not in front of the artwork
  if(e.toolRig){
   e.toolRig.visible=carve>.008&&carve<.985&&!reduced.matches;
   if(e.toolRig.visible){
-   e.toolRig.position.set(impactX,impactY,impactZ);
+   e.toolRig.position.set(impactX,impactY-.021*impact,impactZ);
    e.toolRig.rotation.set(.10,-.12,side*.025);
    e.hammerPivot.rotation.z=-.53*open;
    e.toolRig.updateMatrixWorld(true);

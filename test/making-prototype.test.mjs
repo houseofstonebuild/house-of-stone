@@ -25,7 +25,7 @@ test('scroll-driven source map is factual but does not imply a verified Coil qua
 test('natural springstone, synchronized chisel and traditional finish stages',()=>{
  assert.match(js,/new THREE\.IcosahedronGeometry\(1,5\)/);
  assert.doesNotMatch(js,/const rows=5,cols=3/);
- assert.match(js,/if\(outside>uCarveMargin\+fracturedEdge\)discard/);
+ assert.match(js,/if\(outside>marginHere\+fracturedEdge\)discard/);
  assert.match(js,/const removed=\(Math\.floor\(strokes\)\+impact\)\/strokeCount/);
  assert.match(js,/hammerHead\.position\.set\(-\.70,-\.145,-\.02\)/);
  assert.match(js,/contact\.position\.set\(-\.70,-\.26,-\.02\)/);
@@ -35,6 +35,8 @@ test('natural springstone, synchronized chisel and traditional finish stages',()
  assert.match(js,/const centerX=lerp/);
  assert.match(js,/const sceneOpacity=smooth/);
  assert.match(js,/const strokeCount=28/);
+ assert.match(js,/float bandStart=\(1\.0-localHeight\)\*\.83/);
+ assert.match(js,/float frontCut=mix\(\.95,\.13,bandT\)/);
  assert.match(js,/const invSmooth|const part=fract|const phase=fract/);
  assert.match(js,/makeChalkFromModel\(original\)/);
  assert.match(js,/wet sanding|Wet sanding/);

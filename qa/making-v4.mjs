@@ -68,7 +68,20 @@ try{
     const desiredCarve=(n+.82)/28;
     const p=.53+.235*invSmooth(desiredCarve);
     await scrollTo(page,p);
-    await page.waitForFunction(n=>{const root=document.getElementById('render');return root.dataset.strike===String(n)&&root.dataset.hammerClosed==='true'},n,{timeout:7000});
+    // Scroll timing is interpolated frame-by-frame; seek to a stable impact pose,
+   // then check physical contact rather than trusting a one-frame timing flag.
+   let pose;
+   for(const adjustment of [0,.00008,-.00008,.00016,-.00016]){
+     if(adjustment!==0)await scrollTo(page,p+adjustment);
+     await page.waitForTimeout(180);
+     pose=await page.evaluate(()=>{const root=document.getElementById('render');return {
+       strike:Number(root.dataset.strike),phase:Number(root.dataset.hitPhase),
+       closed:root.dataset.hammerClosed,error:Number(root.dataset.contactError)
+     }});
+     if(pose.closed==='true' && Math.abs(pose.strike-n)<=1)break;
+   }
+   assert.equal(pose.closed,'true',`Hammer did not reach closed impact pose: ${JSON.stringify({n,p,pose})}`);
+   assert(pose.error<.055,`Hammer face not touching chisel: ${JSON.stringify({n,p,pose})}`);
     const {closed,error,material,carveProgress}=await page.evaluate(()=>({
      closed:document.getElementById('render').dataset.hammerClosed,
      error:Number(document.getElementById('render').dataset.contactError),
