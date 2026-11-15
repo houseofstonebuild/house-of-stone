@@ -48,7 +48,8 @@ const fract=n=>n-Math.floor(n);
 const hash=(a,b=0,c=0)=>fract(Math.sin(a*127.1+b*311.7+c*74.7)*43758.5453);
 const mobile=()=>innerWidth<=800;
 const atlasCapture=mobile()&&new URLSearchParams(location.search).has('capture-mobile-atlas');
-const atlasStart=.305,atlasFrames=192,atlasColumns=4,atlasRows=4,atlasGroupSize=16;
+// V2: six near-native phone-resolution frames per sheet; decoded neighbors stay bounded.
+const atlasStart=.305,atlasFrames=192,atlasColumns=2,atlasRows=3,atlasGroupSize=6;
 const atlasCache=new Map();
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let journeyTop=0,journeyDistance=1;
@@ -589,7 +590,7 @@ function finishingPoint(t){
 // Keep just the active/neighbor atlases decoded; do not seek video or shade
 // a deforming mesh during touch momentum.
 function mobileAtlasUrl(group){
- return '/assets/making-mobile-atlas-v1-'+String(group).padStart(2,'0')+'.webp';
+ return '/assets/making-mobile-atlas-v2-'+String(group).padStart(2,'0')+'.webp';
 }
 function requestMobileAtlas(group){
  if(group<0||group>=atlasFrames/atlasGroupSize||atlasCache.has(group))return;
