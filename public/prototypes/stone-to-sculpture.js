@@ -530,9 +530,9 @@ function loadCoil(){
     n.material=materials.length===1?materials[0]:materials;
   }});
   rough.traverse(n=>{if(n.isMesh){
-    // A coarse, granular interim surface that retains Coil's true silhouette.
+    // Opaque rough Coil. It must never overlap the parent boulder.
     const materials=Array.isArray(n.material)?n.material:[n.material];
-    n.material=materials.map(()=>{const m=stoneMaterial({color:0x30362f,roughness:.99,flat:true});m.transparent=true;m.opacity=0;m.depthWrite=true;m.clippingPlanes=[e.carveRevealPlane];applyFinishMask(m,false);return m;});
+    n.material=materials.map(()=>{const m=stoneMaterial({color:0x30362f,roughness:1,flat:false});m.transparent=false;m.opacity=1;m.depthWrite=true;m.clippingPlanes=[];applyFinishMask(m,false);return m;});
     if(n.material.length===1)n.material=n.material[0];
   }});
   e.polished=original;e.rough=rough;e.polishedPlane=polishedPlane;e.roughPlane=roughPlane;e.carvePlane=carvePlane;
@@ -797,12 +797,12 @@ function render(p){
  e.root.scale.setScalar(lerp(.28,1,handoff));
  e.root.position.set(lerp(.85,0,handoff),lerp(-.60,0,handoff),0);
  // Hold the chalk drawing long enough to inspect before stone removal begins.
- const mark=smooth((p-.445)/.034)*(1-smooth((p-.572)/.031));
+ const mark=smooth((p-.445)/.034)*(1-smooth((p-.541)/.024));
  const carve=smooth((p-.565)/.20);
  const file=smooth((p-.765)/.07),heating=smooth((p-.835)/.065);
  const wax=smooth((p-.90)/.06),gallery=smooth((p-.96)/.04);
  e.finishProgress.value=wax;
- // Each impact removes a discrete band of unwanted material, then holds.
+ // Real workshop footage demonstrates the physical chisel strikes; do not simulate an eroding CGI shell.
  const strokeCount=28,strokes=carve*strokeCount;
  const phase=fract(strokes);
  const open=smooth((phase-.06)/.30)*(1-smooth((phase-.56)/.19));
@@ -829,15 +829,16 @@ function render(p){
  const revealHeight=lerp(3.45,-.18,smooth((removed-.01)/.98));
  e.carveRevealPlane.constant=-revealHeight+.09;
  host.dataset.supportOverlap=supportOverlap.toFixed(4);
- const rockFade=smooth((carve-.94)/.06),roughFade=smooth((carve-.025)/.16);
+ const roughFade=1;
  host.dataset.carveFrontier=frontier.toFixed(4);
  host.dataset.realShapeReveal=clamp((3.05-frontier)/3.23).toFixed(4);
  host.dataset.blankCapReady=String(Boolean(e.blankCap));
  host.dataset.blankCapHeight=workingHeight.toFixed(4);
- e.rock.visible=handoff>.02&&carve<.995;
- e.rock.material.transparent=true;
- e.rock.material.opacity=1-rockFade;
- e.rock.material.depthWrite=carve<.95;
+ // Editorial cut at carving start: never fade Coil through a plastic-looking exterior.
+ e.rock.visible=handoff>.02&&p<stops[6];
+ e.rock.material.transparent=false;
+ e.rock.material.opacity=1;
+ e.rock.material.depthWrite=true;
  host.dataset.rockVisible=String(e.rock.visible);
  host.dataset.rockOpacity=e.rock.material.opacity.toFixed(3);
  // Retire the unsupported cylindrical intermediate and its flat disk cap.
@@ -846,7 +847,7 @@ function render(p){
  host.dataset.intermediateVisible='false';
  e.rockCap.visible=false;
  if(e.marks){
-  e.marks.visible=mark>.025;
+  e.marks.visible=mark>.025&&p<stops[6];
   // Each successive scroll interval draws more of the outline onto the actual
   // rock. Lines do not simply blink on all at once.
   const drawn=smooth((p-.445)/.085),pairs=Math.floor(e.marks.geometry.attributes.position.count*.5*drawn);
@@ -856,23 +857,23 @@ function render(p){
  }
  host.dataset.markingVisibility=mark.toFixed(4);
  if(e.rough){
-   e.rough.visible=carve>.012&&wax<.999;
+   e.rough.visible=p>=stops[6]&&wax<.999;
    const roughOpacity=roughFade;
    host.dataset.roughOpacity=roughOpacity.toFixed(3);
    host.dataset.roughVisible=String(e.rough.visible);
-   if(Math.abs((e.lastRoughOpacity??-1)-roughOpacity)>.004){
-    e.lastRoughOpacity=roughOpacity;
-    for(const mat of e.roughMaterials){mat.opacity=roughOpacity;mat.depthWrite=roughOpacity>.45;}
+   if(e.lastRoughOpacity!==1){
+    e.lastRoughOpacity=1;
+    for(const mat of e.roughMaterials){mat.transparent=false;mat.opacity=1;mat.depthWrite=true;}
    }
    // Dry tooling gives way to the slightly darker, smoother wet-sanded stone.
    // The final approved material remains untouched and is revealed by buffing.
-   const wet=smooth((p-.776)/.056);
-   if(Math.abs((e.lastWet??-1)-wet)>.012){
-    e.lastWet=wet;
+   const wet=smooth((p-.776)/.056),chiseled=smooth((p-.565)/.20);
+   if(Math.abs((e.lastWet??-1)-wet)>.012||Math.abs((e.lastChiseled??-1)-chiseled)>.018){
+    e.lastWet=wet;e.lastChiseled=chiseled;
     for(const mat of e.roughMaterials){
-      mat.roughness=lerp(.99,.76,wet);
-      // Three.js setRGB uses linear values. .14 made the stone look pale grey.
-      mat.color.setRGB(lerp(.082,.047,wet),lerp(.090,.052,wet),lerp(.078,.045,wet));
+      mat.roughness=lerp(1,.76,wet);
+      // Dry, chisel-cut stone gradually gains definition, without a fake outer skin.
+      mat.color.setRGB(lerp(lerp(.092,.082,chiseled),.047,wet),lerp(lerp(.098,.090,chiseled),.052,wet),lerp(lerp(.087,.078,chiseled),.045,wet));
     }
    }
    e.roughPlane.constant=lerp(4.5,-.26,wax);
