@@ -507,9 +507,10 @@ function loadCoil(){
   const sourcePosition=e.root.position.clone(),sourceRotation=e.root.rotation.clone(),sourceScale=e.root.scale.clone();
   e.root.position.set(0,0,0);e.root.rotation.set(0,0,0);e.root.scale.setScalar(1);
   e.root.updateMatrixWorld(true);
-  try{makeChalkFromModel(original)}catch(err){console.warn('Contour extraction unavailable',err)}
-  cacheFinishingSurface();
-  finally{
+  try{
+   try{makeChalkFromModel(original)}catch(err){console.warn('Contour extraction unavailable',err)}
+   cacheFinishingSurface();
+  }finally{
     e.root.position.copy(sourcePosition);e.root.rotation.copy(sourceRotation);e.root.scale.copy(sourceScale);
     e.root.updateMatrixWorld(true);
   }
