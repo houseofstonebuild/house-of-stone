@@ -471,6 +471,9 @@ archiveFilm.addEventListener('play',()=>archiveFilm.pause());
 // including its changing front depth, without per-frame raycast cost.
 function cacheFinishingSurface(){
  const ray=new THREE.Raycaster(),direction=new THREE.Vector3(0,0,-1);
+ // Sample in normalized sculpture-local space, not the scaled map handoff pose.
+ const savedPosition=e.root.position.clone(),savedRotation=e.root.rotation.clone(),savedScale=e.root.scale.clone();
+ e.root.position.set(0,0,0);e.root.rotation.set(0,0,0);e.root.scale.setScalar(1);
  e.root.updateMatrixWorld(true);
  const points=[];
  for(let i=0;i<18;i++){
@@ -482,6 +485,8 @@ function cacheFinishingSurface(){
    if(hits.length){points.push(hits[0].point.clone());break;}
   }
  }
+ e.root.position.copy(savedPosition);e.root.rotation.copy(savedRotation);e.root.scale.copy(savedScale);
+ e.root.updateMatrixWorld(true);
  e.surfaceSamples=points;
  e.rough.traverse(node=>{
   if(node.isMesh)for(const mat of Array.isArray(node.material)?node.material:[node.material])e.roughMaterials.push(mat);
