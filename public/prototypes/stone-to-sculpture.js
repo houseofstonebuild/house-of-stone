@@ -140,18 +140,15 @@ function stoneMaterial({raw=false,blank=false,color=0x656b62,roughness=.95,flat=
            // rough geometry appears at the same frontier instead of suddenly popping in.
            float frontCut=mix(.95,.13,bandT);
            if(bandT>.001 && vLocalStone.z>frontCut)discard;`:blank?`
-          // The approved Coil silhouette also supplies its interior void.
-          // Reveal that void only where the chisel has reached the stone.
+          // Do not punch holes in the parent shell. The approved three-dimensional
+          // Coil mesh supplies the true openings as material is taken away.
           float localHeight=clamp(vLocalStone.y/3.35,0.0,1.0);
           float layerStart=(1.0-localHeight)*.84;
           float layerProgress=smoothstep(layerStart,layerStart+.13,clamp(uCarveProgress,0.0,1.0));
-          vec2 silhouetteUV=clamp(vec2((vLocalStone.x+1.70)/3.40,vLocalStone.y/3.48),vec2(.001),vec2(.999));
-          float excess=texture2D(uCarveMask,silhouetteUV).r*1.5;
-          float threshold=mix(1.50,.014,layerProgress);
-          float roughEdge=(mno(vLocalStone*22.0)-.5)*.012*layerProgress;
-          if(excess>threshold+roughEdge)discard;`:''}`);
+          float chiselScars=mno(vLocalStone*34.0);
+          diffuseColor.rgb*=1.0-.045*layerProgress*(.4+.6*chiselScars);`:''}`);
  };
- mat.customProgramCacheKey=()=>raw?'hos-springstone-rind-cut-v4':blank?'hos-coil-progressive-aperture-v5':'hos-springstone-detail-v3';
+ mat.customProgramCacheKey=()=>raw?'hos-springstone-rind-cut-v4':blank?'hos-solid-carving-parent-v6':'hos-springstone-detail-v3';
  return mat;
 }
 function rockGeometry(){
@@ -532,7 +529,7 @@ function render(p){
  const frontier=lerp(3.45,-.18,smooth((removed-.014)/.96));
  // Retain an uncarved bridge around the new shape until the last chisel cuts.
  // Without this overlap, disconnected upper lobes appear to float above the mass.
- const supportOverlap=.72*(1-smooth((carve-.68)/.30));
+ const supportOverlap=.38*(1-smooth((carve-.72)/.26));
  const workingHeight=clamp(frontier+supportOverlap,.025,3.34);
  e.blankHidePlane.constant=workingHeight;
  e.carveRevealPlane.constant=-frontier;
