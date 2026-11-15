@@ -82,8 +82,8 @@ function updateMap(p){
  svg.querySelectorAll('.neighbour,.country-label,.topography,.geo-grid').forEach(node=>{node.style.opacity=labelOpacity;});
  const portal=document.getElementById('harare-arrival');
  if(portal){portal.style.opacity=String(smooth((p-.296)/.037)*(1-materialize));portal.setAttribute('transform',`translate(802.4 258.7) scale(${(lerp(.7,1.7,arrival)).toFixed(3)})`);}
- const mapOpacity=1-smooth((p-.292)/.092);
- const sceneOpacity=smooth((p-.31)/.085);
+ const mapOpacity=1-smooth((p-.315)/.065);
+ const sceneOpacity=smooth((p-.305)/.052);
  stage.style.setProperty('--mapOpacity',mapOpacity.toFixed(4));
  stage.style.setProperty('--sceneOpacity',sceneOpacity.toFixed(4));
  stage.style.setProperty('--handoff',materialize.toFixed(4));
@@ -118,9 +118,9 @@ function stoneMaterial({raw=false,color=0x656b62,roughness=.95,flat=false}={}){
      .replace('#include <color_fragment>',`#include <color_fragment>
        float g=mno(vLocalStone*12.0)*.48+mno(vLocalStone*42.0)*.35+mno(vLocalStone*121.0)*.17;
        float vein=pow(1.0-abs(sin(vLocalStone.y*13.3+vLocalStone.x*4.9+mno(vLocalStone*2.7)*5.0)),35.0);
-       diffuseColor.rgb*=mix(.85,1.12,g)*(1.0-.08*vein);
+       diffuseColor.rgb*=mix(.94,1.06,g)*(1.0-.055*vein);
        ${raw?`float oxide=mno(vLocalStone*7.2+vec3(11.0,-4.0,6.0));
-         float rind=smoothstep(.49,.79,oxide)*.22;
+         float rind=smoothstep(.66,.88,oxide)*.11;
          diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.22,.185,.145),rind);
          float chip=mno(vLocalStone*vec3(10.0,7.0,8.0));
           // Distance to Coil's actual projected mesh (including its central opening).
@@ -151,7 +151,7 @@ function rockGeometry(){
   pos.needsUpdate=true;geo.computeVertexNormals();return geo;
 }
 function makeRock(){
- const rock=new THREE.Mesh(rockGeometry(),stoneMaterial({raw:true,color:0x323c35}));
+ const rock=new THREE.Mesh(rockGeometry(),stoneMaterial({raw:true,color:0x353934}));
  rock.position.y=1.69;e.root.add(rock);e.rock=rock;
  const surface=new THREE.PlaneGeometry(2.1,1.47,26,18);surface.rotateX(-Math.PI/2);
  const pos=surface.attributes.position;
@@ -402,7 +402,7 @@ function render(p){
  }
  ui.progress.style.width=(p*100).toFixed(2)+'%';
  if(!e.renderer||e.contextLost)return;
- const handoff=smooth((p-.31)/.085);
+ const handoff=smooth((p-.30)/.06);
  // Continuous camera handoff: the Harare marker grows into the same physical block.
  e.root.scale.setScalar(lerp(.24,1,handoff));
  e.root.position.set(lerp(.85,0,handoff),lerp(-.66,0,handoff),0);
@@ -417,7 +417,9 @@ function render(p){
  const impact=smooth((phase-.75)/.18);
  const removed=(Math.floor(strokes)+impact)/strokeCount;
  // Increase the constraint in world units: the central opening is physically cut out.
- e.carveMargin.value=lerp(1.72,-.04,removed);
+ // Preserve the continuous parent mass while upper contours emerge, then
+ // cut the negative spaces progressively during the final third of the strikes.
+ e.carveMargin.value=lerp(1.72,-.04,smooth((removed-.64)/.36));
  e.rock.visible=p<.765&&handoff>.02;
  e.rockCap.visible=false;
  if(e.marks){e.marks.visible=mark>.025;e.marks.material.opacity=.82*mark;}
@@ -437,7 +439,7 @@ function render(p){
  const edge=e.contourRows[index]||{left:-.65,right:.65};
  const side=Math.floor(strokes)%2===0?-1:1;
  const boundary=side<0?edge.left:edge.right;
- const impactX=clamp(boundary+side*(e.carveMargin.value*.45+.025),-1.24,1.24);
+ const impactX=clamp(boundary+side*(.075+.09*(1-carve)),-1.24,1.24);
  const impactY=lerp(3.16,.36,carve);
  const impactZ=.77;
  if(e.toolRig){

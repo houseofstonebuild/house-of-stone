@@ -68,7 +68,7 @@ try{
     const desiredCarve=(n+.82)/28;
     const p=.53+.235*invSmooth(desiredCarve);
     await scrollTo(page,p);
-    await page.waitForFunction(target=>Math.abs(Number(document.getElementById('render').dataset.carveProgress||0)-target)<.003&&document.getElementById('render').dataset.hammerClosed==='true',desiredCarve,{timeout:7000});
+    await page.waitForFunction(n=>{const root=document.getElementById('render');return root.dataset.strike===String(n)&&root.dataset.hammerClosed==='true'},n,{timeout:7000});
     const {closed,error,material,carveProgress}=await page.evaluate(()=>({
      closed:document.getElementById('render').dataset.hammerClosed,
      error:Number(document.getElementById('render').dataset.contactError),
