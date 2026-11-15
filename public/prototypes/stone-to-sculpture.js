@@ -22,17 +22,17 @@ const ui={
   progress:document.getElementById('progress-fill')
 };
 const texts=[
- ['ZIMBABWE','The story begins in Zimbabwe.','The material and the people who shape it are inseparable from the place.'],
- ['GURUVE DISTRICT','Stone from the earth.','Guruve is among the northern Zimbabwean regions known for dense springstone.'],
- ['TOWARD HARARE','A journey south.','Trace an illustrative journey from the stone-producing region to the capital.'],
- ['HARARE','From landscape to workshop.','Our view follows the stone into Harare, where generations of sculptors have developed their craft.'],
- ['THE RAW STONE','One block. Many possibilities.','An irregular mass of springstone, with its weathered rind and dark mineral interior.'],
- ['MARKING THE FORM','The artist decides where to begin.','Contour lines indicate where stone will be removed; the form must be found inside.'],
- ['CARVING','Each strike changes the form.','Hammer meets chisel. Material is removed progressively, uncovering contours and the central opening.'],
- ['FINER WORK','The marks are refined.','Rasping and wet sanding soften the tooling marks and expose the smoother grain.'],
- ['HEATING','Preparing the stone.','A controlled heat source can prepare stone for a traditional clear wax finish.'],
- ['WAX AND BUFFING','The surface comes to life.','Clear wax and patient buffing bring out the stone’s natural dark sheen.'],
- ['THE FINISHED SCULPTURE','Coil.','An original work by Douglas Musekiwa, presented with its approved 3D model.']
+ ['ZIMBABWE','It begins with stone.','Zimbabwe has a longstanding tradition of hand-carved stone sculpture.'],
+ ['GURUVE DISTRICT','Where springstone is found.','Guruve is one of the regions in Zimbabwe known for dense springstone.'],
+ ['TOWARD HARARE','From quarry region to city.','Follow an illustrative route toward Harare, an important center for Zimbabwean sculpture.'],
+ ['HARARE','Into the workshop.','The raw stone becomes the starting point for a sculptor’s decisions.'],
+ ['THE RAW STONE','Before the first cut.','A weathered block of springstone, before its outer material is removed.'],
+ ['MARKING THE FORM','Marking the contours.','The sculptor maps the outer shape and identifies the stone that needs to be removed.'],
+ ['CARVING','Carving by subtraction.','Repeated chisel strikes take away material as the upper curve and inner opening emerge.'],
+ ['FINER WORK','Refining the curves.','Rasps and wet abrasives smooth the tool marks while retaining the hand-carved form.'],
+ ['HEATING','Preparing the surface.','Gentle, controlled heating is sometimes used before a clear-wax finish.'],
+ ['WAX AND BUFFING','Bringing out the stone.','Clear wax and buffing deepen the colour and reveal the stone’s natural sheen.'],
+ ['THE FINISHED SCULPTURE','Coil, by Douglas Musekiwa.','The finished work shown with its approved model from our collection.']
 ];
 // Deliberately reserve nearly one quarter of the journey for detailed hand-carving.
 const stops=[0,.075,.17,.29,.37,.45,.53,.765,.835,.90,.96,1];
@@ -50,7 +50,7 @@ const impactVector=new THREE.Vector3();
 let shownProgress=0,desiredProgress=0;
 const e={renderer:null,scene:null,camera:null,root:null,canvas:null,
   rock:null,rockCap:null,intermediate:null,intermediateGeo:null,intermediateRings:[],cut:{value:1.95},carveMargin:{value:2},carveProgress:{value:0},carveMask:{value:null},rawMaterial:null,polished:null,rough:null,contourRows:[],
-  carvePlane:null,roughPlane:null,polishedPlane:null,marks:null,hammerRig:null,
+  carvePlane:null,roughPlane:null,polishedPlane:null,blankHidePlane:null,carveRevealPlane:null,marks:null,hammerRig:null,
   chiselHead:null,chiselTop:null,hammerHead:null,hammerContact:null,hammerPivot:null,toolRig:null,chips:[],dust:null,
   rasp:null,sanding:null,torch:null,torchLight:null,wax:null,waxLight:null,
   shadow:null,plinth:null,modelReady:false,contextLost:false,lastPhase:-1,frame:0,now:0,
@@ -211,6 +211,7 @@ function makeCarvingBlank(rows){
  }
  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geo.setIndex(indices);
  const material=stoneMaterial({color:0x454b45,roughness:1,blank:true});material.transparent=true;material.opacity=0;material.depthWrite=true;
+ material.clippingPlanes=[e.blankHidePlane];
  const blank=new THREE.Mesh(geo,material);blank.frustumCulled=false;blank.visible=false;e.root.add(blank);
  e.intermediate=blank;e.intermediateGeo=geo;e.intermediateRings=data;
  updateCarvingBlank(0);
@@ -408,7 +409,7 @@ function loadCoil(){
   rough.traverse(n=>{if(n.isMesh){
     // A coarse, granular interim surface that retains Coil's true silhouette.
     const materials=Array.isArray(n.material)?n.material:[n.material];
-    n.material=materials.map(()=>{const m=stoneMaterial({color:0x555a52,roughness:.99,flat:true});m.transparent=true;m.opacity=0;m.depthWrite=true;m.clippingPlanes=[roughPlane];return m;});
+    n.material=materials.map(()=>{const m=stoneMaterial({color:0x555a52,roughness:.99,flat:true});m.transparent=true;m.opacity=0;m.depthWrite=true;m.clippingPlanes=[e.carveRevealPlane,roughPlane];return m;});
     if(n.material.length===1)n.material=n.material[0];
   }});
   e.polished=original;e.rough=rough;e.polishedPlane=polishedPlane;e.roughPlane=roughPlane;e.carvePlane=carvePlane;
@@ -420,6 +421,10 @@ function loadCoil(){
  },undefined,err=>{host.dataset.modelError='true';fallback.hidden=false;console.warn('Coil model unavailable',err)});
 }
 function setup(){
+ // Two facing cut planes let the real rough GLB grow out of the single working blank.
+ // No replacement artwork is generated; the approved Coil geometry is never edited.
+ e.blankHidePlane=new THREE.Plane(new THREE.Vector3(0,-1,0),3.6);
+ e.carveRevealPlane=new THREE.Plane(new THREE.Vector3(0,1,0),-3.6);
  e.carveMask.value=new THREE.DataTexture(new Uint8Array([0]),1,1,THREE.RedFormat);e.carveMask.value.needsUpdate=true;
  const canvas=document.createElement('canvas');host.prepend(canvas);e.canvas=canvas;
  const ctx=canvas.getContext('webgl2',{antialias:true,alpha:true,powerPreference:'low-power'});
@@ -495,8 +500,14 @@ function render(p){
  // The boundary follows the actual approved model's silhouette at every height.
  e.carveMargin.value=lerp(1.72,-.04,removed);
  e.carveProgress.value=removed;
- // Keep the intermediate form visible until its outline and aperture emerge.
+ // Reveal Coil's real thickness and inner walls as the cut travels down the stone.
+ // The upper finished portion and the unworked lower mass share one moving frontier.
+ const frontier=lerp(3.45,-.18,smooth((removed-.014)/.96));
+ e.blankHidePlane.constant=frontier+.055;
+ e.carveRevealPlane.constant=-frontier;
  const toBlank=smooth((carve-.007)/.13),toRough=smooth((carve-.82)/.17);
+ host.dataset.carveFrontier=frontier.toFixed(4);
+ host.dataset.realShapeReveal=clamp((3.05-frontier)/3.23).toFixed(4);
  e.rock.visible=handoff>.02&&carve<.15;
  e.rock.material.transparent=true;
  e.rock.material.opacity=1-toBlank;
@@ -510,9 +521,9 @@ function render(p){
  e.rockCap.visible=false;
  if(e.marks){e.marks.visible=mark>.025;e.marks.material.opacity=.82*mark;}
  if(e.rough){
-   e.rough.visible=carve>.82&&wax<.997;
+   e.rough.visible=carve>.035&&wax<.997;
    e.rough.traverse(mesh=>{if(mesh.isMesh){for(const mat of Array.isArray(mesh.material)?mesh.material:[mesh.material]){
-     mat.opacity=toRough;mat.depthWrite=toRough>.85;
+     mat.opacity=smooth((carve-.045)/.11);mat.depthWrite=carve>.16;
    }}});
    e.roughPlane.constant=lerp(4.5,-.26,wax);
  }
@@ -525,7 +536,7 @@ function render(p){
  // Tool tip tracks the current silhouette layer; the hammer's true contact point
  // is rigged to touch the cap when the strike closes (rather than passing beside it).
  const side=Math.floor(strokes)%2===0?-1:1;
- const impactHeight=lerp(3.16,.36,carve);
+ const impactHeight=clamp(frontier-.055,.22,3.22);
  // Land on a front-facing vertex of the current carving blank.
  const ring=Math.round(clamp((impactHeight-.025)/3.31)*84);
  const vertex=ring*33+(side<0?12:4);
@@ -554,7 +565,7 @@ function render(p){
   const c=e.chips[i],d=c.userData,age=clamp((phase-.73)/.26);c.visible=e.toolRig.visible&&burst>.025;
   if(!c.visible)continue;
   const radius=(.08+.42*age)*(.35+d.energy*.7);
-  c.position.set(impactX+Math.cos(d.dir)*radius,impactY+age*.23-age*age*.42,.82+Math.sin(d.dir)*radius);
+  c.position.set(impactX+Math.cos(d.dir)*radius,impactY+age*.23-age*age*.42,impactZ+Math.sin(d.dir)*radius);
   c.rotation.set(age*13,age*8,age*9);c.scale.setScalar((1-age)*(.6+d.energy*.7));
  }
  if(e.dust){
@@ -562,7 +573,7 @@ function render(p){
   if(e.dust.visible){const a=e.dust.geometry.attributes.position;
    for(let i=0;i<a.count;i++){
     const ang=hash(i,7)*6.283,rad=(.08+hash(i,19)*.48)*burst;
-    a.setXYZ(i,impactX+Math.cos(ang)*rad,impactY+Math.sin(ang)*rad*.5,.87+Math.sin(ang)*rad);
+    a.setXYZ(i,impactX+Math.cos(ang)*rad,impactY+Math.sin(ang)*rad*.5,impactZ+.025+Math.sin(ang)*rad);
    }a.needsUpdate=true;
   }
  }
