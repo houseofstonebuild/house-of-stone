@@ -48,11 +48,12 @@ try{
     canvasWidth:document.querySelector('#render canvas')?.width||0, maskReady:document.getElementById('render').dataset.carveMaskReady, carve:document.getElementById('render').dataset.carveProgress, margin:document.getElementById('render').dataset.materialMargin,
     aperture:document.getElementById('render').dataset.apertureProgress, tipError:document.getElementById('render').dataset.tipSurfaceError,blankOpacity:document.getElementById('render').dataset.blankOpacity,
     carveFrontier:document.getElementById('render').dataset.carveFrontier,realShapeReveal:document.getElementById('render').dataset.realShapeReveal,
-    blankCapReady:document.getElementById('render').dataset.blankCapReady,blankCapHeight:document.getElementById('render').dataset.blankCapHeight,supportOverlap:document.getElementById('render').dataset.supportOverlap}));
+    blankCapReady:document.getElementById('render').dataset.blankCapReady,blankCapHeight:document.getElementById('render').dataset.blankCapHeight,supportOverlap:document.getElementById('render').dataset.supportOverlap,
+    cutawayOpacity:Number(getComputedStyle(document.getElementById('archive-cutaway')).opacity),cutawayHidden:document.getElementById('archive-cutaway').getAttribute('aria-hidden')}));
    assert.equal(info.phase,expected,`Incorrect stage ${view.width}px at ${p}: ${JSON.stringify(info)}`);
    assert(info.docWidth<=info.viewport+2,`Unexpected horizontal overflow: ${JSON.stringify(info)}`);
    assert(info.canvasWidth>0,'WebGL canvas must remain allocated');
-   if(i===0)countryBox=info.countryBox;
+   if(i===0){countryBox=info.countryBox;assert(info.cutawayOpacity<.01,'Documentary film should not cover geographic introduction');}
    if(i===1){regionBox=info.countryBox;assert.notEqual(regionBox,countryBox,'Map should zoom into the Guruve region');}
    if(i===2)assert.equal(info.markerOpacity,'1','Illustrative stone transport marker should follow route');
    assert.equal(info.maskReady,'true','Coil geometry silhouette field unavailable');
@@ -65,6 +66,8 @@ try{
     assert(Number(info.carveFrontier)>.3&&Number(info.carveFrontier)<3.1,'Stone removal frontier should be inside the unfinished parent block');
     assert.equal(info.blankCapReady,'true','Unfinished parent stone must have a solid cutting surface');
     assert(Number(info.blankCapHeight)>Number(info.carveFrontier)+.3,'Stone needs a supporting bridge beneath emerging lobes');
+    assert(info.cutawayOpacity>.95,'Real workshop film must cover the proxy geometry at mid-carving');
+    assert.equal(info.cutawayHidden,'false','Documentary cutaway should be exposed while visible');
    }
    if(i===5 && info.hammerClosed==='true')assert(Number(info.contactError)<.06,'Hammer head misses the chisel cap');
    const file=new URL(`${view.width}-${String(i).padStart(2,'0')}.png`,screenshots).pathname;
