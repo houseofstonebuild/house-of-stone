@@ -30,28 +30,30 @@ test('scroll-driven source map is factual but does not imply a verified Coil qua
  assert.match(html,/class="pin-halo"/);
 });
 
-test('natural springstone reveals the approved Coil without a cylindrical proxy or floating tools',()=>{
+test('post-Harare process follows original Coil and credible material transitions',()=>{
  assert.match(js,/new THREE\.IcosahedronGeometry\(1,5\)/);
  assert.match(js,/function makeRock\(\)/);
+ assert.match(js,/normal\.needsUpdate=true;return geo/);
  assert.match(js,/makeChalkFromModel\(original\)/);
  assert.match(js,/host\.dataset\.markingVisibility=/);
  assert.match(js,/const removed=\(Math\.floor\(strokes\)\+impact\)\/strokeCount/);
- assert.match(js,/float removal=uCarveProgress\+localY/);
- assert.match(js,/if\(removal>\.72\)discard/);
- assert.match(js,/e\.carveRevealPlane\.constant=\.55/);
- assert.match(js,/e\.rock\.visible=handoff>\.02&&carve<\.90/);
+ assert.match(js,/float cutY=3\.46-3\.65\*smoothstep/);
+ assert.match(js,/if\(uCarveProgress>\.002 && vLocalStone\.y\+1\.69>cutY\+ridge\)discard/);
+ assert.match(js,/e\.carveRevealPlane\.constant=-revealHeight\+\.09/);
+ assert.match(js,/e\.rock\.visible=handoff>\.02&&carve<\.995/);
  assert.match(js,/const rockFade=smooth/);
  assert.match(js,/const roughOpacity=roughFade/);
  assert.match(js,/e\.intermediate\)e\.intermediate\.visible=false/);
  assert.match(js,/e\.blankCap\)e\.blankCap\.visible=false/);
  assert.match(js,/host\.dataset\.toolsHidden='true'/);
- assert.match(js,/makeRock\(\);makeStudio\(\);makeFinishingTools\(\);loadCoil\(\)/);
- assert.doesNotMatch(js,/makeRock\(\);makeStudio\(\);makeChiselAndHammer\(\);/);
+ assert.match(js,/makeRock\(\);makeStudio\(\);loadCoil\(\)/);
+ assert.doesNotMatch(js,/makeFinishingTools\(\);loadCoil\(\)/);
  assert.match(js,/\/models\/coil-uploaded-v1\.glb/);
  assert.match(js,/host\.dataset\.modelReady='true'/);
- assert.match(js,/function applyFinishMask\(material,polished\)/);
- assert.match(js,/function cacheFinishingSurface\(\)/);
- assert.match(js,/function finishingPoint\(t\)/);
+ assert.match(js,/mat\.color\.setRGB\(lerp\(\.032/);
+ assert.match(js,/e\.polished\.visible=p>=\.90/);
+ assert.match(js,/approvedRoughness/);
+ assert.match(js,/e\.finishLight\.intensity=warming/);
  assert.match(js,/e\.root\.add\(base\);e\.plinth=base/);
  assert.match(js,/const mobileFrame=mobile\(\)\?smooth/);
  assert.match(css,/\.stage\[data-phase="6"\] \.archive-cutaway/);
