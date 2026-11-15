@@ -787,7 +787,12 @@ function render(p){
   e.waxLight.intensity=e.wax.visible?1.0:0;
   e.waxLight.position.set(e.wax.position.x,e.wax.position.y,e.wax.position.z+.60);
  }
- if(e.plinth)e.plinth.visible=gallery>.55;
+ if(e.plinth){
+  e.plinth.visible=gallery>.55;
+  // Ground shadow follows the limestone foot instead of bisecting the pedestal.
+  if(e.shadow)e.shadow.position.y=lerp(-.055,-.55,gallery);
+ }
+ host.dataset.plinthAligned=String(e.plinth?.parent===e.root);
  e.root.rotation.set(.007*Math.sin(p*5),lerp(-.18,.14,smooth((p-.43)/.56)),0);
  const focus=smooth((p-.53)/.20)*(1-smooth((p-.77)/.08));
  const mobileFinal=mobile()?smooth((p-.928)/.05):0;
