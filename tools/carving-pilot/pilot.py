@@ -93,14 +93,27 @@ def main():
  perturb=.016*length*(np.sin(P[:,0]*8/length+1.1)*np.sin(P[:,1]*11/length)+.50*np.sin(P[:,2]*14/length+P[:,1]*4/length))
  sB=(raw+perturb).reshape(shape)
  if np.any(sB[sC<-step]>0):raise SystemExit('FAIL: raw stone clips approved Coil interior')
- # The work progresses through 3D volume: true cut surfaces and through-holes form.
- # A horizontal + side-biased order creates credible regional differences without a surface peel.
+ # Half-carved means half the EXTRA MATERIAL has actually been removed,
+ # not half of a generous distance-offset interval. The earlier formula removed
+ # only ten percent of the block and looked like a lumpy packaging shell.
  X,Y,Z=np.meshgrid(*axes,indexing='ij')
- progress=np.clip(.46+.18*(Y-center[1])/length-.09*(X-center[0])/length,0.10,.80)
- dmax=float(np.max((sC-sB)[sB<0]))+step*3
- d=(1-progress)*dmax
- mid=np.maximum(sB,sC-d)
- masks=[sB<0,mid<0,sC<0]
+ # Lower regions retain a little more stock while upper contours are worked first.
+ order=np.clip(1.0-.46*(Y-center[1])/length+.16*(X-center[0])/length,.60,1.35)
+ rawMask=sB<0
+ finalMask=sC<0
+ extra=int(rawMask.sum()-finalMask.sum())
+ if extra<100:raise SystemExit('FAIL: raw block does not meaningfully contain Coil')
+ target=int(finalMask.sum()+extra*.52)
+ loD,hiD=0.0,float(np.max((sC-sB)[rawMask]))*2+step*4
+ for _ in range(32):
+  trial=(loD+hiD)/2
+  count=int(np.count_nonzero(np.maximum(sB,sC-trial*order)<0))
+  if count>target:hiD=trial
+  else:loD=trial
+ carvedOffset=(loD+hiD)/2
+ mid=np.maximum(sB,sC-carvedOffset*order)
+ masks=[rawMask,mid<0,finalMask]
+ print('Calibrated midpoint',{'raw_voxels':int(rawMask.sum()),'half_voxels':int(masks[1].sum()),'final_voxels':int(finalMask.sum()),'target':target,'remaining_offset':round(carvedOffset,4)},flush=True)
  if np.any(masks[1]&~masks[0]) or np.any(masks[2]&~masks[1]):raise SystemExit('FAIL: voxel material regrowth')
  entries=[]
  for name,field in [('raw',sB),('half',mid)]:
