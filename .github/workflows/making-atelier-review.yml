@@ -1,0 +1,46 @@
+name: New Making Atelier visual review
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/prototypes/making-atelier.html'
+      - 'public/prototypes/making-atelier.css'
+      - 'public/prototypes/making-atelier.js'
+      - 'public/assets/making-cinema-frames/**'
+      - 'qa/making-atelier.mjs'
+      - '.github/workflows/making-atelier-review.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: making-atelier-review-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --prefix qa --no-audit --no-fund
+      - name: Check JS syntax and data assets
+        run: |
+          node --check public/prototypes/making-atelier.js
+          node --check qa/making-atelier.mjs
+          test -s public/models/coil-uploaded-v1.glb
+      - name: Cross-browser preview and screenshot acceptance
+        run: sh scripts/run-browser-qa.sh qa/making-atelier.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: making-atelier-first-principles-desktop-mobile
+          path: test-results/browser/making-atelier/
+          retention-days: 14
+          if-no-files-found: warn
