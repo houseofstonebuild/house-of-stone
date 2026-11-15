@@ -930,10 +930,10 @@ function render(p){
  const focus=smooth((p-.53)/.20)*(1-smooth((p-.77)/.08));
  const mobileFinal=mobile()?smooth((p-.928)/.05):0;
  const mobileFrame=mobile()?smooth((p-.545)/.065):0;
- const dist=mobile()?lerp(8.7,lerp(10.75,11.0,mobileFinal),mobileFrame):8.55;
+ const dist=mobile()?lerp(8.7,lerp(12.15,11.0,mobileFinal),mobileFrame):8.55;
  e.camera.position.set(mobile()?.04:1.38,3.12,dist-.12*focus);
  // Leave a calm, uninterrupted lower area for the title on small screens.
- e.camera.lookAt(mobile()?0:.28,lerp(1.68,lerp(.80,.70,mobileFinal),mobileFrame),0);
+ e.camera.lookAt(mobile()?0:.28,lerp(1.68,lerp(1.32,.70,mobileFinal),mobileFrame),0);
  e.renderer.render(e.scene,e.camera);
  host.dataset.surfaceSampleCount=String(e.surfaceSamples.length);
  host.dataset.carveProgress=removed.toFixed(4);
