@@ -69,8 +69,12 @@ test('natural springstone, synchronized chisel and traditional finish stages',()
  assert.match(js,/Clear wax|clear wax/);
  assert.match(js,/makeFinishingTools/);
  assert.match(js,/e\.root\.add\(base\);e\.plinth=base/);
- assert.match(js,/new THREE\.CylinderGeometry\(\.123,\.115,\.23,20\)/);
+ assert.match(js,/new THREE\.CylinderGeometry\(\.115,\.115,\.36,18\)/);
  assert.match(js,/const wet=smooth/);
+ assert.match(js,/function applyFinishMask\(material,polished\)/);
+ assert.match(js,/shader\.uniforms\.uFinishProgress=e\.finishProgress/);
+ assert.match(js,/vFinishWorld\.y<edge/);
+ assert.match(js,/vFinishWorld\.y>=edge/);
  assert.match(js,/function cacheFinishingSurface\(\)/);
  assert.match(js,/function finishingPoint\(t\)/);
  assert.match(js,/e\.surfaceSamples=points/);
