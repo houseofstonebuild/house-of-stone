@@ -184,3 +184,114 @@
 @media(max-width:800px){
  #render>.making-v6-image{object-position:center 64%}
 }
+
+
+/* Final reveal: display the unchanged approved GLB and approved GLB materials,
+   not the baked VTK approximation. 3D is initialized only near completion. */
+#render>.approved-coil-reveal{
+ position:absolute;inset:0;z-index:5;overflow:hidden;background:#161d19;
+ pointer-events:none;opacity:0;visibility:hidden;
+}
+#render>.approved-coil-reveal>canvas{
+ display:block;position:absolute;inset:0;width:100%;height:100%;max-width:100%;
+}
+#render>.approved-coil-reveal.approved-photo-fallback img{
+ position:absolute;inset:0;width:100%;height:100%;object-fit:contain;
+ background:radial-gradient(ellipse at 64% 43%,#2a342d,#151c18 75%);
+}
+
+/* Actual workshop footage (and a deterministic frame strip on iOS) restores
+   visible hammer-and-chisel work without unsupported floating CG tools. */
+.stage[data-phase="6"] .archive-cutaway{
+ left:clamp(28px,6.7vw,120px);right:auto;
+ top:clamp(120px,16svh,180px);width:min(39vw,490px);
+ aspect-ratio:16/9;max-height:none;
+}
+.stage[data-phase="6"] .archive-cutaway-label{
+ font-size:9px;letter-spacing:.115em;padding:26px 16px 12px;
+}
+#archive-cutaway .archive-mobile-frames{
+ background-image:url('/assets/making-chiseling-scroll-frames-v1.webp');
+ background-size:700% 600%;background-repeat:no-repeat;
+ image-rendering:auto;
+}
+.craft-detail-cutaway{
+ position:absolute;z-index:4;top:clamp(130px,18svh,205px);
+ left:clamp(28px,6.7vw,120px);width:min(35vw,435px);
+ margin:0;overflow:hidden;pointer-events:none;
+ border:1px solid rgba(220,202,171,.42);box-shadow:0 18px 54px rgba(0,0,0,.3);
+ opacity:0;background:#19211d;
+}
+.craft-detail-cutaway img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover}
+.craft-detail-cutaway figcaption{
+ position:absolute;inset:auto 0 0;
+ font:500 9px/1.45 Manrope,Arial,sans-serif;
+ letter-spacing:.13em;color:#f4eade;
+ padding:26px 15px 12px;
+ background:linear-gradient(transparent,rgba(10,15,12,.86))
+}
+.heating-study{
+ position:absolute;inset:0;z-index:4;pointer-events:none;
+ opacity:0;visibility:hidden;overflow:hidden;
+}
+.heating-light{
+ position:absolute;left:calc(63% - 15% * var(--heatTravel,0));
+ top:calc(30% + 8% * var(--heatTravel,0));
+ width:37vw;height:46svh;border-radius:50%;
+ background:radial-gradient(ellipse at 54% 49%,
+ rgba(250,187,103,.32) 0%,rgba(245,125,52,.16) 24%,rgba(244,122,64,0) 75%);
+ opacity:var(--heatStrength,0);mix-blend-mode:screen;
+ filter:blur(12px);
+}
+.heating-torch{
+ position:absolute;right:-7%;top:30%;
+ width:min(51vw,750px);min-width:450px;height:auto;
+ transform:translate3d(calc(7% * var(--heatTravel,0)),calc(-4% * var(--heatTravel,0)),0);
+ filter:drop-shadow(0 12px 17px rgba(0,0,0,.46));
+}
+.heating-caption{
+ position:absolute;left:clamp(28px,6.7vw,120px);top:clamp(145px,23svh,230px);
+ display:flex;flex-direction:column;align-items:flex-start;gap:7px;
+ max-width:310px;color:#f4ede4;
+}
+.heating-caption span{
+ font:500 10px/1.4 Manrope,Arial,sans-serif;letter-spacing:.17em;color:#d0bca0;
+}
+.heating-caption strong{
+ font:300 clamp(35px,3.6vw,55px)/1.02 'Cormorant Garamond',Georgia,serif;
+ letter-spacing:-.028em;
+}
+.heating-caption small{
+ font:400 11px/1.7 Manrope,Arial,sans-serif;max-width:230px;color:#c2bdb3;
+}
+@media(max-width:800px){
+ #render>.approved-coil-reveal>canvas{touch-action:pan-y}
+ .stage[data-phase="6"] .archive-cutaway{
+  top:clamp(108px,17svh,160px);
+  left:22px;right:auto;width:min(61vw,245px);
+  aspect-ratio:16/9;max-height:none;
+ }
+ .stage[data-phase="6"] .archive-cutaway-label{
+  font-size:7px;letter-spacing:.055em;padding:15px 8px 8px;
+ }
+ .archive-cutaway .archive-mobile-frames{
+  display:block!important;z-index:1;position:absolute;inset:0;
+ }
+ .archive-cutaway video{display:none!important}
+ .archive-cutaway .archive-fallback{z-index:0}
+ .craft-detail-cutaway{
+  left:22px;top:clamp(108px,17svh,160px);width:min(57vw,225px);
+ }
+ .craft-detail-cutaway figcaption{font-size:7px;letter-spacing:.06em;padding:18px 9px 9px}
+ .heating-light{left:34%;top:29%;width:65vw;height:44svh;filter:blur(9px)}
+ .heating-torch{
+  top:29%;right:-58vw;width:124vw;min-width:0;
+ }
+ .heating-caption{left:25px;right:25px;top:100px;gap:5px}
+ .heating-caption span{font-size:8px}
+ .heating-caption strong{font-size:37px}
+ .heating-caption small{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+ .heating-study,.craft-detail-cutaway{display:none!important}
+}
