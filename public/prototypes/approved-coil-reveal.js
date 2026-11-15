@@ -19,6 +19,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
     // Use a high-resolution frame rendered from this SAME approved GLB in Chromium.
     // The explicit capture flag keeps the automated render source on live WebGL.
     const capture=new URLSearchParams(location.search).has('capture-approved-coil');
+    const minimalGallery=host.dataset.atelierNoPlinth==='true';
     if(mobile()&&!capture){
       // Both images are rendered from the exact original GLB at the same camera:
       // unmounted workshop stone and the gallery shot with its plinth. Only the
@@ -44,8 +45,8 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
       still.addEventListener('load',done,{once:true});
       workshop.addEventListener('error',fail);
       still.addEventListener('error',fail);
-      workshop.src='/assets/making-coil-approved-workshop-v1.png';
-      still.src='/assets/making-coil-approved-mobile-v2.png';
+      workshop.src=minimalGallery?'/assets/making-atelier-final-mobile-v1.png':'/assets/making-coil-approved-workshop-v1.png';
+      still.src=minimalGallery?'/assets/making-atelier-final-mobile-v1.png':'/assets/making-coil-approved-mobile-v2.png';
       layer.append(workshop,still);
       return;
     }
@@ -193,7 +194,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
       host.dataset.approvedCameraPan=pan.toFixed(4);
     }
     if(state.plinth){
-      state.plinth.visible=gallery>.001&&!new URLSearchParams(location.search).has('capture-no-plinth');
+      state.plinth.visible=gallery>.001&&host.dataset.atelierNoPlinth!=='true'&&!new URLSearchParams(location.search).has('capture-no-plinth');
       state.plinth.material.opacity=gallery;
     }
     if(state.shadow)state.shadow.material.opacity=gallery;
