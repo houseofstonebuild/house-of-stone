@@ -52,6 +52,9 @@ try{
     hammerClosed:document.getElementById('render').dataset.hammerClosed,
     canvasWidth:document.querySelector('#render canvas')?.width||0, maskReady:document.getElementById('render').dataset.carveMaskReady, carve:document.getElementById('render').dataset.carveProgress, margin:document.getElementById('render').dataset.materialMargin,
     aperture:document.getElementById('render').dataset.apertureProgress, tipError:document.getElementById('render').dataset.tipSurfaceError,blankOpacity:document.getElementById('render').dataset.blankOpacity,
+    intermediateVisible:document.getElementById('render').dataset.intermediateVisible,toolsHidden:document.getElementById('render').dataset.toolsHidden,
+    rockVisible:document.getElementById('render').dataset.rockVisible,rockOpacity:Number(document.getElementById('render').dataset.rockOpacity),
+    roughVisible:document.getElementById('render').dataset.roughVisible,roughOpacity:Number(document.getElementById('render').dataset.roughOpacity),
     carveFrontier:document.getElementById('render').dataset.carveFrontier,realShapeReveal:document.getElementById('render').dataset.realShapeReveal,
     blankCapReady:document.getElementById('render').dataset.blankCapReady,blankCapHeight:document.getElementById('render').dataset.blankCapHeight,supportOverlap:document.getElementById('render').dataset.supportOverlap,
     cutawayOpacity:Number(getComputedStyle(document.getElementById('archive-cutaway')).opacity),cutawayHidden:document.getElementById('archive-cutaway').getAttribute('aria-hidden'),
@@ -70,69 +73,44 @@ try{
    if(i===1){regionBox=info.countryBox;assert.notEqual(regionBox,countryBox,'Map should zoom into the Guruve region');}
    if(i===2){assert.equal(info.markerOpacity,'1','Illustrative stone transport marker should follow route');assert(!info.truckTransform.includes('rotate'),'Transport marker should never invert');}
    if(!isAtlas)assert.equal(info.maskReady,'true','Coil geometry silhouette field unavailable');
-   if(isAtlas&&p>=.305){assert(info.mobileAtlasFrame>0&&info.mobileAtlasFrame<192,'Invalid mobile sculpture frame');assert(info.mobileAtlasBlend>=0&&info.mobileAtlasBlend<=1,'Invalid adjacent-frame opacity');assert.match(info.mobileAtlasDisplay,/making-mobile-atlas-v2-/,'High-detail sculpture frame atlas not composited');}
+   if(isAtlas&&p>=.305){assert(info.mobileAtlasFrame>0&&info.mobileAtlasFrame<192,'Invalid mobile sculpture frame');assert(info.mobileAtlasBlend>=0&&info.mobileAtlasBlend<=1,'Invalid adjacent-frame opacity');assert.match(info.mobileAtlasDisplay,/making-mobile-atlas-v3-/,'High-detail sculpture frame atlas not composited');}
    if(!isAtlas&&i===5){assert(info.marking>.85,'Chalk marking must remain clearly visible before chiseling');assert(info.markSegments>20,'Contour extraction must create actual visible chalk geometry');}
    if(!isAtlas&&i>=7)assert(info.surfaceSamples>=5,'Finishing tools need precomputed contact samples');
    if(!isAtlas&&i===10)assert.equal(info.plinthAligned,'true','Gallery pedestal must be mounted at sculpture origin');
    if(i===6){
     if(!isAtlas){
-    assert(Number(info.carve)>.07&&Number(info.carve)<.98,'Stone needs to be shaped progressively');
-    assert(Number(info.aperture)>.07&&Number(info.aperture)<.98,'Opening must reveal with the chiseling sequence');
-    assert(Number(info.tipError)<.025,'Chisel tip should follow current fitted stone surface');
-    assert(Number(info.blankOpacity)>.1,'Physical intermediate blank should remain visible during chiseling');
-    assert(Number(info.realShapeReveal)>.08&&Number(info.realShapeReveal)<.90,`Approved 3D Coil geometry should emerge gradually throughout chiseling: ${JSON.stringify(info)}`);
-    assert(Number(info.carveFrontier)>.3&&Number(info.carveFrontier)<3.1,'Stone removal frontier should be inside the unfinished parent block');
-    assert.equal(info.blankCapReady,'true','Unfinished parent stone must have a solid cutting surface');
-    assert(Number(info.blankCapHeight)>Number(info.carveFrontier)+.3,'Stone needs a supporting bridge beneath emerging lobes');
+     assert(Number(info.carve)>.07&&Number(info.carve)<.98,'Stone should change throughout carving');
+     assert(Number(info.aperture)>.07&&Number(info.aperture)<.98,'Carving follows scroll');
+     assert.equal(info.intermediateVisible,'false','Do not show an unsupported cylindrical blank');
+     assert.equal(info.toolsHidden,'true','Real workshop film replaces floating simulated hammers');
+     assert(info.roughOpacity>.05&&info.roughOpacity<1,'Original Coil geometry emerges gradually');
+     assert.equal(info.roughVisible,'true','The approved Coil model is the revealed form');
     }
-    assert(info.cutawayOpacity>.95,'Supporting workshop footage should be visible during mid-carving');
-    assert(info.stillLoaded,'Phone and desktop must load the video fallback still');
-    assert(info.videoPaused,'Scroll-scrubbed footage must never play autonomously');
-    assert(info.archiveTarget>0,'Scroll progress should drive video currentTime');
-    assert.equal(info.cutawayHidden,'false','Documentary cutaway should be exposed while visible');
+    assert(info.cutawayOpacity>.95,'Archival chiseling supplements the sculpture');
+    assert(info.stillLoaded,'Chiseling still image must load');
+    assert(info.videoPaused,'Archive remains under scroll control');
+    assert(info.archiveTarget>0,'Archive time follows scroll position');
+    assert.equal(info.cutawayHidden,'false');
+    if(isAtlas){
+     const overlap=await page.evaluate(()=>{
+      const a=document.getElementById('skip').getBoundingClientRect();
+      const b=document.getElementById('archive-cutaway').getBoundingClientRect();
+      return Math.max(0,Math.min(a.right,b.right)-Math.max(a.left,b.left))*Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
+     });
+     assert.equal(overlap,0,'Skip link must not cover workshop footage on mobile');
+    }
    }
-   if(!isAtlas&&i===5 && info.hammerClosed==='true')assert(Number(info.contactError)<.06,'Hammer head misses the chisel cap');
    const file=new URL(`${view.width}-${String(i).padStart(2,'0')}.png`,screenshots).pathname;
    await page.screenshot({path:file,fullPage:false});
    rows.push({width:view.width,p,phase:info.phase,contact:info.contactError||null});
   }
-  // Sample known closed strike positions across the sculpting pass. The chisel cap
-  // and hammer face must physically coincide in world space at every contact.
-  const invSmooth=value=>{let lo=0,hi=1;for(let i=0;i<24;i++){
-    const m=(lo+hi)*.5;if(m*m*(3-2*m)<value)lo=m;else hi=m;
-  }return (lo+hi)*.5;};
-  for(const n of isAtlas?[]:[3,9,15,21,26]){
-    const desiredCarve=(n+.82)/28;
-    const p=.565+.20*invSmooth(desiredCarve);
-    await scrollTo(page,p);
-    // Scroll timing is interpolated frame-by-frame; seek to a stable impact pose,
-   // then check physical contact rather than trusting a one-frame timing flag.
-   let pose;
-   for(const adjustment of [0,.00008,-.00008,.00016,-.00016]){
-     if(adjustment!==0)await scrollTo(page,p+adjustment);
-     await page.waitForTimeout(180);
-     pose=await page.evaluate(()=>{const root=document.getElementById('render');return {
-       strike:Number(root.dataset.strike),phase:Number(root.dataset.hitPhase),
-       closed:root.dataset.hammerClosed,error:Number(root.dataset.contactError),
-       tipError:Number(root.dataset.tipSurfaceError),stoneContact:Number(root.dataset.chiselStoneContact),aperture:Number(root.dataset.apertureProgress)
-     }});
-     if(pose.closed==='true' && Math.abs(pose.strike-n)<=1)break;
+  // Inspect stages previously showing a floating mallet and cylindrical stone.
+  for(const p of [.590,.640,.675,.710,.743]){
+   await scrollTo(page,p);
+   if(isAtlas){
+    await page.waitForFunction(()=>document.getElementById('render').dataset.mobileAtlasPending==='',{timeout:20000});
    }
-   assert.equal(pose.closed,'true',`Hammer did not reach closed impact pose: ${JSON.stringify({n,p,pose})}`);
-   assert(pose.error<.055,`Hammer face not touching chisel: ${JSON.stringify({n,p,pose})}`);
-   assert(pose.tipError<.025,`Tool tip misses changing parent stone: ${JSON.stringify({n,p,pose})}`);
-   assert(pose.stoneContact<.03,`World-space chisel tip does not meet the stone: ${JSON.stringify({n,p,pose})}`);
-   assert(pose.aperture>0&&pose.aperture<1,`Carving aperture progression missing: ${JSON.stringify({n,p,pose})}`);
-    const {closed,error,material,carveProgress}=await page.evaluate(()=>({
-     closed:document.getElementById('render').dataset.hammerClosed,
-     error:Number(document.getElementById('render').dataset.contactError),
-     material:Number(document.getElementById('render').dataset.materialMargin),
-     carveProgress:Number(document.getElementById('render').dataset.carveProgress)
-    }));
-    assert.equal(closed,'true','Hammer should close exactly at stone-removal event');
-    assert(error<.055,`Hammer face misses chisel head: ${error}`);
-    assert(carveProgress>0&&carveProgress<1,'Stone shaping should be incomplete at intermediate strikes');
-    assert(Number.isFinite(material),'Missing live material carving field');
+   await page.screenshot({path:new URL(`${view.width}-carving-${String(Math.round(p*1000))}.png`,screenshots).pathname});
   }
   // Rewind via scroll as well as advance: the source must remain paused.
   await scrollTo(page,.690);
@@ -165,7 +143,7 @@ try{
  await reducedPage.locator('#skip').click();
  assert((await reducedPage.locator('#finished').boundingBox()).y<844,'Skip button should move to finished work');
  await reducedPage.close();
- console.log('Making desktop 3D carving and mobile atlas scroll QA passed:',JSON.stringify(rows));
+ console.log('Making geological erosion and mobile documentary QA passed:',JSON.stringify(rows));
 }finally{
  await browser?.close();
  await new Promise(ok=>app.server.close(ok));
