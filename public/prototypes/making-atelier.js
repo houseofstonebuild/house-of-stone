@@ -23,14 +23,19 @@ const $atlas=$('#atlasFilmFrame');
 const $mobileFrame=$('#mobileFilmFrame');
 const $poster=$('.carving-poster');
 const $mapRoute=$('#mapRoute');
+const $truck=$('#routeTruck');
+const $routeReadout=$('#routeReadout');
 const mapLength=$mapRoute.getTotalLength?.()||115;
 $mapRoute.style.strokeDasharray=String(mapLength);
 const frameCount=48;
-const atlasCount=42;
+const fallbackFrames=19; // First ~8 seconds only: the lion never comes into view.
+const atlasCount=18;
+let hdFramesReady=false;
+let frameRoot='/assets/making-cinema-frames';
 const frameCache=new Map();
 let activeFilmFrame=-1,desiredFilmFrame=-1,filmDuration=0,videoMetadata=false,lastSeek=-1,lastSeekAt=0,filmActive=false;
 let storyFrame=0,layoutDirty=true,readings=[],currentScene='',approved=null,approvedPromise=null;
-const filmState=()=>({paused:$film.paused,time:$film.currentTime,frame:desiredFilmFrame,active:filmActive,videoReady:videoMetadata});
+const filmState=()=>({paused:$film.paused,time:$film.currentTime,frame:desiredFilmFrame,active:filmActive,videoReady:videoMetadata,hdFrames:hdFramesReady,maxSeconds:8.4});
 window.__mabweMaking={get film(){return filmState()},get chapter(){return currentScene},get approved(){return $('#approvedHost').dataset.approvedModelState||'not-started'}};
 
 function recordLayout(){
@@ -43,7 +48,26 @@ function recordLayout(){
 }
 
 function frameUrl(index){
- return '/assets/making-cinema-frames/frame_'+String(index).padStart(2,'0')+'.webp';
+ // Until the HD derivative is published, use only the first 19 frames
+ // of the original sequence; later frames show a recognizable lion.
+ const sourceFrame=hdFramesReady?index:Math.min(fallbackFrames-1,Math.round(index*(fallbackFrames-1)/(frameCount-1)));
+ $filmMedia.dataset.sourceFrame=String(sourceFrame);
+ return frameRoot+'/frame_'+String(sourceFrame).padStart(2,'0')+'.webp';
+}
+async function checkHdFrames(){
+ try{
+  const response=await fetch('/assets/making-cinema-frames-v2/manifest.json',{cache:'no-store'});
+  if(!response.ok)return;
+  const manifest=await response.json();
+  if(manifest.version!==2||manifest.frames!==48||manifest.end_seconds>8.5||manifest.width<1280)return;
+  hdFramesReady=true;
+  frameRoot='/assets/making-cinema-frames-v2';
+  frameCache.clear();
+  activeFilmFrame=-1;
+  $filmMedia.dataset.mediaQuality='hd-master';
+  if(mobile()||saveData)rememberFrame(desiredFilmFrame<0?0:desiredFilmFrame);
+  queueUpdate();
+ }catch(_){$filmMedia.dataset.mediaQuality='original-fallback'}
 }
 function rememberFrame(index){
  if(index<0||index>=frameCount)return;
@@ -56,7 +80,7 @@ function rememberFrame(index){
   const entry=frameCache.get(index);
   if(!entry)return;
   entry.ready=true;
-  if(index===desiredFilmFrame&&mobile()){
+  if(index===desiredFilmFrame&&(mobile()||saveData)){
    $mobileFrame.src=img.src;
    $filmMedia.dataset.mobileReady='true';
    activeFilmFrame=index;
@@ -84,7 +108,7 @@ function updateFilm(p,visible){
  $filmMedia.dataset.scrollPosition=p.toFixed(4);
  // Portrait footage reframes the actual chisel contact first, then travels
  // across the worked stone. No small inset and no synthetic hammer image.
- const pan=lerp(18,47,p);
+ const pan=lerp(18,40,p);
  $mobileFrame.style.objectPosition=pan.toFixed(2)+'% 47%';
  $poster.style.objectPosition=pan.toFixed(2)+'% 47%';
  $filmMedia.dataset.filmPan=pan.toFixed(2);
@@ -112,11 +136,11 @@ function updateFilm(p,visible){
   $filmMedia.dataset.videoReady='false';
   return;
  }
- const target=clamp(p)*Math.max(.1,filmDuration-.09);
+ const target=clamp(p)*Math.min(8.4,Math.max(.1,filmDuration-.09));
  const now=performance.now();
  if($film.seeking||now-lastSeekAt<68||Math.abs(target-lastSeek)<.055)return;
  lastSeekAt=now;lastSeek=target;
- try{$film.currentTime=target;$filmMedia.dataset.videoReady='true'}
+ try{$film.currentTime=target}
  catch(e){$filmMedia.dataset.videoReady='false';$filmMedia.dataset.seekFailure='true'}
 }
 
@@ -132,7 +156,7 @@ $film.addEventListener('seeked',()=>{
  $filmMedia.dataset.videoReady='true';
  if(!filmActive)return;
  const p=Number($filmMedia.dataset.scrollPosition||0);
- const expected=clamp(p)*Math.max(.1,filmDuration-.09);
+ const expected=clamp(p)*Math.min(8.4,Math.max(.1,filmDuration-.09));
  if(Math.abs($film.currentTime-expected)>.12){
   lastSeekAt=0;
   updateFilm(p,true);
@@ -157,9 +181,20 @@ function renderIntroduction(p){
  $('.prologue-visual img').style.transform='scale('+(1+.055*p).toFixed(4)+')';
 }
 function renderOrigin(p){
- $('.origin-map-wrap').style.transform='scale('+(1+.19*p).toFixed(4)+')';
- $mapRoute.style.strokeDashoffset=String((mapLength*(1-smooth((p-.20)/.68))).toFixed(2));
- $('#hararePin').style.opacity=String(smooth((p-.55)/.28));
+ // Country first, then a legible close-up of the illustrative Guruve–Harare road.
+ // The truck stays upright; its position is tied to scroll in both directions.
+ const zoom=smooth((p-.045)/.34);
+ const factor=lerp(1,mobile()?2.25:2.55,zoom);
+ const shiftX=lerp(0,-innerWidth*(mobile()?.26:.16),zoom);
+ const shiftY=lerp(0,innerHeight*(mobile()?.015:.11),zoom);
+ $('.origin-map-wrap').style.transform='translate3d('+shiftX.toFixed(1)+'px,'+shiftY.toFixed(1)+'px,0) scale('+factor.toFixed(4)+')';
+ const travel=reduced.matches?1:smooth((p-.41)/.43);
+ $mapRoute.style.strokeDashoffset=String((mapLength*(1-travel)).toFixed(2));
+ const point=$mapRoute.getPointAtLength(mapLength*travel);
+ $truck.setAttribute('transform','translate('+point.x.toFixed(2)+' '+point.y.toFixed(2)+')');
+ $truck.style.opacity=String(reduced.matches?1:smooth((p-.38)/.08)*(1-smooth((p-.95)/.05)));
+ $('#hararePin').style.opacity=String(reduced.matches?1:smooth((p-.75)/.18));
+ $routeReadout.style.opacity=String(reduced.matches?1:smooth((p-.32)/.18));
 }
 function renderMaterial(p){
  const mix=smooth((p-.36)/.28);
@@ -270,5 +305,6 @@ $('#jump').addEventListener('click',e=>{
 });
 // Prime real mobile documentary frames, without decoding an entire video on load.
 if(mobile()){rememberFrame(0);rememberFrame(1);}
+checkHdFrames();
 queueUpdate();
 document.documentElement.dataset.makingAtelier='ready';

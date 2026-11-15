@@ -54,10 +54,24 @@
           <path class="country-outline" d="M817 606 769 598 739 607 695 594 659 593 601 558 532 546 506 496 505 469 467 461 365 375 337 330 318 316 284 254 384 262 414 271 444 269 494 219 572 155 604 148 615 121 667 90 735 80 741 109 816 107 857 124 877 143 920 149 966 174 967 272 949 326 946 385 960 408 949 454 936 461 912 518Z"/>
           <text x="630" y="380" text-anchor="middle" class="country-name">ZIMBABWE</text>
           <path id="mapRoute" class="map-route" d="M773 169 Q828 190 802 259"/>
+          <g id="routeTruck" class="route-truck" transform="translate(773 169)" aria-hidden="true">
+            <g transform="translate(0 -11)">
+              <rect class="truck-shadow" x="-20" y="10" width="42" height="2" rx="1"/>
+              <rect class="truck-load" x="-18" y="-7" width="22" height="14" rx="1.6"/>
+              <path class="truck-cab" d="M4 -5H13L20 1V8H4Z"/>
+              <path class="truck-window" d="M7 -3H12L16 1H7Z"/>
+              <rect class="truck-bumper" x="19" y="5" width="4" height="3" rx=".7"/>
+              <circle class="truck-tire" cx="-11" cy="9" r="3.4"/>
+              <circle class="truck-tire" cx="13" cy="9" r="3.4"/>
+              <circle class="truck-hub" cx="-11" cy="9" r="1.2"/>
+              <circle class="truck-hub" cx="13" cy="9" r="1.2"/>
+            </g>
+          </g>
           <g transform="translate(773 169)" id="guruvePin"><circle class="pin-ring" r="15"/><circle class="pin-center" r="4"/><text x="-14" y="-24" class="pin-title" text-anchor="end">GURUVE</text><text x="-14" y="-9" class="pin-sub" text-anchor="end">STONE REGION</text></g>
           <g transform="translate(802 259)" id="hararePin"><circle class="pin-ring" r="15"/><circle class="pin-center" r="4"/><text x="20" y="-5" class="pin-title">HARARE</text><text x="20" y="13" class="pin-sub">SCULPTORS' WORKSHOPS</text></g>
         </svg>
       </div>
+      <div class="route-readout" id="routeReadout" aria-hidden="true"><span>GURUVE</span><span class="route-readout-line"></span><span>HARARE</span><small>ILLUSTRATIVE ROAD JOURNEY</small></div>
       <div class="chapter-copy copy-left origin-copy">
         <p class="kicker">01 / ORIGIN</p>
         <h2 id="originTitle">The stone<br>comes first.</h2>
@@ -88,6 +102,7 @@
       <div class="carving-media">
         <img class="carving-poster" src="/assets/making-chisel-at-work.webp" alt="" loading="lazy" decoding="async">
         <video id="cinemaFilm" muted playsinline webkit-playsinline preload="metadata" poster="/assets/making-chiseling-poster-v1.jpg" aria-hidden="true">
+          <source src="/assets/making-chiseling-atelier-hd-v2.mp4" type="video/mp4">
           <source src="/assets/making-chiseling-scrub-v1.mp4" type="video/mp4">
         </video>
         <img id="mobileFilmFrame" class="mobile-film-frame" alt="" aria-hidden="true" decoding="async">

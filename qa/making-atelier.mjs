@@ -52,6 +52,17 @@ try{
   });
   await page.goto(base+'/prototypes/making-atelier.html',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.documentElement.dataset.makingAtelier==='ready');
+  // Verify origin zoom and a physically upright truck moving down the route.
+  await go(page,'origin',.14);
+  const mapBefore=await page.locator('#mapWrap').evaluate(el=>el.getBoundingClientRect().width);
+  await go(page,'origin',.60);
+  const mapAfter=await page.locator('#mapWrap').evaluate(el=>el.getBoundingClientRect().width);
+  assert(mapAfter>mapBefore*1.5,'Guruve–Harare close-up did not magnify the map');
+  const posEarly=await page.locator('#routeTruck').getAttribute('transform');
+  await go(page,'origin',.88);
+  const posLate=await page.locator('#routeTruck').getAttribute('transform');
+  assert.notEqual(posEarly,posLate,'Transport must move with page scroll');
+  assert(!posLate.includes('rotate('),'Truck must stay upright during journey');
   for(let i=0;i<chapters.length;i++){
    const [id,p]=chapters[i];
    await go(page,id,p);
@@ -62,6 +73,8 @@ try{
      return {paused:v.paused,loop:v.loop,progress:document.querySelector('.carving-media').dataset.scrollPosition};
     });
     assert(state.paused&&!state.loop,'Archival documentary must never independently play or loop');
+    assert(await page.locator('#cinemaFilm source').first().getAttribute('src')==='/assets/making-chiseling-atelier-hd-v2.mp4');
+    assert((await page.evaluate(()=>window.__mabweMaking.film.maxSeconds))<=8.4,'Lion footage must be excluded');
     assert(Math.abs(Number(state.progress)-p)<.03);
     if(c.mobile){
      await page.waitForFunction(()=>document.querySelector('.carving-media').dataset.mobileReady==='true'
