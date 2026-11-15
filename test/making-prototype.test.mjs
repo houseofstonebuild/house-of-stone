@@ -5,6 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createApp} from '../server.mjs';
 import {spawnSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 
 const html=readFileSync(new URL('../public/prototypes/stone-to-sculpture.html',import.meta.url),'utf8');
 const js=readFileSync(new URL('../public/prototypes/stone-to-sculpture.js',import.meta.url),'utf8');
@@ -64,6 +65,11 @@ test('high-resolution mobile sculpture frames preserve detail without live WebGL
  assert.equal(manifest.columns,2);
  assert.equal(manifest.rows,3);
  assert.equal(manifest.generated.length,32);
+ for(const idx of [0,15,31]){
+  const asset=manifest.generated[idx];
+  const bytes=readFileSync(new URL('../public/assets/'+asset.name,import.meta.url));
+  assert.equal(createHash('sha256').update(bytes).digest('hex'),asset.sha256,'Baked frame checksum differs from manifest: '+asset.name);
+ }
  assert(manifest.tileWidth>=450 && manifest.tileHeight>=950,'Phone source image must have native-size detail');
  assert(statSync(new URL('../public/assets/making-mobile-atlas-v3-00.webp',import.meta.url)).size>10000);
  assert(statSync(new URL('../public/assets/making-mobile-atlas-v3-31.webp',import.meta.url)).size>10000);
