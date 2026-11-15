@@ -100,13 +100,14 @@ try{
      pose=await page.evaluate(()=>{const root=document.getElementById('render');return {
        strike:Number(root.dataset.strike),phase:Number(root.dataset.hitPhase),
        closed:root.dataset.hammerClosed,error:Number(root.dataset.contactError),
-       tipError:Number(root.dataset.tipSurfaceError),aperture:Number(root.dataset.apertureProgress)
+       tipError:Number(root.dataset.tipSurfaceError),stoneContact:Number(root.dataset.chiselStoneContact),aperture:Number(root.dataset.apertureProgress)
      }});
      if(pose.closed==='true' && Math.abs(pose.strike-n)<=1)break;
    }
    assert.equal(pose.closed,'true',`Hammer did not reach closed impact pose: ${JSON.stringify({n,p,pose})}`);
    assert(pose.error<.055,`Hammer face not touching chisel: ${JSON.stringify({n,p,pose})}`);
    assert(pose.tipError<.025,`Tool tip misses changing parent stone: ${JSON.stringify({n,p,pose})}`);
+   assert(pose.stoneContact<.03,`World-space chisel tip does not meet the stone: ${JSON.stringify({n,p,pose})}`);
    assert(pose.aperture>0&&pose.aperture<1,`Carving aperture progression missing: ${JSON.stringify({n,p,pose})}`);
     const {closed,error,material,carveProgress}=await page.evaluate(()=>({
      closed:document.getElementById('render').dataset.hammerClosed,
@@ -121,9 +122,10 @@ try{
   }
   // Rewind via scroll as well as advance: the source must remain paused.
   await scrollTo(page,.690);
+  await page.waitForFunction(()=>{const v=document.getElementById('archive-film');return !Number.isFinite(v.duration)||v.duration===0||(!v.seeking&&Math.abs(v.currentTime-Number(document.getElementById('render').dataset.archiveTarget))<.6);},{timeout:10000}).catch(()=>{});
   const forward=await page.locator('#archive-film').evaluate(v=>({time:v.currentTime,duration:v.duration,paused:v.paused}));
   await scrollTo(page,.615);
-  await page.waitForTimeout(330);
+  await page.waitForFunction(()=>{const v=document.getElementById('archive-film');return !Number.isFinite(v.duration)||v.duration===0||(!v.seeking&&Math.abs(v.currentTime-Number(document.getElementById('render').dataset.archiveTarget))<.6);},{timeout:10000}).catch(()=>{});
   const backward=await page.locator('#archive-film').evaluate(v=>({time:v.currentTime,paused:v.paused}));
   assert(forward.paused&&backward.paused,'Scroll-scrubbed documentary must stay paused');
   if(Number.isFinite(forward.duration)&&forward.duration>.5){
