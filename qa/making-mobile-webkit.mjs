@@ -2,13 +2,19 @@
 // This covers the browser engine on iOS; it does not claim to measure real
 // device thermal throttling or native Safari toolbar dynamics.
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,rmSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,rmSync,readFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {webkit} from 'playwright';
 import {createApp} from '../server.mjs';
 
+const manifest=JSON.parse(readFileSync(new URL('../public/assets/making-mobile-atlas-v2-manifest.json',import.meta.url)));
+assert.equal(manifest.frameCount,192);
+assert.equal(manifest.columns,2);
+assert.equal(manifest.rows,3);
+assert(manifest.tileWidth>=450&&manifest.tileHeight>=950,'Source frames must not be low-resolution upscales');
+assert.equal(manifest.generated.length,32);
 const output=new URL('../test-results/browser/mobile-webkit/',import.meta.url);
 mkdirSync(output,{recursive:true});
 const dataDir=mkdtempSync(join(tmpdir(),'hos-webkit-'));
@@ -36,7 +42,7 @@ try{
     const host=document.getElementById('render'),scene=document.getElementById('mobile-sculpture-frames');
     const visible=progress>=.305;
     return !visible||(Number.isInteger(Number(host.dataset.mobileAtlasFrame))&&
-      host.dataset.mobileAtlasPending===''&&getComputedStyle(scene).backgroundImage.includes('making-mobile-atlas-v1'));
+      host.dataset.mobileAtlasPending===''&&getComputedStyle(scene).backgroundImage.includes('making-mobile-atlas-v2'));
    },progress,{timeout:20000});
    await page.waitForTimeout(120);
    const info=await page.evaluate(()=>({
@@ -48,8 +54,9 @@ try{
     docWidth:document.documentElement.scrollWidth,viewportWidth:innerWidth
    }));
    assert(!info.liveWebGL,'WebKit phone unexpectedly instantiated a WebGL renderer');
+   assert(manifest.tileWidth>=view.width,'Baked sculpture image must never be enlarged beyond its pixel width on phones');
    assert(info.docWidth<=info.viewportWidth+2,'WebKit page has horizontal overflow');
-   if(progress>=.305)assert.match(info.atlas,/making-mobile-atlas-v1-/);
+   if(progress>=.305)assert.match(info.atlas,/making-mobile-atlas-v2-/);
    samples.push({progress,frame:info.frame,phase:info.phase});
   }
   assert(samples[7].frame>samples[8].frame,'Backward scroll did not rewind in WebKit');
