@@ -9,7 +9,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
 
   const mobile=()=>window.innerWidth<=800;
   const state={started:false,ready:false,error:false,scene:null,renderer:null,camera:null,
-    model:null,root:null,canvas:null,plinth:null,lastWidth:0,lastHeight:0,lastRatio:0};
+    model:null,root:null,canvas:null,plinth:null,lastWidth:0,lastHeight:0,lastRatio:0,lastP:0};
   const emit=(value)=>{host.dataset.approvedModelState=value;onState(value)};
 
   async function initialize(){
@@ -90,7 +90,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
         e.preventDefault();state.ready=false;emit('context-lost');
       });
       state.ready=true;emit('ready');
-      resize();render();
+      resize();render();update(state.lastP);
     } catch(error) {
       state.error=true;emit('error');
       console.warn('The approved Coil GLB could not be displayed',error);
@@ -101,6 +101,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
       img.src='/assets/zsa-006-studio-front-v2.webp';
       img.alt='Photograph of the original Coil sculpture';
       layer.append(img);
+      update(state.lastP);
     }
   }
   function resize(){
@@ -126,6 +127,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
     state.renderer.render(state.scene,state.camera);
   }
   function update(p){
+    state.lastP=p;
     // Prewarm the 3D asset before its reveal; zero per-scroll GPU work
     // throughout Zimbabwe, transport, marking, chiseling and heating.
     if(p>=.875&&!state.started)initialize();
