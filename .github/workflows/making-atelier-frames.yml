@@ -1,0 +1,44 @@
+name: Build authentic Making cinema frames
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/build-making-cinema-frames.sh'
+      - 'public/assets/making-chiseling-scrub-v1.mp4'
+      - '.github/workflows/making-atelier-frames.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: atelier-frame-build-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Build 48 high-resolution frames from real documentary film
+        run: sh scripts/build-making-cinema-frames.sh
+      - name: Verify generated files
+        run: |
+          test -s public/assets/making-cinema-frames/frame_00.webp
+          test -s public/assets/making-cinema-frames/frame_47.webp
+          test -s public/assets/making-cinema-frames/manifest.json
+      - name: Retain visual assets for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: making-atelier-authentic-film-frames
+          path: public/assets/making-cinema-frames
+          retention-days: 14
+      - name: Publish generated frames
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/assets/making-cinema-frames/
+          git diff --cached --quiet && exit 0
+          git commit -m 'Render authentic workshop video scroll frames for new Making study'
+          git pull --rebase origin main
+          git push origin HEAD:main
