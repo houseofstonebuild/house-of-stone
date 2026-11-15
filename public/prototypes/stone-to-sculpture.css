@@ -98,3 +98,11 @@
  .stage.mobile-atlas-mode #render canvas{display:none!important}
  .stage.mobile-atlas-mode #render{filter:none;will-change:auto}
 }
+
+/* iOS: avoid per-scroll SVG blur and drop-shadow filter invalidation. */
+@media(max-width:800px){
+ #origin-map,#travel-route,#transport-marker,#country-shape{filter:none!important}
+ .stage.mobile-atlas-mode .map-scene{will-change:auto}
+ .stage.mobile-atlas-mode #origin-map{will-change:auto;transform:none}
+ .stage.mobile-atlas-mode .map-texture{background-image:radial-gradient(circle at 63% 28%,rgba(197,159,118,.11),transparent 48%)}
+}
