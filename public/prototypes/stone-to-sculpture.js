@@ -49,7 +49,7 @@ const phaseT=(p,i)=>clamp((p-stops[i])/Math.max(.001,stops[i+1]-stops[i]));
 const impactVector=new THREE.Vector3();
 let shownProgress=0,desiredProgress=0;
 const e={renderer:null,scene:null,camera:null,root:null,canvas:null,
-  rock:null,rockCap:null,intermediate:null,intermediateGeo:null,intermediateRings:[],cut:{value:1.95},carveMargin:{value:2},carveMask:{value:null},rawMaterial:null,polished:null,rough:null,contourRows:[],
+  rock:null,rockCap:null,intermediate:null,intermediateGeo:null,intermediateRings:[],cut:{value:1.95},carveMargin:{value:2},carveProgress:{value:0},carveMask:{value:null},rawMaterial:null,polished:null,rough:null,contourRows:[],
   carvePlane:null,roughPlane:null,polishedPlane:null,marks:null,hammerRig:null,
   chiselHead:null,chiselTop:null,hammerHead:null,hammerContact:null,hammerPivot:null,toolRig:null,chips:[],dust:null,
   rasp:null,sanding:null,torch:null,torchLight:null,wax:null,waxLight:null,
@@ -100,15 +100,16 @@ function noise(x,y,z){
     lerp(lerp(h(0,0,1),h(1,0,1),t),lerp(h(0,1,1),h(1,1,1),t),u),v);
 }
 function fbm(x,y,z){return .57*noise(x,y,z)+.27*noise(x*2.11+17,y*2.11,z*2.11)+.16*noise(x*4.12,y*4.12+8,z*4.12)}
-function stoneMaterial({raw=false,color=0x656b62,roughness=.95,flat=false}={}){
+function stoneMaterial({raw=false,blank=false,color=0x656b62,roughness=.95,flat=false}={}){
  const mat=new THREE.MeshStandardMaterial({color,metalness:0,roughness,flatShading:flat,side:THREE.DoubleSide});
  mat.onBeforeCompile=shader=>{
    if(raw){shader.uniforms.uCut=e.cut;shader.uniforms.uCarveMargin=e.carveMargin;shader.uniforms.uCarveMask=e.carveMask;}
+   if(blank){shader.uniforms.uCarveProgress=e.carveProgress;shader.uniforms.uCarveMask=e.carveMask;}
    shader.vertexShader=shader.vertexShader.replace('#include <common>',`#include <common>\nvarying vec3 vLocalStone;`)
      .replace('#include <begin_vertex>',`#include <begin_vertex>\nvLocalStone=position;`);
    shader.fragmentShader=shader.fragmentShader.replace('#include <common>',`#include <common>
      varying vec3 vLocalStone;
-     ${raw?'uniform float uCut;uniform float uCarveMargin;uniform sampler2D uCarveMask;':''}
+     ${raw?'uniform float uCut;uniform float uCarveMargin;uniform sampler2D uCarveMask;':blank?'uniform float uCarveProgress;uniform sampler2D uCarveMask;':''}
      float msh(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
      float mno(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
        float a=mix(msh(i),msh(i+vec3(1,0,0)),f.x),b=mix(msh(i+vec3(0,1,0)),msh(i+vec3(1,1,0)),f.x);
@@ -138,9 +139,19 @@ function stoneMaterial({raw=false,color=0x656b62,roughness=.95,flat=false}={}){
            // Strip off the outer rind where the chisel has passed, so the approved
            // rough geometry appears at the same frontier instead of suddenly popping in.
            float frontCut=mix(.95,.13,bandT);
-           if(bandT>.001 && vLocalStone.z>frontCut)discard;`:''}`);
+           if(bandT>.001 && vLocalStone.z>frontCut)discard;`:blank?`
+          // The approved Coil silhouette also supplies its interior void.
+          // Reveal that void only where the chisel has reached the stone.
+          float localHeight=clamp(vLocalStone.y/3.35,0.0,1.0);
+          float layerStart=(1.0-localHeight)*.84;
+          float layerProgress=smoothstep(layerStart,layerStart+.13,clamp(uCarveProgress,0.0,1.0));
+          vec2 silhouetteUV=clamp(vec2((vLocalStone.x+1.70)/3.40,vLocalStone.y/3.48),vec2(.001),vec2(.999));
+          float excess=texture2D(uCarveMask,silhouetteUV).r*1.5;
+          float threshold=mix(1.50,.014,layerProgress);
+          float roughEdge=(mno(vLocalStone*22.0)-.5)*.012*layerProgress;
+          if(excess>threshold+roughEdge)discard;`:''}`);
  };
- mat.customProgramCacheKey=()=>raw?'hos-springstone-rind-cut-v4':'hos-springstone-detail-v3';
+ mat.customProgramCacheKey=()=>raw?'hos-springstone-rind-cut-v4':blank?'hos-coil-progressive-aperture-v5':'hos-springstone-detail-v3';
  return mat;
 }
 function rockGeometry(){
@@ -199,7 +210,7 @@ function makeCarvingBlank(rows){
    indices.push(a,b,a+1,b,b+1,a+1);
  }
  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geo.setIndex(indices);
- const material=stoneMaterial({color:0x454b45,roughness:1});material.transparent=true;material.opacity=0;material.depthWrite=true;
+ const material=stoneMaterial({color:0x454b45,roughness:1,blank:true});material.transparent=true;material.opacity=0;material.depthWrite=true;
  const blank=new THREE.Mesh(geo,material);blank.frustumCulled=false;blank.visible=false;e.root.add(blank);
  e.intermediate=blank;e.intermediateGeo=geo;e.intermediateRings=data;
  updateCarvingBlank(0);
@@ -207,9 +218,11 @@ function makeCarvingBlank(rows){
 function updateCarvingBlank(t){
  if(!e.intermediate)return;
  const data=e.intermediateRings,pos=e.intermediateGeo.attributes.position;
- const eased=smooth(clamp(t*1.35));
  for(let i=0;i<data.length;i++){
    const v=data[i],c=Math.cos(v.a),sn=Math.sin(v.a);
+   // Work down the original parent stone instead of shrinking all rows at once.
+   const localHeight=clamp(v.y/3.35);
+   const eased=smooth((t-(1-localHeight)*.84)/.16);
    const startWidth=1.18*v.taper,finishWidth=v.width;
    const center=lerp(0,v.center,eased);
    // No jump between the geological block and the gradually hand-shaped form.
@@ -480,8 +493,10 @@ function render(p){
  // cut the negative spaces progressively during the final third of the strikes.
  // A continuous irregular stone blank stays whole as the form is carved out.
  // The boundary follows the actual approved model's silhouette at every height.
- e.carveMargin.value=1.72; // the raw parent rock fades into the connected carving blank
- const toBlank=smooth((carve-.007)/.13),toRough=smooth((carve-.21)/.57);
+ e.carveMargin.value=lerp(1.72,-.04,removed);
+ e.carveProgress.value=removed;
+ // Keep the intermediate form visible until its outline and aperture emerge.
+ const toBlank=smooth((carve-.007)/.13),toRough=smooth((carve-.82)/.17);
  e.rock.visible=handoff>.02&&carve<.15;
  e.rock.material.transparent=true;
  e.rock.material.opacity=1-toBlank;
@@ -495,7 +510,7 @@ function render(p){
  e.rockCap.visible=false;
  if(e.marks){e.marks.visible=mark>.025;e.marks.material.opacity=.82*mark;}
  if(e.rough){
-   e.rough.visible=carve>.45&&wax<.997;
+   e.rough.visible=carve>.82&&wax<.997;
    e.rough.traverse(mesh=>{if(mesh.isMesh){for(const mat of Array.isArray(mesh.material)?mesh.material:[mesh.material]){
      mat.opacity=toRough;mat.depthWrite=toRough>.85;
    }}});
@@ -509,15 +524,16 @@ function render(p){
  }
  // Tool tip tracks the current silhouette layer; the hammer's true contact point
  // is rigged to touch the cap when the strike closes (rather than passing beside it).
- const index=Math.max(0,Math.min(e.contourRows.length-1,Math.round((.12+.79*carve)*e.contourRows.length)));
- const edge=e.contourRows[index]||{left:-.65,right:.65};
  const side=Math.floor(strokes)%2===0?-1:1;
- const boundary=side<0?edge.left:edge.right;
- const targetEdge=side<0?edge.left:edge.right;
- const outerWidth=lerp(1.0,Math.abs(targetEdge)+.06,smooth(removed));
- const impactX=clamp(side*outerWidth*.9,-1.18,1.18);
- const impactY=lerp(3.16,.36,carve);
- const impactZ=lerp(.74,.48,smooth(removed)); // surface of the shrinking stone blank
+ const impactHeight=lerp(3.16,.36,carve);
+ // Land on a front-facing vertex of the current carving blank.
+ const ring=Math.round(clamp((impactHeight-.025)/3.31)*84);
+ const vertex=ring*33+(side<0?12:4);
+ const positions=e.intermediateGeo?.attributes.position;
+ const impactX=positions?positions.getX(vertex):side*.6;
+ const impactY=positions?positions.getY(vertex):impactHeight;
+ const impactZ=positions?positions.getZ(vertex)+.012:.68;
+ host.dataset.tipSurfaceError=positions?Math.abs(impactZ-positions.getZ(vertex)).toFixed(4):'unavailable';
  if(e.toolRig){
   e.toolRig.visible=carve>.008&&carve<.985&&!reduced.matches;
   if(e.toolRig.visible){
@@ -578,6 +594,7 @@ function render(p){
  host.dataset.carveProgress=removed.toFixed(4);
  host.dataset.blankReady=String(Boolean(e.intermediate));
  host.dataset.blankOpacity=e.intermediate?e.intermediate.material.opacity.toFixed(3):'0';
- host.dataset.materialMargin=lerp(1.72,-.04,removed).toFixed(4);
+ host.dataset.materialMargin=e.carveMargin.value.toFixed(4);
+ host.dataset.apertureProgress=e.carveProgress.value.toFixed(4);
 }
 try{setup()}catch(err){fallback.hidden=false;host.dataset.modelError='true';console.warn('3D process unavailable',err)}
