@@ -6,6 +6,7 @@ import {randomUUID} from 'node:crypto';
 import {chromium} from 'playwright';
 import {createApp} from '../server.mjs';
 
+// Run against the published v5 baked mobile sprites, never against missing assets.
 const screenshots=new URL('../test-results/browser/making-v4/',import.meta.url);
 mkdirSync(screenshots,{recursive:true});
 const dataDir=mkdtempSync(join(tmpdir(),'hos-making-v4-'));
