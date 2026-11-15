@@ -5,7 +5,7 @@ on:
     paths:
       - 'qa/check-making-live.mjs'
       - '.github/workflows/making-deployment-check.yml'
-      - 'public/assets/making-mobile-atlas-v4-manifest.json'
+      - 'public/assets/making-mobile-atlas-v5-manifest.json'
   workflow_dispatch:
 permissions:
   contents: read
