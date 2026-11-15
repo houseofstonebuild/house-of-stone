@@ -12,6 +12,7 @@ const map=document.getElementById('map-scene');
 const archiveCutaway=document.getElementById('archive-cutaway');
 const archiveFilm=document.getElementById('archive-film');
 const archiveMobileFrames=document.getElementById('archive-mobile-frames');
+const sculptureAtlas=document.getElementById('mobile-sculpture-frames');
 const svg=document.getElementById('origin-map');
 const route=document.getElementById('travel-route');
 const truck=document.getElementById('transport-marker');
@@ -45,8 +46,16 @@ const lerp=(a,b,t)=>a+(b-a)*t;
 const fract=n=>n-Math.floor(n);
 const hash=(a,b=0,c=0)=>fract(Math.sin(a*127.1+b*311.7+c*74.7)*43758.5453);
 const mobile=()=>innerWidth<=800;
+const atlasCapture=mobile()&&new URLSearchParams(location.search).has('capture-mobile-atlas');
+const atlasStart=.305,atlasFrames=192,atlasColumns=4,atlasRows=4,atlasGroupSize=16;
+const atlasCache=new Map();
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-const active=()=>{const r=journey.getBoundingClientRect();return clamp(-r.top/Math.max(1,journey.offsetHeight-stage.offsetHeight));};
+let journeyTop=0,journeyDistance=1;
+function measureScrollRange(){
+ journeyTop=journey.getBoundingClientRect().top+scrollY;
+ journeyDistance=Math.max(1,journey.offsetHeight-stage.offsetHeight);
+}
+const active=()=>clamp((scrollY-journeyTop)/journeyDistance);
 const phaseFor=p=>{for(let i=0;i<stops.length-1;i++)if(p<stops[i+1])return i;return 10;};
 const phaseT=(p,i)=>clamp((p-stops[i])/Math.max(.001,stops[i+1]-stops[i]));
 const impactVector=new THREE.Vector3();
@@ -574,6 +583,72 @@ function finishingPoint(t){
  const pos=clamp(t)*(points.length-1),i=Math.floor(pos),j=Math.min(points.length-1,i+1);
  return points[i].clone().lerp(points[j],smooth(pos-i));
 }
+// A pre-rendered scroll atlas replaces WebGL entirely on phones. Each frame
+// comes from this same approved Coil scene, baked at a fixed mobile viewport.
+// Keep just the active/neighbor atlases decoded; do not seek video or shade
+// a deforming mesh during touch momentum.
+function mobileAtlasUrl(group){
+ return '/assets/making-mobile-atlas-v1-'+String(group).padStart(2,'0')+'.webp';
+}
+function requestMobileAtlas(group){
+ if(group<0||group>=atlasFrames/atlasGroupSize||atlasCache.has(group))return;
+ const img=new Image();img.decoding='async';
+ const entry={img,ready:false,failed:false};
+ atlasCache.set(group,entry);
+ img.onload=()=>{entry.ready=true;schedule();};
+ img.onerror=()=>{entry.failed=true;host.dataset.mobileAtlasError=String(group);schedule();};
+ img.src=mobileAtlasUrl(group);
+}
+function paintMobileSculpture(p){
+ if(!sculptureAtlas)return;
+ if(p<atlasStart){
+  sculptureAtlas.style.visibility='hidden';
+  return;
+ }
+ const frame=clamp(Math.round((p-atlasStart)/(1-atlasStart)*(atlasFrames-1)),0,atlasFrames-1);
+ const group=Math.floor(frame/atlasGroupSize),within=frame%atlasGroupSize;
+ requestMobileAtlas(group);
+ requestMobileAtlas(group+1);
+ const entry=atlasCache.get(group);
+ if(!entry?.ready){host.dataset.mobileAtlasPending=String(group);return;}
+ if(e.lastMobileAtlasGroup!==group){
+  e.lastMobileAtlasGroup=group;
+  sculptureAtlas.style.backgroundImage='url("'+mobileAtlasUrl(group)+'")';
+ }
+ const col=within%atlasColumns,row=Math.floor(within/atlasColumns);
+ if(e.lastMobileAtlasFrame!==frame){
+  e.lastMobileAtlasFrame=frame;
+  sculptureAtlas.style.backgroundPosition=(col/(atlasColumns-1)*100).toFixed(4)+'% '+(row/(atlasRows-1)*100).toFixed(4)+'%';
+  host.dataset.mobileAtlasFrame=String(frame);
+ }
+ sculptureAtlas.style.visibility='visible';
+ host.dataset.mobileAtlasPending='';
+ // Release atlas decoders far outside the active stage to protect iOS memory.
+ for(const [idx,item] of atlasCache){
+  if(Math.abs(idx-group)>2){
+   item.img.onload=null;item.img.onerror=null;item.img.src='';
+   atlasCache.delete(idx);
+  }
+ }
+}
+function setupMobileAtlas(){
+ e.mobileAtlasMode=true;
+ stage.classList.add('mobile-atlas-mode');
+ host.dataset.renderMode='precomputed-mobile';
+ host.dataset.modelReady='true';
+ // Keep the approved sculpture, not an unrelated photo, in each baked frame.
+ requestMobileAtlas(0);
+ requestMobileAtlas(1);
+ measureScrollRange();
+ window.addEventListener('scroll',schedule,{passive:true});
+ window.addEventListener('resize',()=>{measureScrollRange();schedule();},{passive:true});
+ reduced.addEventListener?.('change',schedule);
+ document.addEventListener('visibilitychange',schedule);
+ document.getElementById('skip').addEventListener('click',()=>{
+  document.getElementById('finished').scrollIntoView({behavior:reduced.matches?'instant':'smooth'});
+ });
+ schedule();
+}
 function setup(){
  // Two facing cut planes let the real rough GLB grow out of the single working blank.
  // No replacement artwork is generated; the approved Coil geometry is never edited.
@@ -581,9 +656,9 @@ function setup(){
  e.carveRevealPlane=new THREE.Plane(new THREE.Vector3(0,1,0),-3.6);
  e.carveMask.value=new THREE.DataTexture(new Uint8Array([0]),1,1,THREE.RedFormat);e.carveMask.value.needsUpdate=true;
  const canvas=document.createElement('canvas');host.prepend(canvas);e.canvas=canvas;
- const ctx=canvas.getContext('webgl2',{antialias:!mobile(),alpha:true,powerPreference:'low-power'});
+ const ctx=canvas.getContext('webgl2',{antialias:!mobile(),alpha:true,preserveDrawingBuffer:atlasCapture,powerPreference:'low-power'});
  if(!ctx)throw new Error('WebGL2 unavailable');
- e.renderer=new THREE.WebGLRenderer({canvas,context:ctx,alpha:true,antialias:!mobile(),powerPreference:'low-power'});
+ e.renderer=new THREE.WebGLRenderer({canvas,context:ctx,alpha:true,antialias:!mobile(),preserveDrawingBuffer:atlasCapture,powerPreference:'low-power'});
  e.renderer.setClearColor(0x000000,0);e.renderer.localClippingEnabled=true;
  e.renderer.outputColorSpace=THREE.SRGBColorSpace;e.renderer.toneMapping=THREE.ACESFilmicToneMapping;
  e.renderer.toneMappingExposure=1.07;e.renderer.setPixelRatio(Math.min(devicePixelRatio,mobile()?.85:1.5));
@@ -596,6 +671,7 @@ function setup(){
  makeRock();makeStudio();makeChiselAndHammer();makeFinishingTools();loadCoil();
  canvas.addEventListener('webglcontextlost',ev=>{ev.preventDefault();e.contextLost=true;fallback.hidden=false},{passive:false});
  canvas.addEventListener('webglcontextrestored',()=>{e.contextLost=false;schedule()});
+ measureScrollRange();
  window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',resize,{passive:true});
  reduced.addEventListener?.('change',schedule);
  document.addEventListener('visibilitychange',schedule);
@@ -603,6 +679,7 @@ function setup(){
  resize();schedule();
 }
 function resize(){
+ measureScrollRange();
  if(!e.renderer)return;
  const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);
  if(e.renderWidth!==w||e.renderHeight!==h||e.renderMobile!==mobile()){
@@ -619,7 +696,7 @@ function schedule(){
 function tick(now){
  e.frame=0;
  const next=active();desiredProgress=next;
- if(mobile()&&!reduced.matches&&e.lastRenderTime&&now-e.lastRenderTime<31){e.frame=requestAnimationFrame(tick);return;}
+ if(mobile()&&!e.mobileAtlasMode&&!reduced.matches&&e.lastRenderTime&&now-e.lastRenderTime<31){e.frame=requestAnimationFrame(tick);return;}
  e.lastRenderTime=now;
  const delta=e.lastTick?Math.min(300,Math.max(1,now-e.lastTick)):16;
  e.lastTick=now;
@@ -662,6 +739,7 @@ function render(p){
   seekArchiveVideo(p);
  }
  host.dataset.documentaryCutaway=documentary.toFixed(3);
+ if(e.mobileAtlasMode){paintMobileSculpture(p);return;}
  if(!e.renderer||e.contextLost)return;
  const handoff=smooth((p-.31)/.088);
  // Continuous camera handoff: the Harare marker grows into the same physical block.
@@ -840,4 +918,7 @@ function render(p){
  host.dataset.materialMargin=e.carveMargin.value.toFixed(4);
  host.dataset.apertureProgress=e.carveProgress.value.toFixed(4);
 }
-try{setup()}catch(err){fallback.hidden=false;host.dataset.modelError='true';console.warn('3D process unavailable',err)}
+try{
+ if(mobile()&&!atlasCapture)setupMobileAtlas();
+ else {setup();if(atlasCapture)window.__hosCaptureFrame=p=>{if(!e.modelReady)return false;render(clamp(p));return true;};}
+}catch(err){fallback.hidden=false;host.dataset.modelError='true';console.warn('3D process unavailable',err)}
