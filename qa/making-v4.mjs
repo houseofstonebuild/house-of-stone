@@ -73,7 +73,7 @@ try{
    if(i===1){regionBox=info.countryBox;assert.notEqual(regionBox,countryBox,'Map should zoom into the Guruve region');}
    if(i===2){assert.equal(info.markerOpacity,'1','Illustrative stone transport marker should follow route');assert(!info.truckTransform.includes('rotate'),'Transport marker should never invert');}
    if(!isAtlas)assert.equal(info.maskReady,'true','Coil geometry silhouette field unavailable');
-   if(isAtlas&&p>=.305){assert(info.mobileAtlasFrame>0&&info.mobileAtlasFrame<192,'Invalid mobile sculpture frame');assert(info.mobileAtlasBlend>=0&&info.mobileAtlasBlend<=1,'Invalid adjacent-frame opacity');assert.match(info.mobileAtlasDisplay,/making-mobile-atlas-v4-/,'High-detail sculpture frame atlas not composited');}
+   if(isAtlas&&p>=.305){assert(info.mobileAtlasFrame>0&&info.mobileAtlasFrame<192,'Invalid mobile sculpture frame');assert(info.mobileAtlasBlend>=0&&info.mobileAtlasBlend<=1,'Invalid adjacent-frame opacity');assert.match(info.mobileAtlasDisplay,/making-mobile-atlas-v5-/,'High-detail sculpture frame atlas not composited');}
    if(!isAtlas&&i===5){assert(info.marking>.85,'Chalk marking must remain clearly visible before chiseling');assert(info.markSegments>20,'Contour extraction must create actual visible chalk geometry');}
    if(!isAtlas&&i>=7)assert(info.surfaceSamples>=5,'Approved Coil geometry should provide a stable surface');
    if(!isAtlas&&i===10)assert.equal(info.plinthAligned,'true','Gallery pedestal must be mounted at sculpture origin');
