@@ -206,7 +206,9 @@ const documentary={ready:false,lastSeek:-1,lastAt:0,pending:null,desired:0,activ
 archiveFilm.loop=false;
 archiveFilm.removeAttribute('loop');
 archiveFilm.pause();
-archiveFilm.preload='auto';
+archiveFilm.preload=mobile()?'none':'metadata';
+archiveCutaway.dataset.seekReady='false';
+if(!mobile())archiveFilm.load();
 function documentarySeek(t,force=false){
  const duration=Number.isFinite(archiveFilm.duration)&&archiveFilm.duration>0?archiveFilm.duration:8;
  const desired=clamp(t)*(Math.max(.1,duration-.08));
@@ -225,6 +227,7 @@ function documentarySeek(t,force=false){
 function onDocumentaryMetadata(){
  documentary.ready=true;
  archiveCutaway.dataset.frameReady='true';
+ archiveCutaway.dataset.seekReady=Number.isFinite(archiveFilm.duration)&&archiveFilm.duration>0?'true':'false';
  archiveFilm.pause();
  documentarySeek(documentary.targetProgress||0,true);
 }
