@@ -176,7 +176,7 @@ def main():
  a=p.parse_args();os.makedirs(a.out,exist_ok=True)
  if a.res<96 or a.res>220 or a.frames<48:raise ValueError('Invalid build settings')
  data=prepare(a.mesh,a.res);original=data[0];rawfield=data[4]
- phases=[];previous=float('inf')
+ phases=[];previous=float('inf');reuse={}
  for index,progress in enumerate(np.linspace(.305,1,a.frames)):
   p=float(progress)
   t=0. if p<.565 else 1. if p>=.765 else float(smooth((p-.565)/.20))
@@ -186,9 +186,19 @@ def main():
   mesh=original if t==1 else mesh_for(scalar,data)
   kind='raw' if p<.565 else 'rough' if p<.765 else 'refined' if p<.90 else 'polished' if p<.96 else 'gallery'
   marking=float(smooth((p-.445)/.09)) if .445<=p<.565 else 0.
+  # Reuse byte-identical poses instead of invoking the offline renderer on
+  # dozens of unchanged frames. Marking, carving and wax frames remain unique.
+  still='raw' if kind=='raw' and marking==0 else 'refined' if kind=='refined' else 'gallery' if kind=='gallery' else None
   for profile,w,h in [('desktop',1280,720),('mobile',720,1560)]:
    folder=os.path.join(a.out,profile);os.makedirs(folder,exist_ok=True)
-   render(mesh,data,os.path.join(folder,'frame_%03d.webp'%index),w,h,kind,profile=='mobile',marking,smooth((p-.90)/.06))
+   output=os.path.join(folder,'frame_%03d.webp'%index)
+   key=(profile,still)
+   if still and key in reuse:
+    import shutil
+    shutil.copyfile(reuse[key],output)
+   else:
+    render(mesh,data,output,w,h,kind,profile=='mobile',marking,smooth((p-.90)/.06))
+    if still:reuse[key]=output
   phases.append({'index':index,'progress':round(p,5),'remaining_voxels':volume})
   if index%12==0:print('Rendered',index,'of',a.frames,'volume',volume,flush=True)
  if phases[-1]['remaining_voxels']>=phases[0]['remaining_voxels']:
