@@ -62,7 +62,7 @@ function updateMap(p){
  const approach=smooth((p-.052)/.105);
  const travel=smooth((p-.17)/.135);
  const arrival=smooth((p-.29)/.085);
- const materialize=smooth((p-.337)/.092);
+ const materialize=smooth((p-.31)/.09);
  // Follow the moving shipment rather than changing views at a fixed waypoint.
  const waypoint=route.getPointAtLength(routeLength*travel);
  const countryX=550,countryY=340,guruveX=773.3,guruveY=169.4;
@@ -77,11 +77,13 @@ function updateMap(p){
  truck.setAttribute('opacity',String(approach>.84&&travel<.995?1:0));
  truck.setAttribute('transform',`translate(${waypoint.x.toFixed(2)} ${waypoint.y.toFixed(2)}) rotate(${(Math.atan2(waypoint.y-guruveY,waypoint.x-guruveX)*180/Math.PI-45).toFixed(2)})`);
  guruvePin.style.opacity=String(1-smooth((p-.22)/.07));
- hararePin.style.opacity=String(smooth((p-.17)/.08)*(1-smooth((p-.375)/.035)));
+ hararePin.style.opacity=String(smooth((p-.17)/.08)*(1-smooth((p-.285)/.052)));
+ const labelOpacity=(1-smooth((p-.24)/.085)).toFixed(3);
+ svg.querySelectorAll('.neighbour,.country-label,.topography,.geo-grid').forEach(node=>{node.style.opacity=labelOpacity;});
  const portal=document.getElementById('harare-arrival');
- if(portal){portal.style.opacity=String(smooth((p-.295)/.033)*(1-materialize));portal.setAttribute('transform',`translate(802.4 258.7) scale(${(lerp(.9,4.6,arrival)).toFixed(3)})`);}
- const mapOpacity=1-smooth((p-.355)/.069);
- const sceneOpacity=smooth((p-.334)/.090);
+ if(portal){portal.style.opacity=String(smooth((p-.296)/.037)*(1-materialize));portal.setAttribute('transform',`translate(802.4 258.7) scale(${(lerp(.7,1.7,arrival)).toFixed(3)})`);}
+ const mapOpacity=1-smooth((p-.292)/.092);
+ const sceneOpacity=smooth((p-.31)/.085);
  stage.style.setProperty('--mapOpacity',mapOpacity.toFixed(4));
  stage.style.setProperty('--sceneOpacity',sceneOpacity.toFixed(4));
  stage.style.setProperty('--handoff',materialize.toFixed(4));
@@ -114,12 +116,12 @@ function stoneMaterial({raw=false,color=0x656b62,roughness=.95,flat=false}={}){
        return mix(mix(a,b,f.y),mix(c,d,f.y),f.z);
      }`)
      .replace('#include <color_fragment>',`#include <color_fragment>
-       float g=mno(vLocalStone*5.0)*.63+mno(vLocalStone*24.0)*.25+mno(vLocalStone*69.0)*.12;
+       float g=mno(vLocalStone*12.0)*.48+mno(vLocalStone*42.0)*.35+mno(vLocalStone*121.0)*.17;
        float vein=pow(1.0-abs(sin(vLocalStone.y*13.3+vLocalStone.x*4.9+mno(vLocalStone*2.7)*5.0)),35.0);
-       diffuseColor.rgb*=mix(.62,1.21,g)*(1.0-.14*vein);
-       ${raw?`float oxide=mno(vLocalStone*2.7+vec3(11.0,-4.0,6.0));
-         float rind=smoothstep(.40,.81,oxide)*.58;
-         diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.36,.235,.15),rind);
+       diffuseColor.rgb*=mix(.85,1.12,g)*(1.0-.08*vein);
+       ${raw?`float oxide=mno(vLocalStone*7.2+vec3(11.0,-4.0,6.0));
+         float rind=smoothstep(.49,.79,oxide)*.22;
+         diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.22,.185,.145),rind);
          float chip=mno(vLocalStone*vec3(10.0,7.0,8.0));
           // Distance to Coil's actual projected mesh (including its central opening).
           vec2 silhouetteUV=clamp(vec2((vLocalStone.x+1.70)/3.40,(vLocalStone.y+1.74)/3.48),vec2(.001),vec2(.999));
@@ -149,7 +151,7 @@ function rockGeometry(){
   pos.needsUpdate=true;geo.computeVertexNormals();return geo;
 }
 function makeRock(){
- const rock=new THREE.Mesh(rockGeometry(),stoneMaterial({raw:true,color:0x414a42}));
+ const rock=new THREE.Mesh(rockGeometry(),stoneMaterial({raw:true,color:0x323c35}));
  rock.position.y=1.69;e.root.add(rock);e.rock=rock;
  const surface=new THREE.PlaneGeometry(2.1,1.47,26,18);surface.rotateX(-Math.PI/2);
  const pos=surface.attributes.position;
@@ -379,14 +381,17 @@ function schedule(){
  if(e.frame)return;
  e.frame=requestAnimationFrame(tick);
 }
-function tick(){
+function tick(now){
  e.frame=0;
  const next=active();desiredProgress=next;
+ const delta=e.lastTick?Math.min(300,Math.max(1,now-e.lastTick)):16;
+ e.lastTick=now;
+ const blend=1-Math.exp(-delta/48);
  if(reduced.matches)shownProgress=next;
- else shownProgress+=clamp((next-shownProgress)*.31,-.08,.08);
- if(Math.abs(next-shownProgress)<.00035)shownProgress=next;
+ else shownProgress+=(next-shownProgress)*blend;
+ if(Math.abs(next-shownProgress)<.0004)shownProgress=next;
  render(shownProgress);
- if(Math.abs(next-shownProgress)>.00035&&document.visibilityState!=='hidden')e.frame=requestAnimationFrame(tick);
+ if(Math.abs(next-shownProgress)>.0004&&document.visibilityState!=='hidden')e.frame=requestAnimationFrame(tick);
 }
 function render(p){
  const step=phaseFor(p);updateMap(p);
@@ -397,9 +402,9 @@ function render(p){
  }
  ui.progress.style.width=(p*100).toFixed(2)+'%';
  if(!e.renderer||e.contextLost)return;
- const handoff=smooth((p-.338)/.090);
+ const handoff=smooth((p-.31)/.085);
  // Continuous camera handoff: the Harare marker grows into the same physical block.
- e.root.scale.setScalar(lerp(.20,1,handoff));
+ e.root.scale.setScalar(lerp(.24,1,handoff));
  e.root.position.set(lerp(.85,0,handoff),lerp(-.66,0,handoff),0);
  const mark=smooth((p-.455)/.055)*(1-smooth((p-.536)/.022));
  const carve=smooth((p-.53)/.235);
@@ -418,7 +423,7 @@ function render(p){
  if(e.marks){e.marks.visible=mark>.025;e.marks.material.opacity=.82*mark;}
  if(e.rough){
   e.rough.visible=carve>.012&&wax<.997;
-  e.carvePlane.constant=.28;
+  e.carvePlane.constant=-lerp(3.38,-.20,removed);
   e.roughPlane.constant=lerp(4.5,-.26,wax);
  }
  if(e.polished){
