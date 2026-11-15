@@ -614,7 +614,7 @@ function finishingPoint(t){
 // Keep just the active/neighbor atlases decoded; do not seek video or shade
 // a deforming mesh during touch momentum.
 function mobileAtlasUrl(group){
- return '/assets/making-mobile-atlas-v4-'+String(group).padStart(2,'0')+'.webp';
+ return '/assets/making-mobile-atlas-v5-'+String(group).padStart(2,'0')+'.webp';
 }
 function requestMobileAtlas(group){
  if(group<0||group>=atlasFrames/atlasGroupSize||atlasCache.has(group))return;
