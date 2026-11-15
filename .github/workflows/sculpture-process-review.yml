@@ -6,8 +6,8 @@ on:
       - 'public/prototypes/stone-to-sculpture.*'
       - 'qa/making-v4.mjs'
       - 'qa/making-mobile-webkit.mjs'
-      - 'public/assets/making-mobile-atlas-v1-*.webp'
-      - 'public/assets/making-mobile-atlas-v1-manifest.json'
+      - 'public/assets/making-mobile-atlas-v3-*.webp'
+      - 'public/assets/making-mobile-atlas-v3-manifest.json'
       - 'test/making-prototype.test.mjs'
       - '.github/workflows/sculpture-process-review.yml'
   workflow_dispatch:
