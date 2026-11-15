@@ -406,19 +406,40 @@ function makeChalkFromModel(model){
  field.needsUpdate=true;e.carveMask.value=field;e.contourRows=rows;
   makeCarvingBlank(rows);
  host.dataset.carveMaskReady='true';
- const segments=[];
- for(let y=2;y<H-2;y+=2)for(let x=2;x<W-2;x+=2){
-   if(!inside(x,y))continue;
-   if(inside(x-2,y)&&inside(x+2,y)&&inside(x,y-2)&&inside(x,y+2))continue;
-   if(hash(x,y)<.29)continue;
+ // Trace continuous projected guide strokes and drape them onto the raw stone.
+ // This prevents disconnected chalk dots from floating in front of the block.
+ const segments=[],previous=[null,null,null,null];
+ const ray=new THREE.Raycaster(),towardStone=new THREE.Vector3(0,0,-1);
+ e.rock.updateMatrixWorld(true);
+ for(let y=3;y<H-3;y+=3){
+  const runs=[];let start=-1;
+  for(let x=2;x<W-2;x++){
+   const hit=inside(x,y);
+   if(hit&&start<0)start=x;
+   if(start>=0&&(!hit||x===W-3)){runs.push([start,hit?x:x-1]);start=-1;}
+  }
+  const limits=runs.length?[runs[0][0],runs[runs.length-1][1],runs.length>1?runs[0][1]:null,runs.length>1?runs[1][0]:null]:[];
+  for(let k=0;k<4;k++){
+   const x=limits[k];
+   if(x==null){previous[k]=null;continue;}
    const px=x/W*(maxX-minX)+minX,py=maxY-y/H*maxY;
-   segments.push(px,py,.82,px+(.008+hash(x,y,1)*.012),py+.006,.82);
+   ray.set(new THREE.Vector3(px,py,4),towardStone);
+   const hit=ray.intersectObject(e.rock,false)[0];
+   if(!hit){previous[k]=null;continue;}
+   const p=hit.point;
+   const point=new THREE.Vector3(p.x,p.y,p.z+.009);
+   if(previous[k]&&previous[k].distanceTo(point)<.18){
+    segments.push(previous[k].x,previous[k].y,previous[k].z,point.x,point.y,point.z);
+   }
+   previous[k]=point;
+  }
  }
  host.dataset.chalkSegmentCount=String(segments.length/6);
- if(segments.length<20)return;
+ if(segments.length<24)return;
  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(segments,3));
- const m=new THREE.LineBasicMaterial({color:0xd4d5bc,transparent:true,opacity:.88,depthTest:false});
- e.marks=new THREE.LineSegments(g,m);e.root.add(e.marks);e.marks.visible=false;
+ const m=new THREE.LineBasicMaterial({color:0xd2d1bc,transparent:true,opacity:.80,depthTest:true,depthWrite:false});
+ e.marks=new THREE.LineSegments(g,m);e.marks.renderOrder=4;
+ e.root.add(e.marks);e.marks.visible=false;
 }
 function loadCoil(){
  const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
