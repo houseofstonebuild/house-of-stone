@@ -509,11 +509,19 @@ function flushArchiveSeek(){
 }
 function seekArchiveVideo(p){
  if(!Number.isFinite(archiveFilm.duration)||archiveFilm.duration<=0)return;
- archiveDesiredTime=clamp((p-.590)/.141)*Math.max(0,archiveFilm.duration-.04);
+ // The source contains no lion reveal. Dense keyframes permit bounded reverse seeks.
+ const limit=Math.max(0,Math.min(archiveFilm.duration-.08,21.2));
+ const step=mobile()?.20:.065;
+ archiveDesiredTime=clamp(Math.round(clamp((p-.590)/.141)*limit/step)*step,0,limit);
  flushArchiveSeek();
  host.dataset.archiveTarget=archiveDesiredTime.toFixed(3);
 }
-archiveFilm.addEventListener('seeked',flushArchiveSeek);
+archiveFilm.addEventListener('seeked',()=>{
+  // Never display an undecoded/black video surface over the still fallback.
+  if(archiveFilm.readyState>=2)archiveCutaway.dataset.frameReady='true';
+  flushArchiveSeek();
+});
+archiveFilm.addEventListener('error',()=>{archiveCutaway.dataset.frameReady='false';});
 archiveFilm.addEventListener('loadedmetadata',schedule);
 archiveFilm.addEventListener('play',()=>archiveFilm.pause());
 // Raycast the original mesh at load time only. Finishing tools stay on the stone,
@@ -554,9 +562,9 @@ function setup(){
  e.carveRevealPlane=new THREE.Plane(new THREE.Vector3(0,1,0),-3.6);
  e.carveMask.value=new THREE.DataTexture(new Uint8Array([0]),1,1,THREE.RedFormat);e.carveMask.value.needsUpdate=true;
  const canvas=document.createElement('canvas');host.prepend(canvas);e.canvas=canvas;
- const ctx=canvas.getContext('webgl2',{antialias:true,alpha:true,powerPreference:'low-power'});
+ const ctx=canvas.getContext('webgl2',{antialias:!mobile(),alpha:true,powerPreference:'low-power'});
  if(!ctx)throw new Error('WebGL2 unavailable');
- e.renderer=new THREE.WebGLRenderer({canvas,context:ctx,alpha:true,antialias:true,powerPreference:'low-power'});
+ e.renderer=new THREE.WebGLRenderer({canvas,context:ctx,alpha:true,antialias:!mobile(),powerPreference:'low-power'});
  e.renderer.setClearColor(0x000000,0);e.renderer.localClippingEnabled=true;
  e.renderer.outputColorSpace=THREE.SRGBColorSpace;e.renderer.toneMapping=THREE.ACESFilmicToneMapping;
  e.renderer.toneMappingExposure=1.07;e.renderer.setPixelRatio(Math.min(devicePixelRatio,mobile()?.85:1.5));
@@ -619,7 +627,10 @@ function render(p){
  stage.style.setProperty('--archiveOpacity',showFilm?documentary.toFixed(4):'0');
  archiveCutaway.setAttribute('aria-hidden',String(!showFilm));
  archiveFilm.pause();
- if(showFilm)seekArchiveVideo(p);
+ if(showFilm){
+  if(archiveFilm.networkState===HTMLMediaElement.NETWORK_EMPTY)archiveFilm.load();
+  seekArchiveVideo(p);
+ }
  host.dataset.documentaryCutaway=documentary.toFixed(3);
  if(!e.renderer||e.contextLost)return;
  const handoff=smooth((p-.31)/.088);
@@ -686,6 +697,16 @@ function render(p){
     e.lastRoughOpacity=roughOpacity;
     for(const mat of e.roughMaterials){mat.opacity=roughOpacity;mat.depthWrite=carve>.16;}
    }
+   // Dry tooling gives way to the slightly darker, smoother wet-sanded stone.
+   // The final approved material remains untouched and is revealed by buffing.
+   const wet=smooth((p-.776)/.056);
+   if(Math.abs((e.lastWet??-1)-wet)>.012){
+    e.lastWet=wet;
+    for(const mat of e.roughMaterials){
+      mat.roughness=lerp(.99,.83,wet);
+      mat.color.setRGB(lerp(.36,.27,wet),lerp(.39,.30,wet),lerp(.35,.28,wet));
+    }
+   }
    e.roughPlane.constant=lerp(4.5,-.26,wax);
  }
 
@@ -750,7 +771,7 @@ function render(p){
  }
  if(e.sanding){e.sanding.visible=p>.812&&p<.832&&!reduced.matches;
   const point=finishingPoint(clamp((p-.812)/.02));
-  e.sanding.position.set(point.x,point.y,point.z+.04);
+  e.sanding.position.set(point.x+.036*Math.sin(file*95),point.y+.018*Math.sin(file*41),point.z+.035);
   e.sanding.rotation.z=Math.sin(file*60)*.12;
  }
  if(e.torch){e.torch.visible=p>.839&&p<.897&&!reduced.matches;
@@ -761,10 +782,10 @@ function render(p){
  }
  if(e.wax){e.wax.visible=p>.904&&p<.958&&!reduced.matches;
   const point=finishingPoint(wax);
-  e.wax.position.set(point.x,point.y,point.z+.07);
+  e.wax.position.set(point.x+.04*Math.sin(wax*130),point.y+.018*Math.cos(wax*91),point.z+.065);
   e.wax.rotation.z=Math.sin(wax*56)*.08;
   e.waxLight.intensity=e.wax.visible?1.0:0;
-  e.waxLight.position.set(e.wax.position.x,e.wax.position.y,1.8);
+  e.waxLight.position.set(e.wax.position.x,e.wax.position.y,e.wax.position.z+.60);
  }
  if(e.plinth)e.plinth.visible=gallery>.55;
  e.root.rotation.set(.007*Math.sin(p*5),lerp(-.18,.14,smooth((p-.43)/.56)),0);
