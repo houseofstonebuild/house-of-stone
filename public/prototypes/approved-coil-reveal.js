@@ -122,8 +122,8 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
     resize();
     const phone=mobile();
     state.root.rotation.set(0,.14,0);
-    state.camera.position.set(phone?.10:1.38,3.12,phone?9.55:8.55);
-    state.camera.lookAt(phone?0:.28,phone?1.33:1.68,0);
+    state.camera.position.set(phone?.10:1.38,3.12,phone?12.5:8.55);
+    state.camera.lookAt(phone?0:.28,phone?1.42:1.68,0);
     state.renderer.render(state.scene,state.camera);
   }
   function update(p){
