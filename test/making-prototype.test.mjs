@@ -33,7 +33,7 @@ test('scroll-driven source map is factual but does not imply a verified Coil qua
 test('post-Harare process follows original Coil and credible material transitions',()=>{
  assert.match(js,/new THREE\.IcosahedronGeometry\(1,5\)/);
  assert.match(js,/function makeRock\(\)/);
- assert.match(js,/normal\.needsUpdate=true;return geo/);
+ assert.match(js,/normals\.needsUpdate=true;return geo/);
  assert.match(js,/makeChalkFromModel\(original\)/);
  assert.match(js,/host\.dataset\.markingVisibility=/);
  assert.match(js,/const removed=\(Math\.floor\(strokes\)\+impact\)\/strokeCount/);
