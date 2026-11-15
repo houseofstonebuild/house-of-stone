@@ -48,7 +48,11 @@ test('natural springstone, synchronized chisel and traditional finish stages',()
  assert.match(js,/const toBlank=smooth\(\(carve-\.007\)\/\.13\),toRough=smooth\(\(carve-\.82\)\/\.17\)/);
  assert.match(js,/host\.dataset\.tipSurfaceError=/);
  assert.match(js,/host\.dataset\.apertureProgress=/);
- assert.match(js,/e\.blankHidePlane\.constant=frontier/);
+ assert.match(js,/e\.blankHidePlane\.constant=workingHeight/);
+ assert.match(js,/const supportOverlap=\.72/);
+ assert.match(js,/function makeBlankCap\(\)/);
+ assert.match(js,/function updateBlankCap\(y\)/);
+ assert.match(js,/host\.dataset\.blankCapReady=/);
  assert.match(js,/e\.carveRevealPlane\.constant=-frontier/);
  assert.match(js,/e\.rough\.visible=carve>\.035/);
  assert.match(js,/host\.dataset\.realShapeReveal=/);
