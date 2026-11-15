@@ -45,7 +45,8 @@ try{
     markerOpacity:document.getElementById('transport-marker').getAttribute('opacity'),
     contactError:document.getElementById('render').dataset.contactError,
     hammerClosed:document.getElementById('render').dataset.hammerClosed,
-    canvasWidth:document.querySelector('#render canvas')?.width||0, maskReady:document.getElementById('render').dataset.carveMaskReady, carve:document.getElementById('render').dataset.carveProgress, margin:document.getElementById('render').dataset.materialMargin}));
+    canvasWidth:document.querySelector('#render canvas')?.width||0, maskReady:document.getElementById('render').dataset.carveMaskReady, carve:document.getElementById('render').dataset.carveProgress, margin:document.getElementById('render').dataset.materialMargin,
+    aperture:document.getElementById('render').dataset.apertureProgress, tipError:document.getElementById('render').dataset.tipSurfaceError,blankOpacity:document.getElementById('render').dataset.blankOpacity}));
    assert.equal(info.phase,expected,`Incorrect stage ${view.width}px at ${p}: ${JSON.stringify(info)}`);
    assert(info.docWidth<=info.viewport+2,`Unexpected horizontal overflow: ${JSON.stringify(info)}`);
    assert(info.canvasWidth>0,'WebGL canvas must remain allocated');
@@ -53,7 +54,12 @@ try{
    if(i===1){regionBox=info.countryBox;assert.notEqual(regionBox,countryBox,'Map should zoom into the Guruve region');}
    if(i===2)assert.equal(info.markerOpacity,'1','Illustrative stone transport marker should follow route');
    assert.equal(info.maskReady,'true','Coil geometry silhouette field unavailable');
-   if(i===6)assert(Number(info.carve)>.07&&Number(info.carve)<.98,'Stone needs to be shaped progressively');
+   if(i===6){
+    assert(Number(info.carve)>.07&&Number(info.carve)<.98,'Stone needs to be shaped progressively');
+    assert(Number(info.aperture)>.07&&Number(info.aperture)<.98,'Opening must reveal with the chiseling sequence');
+    assert(Number(info.tipError)<.025,'Chisel tip should follow current fitted stone surface');
+    assert(Number(info.blankOpacity)>.1,'Physical intermediate blank should remain visible during chiseling');
+   }
    if(i===5 && info.hammerClosed==='true')assert(Number(info.contactError)<.06,'Hammer head misses the chisel cap');
    const file=new URL(`${view.width}-${String(i).padStart(2,'0')}.png`,screenshots).pathname;
    await page.screenshot({path:file,fullPage:false});
@@ -76,12 +82,15 @@ try{
      await page.waitForTimeout(180);
      pose=await page.evaluate(()=>{const root=document.getElementById('render');return {
        strike:Number(root.dataset.strike),phase:Number(root.dataset.hitPhase),
-       closed:root.dataset.hammerClosed,error:Number(root.dataset.contactError)
+       closed:root.dataset.hammerClosed,error:Number(root.dataset.contactError),
+       tipError:Number(root.dataset.tipSurfaceError),aperture:Number(root.dataset.apertureProgress)
      }});
      if(pose.closed==='true' && Math.abs(pose.strike-n)<=1)break;
    }
    assert.equal(pose.closed,'true',`Hammer did not reach closed impact pose: ${JSON.stringify({n,p,pose})}`);
    assert(pose.error<.055,`Hammer face not touching chisel: ${JSON.stringify({n,p,pose})}`);
+   assert(pose.tipError<.025,`Tool tip misses changing parent stone: ${JSON.stringify({n,p,pose})}`);
+   assert(pose.aperture>0&&pose.aperture<1,`Carving aperture progression missing: ${JSON.stringify({n,p,pose})}`);
     const {closed,error,material,carveProgress}=await page.evaluate(()=>({
      closed:document.getElementById('render').dataset.hammerClosed,
      error:Number(document.getElementById('render').dataset.contactError),
