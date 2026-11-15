@@ -4,6 +4,7 @@ import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
 
+// Verify the exact v4 private process source after the mobile frame publisher commits.
 const origin=(process.env.HOS_LIVE_URL||'https://houseofmabwe.com').replace(/\/$/,'');
 const paths=['/prototypes/stone-to-sculpture.html','/prototypes/stone-to-sculpture.js','/prototypes/stone-to-sculpture.css',
  '/assets/making-mobile-atlas-v4-manifest.json','/assets/making-mobile-atlas-v4-00.webp','/assets/making-mobile-atlas-v4-31.webp'];
