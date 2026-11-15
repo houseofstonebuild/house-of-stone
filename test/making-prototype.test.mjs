@@ -36,7 +36,7 @@ test('natural springstone reveals the approved Coil without a cylindrical proxy 
  assert.match(js,/host\.dataset\.markingVisibility=/);
  assert.match(js,/const removed=\(Math\.floor\(strokes\)\+impact\)\/strokeCount/);
  assert.match(js,/float removal=uCarveProgress\+localY/);
- assert.match(js,/if\(removal>\.52\)discard/);
+ assert.match(js,/if\(removal>\.72\)discard/);
  assert.match(js,/e\.carveRevealPlane\.constant=\.55/);
  assert.match(js,/e\.rock\.visible=handoff>\.02&&carve<\.90/);
  assert.match(js,/const rockFade=smooth/);
