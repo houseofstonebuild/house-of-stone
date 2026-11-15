@@ -268,9 +268,12 @@ function render(p){
  updateFrames(p);
  const documentary=smooth((p-.565)/.020)*(1-smooth((p-.750)/.015));
  const mobileFilm=mobile();
- const handoff=smooth((p-.625)/.037);
- const filmOpacity=mobileFilm?documentary*(1-handoff):documentary;
- const stoneOpacity=mobileFilm&&p>=.565&&p<.765?handoff:1;
+ // Strictly sequential on phones: documentary fades OUT, then stone fades IN.
+ // At no point can the real workshop footage obscure a visible sculpture.
+ const filmOut=smooth((p-.650)/.014);
+ const stoneIn=smooth((p-.666)/.020);
+ const filmOpacity=mobileFilm?documentary*(1-filmOut):documentary;
+ const stoneOpacity=mobileFilm&&p>=.565&&p<.765?stoneIn:1;
  const show=!!v6.manifest&&!reduced.matches&&document.visibilityState==='visible'&&filmOpacity>.01;
  stage.style.setProperty('--archiveOpacity',show?filmOpacity.toFixed(4):'0');
  stage.style.setProperty('--processStoneOpacity',stoneOpacity.toFixed(4));
