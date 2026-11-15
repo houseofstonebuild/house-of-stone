@@ -73,3 +73,19 @@
  .archive-cutaway-label{font-size:7px;line-height:1.25;padding:13px 7px 6px}
  .stage-info h1{overflow-wrap:normal}
 }
+
+/* On phones, a single decoded atlas replaces video seeking during momentum scroll. */
+.archive-mobile-frames{display:none;position:absolute;inset:0;pointer-events:none}
+@media(max-width:800px){
+ .archive-cutaway{aspect-ratio:16/9;max-height:none}
+ .archive-cutaway video{display:none!important}
+ .archive-mobile-frames{
+  display:block;z-index:1;
+  background-image:url('/assets/making-chiseling-scroll-frames-v1.webp');
+  background-repeat:no-repeat;
+  background-size:700% 600%;
+  background-position:0% 0%;
+  image-rendering:auto;
+ }
+ .archive-cutaway-label{z-index:3}
+}
