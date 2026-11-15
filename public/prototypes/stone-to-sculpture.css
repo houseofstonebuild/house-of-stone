@@ -178,3 +178,9 @@
  }
  .stage[data-phase="6"] .skip{top:70px;right:23px}
 }
+
+/* Preserve vertical separation on short, wide-aspect phones without a layout shift:
+   use the available crop of the pre-rendered frame rather than scaling Coil. */
+@media(max-width:800px){
+ #render>.making-v6-image{object-position:center 64%}
+}
