@@ -722,8 +722,9 @@ function render(p){
  const documentary=smooth((p-.590)/.025)*(1-smooth((p-.731)/.028));
  const showFilm=!reduced.matches&&document.visibilityState==='visible'&&documentary>.05;
  stage.style.setProperty('--archiveOpacity',showFilm?documentary.toFixed(4):'0');
- archiveCutaway.setAttribute('aria-hidden',String(!showFilm));
- archiveFilm.pause();
+ const hidden=String(!showFilm);
+ if(archiveCutaway.getAttribute('aria-hidden')!==hidden)archiveCutaway.setAttribute('aria-hidden',hidden);
+ if(!archiveFilm.paused)archiveFilm.pause();
  if(mobile()){
   // A single WebP atlas turns touch scrolling into deterministic, zero-video-decoder
   // playback. The background position only changes when the frame index changes.
