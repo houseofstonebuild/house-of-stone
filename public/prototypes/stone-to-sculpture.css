@@ -152,3 +152,19 @@
  .archive-cutaway{display:none!important}
  #render>.making-v6-image{transition:none!important}
 }
+
+/* During real chiseling, documentary film and the carving occupy separate
+   editorial zones. The authentic film never covers the actual stone. */
+@media(min-width:801px){
+ .stage[data-phase="6"] .archive-cutaway{
+  left:clamp(28px,6.7vw,120px);right:auto;
+  top:clamp(110px,14svh,180px);width:min(31vw,410px);aspect-ratio:16/10;
+  border-color:rgba(221,204,180,.32);
+ }
+ .stage[data-phase="6"] .stage-info{
+  top:auto;bottom:clamp(98px,14svh,180px);transform:none;
+  width:min(31vw,410px);
+ }
+ .stage[data-phase="6"] .stage-info h1{font-size:clamp(49px,4.7vw,73px)}
+ .stage[data-phase="6"] .counter{margin-bottom:12px}
+}
