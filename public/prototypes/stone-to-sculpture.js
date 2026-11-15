@@ -169,8 +169,10 @@ function stoneMaterial({raw=false,blank=false,color=0x656b62,roughness=.95,flat=
            // Irregular removal through the geological skin, not a planar cylinder cut.
            float localY=clamp((vLocalStone.y+1.69)/3.38,0.0,1.0);
            float tooth=mno(vLocalStone*6.8)*.14+mno(vLocalStone*27.0)*.07;
-           float removal=uCarveProgress+localY*.22+tooth-.105;
-           if(removal>.52)discard;`:blank?`
+           // The cut travels from the upper contours toward the foot of the stone;
+           // a larger height gradient prevents the entire model popping out at once.
+           float removal=uCarveProgress+localY*.42+tooth-.105;
+           if(removal>.72)discard;`:blank?`
           // Do not punch holes in the parent shell. The approved three-dimensional
           // Coil mesh supplies the true openings as material is taken away.
           float localHeight=clamp(vLocalStone.y/3.35,0.0,1.0);
