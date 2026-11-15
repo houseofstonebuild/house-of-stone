@@ -304,15 +304,24 @@ function shadowTexture(){
 function makeStudio(){
  const shadow=new THREE.Mesh(new THREE.PlaneGeometry(5.4,4.4),new THREE.MeshBasicMaterial({map:shadowTexture(),transparent:true,depthWrite:false}));
  shadow.rotation.x=-Math.PI/2;shadow.position.y=-.055;e.scene.add(shadow);e.shadow=shadow;
- // Gallery limestone pedestal, geometrically centered on the approved sculpture.
+ // A single honed limestone slab, not a stack of generic podium cylinders.
+ // Its centre is the original sculpture's footprint; the top is exactly y=0.
  const base=new THREE.Group();
- const limestone=new THREE.MeshStandardMaterial({color:0x938f85,roughness:.91});
- const column=new THREE.Mesh(new THREE.CylinderGeometry(.90,.93,.49,64),limestone);
- column.position.y=-.255;base.add(column);
- const lip=new THREE.Mesh(new THREE.CylinderGeometry(.915,.915,.027,64),new THREE.MeshStandardMaterial({color:0xa39b8d,roughness:.72}));
- lip.position.y=-.024;base.add(lip);
- const foot=new THREE.Mesh(new THREE.CylinderGeometry(.945,.945,.036,64),new THREE.MeshStandardMaterial({color:0x6e6b63,roughness:.84}));
- foot.position.y=-.51;base.add(foot);
+ const radius=.055,halfW=.86,halfD=.55;
+ const shape=new THREE.Shape();
+ shape.moveTo(-halfW+radius,-halfD);
+ shape.lineTo(halfW-radius,-halfD);
+ shape.quadraticCurveTo(halfW,-halfD,halfW,-halfD+radius);
+ shape.lineTo(halfW,halfD-radius);
+ shape.quadraticCurveTo(halfW,halfD,halfW-radius,halfD);
+ shape.lineTo(-halfW+radius,halfD);
+ shape.quadraticCurveTo(-halfW,halfD,-halfW,halfD-radius);
+ shape.lineTo(-halfW,-halfD+radius);
+ shape.quadraticCurveTo(-halfW,-halfD,-halfW+radius,-halfD);
+ const geo=new THREE.ExtrudeGeometry(shape,{depth:.31,steps:1,bevelEnabled:true,bevelThickness:.014,bevelSize:.013,bevelSegments:2,curveSegments:8});
+ geo.rotateX(-Math.PI/2);geo.translate(0,-.31,0);
+ const slab=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:0x8d897c,roughness:.88,metalness:0}));
+ base.add(slab);
  base.visible=false;e.root.add(base);e.plinth=base;
 }
 function makeChiselAndHammer(){
@@ -835,7 +844,15 @@ function render(p){
  if(e.blankCap)e.blankCap.visible=false;
  host.dataset.intermediateVisible='false';
  e.rockCap.visible=false;
- if(e.marks){e.marks.visible=mark>.025;e.marks.material.opacity=.94*mark;}
+ if(e.marks){
+  e.marks.visible=mark>.025;
+  // Each successive scroll interval draws more of the outline onto the actual
+  // rock. Lines do not simply blink on all at once.
+  const drawn=smooth((p-.445)/.085),pairs=Math.floor(e.marks.geometry.attributes.position.count*.5*drawn);
+  e.marks.geometry.setDrawRange(0,pairs*2);
+  e.marks.material.opacity=.78*mark;
+  host.dataset.contoursDrawn=drawn.toFixed(3);
+ }
  host.dataset.markingVisibility=mark.toFixed(4);
  if(e.rough){
    e.rough.visible=carve>.012&&p<.90;
@@ -906,7 +923,7 @@ function render(p){
  if(e.plinth){
   e.plinth.visible=gallery>.55;
   // Ground shadow follows the limestone foot instead of bisecting the pedestal.
-  if(e.shadow)e.shadow.position.y=lerp(-.055,-.55,gallery);
+  if(e.shadow)e.shadow.position.y=lerp(-.055,-.33,gallery);
  }
  host.dataset.plinthAligned=String(e.plinth?.parent===e.root);
  e.root.rotation.set(.007*Math.sin(p*5),lerp(-.18,.14,smooth((p-.43)/.56)),0);
