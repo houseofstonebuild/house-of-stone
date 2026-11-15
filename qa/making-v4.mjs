@@ -50,7 +50,7 @@ try{
     carveFrontier:document.getElementById('render').dataset.carveFrontier,realShapeReveal:document.getElementById('render').dataset.realShapeReveal,
     blankCapReady:document.getElementById('render').dataset.blankCapReady,blankCapHeight:document.getElementById('render').dataset.blankCapHeight,supportOverlap:document.getElementById('render').dataset.supportOverlap,
     cutawayOpacity:Number(getComputedStyle(document.getElementById('archive-cutaway')).opacity),cutawayHidden:document.getElementById('archive-cutaway').getAttribute('aria-hidden'),
-    marking:Number(document.getElementById('render').dataset.markingVisibility),stoneContact:Number(document.getElementById('render').dataset.chiselStoneContact),
+    marking:Number(document.getElementById('render').dataset.markingVisibility),markSegments:Number(document.getElementById('render').dataset.chalkSegmentCount),stoneContact:Number(document.getElementById('render').dataset.chiselStoneContact),
     archiveTarget:Number(document.getElementById('render').dataset.archiveTarget),videoTime:document.getElementById('archive-film').currentTime,
     videoPaused:document.getElementById('archive-film').paused,surfaceSamples:Number(document.getElementById('render').dataset.surfaceSampleCount),
     truckTransform:document.getElementById('transport-marker').getAttribute('transform')}));
@@ -61,7 +61,7 @@ try{
    if(i===1){regionBox=info.countryBox;assert.notEqual(regionBox,countryBox,'Map should zoom into the Guruve region');}
    if(i===2){assert.equal(info.markerOpacity,'1','Illustrative stone transport marker should follow route');assert(!info.truckTransform.includes('rotate'),'Transport marker should never invert');}
    assert.equal(info.maskReady,'true','Coil geometry silhouette field unavailable');
-   if(i===5)assert(info.marking>.85,'Chalk marking must remain clearly visible before chiseling');
+   if(i===5){assert(info.marking>.85,'Chalk marking must remain clearly visible before chiseling');assert(info.markSegments>20,'Contour extraction must create actual visible chalk geometry');}
    if(i>=7)assert(info.surfaceSamples>=5,'Finishing tools need precomputed contact samples');
    if(i===6){
     assert(Number(info.carve)>.07&&Number(info.carve)<.98,'Stone needs to be shaped progressively');
