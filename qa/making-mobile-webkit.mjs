@@ -28,7 +28,7 @@ try{
   const page=await browser.newPage({viewport:view,deviceScaleFactor:2,hasTouch:true,isMobile:true});
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
-  page.on('response',r=>{if(r.status()>=400&&/making-mobile-atlas-v3/.test(r.url()))errors.push(String(r.status())+' '+r.url());});
+  page.on('response',r=>{if(r.status()>=400&&/making-mobile-atlas-v4/.test(r.url()))errors.push(String(r.status())+' '+r.url());});
   await page.goto(origin+'/prototypes/stone-to-sculpture.html',{waitUntil:'domcontentloaded'});
   await page.locator('#render[data-render-mode="precomputed-mobile"]').waitFor({timeout:30000});
   const samples=[];
@@ -47,7 +47,7 @@ try{
     const frame=Number(host.dataset.mobileAtlasFrame);
     return host.dataset.mobileAtlasPending===''&&
       Number.isInteger(frame)&&Math.abs(frame-expected)<=2&&
-      getComputedStyle(scene).backgroundImage.includes('making-mobile-atlas-v3');
+      getComputedStyle(scene).backgroundImage.includes('making-mobile-atlas-v4');
    },{progress,expected},{timeout:20000});
    await page.waitForTimeout(120);
    const info=await page.evaluate(()=>({
