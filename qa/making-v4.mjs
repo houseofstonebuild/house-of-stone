@@ -46,7 +46,8 @@ try{
     contactError:document.getElementById('render').dataset.contactError,
     hammerClosed:document.getElementById('render').dataset.hammerClosed,
     canvasWidth:document.querySelector('#render canvas')?.width||0, maskReady:document.getElementById('render').dataset.carveMaskReady, carve:document.getElementById('render').dataset.carveProgress, margin:document.getElementById('render').dataset.materialMargin,
-    aperture:document.getElementById('render').dataset.apertureProgress, tipError:document.getElementById('render').dataset.tipSurfaceError,blankOpacity:document.getElementById('render').dataset.blankOpacity}));
+    aperture:document.getElementById('render').dataset.apertureProgress, tipError:document.getElementById('render').dataset.tipSurfaceError,blankOpacity:document.getElementById('render').dataset.blankOpacity,
+    carveFrontier:document.getElementById('render').dataset.carveFrontier,realShapeReveal:document.getElementById('render').dataset.realShapeReveal}));
    assert.equal(info.phase,expected,`Incorrect stage ${view.width}px at ${p}: ${JSON.stringify(info)}`);
    assert(info.docWidth<=info.viewport+2,`Unexpected horizontal overflow: ${JSON.stringify(info)}`);
    assert(info.canvasWidth>0,'WebGL canvas must remain allocated');
@@ -59,6 +60,8 @@ try{
     assert(Number(info.aperture)>.07&&Number(info.aperture)<.98,'Opening must reveal with the chiseling sequence');
     assert(Number(info.tipError)<.025,'Chisel tip should follow current fitted stone surface');
     assert(Number(info.blankOpacity)>.1,'Physical intermediate blank should remain visible during chiseling');
+    assert(Number(info.realShapeReveal)>.15&&Number(info.realShapeReveal)<.90,'Approved 3D Coil geometry should emerge gradually throughout chiseling');
+    assert(Number(info.carveFrontier)>.3&&Number(info.carveFrontier)<3.1,'Stone removal frontier should be inside the unfinished parent block');
    }
    if(i===5 && info.hammerClosed==='true')assert(Number(info.contactError)<.06,'Hammer head misses the chisel cap');
    const file=new URL(`${view.width}-${String(i).padStart(2,'0')}.png`,screenshots).pathname;
@@ -102,6 +105,10 @@ try{
     assert(carveProgress>0&&carveProgress<1,'Stone shaping should be incomplete at intermediate strikes');
     assert(Number.isFinite(material),'Missing live material carving field');
   }
+  const film=page.locator('.film-note video');
+  assert.equal(await film.count(),1,'House of Mabwe workshop film should accompany the finished sculpture');
+  assert.equal(await film.getAttribute('autoplay'),null,'Archive footage must not autoplay');
+  assert.match(await film.locator('source').getAttribute('src'),/house-of-mabwe-making-web-v1\.mp4/);
   assert.deepEqual(errors,[],`Browser errors: ${errors.join('; ')}`);
   await page.close();
  }
