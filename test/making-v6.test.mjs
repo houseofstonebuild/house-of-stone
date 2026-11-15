@@ -16,16 +16,19 @@ test('private Making V6 runs deterministic non-WebGL scroll animation',()=>{
  assert.match(page,/robots" content="noindex,nofollow,noarchive/);
  assert.match(player,/frameIndex/);
  assert.match(player,/window\.addEventListener\('scroll',schedule/);
- assert.match(player,/archiveFilm\.play\(\)/);
+ assert.doesNotMatch(player,/archiveFilm\.play\(\)/);
  assert.match(player,/archiveFilm\.pause\(\)/);
- assert.match(player,/createCarvingTools/);
- assert.match(player,/physicalTools\.update\(p,reduced\.matches\)/);
+ assert.match(player,/documentarySeek\(/);
+ assert.match(player,/archiveFilm\.currentTime=desired/);
+ assert.match(player,/archiveFilm\.loop=false/);
+ assert.doesNotMatch(player,/createCarvingTools|physicalTools\.update/);
  assert.doesNotMatch(player,/WebGLRenderer|new THREE|GLTFLoader/);
  assert.match(player,/route\.getPointAtLength/);
  assert.match(player,/truck\.setAttribute\('transform'/);
  assert.match(player,/prefers-reduced-motion/);
  assert.match(player,/approved-coil-reveal\.js/);
  assert.match(page,/HAMMER &amp; CHISEL/);
+ assert.match(player,/mobile-standalone/);
  assert.match(page,/id="heating-study"/);
  assert.match(page,/id="craft-detail"/);
  assert.match(player,/cutFrame=Math\.round/);
@@ -80,19 +83,14 @@ test('mobile final poster is baked from the real approved GLB',()=>{
  assert.match(approved,/approvedPresentation='baked-original-glb'/);
 });
 
-test('the on-stone hammer and chisel are real animated scene elements, not a test-only data flag',()=>{
- const tools=readFileSync(asset('prototypes/carving-tools.js'),'utf8');
- assert.match(tools,/<svg viewBox="0 0 360 330"/);
- assert.match(tools,/id="tool-chisel"/);
- assert.match(tools,/id="tool-mallet"/);
- assert.match(tools,/id="tool-impact"/);
- assert.match(tools,/setAttribute\('transform'/);
- assert.match(tools,/physicalStrikeContact/);
- assert.match(tools,/physicalTipY/);
- const result=spawnSync(process.execPath,['--check',asset('prototypes/carving-tools.js').pathname],{encoding:'utf8'});
- assert.equal(result.status,0,result.stderr);
+test('documentary motion is actual footage synchronized to scrolling, not cartoon overlays',()=>{
+ assert.match(player,/archiveFilm\.loop=false/);
+ assert.match(player,/archiveFilm\.currentTime=desired/);
+ assert.match(player,/documentarySeek\(0,true\)/);
+ assert.match(player,/archiveMobileFrames\.dataset\.workFrame/);
+ assert.match(player,/documentary\.active=active/);
+ assert.doesNotMatch(player,/createCarvingTools|physicalTools\.update/);
 });
-
 test('rapid reverse scrubbing never leaves the approved final frame visible during carving',()=>{
  assert.match(player,/safeFrames=new Set\(\[0,49,70,100,143\]\)/);
  assert.match(player,/Math\.abs\(v6\.current-frame\)>14/);
