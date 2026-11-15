@@ -1,0 +1,87 @@
+name: Making v6 offline volumetric media
+on:
+  pull_request:
+    paths:
+      - 'tools/carving-pilot/build_making_v6.py'
+      - 'tools/carving-pilot/decode-coil.mjs'
+      - 'qa/publish-making-v6-assets.mjs'
+      - '.github/workflows/making-v6-media.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/carving-pilot/build_making_v6.py'
+      - 'tools/carving-pilot/decode-coil.mjs'
+      - 'qa/publish-making-v6-assets.mjs'
+      - '.github/workflows/making-v6-media.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: making-v6-media-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install volumetric and offline renderer dependencies
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund @gltf-transform/core @gltf-transform/extensions meshoptimizer
+          python -m pip install numpy scipy scikit-image trimesh vtk pillow
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1 libxrender1 libxext6
+      - name: Decode approved Coil geometry without changing source asset
+        run: node tools/carving-pilot/decode-coil.mjs public/models/coil-uploaded-v1.glb build/making-v6/coil.obj
+      - name: Render solid carving, marking, refinement and finishing (desktop and phone)
+        run: xvfb-run -a python tools/carving-pilot/build_making_v6.py --mesh build/making-v6/coil.obj --out build/making-v6 --res 144 --frames 144
+      - name: Verify complete image sequences and create contact sheets
+        run: |
+          python - <<'PY'
+          import os,json,hashlib
+          from PIL import Image,ImageDraw,ImageChops
+          base='build/making-v6'
+          manifest=json.load(open(base+'/manifest.json'))
+          n=manifest['frames']
+          assert n==144
+          for profile in ['desktop','mobile']:
+            folder=base+'/'+profile
+            files=[folder+'/frame_%03d.webp'%i for i in range(n)]
+            assert all(os.path.getsize(f)>1500 for f in files),'Missing or empty '+profile+' frame'
+            indexes=[0,20,30,42,54,64,74,85,99,117,130,143]
+            thumbs=[]
+            for i in indexes:
+              img=Image.open(files[i]).convert('RGB');img.thumbnail((240,300))
+              thumbs.append((i,img))
+            sheet=Image.new('RGB',(4*264,3*338),'#f4f1ed')
+            draw=ImageDraw.Draw(sheet)
+            for j,(i,img) in enumerate(thumbs):
+              col=j%4;row=j//4;sheet.paste(img,(col*264,row*338))
+              draw.text((col*264+6,row*338+307),'Frame '+str(i),fill='#252b24')
+            sheet.save(base+'/contact-'+profile+'.jpg',quality=90)
+            assert ImageChops.difference(Image.open(files[35]),Image.open(files[90])).getbbox() is not None
+          print('144 frames/profile, geometry progression, image decoding, and contact sheets verified')
+          PY
+      - name: Retain source diagnostics and rendered contact sheets
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: making-v6-desktop-mobile-review
+          path: |
+            build/making-v6/manifest.json
+            build/making-v6/contact-*.jpg
+            build/making-v6/desktop/
+            build/making-v6/mobile/
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Publish versioned assets only after successful QA on main
+        if: ${{ github.ref == 'refs/heads/main' && success() }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node qa/publish-making-v6-assets.mjs
