@@ -40,8 +40,12 @@ test('post-Harare process follows original Coil and credible material transition
  assert.match(js,/float cutY=3\.46-3\.65\*smoothstep/);
  assert.match(js,/if\(uCarveProgress>\.002 && vLocalStone\.y\+1\.69>cutY\+ridge\)discard/);
  assert.match(js,/e\.carveRevealPlane\.constant=-revealHeight\+\.09/);
- assert.match(js,/e\.rock\.visible=handoff>\.02&&carve<\.995/);
- assert.match(js,/const rockFade=smooth/);
+ assert.match(js,/e\.rock\.visible=handoff>\.02&&p<stops\[6\]/);
+ assert.match(js,/e\.rock\.material\.transparent=false/);
+ assert.match(js,/e\.rough\.visible=p>=stops\[6\]&&wax<\.999/);
+ assert.match(js,/mat\.transparent=false;mat\.opacity=1;mat\.depthWrite=true/);
+ assert.doesNotMatch(js,/e\.rock\.material\.opacity=1-rockFade/);
+ assert.match(js,/const roughFade=1/);
  assert.match(js,/const roughOpacity=roughFade/);
  assert.match(js,/e\.intermediate\)e\.intermediate\.visible=false/);
  assert.match(js,/e\.blankCap\)e\.blankCap\.visible=false/);
