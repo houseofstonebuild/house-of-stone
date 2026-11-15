@@ -1,0 +1,30 @@
+name: Sculpture workshop footage audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sculpture-process-video-review.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Describe original workshop footage
+        run: |
+          ffprobe -hide_banner -v error -show_entries format=duration:stream=index,codec_name,width,height,r_frame_rate -of json public/assets/house-of-mabwe-making-web-v1.mp4
+      - name: Capture a contact sheet every second and a half
+        run: |
+          mkdir -p test-results/process-footage
+          ffmpeg -hide_banner -loglevel error -i public/assets/house-of-mabwe-making-web-v1.mp4 -vf "fps=2/3,scale=240:-2,tile=5x5:padding=6:margin=8" -frames:v 10 -update 0 test-results/process-footage/frames-%02d.jpg
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: workshop-footage-contact-sheet
+          path: test-results/process-footage
+          retention-days: 7
