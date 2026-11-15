@@ -97,13 +97,11 @@ def render(mesh,data,path,w,h,kind,phone,marking,finish):
  import vtk
  from vtk.util.numpy_support import vtk_to_numpy
  coil,lo,step,target,raw,priority,levels=data
- pts=vtk.vtkPoints();pts.SetDataTypeToDouble();pts.SetNumberOfPoints(len(mesh.vertices))
- for i,p in enumerate(mesh.vertices):pts.SetPoint(i,*map(float,p))
+ from vtk.util.numpy_support import numpy_to_vtk,numpy_to_vtkIdTypeArray
+ pts=vtk.vtkPoints();pts.SetData(numpy_to_vtk(np.ascontiguousarray(mesh.vertices,dtype=np.float64),deep=True))
  tris=vtk.vtkCellArray()
- for f in mesh.faces:
-  tri=vtk.vtkTriangle()
-  for j in range(3):tri.GetPointIds().SetId(j,int(f[j]))
-  tris.InsertNextCell(tri)
+ ids=np.column_stack((np.full(len(mesh.faces),3,dtype=np.int64),np.asarray(mesh.faces,dtype=np.int64))).ravel()
+ tris.SetCells(len(mesh.faces),numpy_to_vtkIdTypeArray(ids,deep=True))
  poly=vtk.vtkPolyData();poly.SetPoints(pts);poly.SetPolys(tris)
  normals=vtk.vtkPolyDataNormals();normals.SetInputData(poly);normals.SetSplitting(True)
  normals.SetFeatureAngle(84 if kind in ('polished','gallery') else 50);normals.SetConsistency(True);normals.Update()
