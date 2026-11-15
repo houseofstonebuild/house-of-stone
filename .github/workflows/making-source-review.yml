@@ -1,0 +1,36 @@
+name: Review original Making documentary footage
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/making-source-review.yml'
+permissions:
+  contents: read
+jobs:
+  contact-sheet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Reassemble source documentary and generate sample frames
+        run: |
+          mkdir -p test-results/making-source
+          cat public/assets/film/making-v2-??.part > /tmp/mabwe-documentary.mp4
+          ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 /tmp/mabwe-documentary.mp4 > test-results/making-source/full-duration.txt
+          duration=$(cat test-results/making-source/full-duration.txt)
+          fps=$(awk -v d="$duration" 'BEGIN {printf "%.6f",22/d}')
+          ffmpeg -hide_banner -loglevel error -i /tmp/mabwe-documentary.mp4 -vf "fps=$fps,scale=280:-2:flags=lanczos,tile=5x4:padding=5:margin=5" -frames:v 1 test-results/making-source/full-contact.jpg
+          ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 public/assets/house-of-mabwe-making-web-v1.mp4 > test-results/making-source/short-duration.txt
+          duration=$(cat test-results/making-source/short-duration.txt)
+          fps=$(awk -v d="$duration" 'BEGIN {printf "%.6f",22/d}')
+          ffmpeg -hide_banner -loglevel error -i public/assets/house-of-mabwe-making-web-v1.mp4 -vf "fps=$fps,scale=280:-2:flags=lanczos,tile=5x4:padding=5:margin=5" -frames:v 1 test-results/making-source/web-contact.jpg
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-house-of-mabwe-documentary-contact
+          path: test-results/making-source
+          retention-days: 14
