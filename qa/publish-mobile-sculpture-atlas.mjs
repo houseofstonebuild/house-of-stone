@@ -23,7 +23,7 @@ async function call(endpoint,{method='GET',body}={}){
  }
  return parsed;
 }
-const prefix='making-mobile-atlas-v3-';
+const prefix='making-mobile-atlas-v4-';
 const names=Array.from({length:32},(_,i)=>prefix+String(i).padStart(2,'0')+'.webp');
 names.push(prefix+'manifest.json');
 const items=[];
