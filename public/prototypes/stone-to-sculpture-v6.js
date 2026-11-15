@@ -1,4 +1,3 @@
-import {createCarvingTools} from '/prototypes/carving-tools.js';
 // The Making V6: source-preserving 3D solid carving rendered offline and scrubbed as images.
 // The improved geographic introduction remains identical to the original approved study.
 const host=document.getElementById('render'),stage=document.querySelector('.stage'),journey=document.querySelector('.journey');
@@ -91,7 +90,7 @@ function updateMap(p){
 const safeFrames=new Set([0,49,70,100,143]);
 const v6={manifest:null,profile:null,cache:new Map(),current:-1,requested:-1,raf:0,phase:-1,playing:false,error:false};
 const currentImage=new Image(),oldImage=new Image();
-const physicalTools=createCarvingTools(host);
+
 // Restore the final presentation from the exact approved GLB, never an offline
 // rendering with a replacement procedural material.
 let approvedReveal=null,approvedRequest=null;
@@ -200,12 +199,61 @@ function updateFrames(p){
   host.dataset.staleFrameHidden='true';
  }else host.dataset.staleFrameHidden='true';
 }
-function setDocumentary(visible){
- archiveCutaway.setAttribute('aria-hidden',String(!visible));
- if(visible&&!v6.playing&&!reduced.matches&&!mobile()){
-  archiveFilm.muted=true;archiveFilm.loop=true;v6.playing=true;
-  archiveFilm.play().catch(()=>{v6.playing=false;archiveCutaway.dataset.frameReady='false'});
- }else if(!visible&&v6.playing){archiveFilm.pause();v6.playing=false}
+// The authentic workshop film is a scroll-controlled timeline, not an
+// independent looping video. Desktop seeks a paused HTML5 video; mobile uses
+// the same film's predecoded 7x6 atlas to avoid iOS seek stalls and black frames.
+const documentary={ready:false,lastSeek:-1,lastAt:0,pending:null,desired:0,active:false,hadEntered:false,seekFailures:0};
+archiveFilm.loop=false;
+archiveFilm.removeAttribute('loop');
+archiveFilm.pause();
+archiveFilm.preload='auto';
+function documentarySeek(t,force=false){
+ const duration=Number.isFinite(archiveFilm.duration)&&archiveFilm.duration>0?archiveFilm.duration:8;
+ const desired=clamp(t)*(Math.max(.1,duration-.08));
+ documentary.desired=desired;
+ if(!documentary.ready)return;
+ if(archiveFilm.seeking)return;
+ const now=performance.now();
+ if(!force&&now-documentary.lastAt<70)return;
+ if(!force&&Math.abs(desired-documentary.lastSeek)<.085)return;
+ documentary.lastAt=now;
+ documentary.lastSeek=desired;
+ try{archiveFilm.pause();archiveFilm.currentTime=desired}
+ catch(err){documentary.seekFailures++;archiveCutaway.dataset.seekFailure=String(documentary.seekFailures)}
+}
+archiveFilm.addEventListener('loadedmetadata',()=>{
+ documentary.ready=true;
+ archiveCutaway.dataset.frameReady='true';
+ archiveFilm.pause();
+ documentarySeek(documentary.desired/(Math.max(.1,archiveFilm.duration-.08)),true);
+});
+archiveFilm.addEventListener('seeked',()=>{
+ if(!documentary.active||mobile())return;
+ if(Math.abs(archiveFilm.currentTime-documentary.desired)>.14)documentarySeek(
+  documentary.desired/Math.max(.1,archiveFilm.duration-.08),true);
+});
+function setDocumentary(visible,p){
+ // Deterministic restart: re-entering carving at its beginning puts the film
+ // at its first frame; reverse scroll seeks backward, including after completion.
+ const active=visible&&!reduced.matches&&document.visibilityState==='visible';
+ const t=clamp((p-.565)/.20);
+ documentary.active=active;
+ archiveCutaway.setAttribute('aria-hidden',String(!active));
+ archiveCutaway.dataset.scrollProgress=t.toFixed(4);
+ archiveCutaway.dataset.scrollControlled='true';
+ if(!archiveFilm.paused)archiveFilm.pause();
+ if(!active){
+  if(documentary.hadEntered&&p<.565)documentarySeek(0,true);
+  documentary.hadEntered=false;
+  return;
+ }
+ documentary.hadEntered=true;
+ const frame=Math.max(0,Math.min(41,Math.round(t*41)));
+ const col=frame%7,row=Math.floor(frame/7);
+ archiveMobileFrames.style.backgroundPosition=(col/6*100).toFixed(3)+'% '+(row/5*100).toFixed(3)+'%';
+ archiveMobileFrames.dataset.workFrame=String(frame);
+ archiveCutaway.dataset.workFrame=String(frame);
+ if(!mobile())documentarySeek(t);
 }
 function render(p){
  const step=phaseFor(p);updateMap(p);
@@ -218,11 +266,11 @@ function render(p){
  ui.progress.style.width=(p*100).toFixed(2)+'%';
  updateFrames(p);
  const documentary=smooth((p-.565)/.020)*(1-smooth((p-.750)/.015));
- const show=!!v6.manifest&&!mobile()&&!reduced.matches&&document.visibilityState==='visible'&&documentary>.10;
+ const show=!!v6.manifest&&!reduced.matches&&document.visibilityState==='visible'&&documentary>.10;
  stage.style.setProperty('--archiveOpacity',show?documentary.toFixed(4):'0');
- setDocumentary(show);host.dataset.documentaryCutaway=documentary.toFixed(3);
+ setDocumentary(show,p);host.dataset.documentaryCutaway=documentary.toFixed(3);
  updateCraft(p);
- physicalTools.update(p,reduced.matches);
+
  updateApprovedReveal(p);
  host.dataset.renderMode='precomputed-v6';
  host.dataset.modelReady=String(Boolean(v6.manifest&&v6.current>=0));
@@ -242,7 +290,6 @@ async function boot(){
  }catch(err){v6.error=true;fallback.hidden=false;host.dataset.modelError='true';console.warn(err)}
 }
 let oldWidth=innerWidth;
-archiveFilm.addEventListener('loadeddata',()=>archiveCutaway.dataset.frameReady='true');
 archiveFilm.addEventListener('error',()=>archiveCutaway.dataset.frameReady='false');
 window.addEventListener('scroll',schedule,{passive:true});
 window.addEventListener('resize',()=>{
