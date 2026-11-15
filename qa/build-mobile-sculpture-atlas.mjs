@@ -8,8 +8,10 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash,randomUUID} from 'node:crypto';
 
-const frameCount=192,perGroup=16,columns=4,rows=4,first=.305,last=1;
-const tileWidth=240,tileHeight=520;
+// Preserve full phone-screen detail while keeping each decoded WebP under ~12 MB.
+// Six frames per sheet also limits iOS texture memory when both blended layers are active.
+const frameCount=192,perGroup=6,columns=2,rows=3,first=.305,last=1;
+const tileWidth=468,tileHeight=1013;
 const output=new URL('../public/assets/',import.meta.url);
 const qaDir=new URL('../test-results/mobile-sculpture-atlas/',import.meta.url);
 mkdirSync(output,{recursive:true});
@@ -30,7 +32,7 @@ try{
  await page.waitForFunction(()=>typeof window.__hosCaptureFrame==='function');
  const generated=[];
  for(let group=0;group<frameCount/perGroup;group++){
-  // A single 4x4 WebP sheet minimizes requests and decoding churn on iPhones.
+  // High-detail 2x3 sheets avoid upscaling the sculpture beyond its native pixels.
   const atlasData=await page.evaluate(({group,first,last,frameCount,perGroup,columns,rows,tileWidth,tileHeight})=>{
    const sheet=document.createElement('canvas');
    sheet.width=columns*tileWidth;sheet.height=rows*tileHeight;
@@ -49,20 +51,20 @@ try{
      for(let n=3;n<px.length;n+=173*4)alphaSum+=px[n];
     }
    }
-   return {data:sheet.toDataURL('image/webp',.78),alphaSum};
+   return {data:sheet.toDataURL('image/webp',.87),alphaSum};
   },{group,first,last,frameCount,perGroup,columns,rows,tileWidth,tileHeight});
   if(!atlasData.data.startsWith('data:image/webp;base64,'))throw new Error('Browser does not support WebP atlas export');
   if(group>1&&atlasData.alphaSum===0)throw new Error('WebGL framebuffer was transparent for atlas '+group);
   const bytes=Buffer.from(atlasData.data.slice('data:image/webp;base64,'.length),'base64');
   if(bytes.length<4000)throw new Error('Empty atlas '+group);
-  const fileName='making-mobile-atlas-v1-'+String(group).padStart(2,'0')+'.webp';
+  const fileName='making-mobile-atlas-v2-'+String(group).padStart(2,'0')+'.webp';
   writeFileSync(new URL(fileName,output),bytes);
   generated.push({name:fileName,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});
   process.stdout.write(fileName+' '+bytes.length+' bytes\n');
  }
  if(errors.length)throw new Error('Capture browser exceptions: '+errors.join('; '));
- const manifest={source:'/models/coil-uploaded-v1.glb',script:'/prototypes/stone-to-sculpture.js',frameCount,first,last,columns,rows,tileWidth,tileHeight,generated};
- writeFileSync(new URL('making-mobile-atlas-v1-manifest.json',output),JSON.stringify(manifest,null,2)+'\n');
+ const manifest={version:2,quality:0.87,capturePixelRatio:1.5,source:'/models/coil-uploaded-v1.glb',script:'/prototypes/stone-to-sculpture.js',frameCount,first,last,columns,rows,tileWidth,tileHeight,generated};
+ writeFileSync(new URL('making-mobile-atlas-v2-manifest.json',output),JSON.stringify(manifest,null,2)+'\n');
  writeFileSync(new URL('manifest.json',qaDir),JSON.stringify(manifest,null,2)+'\n');
  console.log('Mobile Coil atlas complete:',generated.reduce((total,x)=>total+x.bytes,0),'bytes for',frameCount,'frames');
 }finally{
