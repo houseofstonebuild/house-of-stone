@@ -11,6 +11,7 @@ const fallback=document.getElementById('fallback');
 const map=document.getElementById('map-scene');
 const archiveCutaway=document.getElementById('archive-cutaway');
 const archiveFilm=document.getElementById('archive-film');
+const archiveMobileFrames=document.getElementById('archive-mobile-frames');
 const svg=document.getElementById('origin-map');
 const route=document.getElementById('travel-route');
 const truck=document.getElementById('transport-marker');
@@ -627,7 +628,18 @@ function render(p){
  stage.style.setProperty('--archiveOpacity',showFilm?documentary.toFixed(4):'0');
  archiveCutaway.setAttribute('aria-hidden',String(!showFilm));
  archiveFilm.pause();
- if(showFilm){
+ if(mobile()){
+  // A single WebP atlas turns touch scrolling into deterministic, zero-video-decoder
+  // playback. The background position only changes when the frame index changes.
+  const frame=Math.min(41,Math.max(0,Math.round(clamp((p-.590)/.141)*41)));
+  if(e.lastMobileFilmFrame!==frame){
+   e.lastMobileFilmFrame=frame;
+   const column=frame%7,row=Math.floor(frame/7);
+   archiveMobileFrames.style.backgroundPosition=`${(column/6*100).toFixed(3)}% ${(row/5*100).toFixed(3)}%`;
+  }
+  host.dataset.archiveTarget=(frame*.5).toFixed(3);
+  host.dataset.mobileFilmFrame=String(frame);
+ }else if(showFilm){
   if(archiveFilm.networkState===HTMLMediaElement.NETWORK_EMPTY)archiveFilm.load();
   seekArchiveVideo(p);
  }
