@@ -89,6 +89,48 @@ function updateMap(p){
 
 const v6={manifest:null,profile:null,cache:new Map(),current:-1,requested:-1,raf:0,phase:-1,playing:false,error:false};
 const currentImage=new Image(),oldImage=new Image();
+// Restore the final presentation from the exact approved GLB, never an offline
+// rendering with a replacement procedural material.
+let approvedReveal=null,approvedRequest=null;
+function updateApprovedReveal(p){
+ if(p>=.875&&!approvedRequest){
+  approvedRequest=import('/prototypes/approved-coil-reveal.js').then(module=>{
+   approvedReveal=module.createApprovedCoilReveal(host);
+   approvedReveal.update(active());
+  }).catch(err=>{
+   host.dataset.approvedModelState='error';
+   console.warn('Approved Coil viewer unavailable',err);
+  });
+ }
+ approvedReveal?.update(p);
+}
+const craftDetail=document.getElementById('craft-detail');
+const heatStudy=document.getElementById('heating-study');
+const heatLight=heatStudy.querySelector('.heating-light');
+const heatTorch=heatStudy.querySelector('.heating-torch');
+const archiveMobileFrames=document.getElementById('archive-mobile-frames');
+function updateCraft(p){
+ const refine=smooth((p-.765)/.016)*(1-smooth((p-.827)/.014));
+ const heat=smooth((p-.835)/.014)*(1-smooth((p-.894)/.012));
+ const work=smooth((p-.837)/.054);
+ const reducedMotion=reduced.matches;
+ craftDetail.style.opacity=reducedMotion?'0':refine.toFixed(4);
+ craftDetail.setAttribute('aria-hidden',String(reducedMotion||refine<.01));
+ heatStudy.style.opacity=reducedMotion?'0':heat.toFixed(4);
+ heatStudy.style.visibility=(!reducedMotion&&heat>.002)?'visible':'hidden';
+ heatStudy.setAttribute('aria-hidden',String(reducedMotion||heat<.01));
+ heatLight.style.left=(63-15*work).toFixed(2)+'%';
+ heatLight.style.top=(30+8*work).toFixed(2)+'%';
+ heatLight.style.opacity=(heat*.85).toFixed(3);
+ heatTorch.style.transform='translate3d('+(-14*work).toFixed(1)+'px,'+(-12*work).toFixed(1)+'px,0)';
+ const cutFrame=Math.round(clamp((p-.565)/.2)*41);
+ const column=cutFrame%7,row=Math.floor(cutFrame/7);
+ archiveMobileFrames.style.backgroundPosition=(column/6*100).toFixed(3)+'% '+(row/5*100).toFixed(3)+'%';
+ archiveMobileFrames.dataset.workFrame=String(cutFrame);
+ stage.dataset.craftToolsVisible=String(!reducedMotion&&p>=.565&&p<.765);
+ stage.dataset.heatingVisible=String(!reducedMotion&&heat>.12);
+ stage.dataset.refiningVisible=String(!reducedMotion&&refine>.12);
+}
 currentImage.className='making-v6-image';oldImage.className='making-v6-image making-v6-previous';
 currentImage.alt='';oldImage.alt='';currentImage.decoding='async';oldImage.decoding='async';
 host.append(oldImage,currentImage);
@@ -140,7 +182,7 @@ function updateFrames(p){
 }
 function setDocumentary(visible){
  archiveCutaway.setAttribute('aria-hidden',String(!visible));
- if(visible&&!v6.playing&&!reduced.matches){
+ if(visible&&!v6.playing&&!reduced.matches&&!mobile()){
   archiveFilm.muted=true;archiveFilm.loop=true;v6.playing=true;
   archiveFilm.play().catch(()=>{v6.playing=false;archiveCutaway.dataset.frameReady='false'});
  }else if(!visible&&v6.playing){archiveFilm.pause();v6.playing=false}
@@ -155,10 +197,12 @@ function render(p){
  }
  ui.progress.style.width=(p*100).toFixed(2)+'%';
  updateFrames(p);
- const documentary=smooth((p-.590)/.025)*(1-smooth((p-.731)/.028));
+ const documentary=smooth((p-.565)/.020)*(1-smooth((p-.750)/.015));
  const show=!!v6.manifest&&!reduced.matches&&document.visibilityState==='visible'&&documentary>.10;
  stage.style.setProperty('--archiveOpacity',show?documentary.toFixed(4):'0');
  setDocumentary(show);host.dataset.documentaryCutaway=documentary.toFixed(3);
+ updateCraft(p);
+ updateApprovedReveal(p);
  host.dataset.renderMode='precomputed-v6';
  host.dataset.modelReady=String(Boolean(v6.manifest&&v6.current>=0));
 }
@@ -189,6 +233,7 @@ window.addEventListener('resize',()=>{
    loadFrame(0);
   }
  }
+ approvedReveal?.resize();
  schedule();
 },{passive:true});
 document.addEventListener('visibilitychange',schedule);
