@@ -94,7 +94,7 @@ try{
     }else{
      assert.equal(state.documentaryMode,'mobile-standalone','Phone video must occupy its own scene');
      assert(state.cutawayOpacity>0,'Phone work must show real footage');
-     assert.equal(getComputedStyle(document.getElementById('archive-cutaway')).display,'block');
+     assert.equal(await page.evaluate(()=>getComputedStyle(document.getElementById('archive-cutaway')).display),'block');
      assert(Number(state.mobileStoneOpacity)<.01,'Mobile film must not overlap a visible sculpture');
      await move(page,.688);
      await page.waitForFunction(()=>Number(getComputedStyle(document.querySelector('.stage')).getPropertyValue('--processStoneOpacity'))>.9,{timeout:15000});
