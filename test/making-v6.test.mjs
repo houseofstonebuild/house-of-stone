@@ -7,6 +7,7 @@ const asset=path=>new URL('../public/'+path,import.meta.url);
 const player=readFileSync(asset('prototypes/stone-to-sculpture-v6.js'),'utf8');
 const page=readFileSync(asset('prototypes/stone-to-sculpture.html'),'utf8');
 const manifest=JSON.parse(readFileSync(asset('assets/making-v6/manifest.json'),'utf8'));
+const approved=readFileSync(asset('prototypes/approved-coil-reveal.js'),'utf8');
 
 test('private Making V6 runs deterministic non-WebGL scroll animation',()=>{
  const result=spawnSync(process.execPath,['--check',asset('prototypes/stone-to-sculpture-v6.js').pathname],{encoding:'utf8'});
@@ -21,6 +22,12 @@ test('private Making V6 runs deterministic non-WebGL scroll animation',()=>{
  assert.match(player,/route\.getPointAtLength/);
  assert.match(player,/truck\.setAttribute\('transform'/);
  assert.match(player,/prefers-reduced-motion/);
+ assert.match(player,/approved-coil-reveal\.js/);
+ assert.match(page,/HAMMER &amp; CHISEL/);
+ assert.match(page,/id="heating-study"/);
+ assert.match(page,/id="craft-detail"/);
+ assert.match(player,/cutFrame=Math\.round/);
+ assert.match(player,/heatingVisible/);
 });
 
 test('verified exact Coil source and all frames are present',()=>{
@@ -44,4 +51,17 @@ test('verified exact Coil source and all frames are present',()=>{
 test('public making page remains separate',()=>{
  const index=readFileSync(asset('index.html'),'utf8');
  assert.doesNotMatch(index,/stone-to-sculpture-v6\.js|prototypes\/stone-to-sculpture\.html/);
+});
+
+test('final stage uses exact owner-approved Coil GLB and keeps its materials untouched',()=>{
+ const result=spawnSync(process.execPath,['--check',asset('prototypes/approved-coil-reveal.js').pathname],{encoding:'utf8'});
+ assert.equal(result.status,0,result.stderr);
+ assert.match(approved,/\/models\/coil-uploaded-v1\.glb/);
+ assert.match(approved,/original\.scale\.multiplyScalar\(factor\)/);
+ assert.match(approved,/approvedMaterialsPreserved='true'/);
+ assert.doesNotMatch(approved,/\.material\s*=\s*new\s+THREE\./);
+ assert.doesNotMatch(approved,/onBeforeCompile|applyFinishMask/);
+ const original=readFileSync(asset('models/coil-uploaded-v1.glb'));
+ assert(original.length>100000,'The approved GLB was missing');
+ assert.equal(original.subarray(0,4).toString('ascii'),'glTF');
 });
