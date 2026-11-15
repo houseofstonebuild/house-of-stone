@@ -57,25 +57,35 @@ try{
     physicalTipY:Number(document.getElementById('render').dataset.physicalTipY),
     archiveDisplay:getComputedStyle(document.getElementById('archive-cutaway')).display,
     revealBlend:Number(document.getElementById('render').dataset.approvedRevealBlend),
-    plinthBlend:Number(document.getElementById('render').dataset.approvedPlinthBlend)}));
+    plinthBlend:Number(document.getElementById('render').dataset.approvedPlinthBlend),
+    documentaryMode:document.querySelector('.stage').dataset.documentaryLayout,
+    documentaryScrubbed:document.getElementById('archive-cutaway').dataset.scrollControlled,
+    mobileStoneOpacity:getComputedStyle(document.getElementById('render')).getPropertyValue('--processStoneOpacity'),
+    videoTime:document.getElementById('archive-film').currentTime}));
    assert.equal(state.phase,expected,'Incorrect stage at '+p+' in '+v.width);
    assert(state.overflow<=2,'Horizontal overflow '+v.width);
    if(p<.86)assert.equal(state.canvasCount,0,'Carving and heating must not load WebGL');
    if(p>=.305)assert.match(state.image,/making-v6\/.*\/frame_/);
    if(p===.64){
-    if(v.width>800)assert(state.cutawayOpacity>.8,'Documentary should accompany desktop carving');
-    assert.equal(state.tools,'true','Hammer and chisel must be visibly represented in carving');
-    assert.equal(state.physicalTool,'true','A chisel must actually touch the stone, not merely appear in footage');
-    assert(state.physicalTipX>.35&&state.physicalTipX<.83,'Chisel tip is detached from the stone horizontally');
-    assert(state.physicalTipY>.30&&state.physicalTipY<.68,'Chisel tip is detached from the stone vertically');
-    const equipment=await page.evaluate(()=>({
-      rig:document.getElementById('carving-tools'),
-      chisel:!!document.querySelector('#tool-chisel'),
-      mallet:!!document.querySelector('#tool-mallet'),
-      visible:getComputedStyle(document.querySelector('#carving-tools')).visibility
-    }));
-    assert(equipment.rig&&equipment.chisel&&equipment.mallet&&equipment.visible==='visible','Real on-stone tool geometry is missing');
-    if(v.width<=800)assert.equal(state.archiveDisplay,'none','Mobile documentary must never cover the stone');
+    assert.equal(state.documentaryScrubbed,'true','Workshop footage must be scroll-controlled');
+    assert.equal(state.videoPaused,true,'Workshop film must not autoplay or loop');
+    assert.equal(state.physicalTool,'false','Cartoon on-stone tool overlay should not load');
+    assert.equal(await page.locator('#carving-tools').count(),0,'Outdated SVG tools must be absent');
+    if(v.width>800){
+     assert(state.cutawayOpacity>.8,'Large editorial documentary should accompany desktop carving');
+     await page.waitForFunction(()=>{
+      const film=document.getElementById('archive-film');
+      const expected=(.64-.565)/.20*(film.duration-.08);
+      return film.readyState>=1&&film.paused&&Math.abs(film.currentTime-expected)<.35;
+     },null,{timeout:30000});
+    }else{
+     assert.equal(state.documentaryMode,'mobile-standalone','Phone video must occupy its own scene');
+     assert(state.cutawayOpacity>0,'Phone work must show real footage');
+     assert.equal(getComputedStyle(document.getElementById('archive-cutaway')).display,'block');
+     assert(Number(state.mobileStoneOpacity)>0,'Stone must return after the documentary beat');
+     const atlas=await page.evaluate(()=>getComputedStyle(document.querySelector('#archive-cutaway .archive-mobile-frames')).display);
+     assert.equal(atlas,'block','Mobile footage must use the scroll-synced real-film atlas');
+    }
    }
    if(p===.8)assert.equal(state.refine,'true','Hand-refinement panel must appear');
    if(p===.865){
@@ -125,6 +135,21 @@ try{
     await page.waitForFunction(()=>document.getElementById('render').dataset.physicalStrikeContact==='true',{timeout:15000});
    }
    await page.screenshot({path:new URL(v.engine+'-'+v.width+'-carve-'+Math.round(p*1000)+'.png',output).pathname});
+  }
+  if(v.width>800){
+   await move(page,.71);
+   await page.waitForFunction(()=>{const f=document.getElementById('archive-film');return f.paused&&f.readyState>=1&&f.currentTime>(.71-.565)/.2*(f.duration-.08)-.35},{timeout:30000});
+   const later=await page.evaluate(()=>document.getElementById('archive-film').currentTime);
+   await move(page,.59);
+   await page.waitForFunction(later=>document.getElementById('archive-film').paused&&document.getElementById('archive-film').currentTime<later-1,later,{timeout:30000});
+  }else{
+   await move(page,.60);
+   const early=await page.locator('#archive-cutaway').getAttribute('data-work-frame');
+   await move(page,.70);
+   const later=await page.locator('#archive-cutaway').getAttribute('data-work-frame');
+   assert(Number(later)>Number(early),'Mobile documentary frames must scrub forward');
+   await move(page,.59);
+   await page.waitForFunction(early=>Number(document.querySelector('#archive-cutaway').dataset.workFrame)<Number(early),early,{timeout:15000});
   }
   await move(page,.40);
   await move(page,.91);
