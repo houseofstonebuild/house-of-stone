@@ -143,6 +143,18 @@ try{
   }));
   assert(earlyCarve.frame<middleCarve.frame&&middleCarve.frame<lateCarve.frame,'Coil is not progressively carved');
   assert(earlyCarve.volume>middleCarve.volume&&middleCarve.volume>lateCarve.volume,'Stone volume must fall as Coil emerges');
+  if(hasRegisteredV7){
+   assert.equal(await page.locator('#formationStage').getAttribute('data-frame-asset-version'),'v7',
+     'Deployed carving is still using the old rendering');
+   await page.waitForFunction(()=>{
+    const stage=document.querySelector('#formationStage');
+    return stage.dataset.frameStatus==='ready'&&Number(stage.dataset.displayedFrame)>=85;
+   },null,{timeout:25000});
+   await page.screenshot({
+    path:new URL(c.browser+'-'+c.width+'-verified-registered-v7-carving.png',out).pathname,
+    animations:'disabled'
+   });
+  }
   assert(await page.locator('#formationChips').count()===1,'Carving canvas missing');
   assert.equal(await page.locator('#formationChips').evaluate(el=>getComputedStyle(el).display),'none',
     'Floating screen-space chips must not appear over the approved sculpture');
