@@ -29,14 +29,20 @@ jobs:
         run: |
           python3 - <<'PY'
           import json,os
-          from PIL import Image
           folder='public/assets/making-cinema-frames-v3'
           m=json.load(open(folder+'/manifest.json'))
           assert m['version']==3 and m['frames']==144 and m['end_seconds']==8.4
           paths=[f'{folder}/frame_{i:03d}.webp' for i in range(144)]
           assert all(os.path.getsize(f)>1000 for f in paths)
+
+          import subprocess
           for i in [0,48,96,143]:
-            im=Image.open(paths[i]);assert im.width>=1280
+            width=int(subprocess.check_output([
+              'ffprobe','-v','error','-select_streams','v:0',
+              '-show_entries','stream=width','-of','default=nokey=1:noprint_wrappers=1',
+              paths[i]
+            ],text=True).strip())
+            assert width>=1280
           print('144 source-documentary frames validated')
           PY
       - uses: actions/upload-artifact@v4

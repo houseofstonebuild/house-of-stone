@@ -230,7 +230,7 @@ function renderOrigin(p){
  const point=$mapRoute.getPointAtLength(mapLength*travel);
  $truck.setAttribute('transform','translate('+point.x.toFixed(2)+' '+point.y.toFixed(2)+')');
  $truck.style.opacity=String(reduced.matches?1:smooth((p-.38)/.08)*(1-smooth((p-.95)/.05)));
- $('#hararePin').style.opacity=String(reduced.matches?1:smooth((p-.75)/.18));
+ $('#hararePin').style.opacity=String(reduced.matches?1:smooth((p-.22)/.18));
  $routeReadout.style.opacity=String(reduced.matches?1:smooth((p-.32)/.18));
 }
 function renderMaterial(p){
@@ -250,8 +250,9 @@ function renderFinishing(p){
  $('#warmth').style.opacity=(.14*(1-polish)).toFixed(4);
  $('#warmth').style.transform='translate3d('+lerp(9,-13,polish).toFixed(2)+'%,0,0)';
  $('#polishStage').style.setProperty('--finishOutro',smooth((p-.91)/.09).toFixed(4));
- $('#highlight').style.transform='translateX('+lerp(-78,88,polish).toFixed(1)+'%)';
- $('#highlight').style.opacity=(polish*.48).toFixed(3);
+ // The authored v7 frames already contain real directional highlights.
+ // Do not slide a rectangular light layer over the image while scrolling.
+ $('#highlight').style.opacity='0';
  $('#finishTrack').style.width=(polish*100).toFixed(1)+'%';
  $('#finishWord').textContent=p<.34?'SANDING':p<.73?'SMOOTHING':'POLISHING';
 }

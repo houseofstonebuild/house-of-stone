@@ -9,6 +9,7 @@ on:
       - 'public/assets/making-cinema-frames/**'
       - 'qa/making-atelier.mjs'
       - 'public/assets/making-v7/**'
+      - 'public/assets/making-cinema-frames-v3/**'
       - 'public/prototypes/coil-formation.js'
       - '.github/workflows/making-atelier-review.yml'
   workflow_dispatch:

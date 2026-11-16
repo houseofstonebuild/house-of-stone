@@ -48,6 +48,11 @@ try{
   const failures=[];
   page.on('pageerror',err=>failures.push('JS: '+err.message));
   page.on('response',res=>{
+   // v3 is an optional, separately published media archive. A deliberate
+   // 404 before the archive exists must not fail the source-v2 fallback QA.
+   const optionalV3=/\/assets\/making-cinema-frames-v3\/manifest\.json/.test(res.url());
+   if(optionalV3&&res.status()===404&&!existsSync(new URL(
+      '../public/assets/making-cinema-frames-v3/manifest.json',import.meta.url)))return;
    if(res.status()>=400&&/making-atelier|making-cinema-frames|coil-uploaded-v1\.glb/.test(res.url()))
     failures.push('HTTP '+res.status()+' '+res.url());
   });
@@ -90,6 +95,9 @@ try{
   const posLate=await page.locator('#routeTruck').getAttribute('transform');
   assert.notEqual(posEarly,posLate,'Transport must move with page scroll');
   assert(!posLate.includes('rotate('),'Truck must stay upright during journey');
+  await go(page,'origin',.60);
+  assert(Number(await page.locator('#hararePin').evaluate(el=>getComputedStyle(el).opacity))>.95,
+   'Harare should be identified before the route is complete');
   assert.equal(await page.locator('#routeTruck .truck-stone').count(),1,
    'Transport must visibly carry the stone, not an empty box');
   for(let i=0;i<chapters.length;i++){
@@ -152,6 +160,24 @@ try{
    await page.waitForFunction(selector=>document.querySelector(selector)?.naturalWidth>0,picture,{timeout:22000});
    const visible=await page.locator(picture).evaluate(img=>img.getBoundingClientRect().width>0);
    assert(visible,'The '+id+' chapter did not have a frame available on first paint');
+  }
+  if(c.mobile){
+   for(const [chapter,art,heading] of [
+    ['detail','#formationFrame','#detailTitle'],
+    ['finishing','#polishFrame','#finishingTitle']
+   ]){
+    await go(page,chapter,.60);
+    await page.waitForFunction(selector=>document.querySelector(selector)?.naturalWidth>0,
+      art,{timeout:25000});
+    const position=await page.evaluate(({art,heading})=>{
+     const image=document.querySelector(art);
+     const title=document.querySelector(heading);
+     const a=image.getBoundingClientRect(),h=title.getBoundingClientRect();
+     return {imageTop:a.top,headingTop:h.top,headingBottom:h.bottom};
+    },{art,heading});
+    assert(position.imageTop<position.headingTop,
+     'Mobile sculpture should appear above its chapter heading');
+   }
   }
   // The new transformation must actually remove model-derived volume.
   await go(page,'detail',.08);

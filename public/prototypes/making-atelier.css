@@ -357,3 +357,21 @@ p{font-weight:400}
  opacity:var(--finishOutro,0);z-index:4;pointer-events:none
 }
 .reveal-art{opacity:0;will-change:opacity}
+
+/* Editorial polish: preserve subject framing rather than letting it compete
+   with the mobile heading, and replace distracting animated screen-space light. */
+.map-route-guide{fill:none;stroke:#e8cda6;stroke-width:2.4;stroke-linecap:round;
+ opacity:.30;stroke-dasharray:4 7;pointer-events:none}
+.finishing-highlight{display:none!important}
+@media(max-width:700px){
+ .formation-stage .formation-poster img,
+ .formation-stage .formation-frame,
+ .finishing-art .polish-poster img,
+ .finishing-art .polish-frame{
+   transform:translate3d(0,-11svh,0) scale(.85);
+   transform-origin:50% 40%;
+ }
+ .formation-shade{background:linear-gradient(0deg,
+   rgba(8,13,9,.92) 0%,rgba(8,13,9,.72) 17%,transparent 51%)}
+ .map-route-guide{stroke-width:4;opacity:.4}
+}
