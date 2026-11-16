@@ -106,7 +106,6 @@ async function checkHdFrames(){
  filmEdition=selected.edition;
  frameCount=selected.count;
  hdFramesReady=true;
- frameCache.clear();
  activeFilmFrame=-1;
  $filmMedia.dataset.mobileReady='false';
  $filmMedia.dataset.mediaQuality=filmEdition;
@@ -163,7 +162,7 @@ $film.addEventListener('error',()=>{
   // Remain functional if the deployment contains frames before the HD MP4.
   hdFramesReady=false;
   frameRoot='/assets/making-cinema-frames';
-  frameCache.clear();
+  filmStream.configure({frames:frameCount});
   activeFilmFrame=-1;
   $filmMedia.dataset.mediaQuality='original-fallback';
   const source=$film.querySelector('source');
