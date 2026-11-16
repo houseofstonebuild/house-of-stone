@@ -250,18 +250,15 @@ function syncApprovedPlacement(y){
  const ready=host.dataset.approvedModelState==='ready';
  $('.reveal-poster').style.opacity=ready?'0':'1';
  if(inFinalPolish){
-  const registered=formation.registered;
-  const blend=ready?smooth((p-.83)/.16):0;
-  // While the old frame archive is still deployed, cover the handoff with
-  // a short fade-through-dark. Never show the misregistered objects together.
-  const oldFade=ready?(1-smooth((p-.78)/.075)):1;
-  const newFade=ready?smooth((p-.885)/.085):0;
-  const frameAlpha=registered?1-blend:oldFade;
-  const modelAlpha=registered?blend:newFade;
+  // A physical match requires identical pixels, not two different
+  // rasterizers sharing approximate coordinates. Remove the old image
+  // completely before exposing the approved model to prevent ghosting.
+  const frameAlpha=ready?1-smooth((p-.795)/.083):1;
+  const modelAlpha=ready?smooth((p-.895)/.083):0;
   frame.style.opacity=frameAlpha.toFixed(4);
   host.style.opacity=modelAlpha.toFixed(4);
   host.dataset.inFinishing='true';
-  stage.dataset.handoffMode=registered?'registered-match':'masked-dissolve';
+  stage.dataset.handoffMode='masked-dissolve';
   stage.dataset.frameAlpha=frame.style.opacity;
   stage.dataset.modelAlpha=host.style.opacity;
   if(ready&&modelAlpha>.001)approved?.update(.999);
