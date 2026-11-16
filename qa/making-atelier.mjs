@@ -10,7 +10,9 @@ import {createApp} from '../server.mjs';
 assert(existsSync(new URL('../public/assets/making-cinema-frames/frame_00.webp',import.meta.url)),'Real source film frames have not been built');
 assert(existsSync(new URL('../public/assets/making-cinema-frames/frame_47.webp',import.meta.url)),'Real source film frames are incomplete');
 assert(existsSync(new URL('../public/assets/making-atelier-final-mobile-v1.png',import.meta.url)),'Plinth-free approved Coil final is missing');
+const hasRegisteredV8=existsSync(new URL('../public/assets/making-v8/manifest.json',import.meta.url));
 const hasRegisteredV7=existsSync(new URL('../public/assets/making-v7/manifest.json',import.meta.url));
+const expectedCoilEdition=hasRegisteredV8?'v8':'v7';
 const out=new URL('../test-results/browser/making-atelier/',import.meta.url);
 mkdirSync(out,{recursive:true});
 const data=mkdtempSync(join(tmpdir(),'making-atelier-'));
@@ -69,13 +71,13 @@ try{
   }
   // New assets are made visible only after the matching manifest and actual
   // frames deploy. Once v7 files exist, using the older set is a regression.
-  if(hasRegisteredV7){
-   await page.waitForFunction(()=>{
+  if(hasRegisteredV7||hasRegisteredV8){
+   await page.waitForFunction(expected=>{
     const stage=document.querySelector('#formationStage');
-    return stage?.dataset.mediaVerified==='v7'||stage?.dataset.modelDerived==='unavailable';
-   },null,{timeout:20000});
-   assert.equal(await page.locator('#formationStage').getAttribute('data-media-verified'),'v7',
-     'The current versioned stone frames were ignored after publication');
+    return stage?.dataset.mediaVerified===expected||stage?.dataset.modelDerived==='unavailable';
+   },expectedCoilEdition,{timeout:20000});
+   assert.equal(await page.locator('#formationStage').getAttribute('data-media-verified'),expectedCoilEdition,
+     'The densest registered stone frames were ignored after publication');
   }
   // Verify origin zoom and a physically upright truck moving down the route.
   await go(page,'origin',.14);
@@ -211,9 +213,9 @@ try{
   }));
   assert(earlyCarve.frame<middleCarve.frame&&middleCarve.frame<lateCarve.frame,'Coil is not progressively carved');
   assert(earlyCarve.volume>middleCarve.volume&&middleCarve.volume>lateCarve.volume,'Stone volume must fall as Coil emerges');
-  if(hasRegisteredV7){
-   assert.equal(await page.locator('#formationStage').getAttribute('data-frame-asset-version'),'v7',
-     'Deployed carving is still using the old rendering');
+  if(hasRegisteredV7||hasRegisteredV8){
+   assert.equal(await page.locator('#formationStage').getAttribute('data-frame-asset-version'),expectedCoilEdition,
+     'The canvas did not select the highest-fidelity Coil rendering');
    await page.waitForFunction(()=>{
     const stage=document.querySelector('#formationStage');
     return stage.dataset.frameStatus==='ready'&&Number(stage.dataset.displayedFrame)>=85;
@@ -260,6 +262,12 @@ try{
    assert.equal(await page.locator('.carving-media').getAttribute('data-media-quality'),
      filmV4?'hd-v4':'hd-v3','The source documentary must really be displayed, not only loaded');
   }
+  // Bound memory and decoder pressure before testing reverse scrolling.
+  const perf=await page.evaluate(()=>window.__mabwePerformance());
+  assert(perf.coil.carve.ready<=(c.mobile?9:15),'Coil decoded-image cache exceeded device budget');
+  assert(perf.coil.polish.ready<=(c.mobile?9:15),'Polish decoded-image cache exceeded device budget');
+  assert(perf.coil.carve.inflight<4&&perf.coil.polish.inflight<4,'Coil decode concurrency exceeded budget');
+  assert(perf.film.inflight<4,'Documentary decode concurrency exceeded budget');
   // Reversible film, with visible frame changes on real-source mobile frames.
   await go(page,'carving',.20);
   const early=await page.evaluate(()=>Number(document.querySelector('.carving-media').dataset.requestedFrame));
