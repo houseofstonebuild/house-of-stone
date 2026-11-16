@@ -170,5 +170,5 @@ export function createFrameStream({stage,image,mobile,src,onDisplay,position=()=
  }
  function stats(){return {target,displayed,ready:[...memory.values()].filter(v=>v.state==='ready').length,
   queued:queued.size,inflight:loading,requests:requestCount,draws:displayCount,errors:frameErrors,stale:staleCount,profile};}
- return {request,prime,configure,resize,suspend,stats,get displayed(){return displayed;}};
+ return {request,prime,configure,resize,suspend,stats,canvas,get displayed(){return displayed;}};
 }

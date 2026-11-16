@@ -31,6 +31,12 @@ try{
   await page.goto(base+'/prototypes/making-atelier.html',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.documentElement.dataset.makingAtelier==='ready');
   await page.waitForFunction(()=>window.__mabwePerformance?.().coil?.edition);
+  const atlasReview=await page.evaluate(async()=>{
+   try{const r=await fetch('/assets/making-film-atlas-v1/manifest.json');return r.ok}
+   catch{return false}
+  });
+  if(atlasReview)await page.waitForFunction(()=>
+   window.__mabwePerformance().filmAtlas.ready>=8,null,{timeout:30000});
   const chapters=[];
   for(const section of ['carving','detail','finishing']){
    const sample=await page.evaluate(async section=>{
@@ -73,6 +79,8 @@ try{
    },section);
    assert(sample.overflow<=2,config.device+' overflow in '+section);
    assert(sample.rafCount>=8,config.device+' animation frame loop stalled in '+section);
+   if(atlasReview&&section==='carving')
+    assert(sample.visibleChanges>=10,config.device+' documentary remains too jerky while scrubbing');
    assert(sample.after.film.inflight<4,config.device+' film decoding exceeded budget');
    assert(sample.after.coil.carve.inflight<4&&sample.after.coil.polish.inflight<4,
      config.device+' Coil decoder exceeded concurrent budget');

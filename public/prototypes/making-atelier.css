@@ -537,3 +537,10 @@ html[data-embed="true"] .prologue-content{top:48%}
   transform:translate3d(0,-18svh,0) scale(.79);transform-origin:50% 40%;
  }
 }
+
+/* Original-photo film playback: low-memory atlas only during rapid scrubbing;
+   exact HD still takes over as soon as the corresponding decode completes. */
+.film-motion-atlas{position:absolute;inset:0;width:100%;height:100%;opacity:0;z-index:1;pointer-events:none}
+.carving-media .scroll-frame-canvas{z-index:2}
+.carving-shade{z-index:3}
+.carving-title,.carving-caption,.carving .footnote{z-index:4}

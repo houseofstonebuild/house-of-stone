@@ -4,6 +4,7 @@
  */
 import {createCoilFormation} from './coil-formation.js';
 import {createFrameStream} from './scroll-frame-stream.js';
+import {createFilmAtlas} from './story-film-atlas.js';
 const $=s=>document.querySelector(s);
 const clamp=x=>Math.max(0,Math.min(1,x));
 const smooth=x=>{x=clamp(x);return x*x*(3-2*x)};
@@ -56,12 +57,22 @@ const filmStream=createFrameStream({
   activeFilmFrame=index;
   $filmMedia.dataset.mobileReady='true';
   $filmMedia.dataset.displayedFrame=String(index);
+  if(filmAtlas.available){
+   filmStream.canvas.style.opacity=index===desiredFilmFrame?'1':'0';
+   $filmMedia.dataset.displayQuality=index===desiredFilmFrame?'hd-source':'atlas-preview';
+  }
+ }
+});
+const filmAtlas=createFilmAtlas({
+ stage:$filmMedia,anchor:$poster,mobile,
+ onDisplay:frame=>{
+  if(filmStream.displayed!==frame)filmStream.canvas.style.opacity='0';
  }
 });
 let storyFrame=0,layoutDirty=true,readings=[],currentScene='',approved=null,approvedPromise=null;
 const formation=createCoilFormation($('#formationStage'),$('#polishStage'),mobile,reduced);
 const approvedOriginalSlot=$('#approvedHost').parentElement;
-const filmState=()=>({paused:$film.paused,time:$film.currentTime,frame:desiredFilmFrame,active:filmActive,videoReady:videoMetadata,hdFrames:hdFramesReady,edition:filmEdition,frames:frameCount,maxSeconds:8.4,stream:filmStream.stats(),coil:formation.stats()});
+const filmState=()=>({paused:$film.paused,time:$film.currentTime,frame:desiredFilmFrame,active:filmActive,videoReady:videoMetadata,hdFrames:hdFramesReady,edition:filmEdition,frames:frameCount,maxSeconds:8.4,stream:filmStream.stats(),atlas:filmAtlas.stats(),coil:formation.stats()});
 window.__mabweMaking={get film(){return filmState()},get chapter(){return currentScene},get approved(){return $('#approvedHost').dataset.approvedModelState||'not-started'}};
 
 function recordLayout(){
@@ -157,8 +168,11 @@ function updateFilm(p,visible){
  $atlas.style.backgroundPosition=(x/6*100).toFixed(3)+'% '+(y/5*100).toFixed(3)+'%';
  $atlas.dataset.spriteFrame=String(sprite);
  filmActive=Boolean(visible);
- if(visible)filmStream.request(n,true);
- else filmStream.suspend();
+ if(visible){
+  const atlasShown=filmAtlas.available&&filmAtlas.paint(n,filmPan,47);
+  if(atlasShown&&filmStream.displayed!==n)filmStream.canvas.style.opacity='0';
+  filmStream.request(n,true);
+ }else filmStream.suspend();
 }
 
 $film.loop=false;
@@ -338,7 +352,7 @@ function queueUpdate(){
  storyFrame=requestAnimationFrame(update);
 }
 addEventListener('scroll',queueUpdate,{passive:true});
-addEventListener('resize',()=>{layoutDirty=true;formation.resize();filmStream.resize();approved?.resize();if(approved)approved.update(.999);queueUpdate()},{passive:true});
+addEventListener('resize',()=>{layoutDirty=true;formation.resize();filmStream.resize();filmAtlas.resize();approved?.resize();if(approved)approved.update(.999);queueUpdate()},{passive:true});
 addEventListener('orientationchange',()=>{layoutDirty=true;queueUpdate()},{passive:true});
 document.addEventListener('visibilitychange',()=>{$film.pause();queueUpdate()});
 reduced.addEventListener?.('change',queueUpdate);
@@ -349,5 +363,5 @@ if(mobile()){rememberFrame(0);rememberFrame(1);}
 checkHdFrames();
 queueUpdate();
 document.documentElement.dataset.makingAtelier='ready';
-window.__mabwePerformance=()=>({film:filmStream.stats(),coil:formation.stats(),chapter:currentScene,scroll:scrollY});
+window.__mabwePerformance=()=>({film:filmStream.stats(),filmAtlas:filmAtlas.stats(),coil:formation.stats(),chapter:currentScene,scroll:scrollY});
 if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.dataset.embed='true';

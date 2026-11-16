@@ -53,8 +53,11 @@ try{
    // v3 is an optional, separately published media archive. A deliberate
    // 404 before the archive exists must not fail the source-v2 fallback QA.
    const optionalV3=/\/assets\/making-cinema-frames-v3\/manifest\.json/.test(res.url());
+   const optionalAtlas=/\/assets\/making-film-atlas-v1\/manifest\.json/.test(res.url());
    if(optionalV3&&res.status()===404&&!existsSync(new URL(
       '../public/assets/making-cinema-frames-v3/manifest.json',import.meta.url)))return;
+   if(optionalAtlas&&res.status()===404&&!existsSync(new URL(
+      '../public/assets/making-film-atlas-v1/manifest.json',import.meta.url)))return;
    if(res.status()>=400&&/making-atelier|making-cinema-frames|coil-uploaded-v1\.glb/.test(res.url()))
     failures.push('HTTP '+res.status()+' '+res.url());
   });

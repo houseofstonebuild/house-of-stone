@@ -21,6 +21,8 @@ on:
       - 'public/prototypes/scroll-frame-stream.js'
       - 'public/assets/making-v8/**'
       - 'public/assets/making-cinema-frames-v4/**'
+      - 'public/assets/making-film-atlas-v1/**'
+      - 'public/prototypes/story-film-atlas.js'
       - 'server.mjs'
       - '.github/workflows/making-atelier-review.yml'
   workflow_dispatch:
@@ -47,6 +49,8 @@ jobs:
       - name: Check JS syntax and data assets
         run: |
           node --check public/prototypes/making-atelier.js
+          node --check public/prototypes/scroll-frame-stream.js
+          node --check public/prototypes/story-film-atlas.js
           node --check public/story-invitation.js
           node --check qa/making-atelier.mjs
           node --check qa/story-invitation.mjs
