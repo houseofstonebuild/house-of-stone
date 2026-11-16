@@ -74,6 +74,16 @@ const filmAtlas=createFilmAtlas({
  }
 });
 let storyFrame=0,layoutDirty=true,readings=[],currentScene='',approved=null,approvedPromise=null;
+let approvedIdleHandle=null;
+function scheduleApprovedInit(){
+ if(approved||approvedPromise||approvedIdleHandle!==null)return;
+ // WebGL shader compilation and GLB uploads must not interrupt a gesture.
+ // The original still remains visible until the approved asset is ready.
+ const load=()=>{approvedIdleHandle=null;if(!document.hidden)initializeApproved();};
+ if('requestIdleCallback' in window)
+  approvedIdleHandle=requestIdleCallback(load,{timeout:1400});
+ else approvedIdleHandle=setTimeout(load,260);
+}
 const formation=createCoilFormation($('#formationStage'),$('#polishStage'),mobile,reduced);
 const approvedOriginalSlot=$('#approvedHost').parentElement;
 const filmState=()=>({paused:$film.paused,time:$film.currentTime,frame:desiredFilmFrame,active:filmActive,videoReady:videoMetadata,hdFrames:hdFramesReady,edition:filmEdition,frames:frameCount,maxSeconds:8.4,stream:filmStream.stats(),atlas:filmAtlas.stats(),coil:formation.stats()});
@@ -304,7 +314,7 @@ function syncApprovedPlacement(y){
  stage.dataset.modelAlpha='0';
  if(host.parentElement!==approvedOriginalSlot)approvedOriginalSlot.append(host);
  host.dataset.inFinishing='false';
- if(p>.74&&y<finishing.top+finishing.height+innerHeight*.2)initializeApproved();
+ if(p>.61&&y<finishing.top+finishing.height+innerHeight*.2)scheduleApprovedInit();
 }
 
 function renderCarving(p,onscreen){
@@ -337,7 +347,7 @@ function renderReveal(p,near){
  art.style.opacity=smooth((p-.005)/.18).toFixed(4);
  // Load the GLB only near the final chapter; the fallback remains visible
  // until the original model is ready, so iOS never shows a blank final frame.
- if(near)initializeApproved();
+ if(near)scheduleApprovedInit();
  // The approved artwork is a still presentation. Do not re-render the
  // exact same WebGL frame on every scroll tick.
  $('.reveal-poster').style.opacity=art.dataset.approvedModelState==='ready'?'0':'1';
@@ -388,7 +398,14 @@ addEventListener('scroll',queueUpdate,{passive:true});
 addEventListener('resize',()=>{layoutDirty=true;formation.resize();filmStream.resize();filmAtlas.resize();approved?.resize();if(approved)approved.update(.999);queueUpdate()},{passive:true});
 addEventListener('orientationchange',()=>{layoutDirty=true;queueUpdate()},{passive:true});
 document.addEventListener('visibilitychange',()=>{
- if(document.hidden){clearTimeout(filmIdleTimer);filmIdleTimer=0;filmStream.suspend();}
+ if(document.hidden){
+  clearTimeout(filmIdleTimer);filmIdleTimer=0;filmStream.suspend();
+  if(approvedIdleHandle!==null){
+   if('cancelIdleCallback' in window)cancelIdleCallback(approvedIdleHandle);
+   else clearTimeout(approvedIdleHandle);
+   approvedIdleHandle=null;
+  }
+ }
  queueUpdate();
 });
 reduced.addEventListener?.('change',queueUpdate);
