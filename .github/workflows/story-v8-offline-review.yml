@@ -1,0 +1,95 @@
+name: Isolated dense Coil animation render (240 frames)
+on:
+  push:
+    branches: ['review/our-story-scroll-qa-2026-11-16']
+    paths:
+      - 'tools/carving-pilot/build_making_v8.py'
+      - '.github/workflows/story-v8-offline-review.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: coil-v8-isolated-review-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 85
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install original geometry decoder and offline VTK renderer
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund @gltf-transform/core @gltf-transform/extensions meshoptimizer
+          python -m pip install numpy scipy scikit-image trimesh vtk pillow
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1 libxrender1 libxext6
+      - name: Decode the exact approved Coil model
+        run: |
+          node tools/carving-pilot/decode-coil.mjs public/models/coil-uploaded-v1.glb build/making-v8/coil.obj
+      - name: Render 240 meaningful stone and polish states for both formats
+        run: |
+          xvfb-run -a python tools/carving-pilot/build_making_v8.py --mesh build/making-v8/coil.obj --out build/making-v8 --res 144 --frames 240
+      - name: Verify unique samples, source registration, order, and responsive images
+        run: |
+          python - <<'PY'
+          import os,json,hashlib
+          from PIL import Image,ImageDraw
+          path='build/making-v8'
+          m=json.load(open(path+'/manifest.json'))
+          assert m['version']==8 and m['frames']==240
+          assert m['camera_revision']==4 and m['registered_to']=='approved-coil-v1'
+          volumes=[e['remaining_voxels'] for e in m['entries']]
+          assert all(volumes[i]>=volumes[i+1] for i in range(len(volumes)-1))
+          assert volumes[0]>volumes[169] and volumes[169]==volumes[-1]
+          for profile in ('desktop','mobile'):
+            files=[f'{path}/{profile}/frame_{i:03d}.webp' for i in range(240)]
+            assert all(os.path.getsize(f)>1200 for f in files)
+            hashes={hashlib.sha256(open(f,'rb').read()).hexdigest() for f in files}
+            assert len(hashes)>=165, (profile,len(hashes))
+            thumbs=[]
+            for i in [0,25,50,75,100,125,150,169,180,200,220,239]:
+              im=Image.open(files[i]).convert('RGB');im.thumbnail((240,300))
+              thumbs.append((i,im))
+            sheet=Image.new('RGB',(1056,1014),'#f4f1ed')
+            drawer=ImageDraw.Draw(sheet)
+            for n,(index,img) in enumerate(thumbs):
+              x=n%4*264;y=n//4*338
+              sheet.paste(img,(x,y));drawer.text((x+5,y+306),str(index),fill='#252b24')
+            sheet.save(f'{path}/contact-{profile}.jpg',quality=88)
+          print('Dense source-derived Coil frames validated, no main-branch deployment')
+          PY
+      - name: Archive quality-assurance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coil-v8-240-frame-desktop-mobile-review
+          path: |
+            build/making-v8/manifest.json
+            build/making-v8/contact-*.jpg
+          retention-days: 30
+      - name: Publish only to the isolated review branch
+        if: ${{ success() && github.ref == 'refs/heads/review/our-story-scroll-qa-2026-11-16' }}
+        run: |
+          mkdir -p public/assets/making-v8
+          cp -r build/making-v8/desktop build/making-v8/mobile public/assets/making-v8/
+          cp build/making-v8/manifest.json public/assets/making-v8/
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/assets/making-v8/
+          git diff --cached --quiet && exit 0
+          git commit -m 'Publish 240 approved-Coil-derived frames to isolated review branch'
+          for i in 1 2 3 4 5 6; do
+            git fetch origin review/our-story-scroll-qa-2026-11-16
+            git rebase origin/review/our-story-scroll-qa-2026-11-16
+            if git push origin HEAD:review/our-story-scroll-qa-2026-11-16; then exit 0; fi
+          done
+          echo 'Cannot safely publish isolated-review assets' >&2
+          exit 1
