@@ -132,7 +132,9 @@ try{
   }));
   assert(earlyCarve.frame<middleCarve.frame&&middleCarve.frame<lateCarve.frame,'Coil is not progressively carved');
   assert(earlyCarve.volume>middleCarve.volume&&middleCarve.volume>lateCarve.volume,'Stone volume must fall as Coil emerges');
-  assert(await page.locator('#formationChips').count()===1,'Visible stone fragments missing');
+  assert(await page.locator('#formationChips').count()===1,'Carving canvas missing');
+  assert.equal(await page.locator('#formationChips').evaluate(el=>getComputedStyle(el).display),'none',
+    'Floating screen-space chips must not appear over the approved sculpture');
   await go(page,'detail',.19);
   assert(+await page.locator('#formationStage').getAttribute('data-requested-frame')<middleCarve.frame,'Stone transformation must reverse on reverse scroll');
   await go(page,'finishing',.19);

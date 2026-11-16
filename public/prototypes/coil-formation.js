@@ -7,22 +7,28 @@
 const clamp=x=>Math.max(0,Math.min(1,x));
 const smooth=x=>{x=clamp(x);return x*x*(3-2*x)};
 const mix=(a,b,t)=>a+(b-a)*t;
-const FRAME_ROOT='/assets/making-v6';
+const FALLBACK_ROOT='/assets/making-v6';
+const CURRENT_ROOT='/assets/making-v7';
 const FRAME_COUNT=144;
 const random=(seed)=>{let x=Math.sin(seed*128.376+19.117)*43758.5453;return x-Math.floor(x)};
 export function createCoilFormation(carveStage,polishStage,mobile,reduced){
  const elements={carve:carveStage.querySelector('#formationFrame'),polish:polishStage.querySelector('#polishFrame')};
  const chips=carveStage.querySelector('#formationChips');
- const ctx=chips.getContext('2d',{alpha:true});
+ // The previous screen-space particles floated across Coil instead of
+ // detaching from its surface. Version 7 renders real 3D fragments with the
+ // same lighting and camera as the stone, so this overlay stays disabled.
+ chips.style.display='none';
+ const ctx=null;
  const cache=new Map();
  const want={carve:-1,polish:-1};
  const shown={carve:-1,polish:-1};
  let manifest=null;
+ let activeRoot=FALLBACK_ROOT;
  let currentProfile=mobile()?'mobile':'desktop';
- const url=(frame)=>FRAME_ROOT+'/'+currentProfile+'/frame_'+String(frame).padStart(3,'0')+'.webp';
+ const url=(frame)=>activeRoot+'/'+currentProfile+'/frame_'+String(frame).padStart(3,'0')+'.webp';
  function load(frame){
   if(frame<0||frame>=FRAME_COUNT)return;
-  const key=currentProfile+':'+frame;
+  const key=activeRoot+':'+currentProfile+':'+frame;
   if(cache.has(key))return;
   const image=new Image();
   image.decoding='async';
@@ -38,8 +44,8 @@ export function createCoilFormation(carveStage,polishStage,mobile,reduced){
   image.src=url(frame);
   if(cache.size>26){
    for(const [name,entry] of cache){
-    const n=Number(name.split(':')[1]);
-    if(name!==currentProfile+':'+want.carve&&name!==currentProfile+':'+want.polish&&
+    const n=Number(name.split(':').at(-1));
+    if(name!==activeRoot+':'+currentProfile+':'+want.carve&&name!==activeRoot+':'+currentProfile+':'+want.polish&&
        (entry.profile!==currentProfile||Math.abs(n-want.carve)>9&&Math.abs(n-want.polish)>9)){
       cache.delete(name);
       if(cache.size<=20)break;
@@ -48,7 +54,7 @@ export function createCoilFormation(carveStage,polishStage,mobile,reduced){
   }
  }
  function display(phase,frame){
-  const item=cache.get(currentProfile+':'+frame);
+  const item=cache.get(activeRoot+':'+currentProfile+':'+frame);
   if(!item?.ready||shown[phase]===frame)return;
   elements[phase].src=item.image.src;
   shown[phase]=frame;
@@ -61,15 +67,16 @@ export function createCoilFormation(carveStage,polishStage,mobile,reduced){
   const stage=phase==='carve'?carveStage:polishStage;
   stage.dataset.requestedFrame=String(frame);
   stage.dataset.modelSource='/models/coil-uploaded-v1.glb';
+  stage.dataset.frameAssetVersion=activeRoot===CURRENT_ROOT?'v7':'v6-fallback';
   if(manifest?.entries?.[frame])stage.dataset.remainingVoxels=String(manifest.entries[frame].remaining_voxels);
   if(want[phase]!==frame)want[phase]=frame;
   load(frame);load(frame-1);load(frame+1);
-  if(cache.get(currentProfile+':'+frame)?.ready)display(phase,frame);
+  if(cache.get(activeRoot+':'+currentProfile+':'+frame)?.ready)display(phase,frame);
   // A nearby decoded frame is safer than a missing image on low-memory iOS.
   else if(shown[phase]===-1){
    for(let d=1;d<=4;d++){
     for(const n of [frame-d,frame+d]){
-     if(cache.get(currentProfile+':'+n)?.ready){display(phase,n);break;}
+     if(cache.get(activeRoot+':'+currentProfile+':'+n)?.ready){display(phase,n);break;}
     }
     if(shown[phase]!==-1)break;
    }
@@ -165,11 +172,49 @@ export function createCoilFormation(carveStage,polishStage,mobile,reduced){
   shown.carve=shown.polish=-1;
   drawChips(Number(carveStage.dataset.phaseProgress||0));
  }
- fetch(FRAME_ROOT+'/manifest.json').then(r=>{if(!r.ok)throw Error('Missing Coil geometry manifest');return r.json()}).then(m=>{
-  if(m.version!==6||m.frames!==FRAME_COUNT||!Array.isArray(m.entries)||m.entries.length!==FRAME_COUNT)throw Error('Invalid Coil carving source');
-  manifest=m;
-  carveStage.dataset.modelDerived='true';
-  polishStage.dataset.modelDerived='true';
- }).catch(()=>{carveStage.dataset.modelDerived='unavailable';polishStage.dataset.modelDerived='unavailable';});
- return {update,resize,get registered(){return manifest?.registered_to==='approved-coil-v1'&&manifest?.camera_revision===2}};
+ async function loadManifest(){
+  try{
+   // The checked-in v6 frames are retained only as a non-broken fallback.
+   // Never claim a visual improvement merely because the renderer changed:
+   // the v7 manifest and representative frames must be live first.
+   let response=await fetch(CURRENT_ROOT+'/manifest.json',{cache:'no-store'});
+   if(response.ok){
+    const candidate=await response.json();
+    const valid=candidate.version===7&&candidate.frames===FRAME_COUNT&&
+     candidate.registered_to==='approved-coil-v1'&&candidate.camera_revision===3&&
+     Array.isArray(candidate.entries)&&candidate.entries.length===FRAME_COUNT;
+    if(valid){
+     const check=await Promise.all(['054','085','095','132'].map(i=>
+       fetch(CURRENT_ROOT+'/'+currentProfile+'/frame_'+i.padStart(3,'0')+'.webp',{method:'HEAD'})));
+     if(check.every(x=>x.ok)){
+      activeRoot=CURRENT_ROOT;
+      manifest=candidate;
+      cache.clear();
+      shown.carve=shown.polish=-1;
+      carveStage.dataset.mediaVerified='v7';
+      polishStage.dataset.mediaVerified='v7';
+      for(const phase of ['carve','polish'])if(want[phase]>=0)load(want[phase]);
+     }
+    }
+   }
+   if(!manifest){
+    response=await fetch(FALLBACK_ROOT+'/manifest.json');
+    if(!response.ok)throw Error('Missing source-derived frames');
+    const candidate=await response.json();
+    if(candidate.version!==6||candidate.frames!==FRAME_COUNT||!Array.isArray(candidate.entries)||
+      candidate.entries.length!==FRAME_COUNT)throw Error('Invalid source-derived frames');
+    manifest=candidate;
+    carveStage.dataset.mediaVerified='v6-fallback';
+    polishStage.dataset.mediaVerified='v6-fallback';
+   }
+   carveStage.dataset.modelDerived='true';
+   polishStage.dataset.modelDerived='true';
+  }catch(error){
+   carveStage.dataset.modelDerived='unavailable';
+   polishStage.dataset.modelDerived='unavailable';
+   console.warn('Coil frame manifest unavailable',error);
+  }
+ }
+ loadManifest();
+ return {update,resize,get registered(){return activeRoot===CURRENT_ROOT&&manifest?.registered_to==='approved-coil-v1'&&manifest?.camera_revision===3}};
 }
