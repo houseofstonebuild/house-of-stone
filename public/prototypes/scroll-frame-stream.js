@@ -13,12 +13,14 @@ export function createFrameStream({stage,image,mobile,src,onDisplay,position=()=
  let memory=new Map(),displayCount=0,requestCount=0,staleCount=0;
  const retries=new Map();
  let direction=1;
+ let drawWidth=0,drawHeight=0,drawProfile='';
  const budget=()=>mobile()?7:13;
  const inflight=()=>mobile()?2:3;
  function url(index){return src(index,profile);}
  function draw(img,index){
   if(!context)return;
-  const rect=stage.getBoundingClientRect(),w=Math.max(1,Math.round(rect.width)),h=Math.max(1,Math.round(rect.height));
+  const w=drawWidth||Math.max(1,stage.clientWidth),h=drawHeight||Math.max(1,stage.clientHeight);
+  if(!drawWidth||!drawHeight){drawWidth=w;drawHeight=h;drawProfile=profile;}
   const ratio=Math.min(devicePixelRatio||1,mobile()?1:1.45);
   const ww=Math.max(1,Math.round(w*ratio)),hh=Math.max(1,Math.round(h*ratio));
   if(canvas.width!==ww||canvas.height!==hh){canvas.width=ww;canvas.height=hh;}
@@ -28,7 +30,6 @@ export function createFrameStream({stage,image,mobile,src,onDisplay,position=()=
   const dx=(ww-dw)*clamp(x/100,0,1),dy=(hh-dh)*clamp(y/100,0,1);
   context.imageSmoothingEnabled=true;
   context.imageSmoothingQuality=mobile()?'medium':'high';
-  context.clearRect(0,0,ww,hh);
   context.drawImage(img,dx,dy,dw,dh);
   displayed=index;lastFrame=img;displayCount++;
   canvas.style.opacity='1';
@@ -145,6 +146,7 @@ export function createFrameStream({stage,image,mobile,src,onDisplay,position=()=
  }
  function configure({frames=count}={}){
   count=frames;rootVersion++;
+  drawWidth=drawHeight=0;
   memory.clear();queued.clear();retries.clear();
   target=displayed=-1;lastFrame=null;
   canvas.style.opacity='0';
@@ -153,6 +155,7 @@ export function createFrameStream({stage,image,mobile,src,onDisplay,position=()=
   active=true;
  }
  function resize(force=false){
+  drawWidth=drawHeight=0;
   const next=mobile()?'mobile':'desktop';
   if(next!==profile){
    profile=next;rootVersion++;

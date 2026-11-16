@@ -10,7 +10,7 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
  const ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});
  const images=new Map();
  let profile=mobile()?'mobile':'desktop',meta=null,target=-1,ready=0,draws=0;
- let edition=0,loading=false;
+ let edition=0,loading=false,lastPainted=-1,lastPan=-1;
  function source(index){return '/assets/making-film-atlas-v1/'+profile+'/sheet_'+String(index).padStart(2,'0')+'.webp';}
  function paint(frame,positionX=30,positionY=47){
   if(!ctx||!meta||frame<0||frame>=meta.frames)return false;
@@ -20,20 +20,25 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
   if(!bitmap?.complete||!bitmap.naturalWidth)return false;
   const {tile_width:tw,tile_height:th}=meta.profiles[profile];
   const tile=frame%25;
+  if(frame===lastPainted&&Math.abs(positionX-lastPan)<.75)return true;
   const sx=(tile%5)*tw,sy=Math.floor(tile/5)*th;
   const w=Math.max(1,Math.round(stage.clientWidth)),h=Math.max(1,Math.round(stage.clientHeight));
-  const ratio=Math.min(devicePixelRatio||1,mobile()?1:1.35);
-  const pw=Math.round(w*ratio),ph=Math.round(h*ratio);
+  // Approx 0.2–0.3 megapixels rather than 1–3 megapixels per scroll tick.
+  // Retain the exact source-resolution still above this canvas at rest.
+  const previewW=mobile()?Math.min(w,300):Math.min(w,620);
+  const pw=Math.max(1,Math.round(previewW));
+  const ph=Math.max(1,Math.round(h*(pw/w)));
   if(canvas.width!==pw||canvas.height!==ph){canvas.width=pw;canvas.height=ph;}
   const scale=Math.max(pw/tw,ph/th);
   const dw=tw*scale,dh=th*scale;
   const dx=(pw-dw)*clamp(positionX/100,0,1);
   const dy=(ph-dh)*clamp(positionY/100,0,1);
   ctx.imageSmoothingEnabled=true;
-  ctx.imageSmoothingQuality=mobile()?'medium':'high';
+  ctx.imageSmoothingQuality='medium';
   ctx.drawImage(bitmap,sx,sy,tw,th,dx,dy,dw,dh);
   canvas.style.opacity='1';
   draws++;
+  lastPainted=frame;lastPan=positionX;
   stage.dataset.displayedFrame=String(frame);
   stage.dataset.displayQuality='atlas-preview';
   stage.dataset.mobileReady='true';
@@ -71,6 +76,7 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
   const newProfile=mobile()?'mobile':'desktop';
   if(newProfile!==profile){
    profile=newProfile;images.clear();ready=0;meta=null;edition++;
+   lastPainted=-1;lastPan=-1;
    canvas.style.opacity='0';verifyAndLoad();
   }else if(target>=0)paint(target,Number(stage.dataset.filmPan||30),47);
  }

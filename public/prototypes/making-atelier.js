@@ -48,6 +48,9 @@ let hdFramesReady=false;
 let frameRoot='/assets/making-cinema-frames';
 let activeFilmFrame=-1,desiredFilmFrame=-1,filmDuration=0,videoMetadata=false,filmActive=false;
 let filmPan=18;
+// Preserve the fluid source-atlas timeline during touch/trackpad movement.
+// Decode full-resolution source photography only when the gesture settles.
+let filmIdleTimer=0,filmMoving=false,lastFilmTarget=-1;
 const filmStream=createFrameStream({
  stage:$filmMedia,image:$mobileFrame,mobile,
  src:index=>frameUrl(index),
@@ -58,8 +61,9 @@ const filmStream=createFrameStream({
   $filmMedia.dataset.mobileReady='true';
   $filmMedia.dataset.displayedFrame=String(index);
   if(filmAtlas.available){
-   filmStream.canvas.style.opacity=index===desiredFilmFrame?'1':'0';
-   $filmMedia.dataset.displayQuality=index===desiredFilmFrame?'hd-source':'atlas-preview';
+   const showHD=index===desiredFilmFrame&&!filmMoving&&filmActive;
+   filmStream.canvas.style.opacity=showHD?'1':'0';
+   $filmMedia.dataset.displayQuality=showHD?'hd-source':'atlas-preview';
   }
  }
 });
@@ -146,6 +150,7 @@ async function checkHdFrames(){
  $filmMedia.dataset.mediaQuality=filmEdition;
  $filmMedia.dataset.totalFrames=String(frameCount);
  filmStream.configure({frames:frameCount});
+ lastFilmTarget=-1;
  const currentProgress=Number($filmMedia.dataset.scrollPosition||0);
  rememberFrame(Math.max(0,Math.min(frameCount-1,Math.round(clamp(currentProgress)*(frameCount-1)))));
  queueUpdate();
@@ -153,6 +158,14 @@ async function checkHdFrames(){
 function rememberFrame(index){
  if(index<0||index>=frameCount)return;
  filmStream.prime(index);
+}
+function settleFilm(){
+ filmIdleTimer=0;
+ if(!filmActive||document.hidden)return;
+ filmMoving=false;
+ // Reuse a previously decoded exact source frame when available, otherwise
+ // fetch the single current target. No old frame may obscure active motion.
+ filmStream.request(desiredFilmFrame,true);
 }
 function updateFilm(p,visible){
  const n=Math.max(0,Math.min(frameCount-1,Math.round(clamp(p)*(frameCount-1))));
@@ -168,11 +181,28 @@ function updateFilm(p,visible){
  $atlas.style.backgroundPosition=(x/6*100).toFixed(3)+'% '+(y/5*100).toFixed(3)+'%';
  $atlas.dataset.spriteFrame=String(sprite);
  filmActive=Boolean(visible);
+ if(filmIdleTimer){clearTimeout(filmIdleTimer);filmIdleTimer=0;}
  if(visible){
-  const atlasShown=filmAtlas.available&&filmAtlas.paint(n,filmPan,47);
-  if(atlasShown&&filmStream.displayed!==n)filmStream.canvas.style.opacity='0';
-  filmStream.request(n,true);
- }else filmStream.suspend();
+  if(n!==lastFilmTarget){
+   lastFilmTarget=n;
+   const atlasShown=filmAtlas.available&&filmAtlas.paint(n,filmPan,47);
+   // When the atlas is not available, retain the existing HD fallback.
+   if(atlasShown){
+    filmMoving=true;
+    filmStream.canvas.style.opacity='0';
+    $filmMedia.dataset.displayQuality='atlas-preview';
+   }else filmStream.request(n,true);
+  }
+  if(filmAtlas.available){
+   // Never compete with canvas animation by decoding 1600-pixel WebPs.
+   filmStream.suspend();
+   filmIdleTimer=setTimeout(settleFilm,150);
+  }
+ }else{
+  lastFilmTarget=-1;
+  filmMoving=false;
+  filmStream.suspend();
+ }
 }
 
 $film.loop=false;
@@ -201,6 +231,7 @@ $film.addEventListener('error',()=>{
   hdFramesReady=false;
   frameRoot='/assets/making-cinema-frames';
   filmStream.configure({frames:frameCount});
+  lastFilmTarget=-1;
   activeFilmFrame=-1;
   $filmMedia.dataset.mediaQuality='original-fallback';
   const source=$film.querySelector('source');
@@ -339,7 +370,9 @@ function update(){
   else if(r.name==='reveal')renderReveal(p,near);
  }
  if(!readings.find(r=>r.name==='carving'&&sceneInView(r,y))) {
-  filmActive=false;filmStream.suspend();
+  filmActive=false;
+  if(filmIdleTimer){clearTimeout(filmIdleTimer);filmIdleTimer=0;}
+  filmStream.suspend();
  }
  const nextFilm=readings.find(r=>r.name==='carving');
  if(nextFilm&&y+view*1.4>=nextFilm.top&&y<nextFilm.top)rememberFrame(0);
@@ -354,7 +387,10 @@ function queueUpdate(){
 addEventListener('scroll',queueUpdate,{passive:true});
 addEventListener('resize',()=>{layoutDirty=true;formation.resize();filmStream.resize();filmAtlas.resize();approved?.resize();if(approved)approved.update(.999);queueUpdate()},{passive:true});
 addEventListener('orientationchange',()=>{layoutDirty=true;queueUpdate()},{passive:true});
-document.addEventListener('visibilitychange',()=>{$film.pause();queueUpdate()});
+document.addEventListener('visibilitychange',()=>{
+ if(document.hidden){clearTimeout(filmIdleTimer);filmIdleTimer=0;filmStream.suspend();}
+ queueUpdate();
+});
 reduced.addEventListener?.('change',queueUpdate);
 // The story's skip action now leads to the collection rather than to Coil.
 // Do not trap or intercept the native navigation.
@@ -363,5 +399,5 @@ if(mobile()){rememberFrame(0);rememberFrame(1);}
 checkHdFrames();
 queueUpdate();
 document.documentElement.dataset.makingAtelier='ready';
-window.__mabwePerformance=()=>({film:filmStream.stats(),filmAtlas:filmAtlas.stats(),coil:formation.stats(),chapter:currentScene,scroll:scrollY});
+window.__mabwePerformance=()=>({film:filmStream.stats(),filmAtlas:filmAtlas.stats(),coil:formation.stats(),filmMoving,chapter:currentScene,scroll:scrollY});
 if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.dataset.embed='true';
