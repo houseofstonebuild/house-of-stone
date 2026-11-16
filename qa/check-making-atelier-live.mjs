@@ -6,6 +6,14 @@ const files=[
  ['/prototypes/making-atelier.html','From the earth.',1500],
  ['/prototypes/making-atelier.css','.story-chapter',9000],
  ['/prototypes/making-atelier.js','window.__mabweMaking',6000],
+ ['/prototypes/coil-formation.js','making-v7',6000],
+ ['/assets/making-v7/manifest.json','camera_revision',6000],
+ ['/assets/making-v7/desktop/frame_054.webp',null,2500],
+ ['/assets/making-v7/desktop/frame_074.webp',null,2500],
+ ['/assets/making-v7/desktop/frame_085.webp',null,2500],
+ ['/assets/making-v7/desktop/frame_130.webp',null,2500],
+ ['/assets/making-v7/mobile/frame_074.webp',null,2500],
+ ['/assets/making-v7/mobile/frame_130.webp',null,2500],
  ['/assets/making-cinema-frames/manifest.json','source_sha256',60],
  ['/assets/making-cinema-frames/frame_00.webp',null,1500],
  ['/assets/making-cinema-frames/frame_24.webp',null,1500],
@@ -27,4 +35,12 @@ for(const [path,marker,min] of files){
  }
  console.log(response.status,path,content.length);
 }
-console.log('Live source-true Making Atelier verification passed at',root);
+const manifestResponse=await fetch(root+'/assets/making-v7/manifest.json?registered-v7=1',{cache:'no-store',signal:AbortSignal.timeout(25000)});
+const manifest=await manifestResponse.json();
+assert.equal(manifest.version,7,'Live site is not serving new Coil frames');
+assert.equal(manifest.registered_to,'approved-coil-v1');
+assert.equal(manifest.camera_revision,3);
+assert.equal(manifest.frames,144);
+assert(manifest.entries[65].remaining_voxels>manifest.entries[85].remaining_voxels,
+  'Coil removal frames do not gradually reduce stone volume');
+console.log('Live source-true Making Atelier v7 verified at',root);
