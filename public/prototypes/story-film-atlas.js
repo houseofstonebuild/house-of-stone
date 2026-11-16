@@ -22,7 +22,10 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
   const tile=frame%25;
   const sx=(tile%5)*tw,sy=Math.floor(tile/5)*th;
   const w=Math.max(1,Math.round(stage.clientWidth)),h=Math.max(1,Math.round(stage.clientHeight));
-  const ratio=Math.min(devicePixelRatio||1,mobile()?1:1.35);
+  // During a gesture the preview only needs smooth motion. A small canvas
+  // cuts pixel fill-rate; the HD decoded image replaces it when scrolling
+  // settles, with no permanent quality reduction.
+  const ratio=mobile()?.68:.82;
   const pw=Math.round(w*ratio),ph=Math.round(h*ratio);
   if(canvas.width!==pw||canvas.height!==ph){canvas.width=pw;canvas.height=ph;}
   const scale=Math.max(pw/tw,ph/th);
@@ -30,7 +33,7 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
   const dx=(pw-dw)*clamp(positionX/100,0,1);
   const dy=(ph-dh)*clamp(positionY/100,0,1);
   ctx.imageSmoothingEnabled=true;
-  ctx.imageSmoothingQuality=mobile()?'medium':'high';
+  ctx.imageSmoothingQuality='medium';
   ctx.drawImage(bitmap,sx,sy,tw,th,dx,dy,dw,dh);
   canvas.style.opacity='1';
   draws++;
