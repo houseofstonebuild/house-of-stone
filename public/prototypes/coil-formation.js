@@ -24,7 +24,9 @@ export function createCoilFormation(carveStage,polishStage,mobile,reduced){
    onDisplay:(frame,item)=>{
     // Retain the image for existing tests and screen readers, but keep it
     // behind the canvas to avoid two different frame layers crossfading.
-    image.src=item.src;
+    // The hidden compatibility image only needs a first decoded frame.
+    // Duplicating every frame in an <img> doubles Safari's decode workload.
+    if(!image.hasAttribute('src'))image.src=item.src;
     stage.dataset.displayedFrame=String(frame);
     stage.dataset.frameStatus='ready';
    }
