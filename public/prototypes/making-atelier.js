@@ -27,6 +27,17 @@ const $mapRoute=$('#mapRoute');
 const $truck=$('#routeTruck');
 const $routeReadout=$('#routeReadout');
 const mapLength=$mapRoute.getTotalLength?.()||115;
+// Pre-sample the fixed SVG path once. getPointAtLength() during scrolling can
+// force a costly geometry query after moving the map on slower mobile devices.
+const routeSamples=Array.from({length:257},(_,i)=>{
+ const point=$mapRoute.getPointAtLength(mapLength*i/256);
+ return {x:point.x,y:point.y};
+});
+function routePoint(t){
+ const u=clamp(t)*256,index=Math.min(255,Math.floor(u));
+ const f=u-index,a=routeSamples[index],b=routeSamples[index+1];
+ return {x:lerp(a.x,b.x,f),y:lerp(a.y,b.y,f)};
+}
 $mapRoute.style.strokeDasharray=String(mapLength);
 let frameCount=48;
 let filmEdition='legacy';
@@ -207,7 +218,7 @@ function renderOrigin(p){
  $('.origin-map-wrap').style.transform='translate3d('+shiftX.toFixed(1)+'px,'+shiftY.toFixed(1)+'px,0) scale('+factor.toFixed(4)+')';
  const travel=reduced.matches?1:smooth((p-.41)/.43);
  $mapRoute.style.strokeDashoffset=String((mapLength*(1-travel)).toFixed(2));
- const point=$mapRoute.getPointAtLength(mapLength*travel);
+ const point=routePoint(travel);
  $truck.setAttribute('transform','translate('+point.x.toFixed(2)+' '+point.y.toFixed(2)+')');
  $truck.style.opacity=String(reduced.matches?1:smooth((p-.38)/.08)*(1-smooth((p-.95)/.05)));
  $('#hararePin').style.opacity=String(reduced.matches?1:smooth((p-.22)/.18));
