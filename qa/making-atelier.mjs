@@ -10,6 +10,7 @@ import {createApp} from '../server.mjs';
 assert(existsSync(new URL('../public/assets/making-cinema-frames/frame_00.webp',import.meta.url)),'Real source film frames have not been built');
 assert(existsSync(new URL('../public/assets/making-cinema-frames/frame_47.webp',import.meta.url)),'Real source film frames are incomplete');
 assert(existsSync(new URL('../public/assets/making-atelier-final-mobile-v1.png',import.meta.url)),'Plinth-free approved Coil final is missing');
+const hasRegisteredV7=existsSync(new URL('../public/assets/making-v7/manifest.json',import.meta.url));
 const out=new URL('../test-results/browser/making-atelier/',import.meta.url);
 mkdirSync(out,{recursive:true});
 const data=mkdtempSync(join(tmpdir(),'making-atelier-'));
@@ -52,6 +53,16 @@ try{
   });
   await page.goto(base+'/prototypes/making-atelier.html',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.documentElement.dataset.makingAtelier==='ready');
+  // New assets are made visible only after the matching manifest and actual
+  // frames deploy. Once v7 files exist, using the older set is a regression.
+  if(hasRegisteredV7){
+   await page.waitForFunction(()=>{
+    const stage=document.querySelector('#formationStage');
+    return stage?.dataset.mediaVerified==='v7'||stage?.dataset.modelDerived==='unavailable';
+   },null,{timeout:20000});
+   assert.equal(await page.locator('#formationStage').getAttribute('data-media-verified'),'v7',
+     'The current versioned stone frames were ignored after publication');
+  }
   // Verify origin zoom and a physically upright truck moving down the route.
   await go(page,'origin',.14);
   const mapBefore=await page.locator('#mapWrap').evaluate(el=>el.getBoundingClientRect().width);
