@@ -1,7 +1,7 @@
-name: New Making Atelier visual review
+name: Isolated Our Story browser review
 on:
   push:
-    branches: [main]
+    branches: ['review/our-story-scroll-qa-2026-11-16']
     paths:
       - 'public/prototypes/making-atelier.html'
       - 'public/prototypes/making-atelier.css'
@@ -16,6 +16,7 @@ on:
       - 'public/story-invitation.js'
       - 'public/story-invitation.css'
       - 'qa/story-invitation.mjs'
+      - 'qa/story-scroll-diagnostics.mjs'
       - 'server.mjs'
       - '.github/workflows/making-atelier-review.yml'
   workflow_dispatch:
@@ -50,6 +51,8 @@ jobs:
         run: sh scripts/run-browser-qa.sh qa/making-atelier.mjs
       - name: First-visit invitation and full-screen story acceptance
         run: sh scripts/run-browser-qa.sh qa/story-invitation.mjs
+      - name: Diagnose scroll stalls and responsive layout without production deployment
+        run: sh scripts/run-browser-qa.sh qa/story-scroll-diagnostics.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
