@@ -144,8 +144,8 @@ try{
   const handoff=await page.evaluate(()=>({
    mode:document.querySelector('#polishStage').dataset.handoffMode,
    frame:Number(document.querySelector('#polishStage').dataset.frameAlpha),
-   model:Number(document.querySelector('#polishStage').dataset.modelAlpha
- )});
+   model:Number(document.querySelector('#polishStage').dataset.modelAlpha)
+  }));
   assert(['registered-match','masked-dissolve'].includes(handoff.mode),'Unsupported camera handoff');
   assert.equal(handoff.mode,'masked-dissolve','Never overlay two separately rasterized models');
   assert(!(handoff.frame>.03&&handoff.model>.03),'Unmatched 3D sculptures must not overlap');
