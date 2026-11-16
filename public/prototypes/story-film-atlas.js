@@ -7,7 +7,7 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
  canvas.className='film-motion-atlas';
  canvas.setAttribute('aria-hidden','true');
  anchor.after(canvas);
- const mode=new URLSearchParams(location.search).get('filmmode')==='css'?'css':'canvas';
+ const mode=new URLSearchParams(location.search).get('filmmode')==='canvas'?'canvas':'css';
  const compositor=document.createElement('div');
  compositor.className='film-motion-compositor';
  compositor.setAttribute('aria-hidden','true');
