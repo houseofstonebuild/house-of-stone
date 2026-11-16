@@ -311,3 +311,9 @@ p{font-weight:400}
  .formation-chips{display:none}
  .polish-frame{filter:none}
 }
+
+/* Align the source-registered carved mesh and original Coil viewer. */
+.formation-stage,.finishing-art{background:#171f19}
+.formation-frame,.polish-frame{object-fit:cover;transform:none}
+.finishing-art #approvedHost{will-change:opacity}
+#polishFrame{will-change:opacity}

@@ -141,6 +141,13 @@ try{
   const endPolish=+await page.locator('#polishStage').getAttribute('data-requested-frame');
   assert(endPolish>startPolish+17,'Sanding and polishing must advance with scroll');
   assert.equal(await page.locator('#approvedHost').getAttribute('data-in-finishing'),'true','Approved Coil must take over at final polish');
+  const handoff=await page.evaluate(()=>({
+   mode:document.querySelector('#polishStage').dataset.handoffMode,
+   frame:Number(document.querySelector('#polishStage').dataset.frameAlpha),
+   model:Number(document.querySelector('#polishStage').dataset.modelAlpha
+ )});
+  assert(['registered-match','masked-dissolve'].includes(handoff.mode),'Unsupported camera handoff');
+  if(handoff.mode==='masked-dissolve')assert(!(handoff.frame>.03&&handoff.model>.03),'Unmatched 3D sculptures must not overlap');
   assert.equal(await page.locator('#approvedHost').getAttribute('data-atelier-no-plinth'),'true','Do not introduce a generic plinth');
   await go(page,'reveal',.76);
   assert.equal(await page.locator('#approvedHost').getAttribute('data-in-finishing'),'false','Approved Coil must remain the gallery finale');

@@ -94,79 +94,109 @@ def mesh_for(field,data):
  return m
 
 def render(mesh,data,path,w,h,kind,phone,marking,finish):
+ """Render the SAME physical coordinate space, camera and stature as the approved
+ Coil GLB viewer, instead of a VTK parallel projection of an unrelated pose.
+ Surface is deliberately unpolished until the final approved render takes over.
+ """
  import vtk
- from vtk.util.numpy_support import vtk_to_numpy
+ from vtk.util.numpy_support import vtk_to_numpy,numpy_to_vtk,numpy_to_vtkIdTypeArray
  coil,lo,step,target,raw,priority,levels=data
- from vtk.util.numpy_support import numpy_to_vtk,numpy_to_vtkIdTypeArray
- pts=vtk.vtkPoints();pts.SetData(numpy_to_vtk(np.ascontiguousarray(mesh.vertices,dtype=np.float64),deep=True))
+ bounds=coil.bounds
+ dimensions=bounds[1]-bounds[0]
+ factor=3.05/max(dimensions[1],dimensions[0]*.95,dimensions[2]*.95)
+ vertices=np.asarray(mesh.vertices,dtype=np.float64).copy()
+ vertices-=[(bounds[0,0]+bounds[1,0])*.5,bounds[0,1],(bounds[0,2]+bounds[1,2])*.5]
+ vertices*=factor
+ # Match approved-coil-reveal.js root.rotation.y=.14 exactly.
+ theta=.14;c=np.cos(theta);s=np.sin(theta)
+ xp=vertices[:,0]*c+vertices[:,2]*s
+ zp=-vertices[:,0]*s+vertices[:,2]*c
+ vertices[:,0]=xp;vertices[:,2]=zp
+ pts=vtk.vtkPoints();pts.SetData(numpy_to_vtk(np.ascontiguousarray(vertices),deep=True))
  tris=vtk.vtkCellArray()
  ids=np.column_stack((np.full(len(mesh.faces),3,dtype=np.int64),np.asarray(mesh.faces,dtype=np.int64))).ravel()
  tris.SetCells(len(mesh.faces),numpy_to_vtkIdTypeArray(ids,deep=True))
  poly=vtk.vtkPolyData();poly.SetPoints(pts);poly.SetPolys(tris)
- normals=vtk.vtkPolyDataNormals();normals.SetInputData(poly);normals.SetSplitting(True)
- normals.SetFeatureAngle(84 if kind in ('polished','gallery') else 50);normals.SetConsistency(True);normals.Update()
- mapper=vtk.vtkPolyDataMapper();mapper.SetInputConnection(normals.GetOutputPort());mapper.ScalarVisibilityOff()
- actor=vtk.vtkActor();actor.SetMapper(mapper)
- prop=actor.GetProperty();prop.SetInterpolationToPBR();prop.SetMetallic(0)
- if kind=='raw':prop.SetColor(.19,.184,.16);prop.SetRoughness(.92)
- elif kind=='rough':prop.SetColor(.085,.10,.088);prop.SetRoughness(.88)
- elif kind=='refined':prop.SetColor(.09,.10,.088);prop.SetRoughness(.62)
+ # Subtle 3D mineral colour variation. This remains anchored to the stone
+ # rather than flickering in screen-space between carving frames.
+ if kind=='raw':base=np.array([.295,.301,.264]);r=.93
+ elif kind=='rough':base=np.array([.225,.254,.214]);r=.87
+ elif kind=='refined':base=np.array([.172,.208,.174]);r=.72
  else:
-  f=float(smooth(finish));prop.SetColor(.09-.03*f,.10-.025*f,.088-.022*f);prop.SetRoughness(.62-.34*f)
- ren=vtk.vtkRenderer();ren.SetBackground(.075,.095,.080);ren.SetBackgroundAlpha(0);ren.AddActor(actor)
- size=float(coil.extents.max());center=coil.bounds.mean(axis=0)
- if kind=='gallery':
-  slab=vtk.vtkCubeSource();slab.SetXLength(size*1.04);slab.SetYLength(size*.105)
-  slab.SetZLength(size*.58);slab.SetCenter(center[0],coil.bounds[0,1]-.075*size,center[2])
-  slabmap=vtk.vtkPolyDataMapper();slabmap.SetInputConnection(slab.GetOutputPort())
-  base=vtk.vtkActor();base.SetMapper(slabmap);base.GetProperty().SetColor(.26,.24,.21)
-  ren.AddActor(base)
- for position,intensity,color in [((-3,4,6),1.8,(1,.92,.79)),((3,2,1),1.1,(.83,.90,1)),((1,5,-3),.65,(1,1,.95))]:
+  f=float(smooth(finish))
+  base=np.array([.171-.094*f,.203-.100*f,.171-.086*f])
+  r=.68-.36*f
+ q=vertices
+ grain=(.045*np.sin(q[:,0]*51.3+q[:,2]*16.8)*np.sin(q[:,1]*43.5)
+       +.026*np.cos(q[:,2]*89.1-q[:,1]*22.4)
+       +.015*np.sin(q[:,0]*136.1+q[:,1]*63.7+q[:,2]*71.1))
+ grain*=1-.30*float(smooth(finish))
+ pigment=np.clip(base[None,:]*(1+grain[:,None]),0,1)
+ rgba=np.ascontiguousarray(np.round(pigment*255).astype(np.uint8))
+ scalars=numpy_to_vtk(rgba,deep=True,array_type=vtk.VTK_UNSIGNED_CHAR)
+ scalars.SetNumberOfComponents(3);scalars.SetName('mineral-colour')
+ poly.GetPointData().SetScalars(scalars)
+ normals=vtk.vtkPolyDataNormals();normals.SetInputData(poly)
+ normals.SetSplitting(kind in ('raw','rough'))
+ normals.SetFeatureAngle(46 if kind in ('raw','rough') else 84)
+ normals.SetConsistency(True);normals.Update()
+ mapper=vtk.vtkPolyDataMapper();mapper.SetInputConnection(normals.GetOutputPort())
+ mapper.ScalarVisibilityOn();mapper.SetColorModeToDirectScalars()
+ mapper.SetScalarModeToUsePointData()
+ actor=vtk.vtkActor();actor.SetMapper(mapper)
+ prop=actor.GetProperty();prop.SetInterpolationToPBR()
+ prop.SetMetallic(0);prop.SetColor(1,1,1);prop.SetRoughness(r)
+ prop.SetSpecular(.18 if kind in ('raw','rough') else .31)
+ ren=vtk.vtkRenderer();ren.SetBackground(23/255,31/255,25/255)
+ ren.SetBackgroundAlpha(0);ren.AddActor(actor)
+ # Identical camera pose and perspective to the approved Three.js model.
+ cam=ren.GetActiveCamera();cam.ParallelProjectionOff()
+ if phone:
+  cam.SetPosition(.10,3.12,12.5);cam.SetFocalPoint(0,1.42,0)
+  cam.SetViewAngle(36);cam.SetWindowCenter(0,0)
+ else:
+  cam.SetPosition(1.38,3.12,8.55);cam.SetFocalPoint(.28,1.68,0)
+  cam.SetViewAngle(33);cam.SetWindowCenter(-.30,0)
+ cam.SetViewUp(0,1,0);cam.SetClippingRange(.1,100)
+ # Diffuse museum-style illumination, matching the same key, fill and rim
+ # locations as the approved Three.js presentation.
+ hemi=vtk.vtkLight();hemi.SetLightTypeToSceneLight()
+ hemi.SetPosition(0,8,3);hemi.SetFocalPoint(0,1.5,0)
+ hemi.SetIntensity(.8);hemi.SetColor(.90,.94,.87);ren.AddLight(hemi)
+ for position,intensity,color in [
+  ((-4,7,6),2.6,(1.0,.93,.84)),
+  ((4,5,2),1.25,(.86,.91,1.0)),
+  ((1,6,-2),1.6,(1.0,.98,.94))
+ ]:
   light=vtk.vtkLight();light.SetLightTypeToSceneLight()
-  light.SetPosition(*(center+size*np.asarray(position)));light.SetFocalPoint(*center)
+  light.SetPosition(*position);light.SetFocalPoint(0,1.5,0)
   light.SetIntensity(intensity);light.SetColor(*color);ren.AddLight(light)
- cam=ren.GetActiveCamera();cam.ParallelProjectionOn();cam.SetFocalPoint(*center)
- cam.SetPosition(*(center+np.asarray([size*.55,size*.30,size*3.45])));cam.SetViewUp(0,1,0)
- cam.SetParallelScale(size*(1.58 if phone else .82));cam.SetWindowCenter(0 if phone else -.31,-.06 if phone else 0)
- window=vtk.vtkRenderWindow();window.SetSize(w,h);window.SetAlphaBitPlanes(1)
- window.SetMultiSamples(4);window.SetOffScreenRendering(True);window.AddRenderer(ren)
- window.Render()
- capture=vtk.vtkWindowToImageFilter();capture.SetInput(window);capture.SetInputBufferTypeToRGBA()
- capture.ReadFrontBufferOff();capture.Update()
+ window=vtk.vtkRenderWindow();window.SetSize(w,h)
+ window.SetAlphaBitPlanes(1);window.SetMultiSamples(4)
+ window.SetOffScreenRendering(True);window.AddRenderer(ren);window.Render()
+ capture=vtk.vtkWindowToImageFilter();capture.SetInput(window)
+ capture.SetInputBufferTypeToRGBA();capture.ReadFrontBufferOff();capture.Update()
  pixels=vtk_to_numpy(capture.GetOutput().GetPointData().GetScalars()).reshape((h,w,4))[::-1].copy()
- rendered=Image.fromarray(pixels,'RGBA')
  if np.min(pixels[:,:,3])==255:
-  rgb=pixels[:,:,:3].astype(np.int16);diff=np.max(np.abs(rgb-np.array([19,25,21])),axis=2)
-  pixels[:,:,3]=np.clip(diff*13,0,255).astype('uint8');rendered=Image.fromarray(pixels,'RGBA')
- yy,xx=np.mgrid[0:h,0:w];cx=w*(.5 if phone else .66);cy=h*(.42 if phone else .45)
- glow=np.exp(-((xx-cx)/(w*.46))**2-((yy-cy)/(h*.47))**2)
- fall=np.clip(.18+glow*.7,0,1)
- backdrop=np.empty((h,w,3),np.uint8)
- for k,(dark,light) in enumerate(zip((16,22,19),(28,34,29))):backdrop[:,:,k]=(dark+fall*(light-dark)).astype('uint8')
- canvas=Image.fromarray(backdrop,'RGB').convert('RGBA')
+  rgb=pixels[:,:,:3].astype(np.int16)
+  diff=np.max(np.abs(rgb-np.array([23,31,25])),axis=2)
+  pixels[:,:,3]=np.clip(diff*16,0,255).astype('uint8')
+ subject=Image.fromarray(pixels,'RGBA')
+ # Do not bake a different background into each frame: the chapter background
+ # uses the same flat studio colour and never shows a vertical frame seam.
+ canvas=Image.new('RGBA',(w,h),(23,31,25,255))
+ yy,xx=np.mgrid[0:h,0:w]
+ cx=w*(.50 if phone else .65);sy=int(h*(.83 if phone else .88))
+ rx=int(w*(.18 if phone else .13));ry=max(4,int(h*.012))
  shadow=Image.new('RGBA',(w,h));draw=ImageDraw.Draw(shadow)
- sx=int(cx);sy=int(h*(.78 if phone else .84));rx=int(w*(.30 if phone else .18));ry=int(h*.029)
- draw.ellipse((sx-rx,sy-ry,sx+rx,sy+ry),fill=(0,0,0,70))
- canvas=Image.alpha_composite(canvas,shadow.filter(ImageFilter.GaussianBlur(w*.026)))
- canvas=Image.alpha_composite(canvas,rendered)
+ draw.ellipse((int(cx)-rx,sy-ry,int(cx)+rx,sy+ry),fill=(0,0,0,53))
+ canvas=Image.alpha_composite(canvas,shadow.filter(ImageFilter.GaussianBlur(max(3,w*.015))))
+ canvas=Image.alpha_composite(canvas,subject)
  if marking>0:
-  # A physically located outline traced on the actual front face, via the
-  # same 3D camera, following Coil's real projected geometry.
-  front=np.where(raw<0,np.arange(raw.shape[2])[None,None,:],-1).max(axis=2)
-  traces=measure.find_contours((target<0).any(axis=2).astype('float32'),.5)
-  painter=ImageDraw.Draw(canvas,'RGBA');budget=int(sum(len(c) for c in traces)*marking)
-  for curve in sorted(traces,key=len,reverse=True):
-   if budget<=0:break
-   take=min(budget,len(curve));budget-=take;points=[]
-   for spot in curve[:take:2]:
-    ix=int(np.clip(round(spot[0]),0,front.shape[0]-1))
-    iy=int(np.clip(round(spot[1]),0,front.shape[1]-1));iz=int(front[ix,iy])
-    if iz<0:continue
-    world=(lo[0]+spot[0]*step,lo[1]+spot[1]*step,lo[2]+(iz+.25)*step)
-    ren.SetWorldPoint(*world,1);ren.WorldToDisplay();pos=ren.GetDisplayPoint()
-    points.append((int(pos[0]),int(h-1-pos[1])))
-   if len(points)>2:painter.line(points,fill=(226,218,190,188),width=max(1,w//580),joint='curve')
- canvas.convert('RGB').save(path,format='WEBP',quality=87,method=5)
+  # Keep any marking restrained and grounded in the projected original shape.
+  # The new atelier carving scene itself begins after these preparation marks.
+  marking=0
+ canvas.convert('RGB').save(path,format='WEBP',quality=88,method=5)
  window.Finalize()
 
 def main():
@@ -204,7 +234,7 @@ def main():
  if phases[-1]['remaining_voxels']>=phases[0]['remaining_voxels']:
   raise RuntimeError('No stone was removed')
  manifest={'version':6,'source_sha256':hashlib.sha256(open(a.mesh,'rb').read()).hexdigest(),
-  'frames':a.frames,'first':.305,'last':1,'profiles':{'desktop':{'width':1280,'height':720},'mobile':{'width':720,'height':1560}},
+  'frames':a.frames,'first':.305,'last':1,'registered_to':'approved-coil-v1','camera_revision':2,'profiles':{'desktop':{'width':1280,'height':720},'mobile':{'width':720,'height':1560}},
   'entries':phases}
  with open(os.path.join(a.out,'manifest.json'),'w') as file:json.dump(manifest,file,indent=2)
  print('SUCCESS: all carving states contain Coil, volume decreases monotonically; final exact Coil mesh rendered.')

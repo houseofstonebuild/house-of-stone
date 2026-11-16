@@ -236,23 +236,42 @@ function renderFinishing(p){
  $('#finishWord').textContent=p<.34?'SANDING':p<.73?'SMOOTHING':'POLISHING';
 }
 function syncApprovedPlacement(y){
- // One approved model: it takes over during the final polish, then remains
- // the same exact GLB in the gallery. Never load a substitute sculpture.
+ // Keep just ONE sculpture visible during finishing. The previous screen-space
+ // crossfade overlaid two unmatched silhouettes and produced a doubled spiral.
  const finishing=readings.find(r=>r.name==='finishing');
  const reveal=readings.find(r=>r.name==='reveal');
  if(!finishing||!reveal)return;
  const p=clamp((y-finishing.top)/finishing.distance);
- const inFinalPolish=y>=finishing.top+finishing.distance*.76 && y<reveal.top-innerHeight*.22;
+ const inFinalPolish=y>=finishing.top+finishing.distance*.72&&y<reveal.top-innerHeight*.18;
+ const host=$('#approvedHost'),frame=$('#polishFrame'),stage=$('#polishStage');
+ if(p>.68&&y<reveal.top)initializeApproved();
  const target=inFinalPolish?$('#finishApprovedSpace'):approvedOriginalSlot;
- const host=$('#approvedHost');
  if(host.parentElement!==target){target.append(host);approved?.resize();}
+ const ready=host.dataset.approvedModelState==='ready';
+ $('.reveal-poster').style.opacity=ready?'0':'1';
  if(inFinalPolish){
-  initializeApproved();
-  host.style.opacity=smooth((p-.78)/.20).toFixed(4);
+  const registered=formation.registered;
+  const blend=ready?smooth((p-.83)/.16):0;
+  // While the old frame archive is still deployed, cover the handoff with
+  // a short fade-through-dark. Never show the misregistered objects together.
+  const oldFade=ready?(1-smooth((p-.78)/.075)):1;
+  const newFade=ready?smooth((p-.885)/.085):0;
+  const frameAlpha=registered?1-blend:oldFade;
+  const modelAlpha=registered?blend:newFade;
+  frame.style.opacity=frameAlpha.toFixed(4);
+  host.style.opacity=modelAlpha.toFixed(4);
   host.dataset.inFinishing='true';
+  stage.dataset.handoffMode=registered?'registered-match':'masked-dissolve';
+  stage.dataset.frameAlpha=frame.style.opacity;
+  stage.dataset.modelAlpha=host.style.opacity;
+  if(ready&&modelAlpha>.001)approved?.update(.999);
  }else{
+  frame.style.opacity='1';
   host.style.opacity='1';
   host.dataset.inFinishing='false';
+  stage.dataset.handoffMode='none';
+  stage.dataset.frameAlpha='1';
+  stage.dataset.modelAlpha='0';
  }
 }
 function renderCarving(p,onscreen){

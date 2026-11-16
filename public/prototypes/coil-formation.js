@@ -77,14 +77,14 @@ export function createCoilFormation(carveStage,polishStage,mobile,reduced){
  }
  // Deterministic fractures on the OUTSIDE of the diminishing stone volume.
  // A shard falls outward and down, then vanishes, when its carving phase passes.
- const shards=Array.from({length:68},(_,i)=>({
-  at:.08+random(i+11)*.84,
+ const shards=Array.from({length:32},(_,i)=>({
+  at:.09+random(i+11)*.65,
   angle:(random(i+28)-.5)*2.8,
-  x:random(i+35)*2-1,
+  side:random(i+35)>.5?1:-1,
   y:random(i+49)*2-1,
-  size:5+random(i+97)*12,
-  spin:random(i+79)*4-2,
-  drift:random(i+88)*2-1
+  size:8+random(i+97)*13,
+  spin:random(i+79)*3-1.5,
+  drift:random(i+88)*.7+.3
  }));
  function drawChips(progress){
   if(!ctx||reduced.matches){if(ctx)ctx.clearRect(0,0,chips.width,chips.height);return;}
@@ -99,21 +99,20 @@ export function createCoilFormation(carveStage,polishStage,mobile,reduced){
   const cx=w*(phone?.50:.66),cy=h*(phone?.42:.45);
   const rx=w*(phone?.20:.145),ry=h*(phone?.145:.29);
   for(let i=0;i<shards.length;i++){
-   const s=shards[i],t=(progress-s.at)/.17;
-   if(t<0||t>1)continue;
-   const q=smooth(t),fade=1-smooth((t-.58)/.4);
-   // Source coordinates stay close to the actual rough silhouette, and
-   // converge inward as the section loses its outer material.
-   const shrinking=1-progress*.52;
-   const ox=s.x*rx*shrinking,oy=s.y*ry*shrinking;
-   const side=Math.sign(s.x||.1);
-   const spread=(side*(18+Math.abs(s.drift)*22))*q;
-   const fall=(35+Math.abs(s.y)*42)*q*q;
+   const s=shards[i],t=(progress-s.at)/.165;
+   if(t<0||t>1||progress>.86)continue;
+   const q=smooth(t),fade=(1-smooth((t-.52)/.45))*(1-smooth((progress-.69)/.17));
+   // Chips detach at the OUTER perimeter of the stone and fall away from
+   // the mass; never scatter imaginary marks across Coil's finished face.
+   const shrinking=1-progress*.33;
+   const ox=s.side*rx*shrinking,oy=s.y*ry*shrinking;
+   const spread=s.side*(25+30*s.drift)*q;
+   const fall=(45+Math.abs(s.y)*80)*q*q;
    const x=cx+ox+spread,y=cy+oy+fall;
    const radius=s.size*(phone?.62:1)*(1-.34*q);
    ctx.save();
    ctx.translate(x,y);ctx.rotate(s.angle+s.spin*q);
-   ctx.globalAlpha=Math.min(1,fade*.83);
+   ctx.globalAlpha=Math.min(1,fade*.77);
    ctx.shadowColor='rgba(0,0,0,.30)';ctx.shadowBlur=radius*.48;ctx.shadowOffsetY=radius*.25;
    ctx.beginPath();
    ctx.moveTo(-radius*.91,-radius*.36);
@@ -136,7 +135,7 @@ export function createCoilFormation(carveStage,polishStage,mobile,reduced){
    ctx.lineTo(-radius*.80,radius*.37);ctx.closePath();
    ctx.fillStyle='#303e34';ctx.fill();
    ctx.restore();
-   if(i%2===0){
+   if(i%3===0){
     ctx.fillStyle='rgba(207,192,163,'+(fade*.27).toFixed(3)+')';
     ctx.beginPath();ctx.arc(x+8*q,y+15*q,Math.max(.5,radius*.085),0,Math.PI*2);ctx.fill();
    }
@@ -172,5 +171,5 @@ export function createCoilFormation(carveStage,polishStage,mobile,reduced){
   carveStage.dataset.modelDerived='true';
   polishStage.dataset.modelDerived='true';
  }).catch(()=>{carveStage.dataset.modelDerived='unavailable';polishStage.dataset.modelDerived='unavailable';});
- return {update,resize};
+ return {update,resize,get registered(){return manifest?.registered_to==='approved-coil-v1'&&manifest?.camera_revision===2}};
 }
