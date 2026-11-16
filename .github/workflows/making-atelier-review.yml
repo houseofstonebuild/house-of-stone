@@ -17,6 +17,9 @@ on:
       - 'public/story-invitation.css'
       - 'qa/story-invitation.mjs'
       - 'qa/story-scroll-diagnostics.mjs'
+      - 'qa/story-motion-performance.mjs'
+      - 'public/prototypes/scroll-frame-stream.js'
+      - 'public/assets/making-v8/**'
       - 'server.mjs'
       - '.github/workflows/making-atelier-review.yml'
   workflow_dispatch:
@@ -53,6 +56,8 @@ jobs:
         run: sh scripts/run-browser-qa.sh qa/story-invitation.mjs
       - name: Diagnose scroll stalls and responsive layout without production deployment
         run: sh scripts/run-browser-qa.sh qa/story-scroll-diagnostics.mjs
+      - name: Measure interactive scroll pacing and frame readiness
+        run: sh scripts/run-browser-qa.sh qa/story-motion-performance.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
