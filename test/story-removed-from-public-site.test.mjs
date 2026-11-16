@@ -21,7 +21,7 @@ test('Production denies standalone experimental story; main site remains accessi
   const app=createApp({dataDir:dir,backgroundNotifications:false,env:{
     ADMIN_PASSWORD:'test-not-a-real-password-123456',
     NODE_ENV:'production',
-    SITE_URL:'http://127.0.0.1'
+    SITE_URL:'https://house-of-mabwe-test.example'
   }});
   server=app.server;
   await new Promise(done=>server.listen(0,'127.0.0.1',done));
