@@ -317,3 +317,31 @@ p{font-weight:400}
 .formation-frame,.polish-frame{object-fit:cover;transform:none}
 .finishing-art #approvedHost{will-change:opacity}
 #polishFrame{will-change:opacity}
+
+/* Audit: image frames never reveal a blank canvas during a quick chapter entry.
+   Posters are pre-rendered from precisely the same approved-derived frames. */
+.formation-poster,.polish-poster{position:absolute;inset:0;display:block;pointer-events:none}
+.formation-poster img,.polish-poster img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.formation-frame,.polish-frame{opacity:0}
+.formation-stage[data-frame-status="ready"] .formation-frame,
+.finishing-art[data-frame-status="ready"] .polish-frame{opacity:1}
+.truck-bed{fill:#34483d;stroke:#b9b098;stroke-width:.8}
+.truck-stone{fill:#8f9585;stroke:#eee2c9;stroke-width:.7;stroke-linejoin:round}
+.truck-stone-top{fill:#c7c6ad}
+.truck-stone-facet{fill:#66786a}
+#formationChips{display:none!important}
+@media(max-width:700px){
+ /* Wide country overview remains visible even during the transport close-up. */
+ .origin-map-wrap{inset:8% 2% 36% 2%;transform-origin:70% 38%}
+ .map-route{stroke-width:6}
+ #guruvePin .pin-title,#hararePin .pin-title{font-size:21px;letter-spacing:1px}
+ #guruvePin .pin-sub,#hararePin .pin-sub{font-size:13px;letter-spacing:.5px}
+ #guruvePin .pin-ring,#hararePin .pin-ring{stroke-width:2.5}
+ .route-readout{top:14%;right:8%;left:auto}
+ .formation-shade{background:linear-gradient(0deg,rgba(8,13,9,.92) 1%,rgba(8,13,9,.75) 23%,transparent 59%)}
+}
+
+/* Media decoded from the same HD documentary, never a video seek raster. */
+.carving-media>video{display:none!important}
+.mobile-film-frame{display:block;opacity:0}
+.carving-media[data-mobile-ready="true"] .mobile-film-frame{opacity:1}

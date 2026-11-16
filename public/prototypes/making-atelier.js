@@ -71,7 +71,7 @@ async function checkHdFrames(){
   frameCache.clear();
   activeFilmFrame=-1;
   $filmMedia.dataset.mediaQuality='hd-master';
-  if(mobile()||saveData)rememberFrame(desiredFilmFrame<0?0:desiredFilmFrame);
+  rememberFrame(desiredFilmFrame<0?0:desiredFilmFrame);
   queueUpdate();
  }catch(_){$filmMedia.dataset.mediaQuality='original-fallback'}
 }
@@ -86,7 +86,7 @@ function rememberFrame(index){
   const entry=frameCache.get(index);
   if(!entry)return;
   entry.ready=true;
-  if(index===desiredFilmFrame&&(mobile()||saveData)){
+  if(index===desiredFilmFrame){
    $mobileFrame.src=img.src;
    $filmMedia.dataset.mobileReady='true';
    activeFilmFrame=index;
@@ -99,9 +99,9 @@ function rememberFrame(index){
  };
  img.src=frameUrl(index);
  // Limit JS Image instances without discarding HTTP cached responses.
- if(frameCache.size>20){
+ if(frameCache.size>(mobile()?9:13)){
   for(const key of frameCache.keys()){
-   if(Math.abs(key-index)>7){frameCache.delete(key);if(frameCache.size<=17)break;}
+   if(Math.abs(key-index)>3){frameCache.delete(key);if(frameCache.size<=(mobile()?7:11))break;}
   }
  }
 }
@@ -124,30 +124,22 @@ function updateFilm(p,visible){
  $film.pause();
  filmActive=Boolean(visible);
  if(!visible)return;
-
- if(mobile()||saveData){
-  rememberFrame(n);
-  for(const neighbor of [n-1,n+1,n-2,n+2])rememberFrame(neighbor);
-  const item=frameCache.get(n);
-  if(item?.ready&&activeFilmFrame!==n){
-   $mobileFrame.src=item.img.src;
-   $filmMedia.dataset.mobileReady='true';
-   activeFilmFrame=n;
-  }else if(item?.failed){
-   $filmMedia.dataset.mobileReady='false';
-  }
-  return;
+ // Desktop and mobile share the same reversible film-frame timeline, avoiding
+ // browser video seek jitter and Safari's intermittently blank video canvas.
+ rememberFrame(n);
+ const previous=Number($filmMedia.dataset.previousScroll||0);
+ const neighbor=n+(p>=previous?1:-1);
+ if(neighbor>=0&&neighbor<frameCount)rememberFrame(neighbor);
+ const item=frameCache.get(n);
+ if(item?.ready&&activeFilmFrame!==n){
+  $mobileFrame.src=item.img.src;
+  $filmMedia.dataset.mobileReady='true';
+  activeFilmFrame=n;
+  $filmMedia.dataset.displayedFrame=String(n);
+ }else if(item?.failed){
+  $filmMedia.dataset.mobileReady='false';
  }
- if(!videoMetadata||!Number.isFinite(filmDuration)||filmDuration<=.1){
-  $filmMedia.dataset.videoReady='false';
-  return;
- }
- const target=clamp(p)*Math.min(8.4,Math.max(.1,filmDuration-.09));
- const now=performance.now();
- if($film.seeking||now-lastSeekAt<68||Math.abs(target-lastSeek)<.055)return;
- lastSeekAt=now;lastSeek=target;
- try{$film.currentTime=target}
- catch(e){$filmMedia.dataset.videoReady='false';$filmMedia.dataset.seekFailure='true'}
+ $filmMedia.dataset.previousScroll=String(p);
 }
 
 $film.loop=false;
@@ -185,7 +177,7 @@ $film.addEventListener('error',()=>{
  }
 });
 if($film.readyState>=1){videoMetadata=true;filmDuration=$film.duration||0;}
-if(!mobile()&&!saveData)$film.load();
+$film.preload='none';
 
 function setScene(name){
  if(name===currentScene)return;
@@ -202,9 +194,9 @@ function renderOrigin(p){
  // Country first, then a legible close-up of the illustrative Guruve–Harare road.
  // The truck stays upright; its position is tied to scroll in both directions.
  const zoom=smooth((p-.045)/.34);
- const factor=lerp(1,mobile()?2.25:2.55,zoom);
- const shiftX=lerp(0,-innerWidth*(mobile()?.26:.16),zoom);
- const shiftY=lerp(0,innerHeight*(mobile()?.015:.11),zoom);
+ const factor=lerp(1,mobile()?1.18:2.55,zoom);
+ const shiftX=lerp(0,-innerWidth*(mobile()?.085:.16),zoom);
+ const shiftY=lerp(0,innerHeight*(mobile()?0:.11),zoom);
  $('.origin-map-wrap').style.transform='translate3d('+shiftX.toFixed(1)+'px,'+shiftY.toFixed(1)+'px,0) scale('+factor.toFixed(4)+')';
  const travel=reduced.matches?1:smooth((p-.41)/.43);
  $mapRoute.style.strokeDashoffset=String((mapLength*(1-travel)).toFixed(2));
@@ -236,41 +228,21 @@ function renderFinishing(p){
  $('#finishWord').textContent=p<.34?'SANDING':p<.73?'SMOOTHING':'POLISHING';
 }
 function syncApprovedPlacement(y){
- // Keep just ONE sculpture visible during finishing. The previous screen-space
- // crossfade overlaid two unmatched silhouettes and produced a doubled spiral.
+ // One art object per chapter. Reparenting live WebGL while scrolling causes
+ // a canvas resize, a GPU reallocation, and a visible sculpture jump.
  const finishing=readings.find(r=>r.name==='finishing');
- const reveal=readings.find(r=>r.name==='reveal');
- if(!finishing||!reveal)return;
+ if(!finishing)return;
  const p=clamp((y-finishing.top)/finishing.distance);
- const inFinalPolish=y>=finishing.top+finishing.distance*.72&&y<reveal.top-innerHeight*.18;
- const host=$('#approvedHost'),frame=$('#polishFrame'),stage=$('#polishStage');
- if(p>.68&&y<reveal.top)initializeApproved();
- const target=inFinalPolish?$('#finishApprovedSpace'):approvedOriginalSlot;
- if(host.parentElement!==target){target.append(host);approved?.resize();}
- const ready=host.dataset.approvedModelState==='ready';
- $('.reveal-poster').style.opacity=ready?'0':'1';
- if(inFinalPolish){
-  // A physical match requires identical pixels, not two different
-  // rasterizers sharing approximate coordinates. Remove the old image
-  // completely before exposing the approved model to prevent ghosting.
-  const frameAlpha=ready?1-smooth((p-.795)/.083):1;
-  const modelAlpha=ready?smooth((p-.895)/.083):0;
-  frame.style.opacity=frameAlpha.toFixed(4);
-  host.style.opacity=modelAlpha.toFixed(4);
-  host.dataset.inFinishing='true';
-  stage.dataset.handoffMode='masked-dissolve';
-  stage.dataset.frameAlpha=frame.style.opacity;
-  stage.dataset.modelAlpha=host.style.opacity;
-  if(ready&&modelAlpha>.001)approved?.update(.999);
- }else{
-  frame.style.opacity='1';
-  host.style.opacity='1';
-  host.dataset.inFinishing='false';
-  stage.dataset.handoffMode='none';
-  stage.dataset.frameAlpha='1';
-  stage.dataset.modelAlpha='0';
- }
+ const stage=$('#polishStage'),host=$('#approvedHost');
+ stage.dataset.handoffMode='single-source';
+ stage.dataset.frameAlpha='1';
+ stage.dataset.modelAlpha='0';
+ if(host.parentElement!==approvedOriginalSlot)approvedOriginalSlot.append(host);
+ host.style.opacity='1';
+ host.dataset.inFinishing='false';
+ if(p>.74&&y<finishing.top+finishing.height+innerHeight*.2)initializeApproved();
 }
+
 function renderCarving(p,onscreen){
  updateFilm(p,onscreen&&!reduced.matches);
  const percent=String(Math.round(p*100)).padStart(2,'0');
@@ -332,6 +304,8 @@ function update(){
  if(!readings.find(r=>r.name==='carving'&&sceneInView(r,y))) {
   filmActive=false;$film.pause();
  }
+ const nextFilm=readings.find(r=>r.name==='carving');
+ if(nextFilm&&y+view*1.4>=nextFilm.top&&y<nextFilm.top)rememberFrame(0);
  syncApprovedPlacement(y);
  if(y>=($('.endmatter').offsetTop-view*.6))document.body.dataset.currentChapter='end';
  else setScene(scene);
