@@ -14,7 +14,7 @@ const sections=[...document.querySelectorAll('[data-scene]')];
 const names={
  introduction:['01','INTRODUCTION'],origin:['02','ORIGIN'],
  material:['03','PREPARATION'],carving:['04','CARVING'],
- detail:['05','THE FORM'],finishing:['06','FINISHING'],reveal:['07','COIL']
+ detail:['05','THE FORM'],finishing:['06','FINISHING'],reveal:['07','THE WORK'],house:['08','THE HOUSE']
 };
 const states=new Map();
 const $film=$('#cinemaFilm');
@@ -275,7 +275,7 @@ function renderCarving(p,onscreen){
  updateFilm(p,onscreen&&!reduced.matches);
  const percent=String(Math.round(p*100)).padStart(2,'0');
  $('#carvingTime').textContent=percent+' / 100';
- const phrase=p<.31?'STRIKE / LIFT / REPEAT':p<.68?'THE SHAPE DEEPENS':'THE WORK CONTINUES';
+ const phrase=p<.31?'CARVING BY HAND':p<.68?'THE FORM TAKES SHAPE':'WORK IN PROGRESS';
  if($('#filmPhrase').textContent!==phrase)$('#filmPhrase').textContent=phrase;
 }
 
@@ -350,18 +350,11 @@ addEventListener('resize',()=>{layoutDirty=true;formation.resize();approved?.res
 addEventListener('orientationchange',()=>{layoutDirty=true;queueUpdate()},{passive:true});
 document.addEventListener('visibilitychange',()=>{$film.pause();queueUpdate()});
 reduced.addEventListener?.('change',queueUpdate);
-$('#jump').addEventListener('click',e=>{
- e.preventDefault();
- if(layoutDirty)recordLayout();
- const section=readings.find(r=>r.name==='reveal');
- if(!section)return;
- history.replaceState(null,'','#finished');
- scrollTo({top:section.top+section.distance*.72,behavior:'instant'});
- initializeApproved();
- queueUpdate();
-});
+// The story's skip action now leads to the collection rather than to Coil.
+// Do not trap or intercept the native navigation.
 // Prime real mobile documentary frames, without decoding an entire video on load.
 if(mobile()){rememberFrame(0);rememberFrame(1);}
 checkHdFrames();
 queueUpdate();
 document.documentElement.dataset.makingAtelier='ready';
+if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.dataset.embed='true';
