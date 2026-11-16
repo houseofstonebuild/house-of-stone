@@ -68,17 +68,32 @@ try{
   const mapBefore=await page.locator('#mapWrap').evaluate(el=>el.getBoundingClientRect().width);
   await go(page,'origin',.60);
   const mapAfter=await page.locator('#mapWrap').evaluate(el=>el.getBoundingClientRect().width);
-  assert(mapAfter>mapBefore*1.5,'Guruve–Harare close-up did not magnify the map');
+  assert(mapAfter>mapBefore*(c.mobile?1.08:1.5),
+    'The journey map did not achieve its intended responsive zoom');
+  if(c.mobile){
+   const pins=await page.evaluate(()=>['#guruvePin .pin-center','#hararePin .pin-center'].map(q=>{
+    const r=document.querySelector(q).getBoundingClientRect();
+    return {x:r.left+r.width/2,y:r.top+r.height/2};
+   }));
+   for(const pin of pins)assert(pin.x>12&&pin.x<c.width-12&&pin.y>75&&pin.y<c.height*.66,
+    'The Guruve–Harare route was clipped or obscured on mobile');
+  }
   const posEarly=await page.locator('#routeTruck').getAttribute('transform');
   await go(page,'origin',.88);
   const posLate=await page.locator('#routeTruck').getAttribute('transform');
   assert.notEqual(posEarly,posLate,'Transport must move with page scroll');
   assert(!posLate.includes('rotate('),'Truck must stay upright during journey');
+  assert.equal(await page.locator('#routeTruck .truck-stone').count(),1,
+   'Transport must visibly carry the stone, not an empty box');
   for(let i=0;i<chapters.length;i++){
    const [id,p]=chapters[i];
    await go(page,id,p);
    if(id==='carving'){
     await page.waitForFunction(()=>document.querySelector('.carving-media').dataset.requestedFrame!==undefined);
+    await page.waitForFunction(()=>document.querySelector('.carving-media').dataset.mobileReady==='true'
+     ||document.querySelector('.carving-media').dataset.fallback==='atlas',null,{timeout:25000});
+    assert.equal(await page.locator('#cinemaFilm').evaluate(v=>getComputedStyle(v).display),'none',
+     'Video seeking must not compete with the documentary image timeline');
     const state=await page.evaluate(()=>{
      const v=document.getElementById('cinemaFilm');
      return {paused:v.paused,loop:v.loop,progress:document.querySelector('.carving-media').dataset.scrollPosition};
@@ -124,6 +139,13 @@ try{
     animations:'disabled'
    });
   }
+  // Actual first paint must never rely on an asynchronous scroll frame.
+  for(const [id,picture] of [['detail','.formation-poster img'],['finishing','.polish-poster img']]){
+   await go(page,id,.015);
+   await page.waitForFunction(selector=>document.querySelector(selector)?.naturalWidth>0,picture,{timeout:22000});
+   const visible=await page.locator(picture).evaluate(img=>img.getBoundingClientRect().width>0);
+   assert(visible,'The '+id+' chapter did not have a frame available on first paint');
+  }
   // The new transformation must actually remove model-derived volume.
   await go(page,'detail',.08);
   await page.waitForFunction(()=>document.querySelector('#formationStage').dataset.modelDerived==='true',{timeout:20000});
@@ -165,15 +187,18 @@ try{
   await go(page,'finishing',.93);
   const endPolish=+await page.locator('#polishStage').getAttribute('data-requested-frame');
   assert(endPolish>startPolish+17,'Sanding and polishing must advance with scroll');
-  assert.equal(await page.locator('#approvedHost').getAttribute('data-in-finishing'),'true','Approved Coil must take over at final polish');
+  assert.equal(await page.locator('#approvedHost').getAttribute('data-in-finishing'),'false',
+    'The approved WebGL canvas must never be reparented during polishing');
   const handoff=await page.evaluate(()=>({
    mode:document.querySelector('#polishStage').dataset.handoffMode,
    frame:Number(document.querySelector('#polishStage').dataset.frameAlpha),
    model:Number(document.querySelector('#polishStage').dataset.modelAlpha)
   }));
-  assert(['registered-match','masked-dissolve'].includes(handoff.mode),'Unsupported camera handoff');
-  assert.equal(handoff.mode,'masked-dissolve','Never overlay two separately rasterized models');
-  assert(!(handoff.frame>.03&&handoff.model>.03),'Unmatched 3D sculptures must not overlap');
+  assert.equal(handoff.mode,'single-source','Finishing should have exactly one sculpture presentation');
+  assert.equal(handoff.frame,1,'The polish sequence must remain visually continuous');
+  assert.equal(handoff.model,0,'Approved 3D model must only appear in the gallery');
+  assert.equal(await page.locator('#approvedHost').evaluate(el=>el.parentElement.classList.contains('reveal-pin')),true,
+    'The approved 3D canvas must stay in its final gallery host');
   assert.equal(await page.locator('#approvedHost').getAttribute('data-atelier-no-plinth'),'true','Do not introduce a generic plinth');
   await go(page,'reveal',.76);
   assert.equal(await page.locator('#approvedHost').getAttribute('data-in-finishing'),'false','Approved Coil must remain the gallery finale');

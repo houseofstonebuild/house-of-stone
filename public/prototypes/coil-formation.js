@@ -20,10 +20,11 @@ export function createCoilFormation(carveStage,polishStage,mobile,reduced){
  chips.style.display='none';
  const ctx=null;
  const cache=new Map();
+ const recentDemand={carve:54,polish:95};
  const want={carve:-1,polish:-1};
  const shown={carve:-1,polish:-1};
  let manifest=null;
- let activeRoot=FALLBACK_ROOT;
+ let activeRoot=CURRENT_ROOT;
  let currentProfile=mobile()?'mobile':'desktop';
  const url=(frame)=>activeRoot+'/'+currentProfile+'/frame_'+String(frame).padStart(3,'0')+'.webp';
  function load(frame){
@@ -42,13 +43,15 @@ export function createCoilFormation(carveStage,polishStage,mobile,reduced){
   };
   image.onerror=()=>{item.error=true;};
   image.src=url(frame);
-  if(cache.size>26){
+  const limit=mobile()?10:16;
+  if(cache.size>limit){
    for(const [name,entry] of cache){
     const n=Number(name.split(':').at(-1));
-    if(name!==activeRoot+':'+currentProfile+':'+want.carve&&name!==activeRoot+':'+currentProfile+':'+want.polish&&
-       (entry.profile!==currentProfile||Math.abs(n-want.carve)>9&&Math.abs(n-want.polish)>9)){
-      cache.delete(name);
-      if(cache.size<=20)break;
+    const nearCarve=Math.abs(n-recentDemand.carve)<=2;
+    const nearPolish=Math.abs(n-recentDemand.polish)<=2;
+    if(entry.profile!==currentProfile||(!nearCarve&&!nearPolish)){
+     cache.delete(name);
+     if(cache.size<=limit)break;
     }
    }
   }
@@ -70,7 +73,14 @@ export function createCoilFormation(carveStage,polishStage,mobile,reduced){
   stage.dataset.frameAssetVersion=activeRoot===CURRENT_ROOT?'v7':'v6-fallback';
   if(manifest?.entries?.[frame])stage.dataset.remainingVoxels=String(manifest.entries[frame].remaining_voxels);
   if(want[phase]!==frame)want[phase]=frame;
-  load(frame);load(frame-1);load(frame+1);
+  recentDemand[phase]=frame;
+  load(frame);
+  // Predecode only the direction of travel and one nearby frame.
+  // Avoid growing mobile image memory with every 60 Hz scroll event.
+  const previous=shown[phase];
+  const direction=previous<=frame?1:-1;
+  load(frame+direction);
+  if(!mobile())load(frame-direction);
   if(cache.get(activeRoot+':'+currentProfile+':'+frame)?.ready)display(phase,frame);
   // A nearby decoded frame is safer than a missing image on low-memory iOS.
   else if(shown[phase]===-1){
@@ -167,10 +177,16 @@ export function createCoilFormation(carveStage,polishStage,mobile,reduced){
   if(phase==='polish')polishStage.style.setProperty('--polish',smooth(p).toFixed(4));
  }
  function resize(){
-  // Image assets and canvas are selected per viewport; no WebGL memory on iOS.
-  currentProfile=mobile()?'mobile':'desktop';
-  shown.carve=shown.polish=-1;
-  drawChips(Number(carveStage.dataset.phaseProgress||0));
+  const next=mobile()?'mobile':'desktop';
+  if(next!==currentProfile){
+   currentProfile=next;
+   shown.carve=shown.polish=-1;
+   for(const phase of ['carve','polish']){
+    const stage=phase==='carve'?carveStage:polishStage;
+    stage.dataset.frameStatus='loading';
+    if(want[phase]>=0)load(want[phase]);
+   }
+  }
  }
  async function loadManifest(){
   try{
@@ -187,10 +203,12 @@ export function createCoilFormation(carveStage,polishStage,mobile,reduced){
      const check=await Promise.all(['054','085','095','132'].map(i=>
        fetch(CURRENT_ROOT+'/'+currentProfile+'/frame_'+i.padStart(3,'0')+'.webp',{method:'HEAD'})));
      if(check.every(x=>x.ok)){
-      activeRoot=CURRENT_ROOT;
+      if(activeRoot!==CURRENT_ROOT){
+       activeRoot=CURRENT_ROOT;
+       cache.clear();
+       shown.carve=shown.polish=-1;
+      }
       manifest=candidate;
-      cache.clear();
-      shown.carve=shown.polish=-1;
       carveStage.dataset.mediaVerified='v7';
       polishStage.dataset.mediaVerified='v7';
       for(const phase of ['carve','polish'])if(want[phase]>=0)load(want[phase]);
@@ -203,7 +221,11 @@ export function createCoilFormation(carveStage,polishStage,mobile,reduced){
     const candidate=await response.json();
     if(candidate.version!==6||candidate.frames!==FRAME_COUNT||!Array.isArray(candidate.entries)||
       candidate.entries.length!==FRAME_COUNT)throw Error('Invalid source-derived frames');
+    activeRoot=FALLBACK_ROOT;
+    cache.clear();
+    shown.carve=shown.polish=-1;
     manifest=candidate;
+    for(const phase of ['carve','polish'])if(want[phase]>=0)load(want[phase]);
     carveStage.dataset.mediaVerified='v6-fallback';
     polishStage.dataset.mediaVerified='v6-fallback';
    }

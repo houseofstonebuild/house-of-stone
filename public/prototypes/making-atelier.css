@@ -345,3 +345,15 @@ p{font-weight:400}
 .carving-media>video{display:none!important}
 .mobile-film-frame{display:block;opacity:0}
 .carving-media[data-mobile-ready="true"] .mobile-film-frame{opacity:1}
+
+/* Composite-only polishing ambience; no large CSS gradient repaint on scroll. */
+.finishing-warmth{
+ background:radial-gradient(ellipse 30% 34% at 65% 49%,rgba(241,155,67,.16),transparent 75%);
+ will-change:transform,opacity;
+}
+.polish-frame{filter:none}
+.finishing-art::after{
+ content:"";position:absolute;inset:0;background:#161d19;
+ opacity:var(--finishOutro,0);z-index:4;pointer-events:none
+}
+.reveal-art{opacity:0;will-change:opacity}

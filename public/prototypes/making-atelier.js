@@ -64,10 +64,10 @@ async function checkHdFrames(){
   if(manifest.version!==2||manifest.frames!==48||manifest.end_seconds>8.5||manifest.width<1280)return;
   hdFramesReady=true;
   frameRoot='/assets/making-cinema-frames-v2';
-  // Select HD source only once the matching media assets are published.
+  // The source is retained for provenance; decoding the MP4 during
+  // scrolling would create a second media pipeline on mobile Safari.
   const hdSource=$film.querySelector('source');
   hdSource.src='/assets/making-chiseling-atelier-hd-v2.mp4';
-  $film.load();
   frameCache.clear();
   activeFilmFrame=-1;
   $filmMedia.dataset.mediaQuality='hd-master';
@@ -86,7 +86,7 @@ function rememberFrame(index){
   const entry=frameCache.get(index);
   if(!entry)return;
   entry.ready=true;
-  if(index===desiredFilmFrame){
+  if(index===desiredFilmFrame&&entry.img===img){
    $mobileFrame.src=img.src;
    $filmMedia.dataset.mobileReady='true';
    activeFilmFrame=index;
@@ -172,7 +172,6 @@ $film.addEventListener('error',()=>{
   $filmMedia.dataset.mediaQuality='original-fallback';
   const source=$film.querySelector('source');
   source.src='/assets/making-chiseling-scrub-v1.mp4';
-  $film.load();
   queueUpdate();
  }
 });
@@ -221,7 +220,8 @@ function renderFinishing(p){
  const polish=smooth((p-.13)/.75);
  $('#polishStage').style.setProperty('--polish',polish.toFixed(4));
  $('#warmth').style.opacity=(.14*(1-polish)).toFixed(4);
- $('#warmth').style.background='radial-gradient(ellipse 30% 34% at '+lerp(73,42,polish).toFixed(2)+'% 49%,rgba(241,155,67,.16),transparent 75%)';
+ $('#warmth').style.transform='translate3d('+lerp(9,-13,polish).toFixed(2)+'%,0,0)';
+ $('#polishStage').style.setProperty('--finishOutro',smooth((p-.91)/.09).toFixed(4));
  $('#highlight').style.transform='translateX('+lerp(-78,88,polish).toFixed(1)+'%)';
  $('#highlight').style.opacity=(polish*.48).toFixed(3);
  $('#finishTrack').style.width=(polish*100).toFixed(1)+'%';
@@ -238,7 +238,6 @@ function syncApprovedPlacement(y){
  stage.dataset.frameAlpha='1';
  stage.dataset.modelAlpha='0';
  if(host.parentElement!==approvedOriginalSlot)approvedOriginalSlot.append(host);
- host.style.opacity='1';
  host.dataset.inFinishing='false';
  if(p>.74&&y<finishing.top+finishing.height+innerHeight*.2)initializeApproved();
 }
@@ -268,6 +267,9 @@ async function initializeApproved(){
 }
 function renderReveal(p,near){
  const art=$('#approvedHost');
+ // Fade the gallery in from the dark finish. There is never a translucent
+ // overlay of two separately rendered versions of Coil.
+ art.style.opacity=smooth((p-.005)/.18).toFixed(4);
  // Load the GLB only near the final chapter; the fallback remains visible
  // until the original model is ready, so iOS never shows a blank final frame.
  if(near)initializeApproved();
