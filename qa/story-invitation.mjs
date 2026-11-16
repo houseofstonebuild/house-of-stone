@@ -37,7 +37,7 @@ try{
   await page.waitForFunction(()=>document.querySelector('#hos-concept')?.dataset.ready==='true');
   assert.equal(await page.locator('#hos-story-invite').isVisible(),false,'Invitation must show only once');
   assert.equal(await page.locator('[data-open-story]').count()>0,true,'Story must remain discoverable');
-  await page.locator('[data-open-story]').first().click();
+  await page.locator('.hos-story-inline').click();
   assert.equal(await page.locator('#hos-story-dialog').evaluate(el=>el.open),true);
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#hos-story-dialog').evaluate(el=>el.open),false);

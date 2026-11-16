@@ -24,7 +24,7 @@ const cases=[
 ];
 const chapters=[
  ['introduction',.3],['origin',.45],['material',.74],
- ['carving',.42],['detail',.64],['finishing',.68],['reveal',.86]
+ ['carving',.42],['detail',.64],['finishing',.68],['reveal',.86],['house',.60]
 ];
 let browser;
 async function go(page,id,p){
@@ -269,10 +269,13 @@ try{
   assert(back<early,'Film did not rewind on reverse scroll');
   await go(page,'detail',.45);
   assert(await page.locator('#cinemaFilm').evaluate(v=>v.paused),'Video kept playing after exiting carving');
-  // Jump must lead to the gallery state, not the introduction of the chapter.
-  await page.locator('#jump').click();
-  await page.waitForFunction(()=>Number(document.querySelector('.reveal').dataset.progress)>.6);
-  const screenshot=new URL(c.browser+'-'+c.width+'-skip-to-coil.png',out).pathname;
+  // The only terminal action must lead to the collection, not to Coil.
+  assert.equal(await page.locator('#jump').getAttribute('href'),'/collection');
+  assert.equal(await page.locator('.collection-link').getAttribute('href'),'/collection');
+  assert.equal(await page.locator('a[href="/works/zsa-page-6"]').count(),0);
+  assert.equal(await page.locator('#houseTitle').textContent(),'The people behind the work.');
+  const screenshot=new URL(c.browser+'-'+c.width+'-collection-finale.png',out).pathname;
+  await go(page,'house',.75);
   await page.screenshot({path:screenshot,animations:'disabled'});
   assert(statSync(screenshot).size>15000);
   assert.deepEqual(failures,[],'Runtime and asset loading errors');

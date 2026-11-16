@@ -11,6 +11,11 @@ on:
       - 'public/assets/making-v7/**'
       - 'public/assets/making-cinema-frames-v3/**'
       - 'public/prototypes/coil-formation.js'
+      - 'public/index.html'
+      - 'public/app.js'
+      - 'public/story-invitation.js'
+      - 'public/story-invitation.css'
+      - 'qa/story-invitation.mjs'
       - '.github/workflows/making-atelier-review.yml'
   workflow_dispatch:
 permissions:
@@ -36,10 +41,14 @@ jobs:
       - name: Check JS syntax and data assets
         run: |
           node --check public/prototypes/making-atelier.js
+          node --check public/story-invitation.js
           node --check qa/making-atelier.mjs
+          node --check qa/story-invitation.mjs
           test -s public/models/coil-uploaded-v1.glb
       - name: Cross-browser preview and screenshot acceptance
         run: sh scripts/run-browser-qa.sh qa/making-atelier.mjs
+      - name: First-visit invitation and full-screen story acceptance
+        run: sh scripts/run-browser-qa.sh qa/story-invitation.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
