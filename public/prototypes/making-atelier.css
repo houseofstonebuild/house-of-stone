@@ -545,12 +545,3 @@ html[data-embed="true"] .prologue-content{top:48%}
 .carving-shade{z-index:3}
 .carving-title,.carving-caption,.carving .footnote{z-index:4}
 
-/* Discreet editorial invitation in the existing homepage, never over the hero.
- * The story is top-level; no nested iOS scroll view, modal, or iframe. */
-.hos-story-start{display:inline-flex;align-items:center;gap:14px;margin-top:22px;
- color:inherit;text-decoration:none;border-bottom:1px solid currentColor;
- padding-bottom:8px;font-size:clamp(11px,1vw,13px);font-family:Manrope,sans-serif;
- letter-spacing:.005em;font-weight:600}
-.hos-story-start span{font-size:19px;font-weight:300;line-height:1}
-.hos-story-inline{display:inline-block;margin-top:18px}
-@media(max-width:700px){.hos-story-start{margin-top:18px;font-size:12px}}
