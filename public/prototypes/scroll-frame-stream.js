@@ -100,6 +100,11 @@ export function createFrameStream({stage,image,mobile,src,onDisplay,position=()=
  function request(index,visible=true){
   index=clamp(Math.round(index),0,count-1);
   if(profile!==(mobile()?'mobile':'desktop'))resize(true);
+  const wasActive=active;
+  if(target===index&&wasActive===Boolean(visible)){
+   choose();
+   return;
+  }
   active=Boolean(visible);
   if(target>=0&&index!==target)direction=index>target?1:-1;
   target=index;

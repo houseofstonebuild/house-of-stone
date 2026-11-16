@@ -3,6 +3,7 @@
  * volume drives the separate reversible carving study before the final GLB.
  */
 import {createCoilFormation} from './coil-formation.js';
+import {createFrameStream} from './scroll-frame-stream.js';
 const $=s=>document.querySelector(s);
 const clamp=x=>Math.max(0,Math.min(1,x));
 const smooth=x=>{x=clamp(x);return x*x*(3-2*x)};
@@ -33,12 +34,23 @@ const fallbackFrames=19; // First ~8 seconds only: the lion never comes into vie
 const atlasCount=18;
 let hdFramesReady=false;
 let frameRoot='/assets/making-cinema-frames';
-const frameCache=new Map();
-let activeFilmFrame=-1,desiredFilmFrame=-1,filmDuration=0,videoMetadata=false,lastSeek=-1,lastSeekAt=0,filmActive=false;
+let activeFilmFrame=-1,desiredFilmFrame=-1,filmDuration=0,videoMetadata=false,filmActive=false;
+let filmPan=18;
+const filmStream=createFrameStream({
+ stage:$filmMedia,image:$mobileFrame,mobile,
+ src:index=>frameUrl(index),
+ position:()=>({x:filmPan,y:47}),
+ onDisplay:(index,img)=>{
+  $mobileFrame.src=img.src;
+  activeFilmFrame=index;
+  $filmMedia.dataset.mobileReady='true';
+  $filmMedia.dataset.displayedFrame=String(index);
+ }
+});
 let storyFrame=0,layoutDirty=true,readings=[],currentScene='',approved=null,approvedPromise=null;
 const formation=createCoilFormation($('#formationStage'),$('#polishStage'),mobile,reduced);
 const approvedOriginalSlot=$('#approvedHost').parentElement;
-const filmState=()=>({paused:$film.paused,time:$film.currentTime,frame:desiredFilmFrame,active:filmActive,videoReady:videoMetadata,hdFrames:hdFramesReady,edition:filmEdition,frames:frameCount,maxSeconds:8.4});
+const filmState=()=>({paused:$film.paused,time:$film.currentTime,frame:desiredFilmFrame,active:filmActive,videoReady:videoMetadata,hdFrames:hdFramesReady,edition:filmEdition,frames:frameCount,maxSeconds:8.4,stream:filmStream.stats(),coil:formation.stats()});
 window.__mabweMaking={get film(){return filmState()},get chapter(){return currentScene},get approved(){return $('#approvedHost').dataset.approvedModelState||'not-started'}};
 
 function recordLayout(){
@@ -99,75 +111,31 @@ async function checkHdFrames(){
  $filmMedia.dataset.mobileReady='false';
  $filmMedia.dataset.mediaQuality=filmEdition;
  $filmMedia.dataset.totalFrames=String(frameCount);
+ filmStream.configure({frames:frameCount});
  const currentProgress=Number($filmMedia.dataset.scrollPosition||0);
  rememberFrame(Math.max(0,Math.min(frameCount-1,Math.round(clamp(currentProgress)*(frameCount-1)))));
  queueUpdate();
 }
 function rememberFrame(index){
  if(index<0||index>=frameCount)return;
- const cached=frameCache.get(index);
- if(cached)return;
- const img=new Image();
- frameCache.set(index,{img,ready:false,failed:false});
- img.decoding='async';
- img.onload=()=>{
-  const entry=frameCache.get(index);
-  if(!entry)return;
-  entry.ready=true;
-  if(index===desiredFilmFrame&&entry.img===img){
-   $mobileFrame.src=img.src;
-   $filmMedia.dataset.mobileReady='true';
-   activeFilmFrame=index;
-   $filmMedia.dataset.displayedFrame=String(index);
-  }
- };
- img.onerror=()=>{
-  const entry=frameCache.get(index);if(entry)entry.failed=true;
-  $filmMedia.dataset.fallback='atlas';
- };
- img.src=frameUrl(index);
- // Limit JS Image instances without discarding HTTP cached responses.
- if(frameCache.size>(mobile()?10:16)){
-  for(const key of frameCache.keys()){
-   if(Math.abs(key-index)>5){frameCache.delete(key);if(frameCache.size<=(mobile()?8:13))break;}
-  }
- }
+ filmStream.prime(index);
 }
-
 function updateFilm(p,visible){
  const n=Math.max(0,Math.min(frameCount-1,Math.round(clamp(p)*(frameCount-1))));
  const sprite=Math.max(0,Math.min(atlasCount-1,Math.round(clamp(p)*(atlasCount-1))));
  desiredFilmFrame=n;
  $filmMedia.dataset.requestedFrame=String(n);
  $filmMedia.dataset.scrollPosition=p.toFixed(4);
- // Portrait footage reframes the actual chisel contact first, then travels
- // across the worked stone. No small inset and no synthetic hammer image.
- const pan=lerp(18,40,p);
- $mobileFrame.style.objectPosition=pan.toFixed(2)+'% 47%';
- $poster.style.objectPosition=pan.toFixed(2)+'% 47%';
- $filmMedia.dataset.filmPan=pan.toFixed(2);
+ filmPan=lerp(18,40,p);
+ $mobileFrame.style.objectPosition=filmPan.toFixed(2)+'% 47%';
+ $poster.style.objectPosition=filmPan.toFixed(2)+'% 47%';
+ $filmMedia.dataset.filmPan=filmPan.toFixed(2);
  const x=sprite%7,y=Math.floor(sprite/7);
  $atlas.style.backgroundPosition=(x/6*100).toFixed(3)+'% '+(y/5*100).toFixed(3)+'%';
  $atlas.dataset.spriteFrame=String(sprite);
- $film.pause();
  filmActive=Boolean(visible);
- if(!visible)return;
- // Desktop and mobile share the same reversible film-frame timeline, avoiding
- // browser video seek jitter and Safari's intermittently blank video canvas.
- rememberFrame(n);
- const previous=Number($filmMedia.dataset.previousScroll||0);
- const neighbor=n+(p>=previous?1:-1);
- if(neighbor>=0&&neighbor<frameCount)rememberFrame(neighbor);
- const item=frameCache.get(n);
- if(item?.ready&&activeFilmFrame!==n){
-  $mobileFrame.src=item.img.src;
-  $filmMedia.dataset.mobileReady='true';
-  activeFilmFrame=n;
-  $filmMedia.dataset.displayedFrame=String(n);
- }else if(item?.failed){
-  $filmMedia.dataset.mobileReady='false';
- }
- $filmMedia.dataset.previousScroll=String(p);
+ if(visible)filmStream.request(n,true);
+ else filmStream.suspend();
 }
 
 $film.loop=false;
@@ -253,7 +221,7 @@ function renderFinishing(p){
  // The authored v7 frames already contain real directional highlights.
  // Do not slide a rectangular light layer over the image while scrolling.
  $('#highlight').style.opacity='0';
- $('#finishTrack').style.width=(polish*100).toFixed(1)+'%';
+ $('#finishTrack').style.transform='scaleX('+polish.toFixed(4)+')';
  $('#finishWord').textContent=p<.34?'SANDING':p<.73?'SMOOTHING':'POLISHING';
 }
 function syncApprovedPlacement(y){
@@ -302,7 +270,8 @@ function renderReveal(p,near){
  // Load the GLB only near the final chapter; the fallback remains visible
  // until the original model is ready, so iOS never shows a blank final frame.
  if(near)initializeApproved();
- if(approved)approved.update(.999);
+ // The approved artwork is a still presentation. Do not re-render the
+ // exact same WebGL frame on every scroll tick.
  $('.reveal-poster').style.opacity=art.dataset.approvedModelState==='ready'?'0':'1';
 }
 function sceneInView(reading,y){
@@ -315,7 +284,7 @@ function update(){
  if(layoutDirty)recordLayout();
  const y=scrollY,view=innerHeight;
  const max=Math.max(1,document.documentElement.scrollHeight-view);
- $('#readingProgress').style.width=(clamp(y/max)*100).toFixed(3)+'%';
+ $('#readingProgress').style.transform='scaleX('+clamp(y/max).toFixed(5)+')';
  let scene='introduction';
  for(const r of readings){
   const p=clamp((y-r.top)/r.distance);
@@ -333,7 +302,7 @@ function update(){
   else if(r.name==='reveal')renderReveal(p,near);
  }
  if(!readings.find(r=>r.name==='carving'&&sceneInView(r,y))) {
-  filmActive=false;$film.pause();
+  filmActive=false;filmStream.suspend();
  }
  const nextFilm=readings.find(r=>r.name==='carving');
  if(nextFilm&&y+view*1.4>=nextFilm.top&&y<nextFilm.top)rememberFrame(0);
@@ -346,7 +315,7 @@ function queueUpdate(){
  storyFrame=requestAnimationFrame(update);
 }
 addEventListener('scroll',queueUpdate,{passive:true});
-addEventListener('resize',()=>{layoutDirty=true;formation.resize();approved?.resize();queueUpdate()},{passive:true});
+addEventListener('resize',()=>{layoutDirty=true;formation.resize();filmStream.resize();approved?.resize();queueUpdate()},{passive:true});
 addEventListener('orientationchange',()=>{layoutDirty=true;queueUpdate()},{passive:true});
 document.addEventListener('visibilitychange',()=>{$film.pause();queueUpdate()});
 reduced.addEventListener?.('change',queueUpdate);
@@ -357,4 +326,5 @@ if(mobile()){rememberFrame(0);rememberFrame(1);}
 checkHdFrames();
 queueUpdate();
 document.documentElement.dataset.makingAtelier='ready';
+window.__mabwePerformance=()=>({film:filmStream.stats(),coil:formation.stats(),chapter:currentScene,scroll:scrollY});
 if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.dataset.embed='true';
