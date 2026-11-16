@@ -8,8 +8,9 @@ const editorial=read('../public/editorial.json'),story=read('../public/story.jso
 test('published sculpture settings use the selected interiors and approved campaign photographs',()=>{
   const settings=editorial.workSettings;
   assert.deepEqual(Object.keys(settings).sort(),Object.keys(story.works).filter(id=>id!=='zsa-017').sort());
-  assert.equal(Object.keys(settings).length,27);
-  assert.equal(new Set(Object.values(settings).map(setting=>setting.source)).size,27);
+  const publishedCount=Object.keys(story.works).filter(id=>id!=='zsa-017').length;
+  assert.equal(Object.keys(settings).length,publishedCount);
+  assert.equal(new Set(Object.values(settings).map(setting=>setting.source)).size,publishedCount);
   assert.equal(settings['zsa-029'].source,'/assets/zsa-029-space-v1-1536.webp');
   for(const [id,source] of Object.entries({'zsa-001':'/assets/presence-campaign-v2.webp','zsa-020':'/assets/kinship-campaign-v2.webp','zsa-013':'/assets/rhythm-campaign-v2.webp'}))assert.equal(settings[id].source,source);
   for(const [id,setting] of Object.entries(settings)){

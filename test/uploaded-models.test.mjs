@@ -12,7 +12,11 @@ const audit=JSON.parse(read('content/uploaded-model-audit.json'));
 
 test('uploaded sculptures retain finite geometry, embedded PBR textures and recorded triangle counts',async()=>{
   assert.equal(audit.length,23);
-  for(const record of audit){
+  // Tall Attention was intentionally archived from the published model map.
+  // Its original audit record remains immutable for historical traceability.
+  assert.deepEqual(audit.filter(record=>!models[record.workId]).map(record=>record.workId),
+    ['hos-tall-attention']);
+  for(const record of audit.filter(record=>models[record.workId])){
     const entry=models[record.workId],bytes=read('public'+entry.file);
     assert(entry.uploaded&&entry.ownerApproved&&!entry.referenceSurface&&!entry.stoneGrain);
     assert.equal(createHash('sha256').update(bytes).digest('hex'),record.webSha256);
