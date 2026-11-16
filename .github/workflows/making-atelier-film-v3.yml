@@ -1,0 +1,65 @@
+name: Build 144-frame original Making documentary
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/build-making-cinema-frames-v3.sh'
+      - '.github/workflows/making-atelier-film-v3.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: atelier-film-v3-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Install source-media decoder
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Extract 144 real frames from the early carving footage
+        run: sh scripts/build-making-cinema-frames-v3.sh
+      - name: Verify individual frames and their source resolution
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from PIL import Image
+          folder='public/assets/making-cinema-frames-v3'
+          m=json.load(open(folder+'/manifest.json'))
+          assert m['version']==3 and m['frames']==144 and m['end_seconds']==8.4
+          paths=[f'{folder}/frame_{i:03d}.webp' for i in range(144)]
+          assert all(os.path.getsize(f)>1000 for f in paths)
+          for i in [0,48,96,143]:
+            im=Image.open(paths[i]);assert im.width>=1280
+          print('144 source-documentary frames validated')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: original-making-documentary-144-frame-review
+          path: |
+            public/assets/making-cinema-frames-v3/manifest.json
+            public/assets/making-cinema-frames-v3/frame_000.webp
+            public/assets/making-cinema-frames-v3/frame_048.webp
+            public/assets/making-cinema-frames-v3/frame_096.webp
+            public/assets/making-cinema-frames-v3/frame_143.webp
+          retention-days: 14
+      - name: Publish the original-resolution frame archive
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/assets/making-cinema-frames-v3/
+          git diff --cached --quiet && exit 0
+          git commit -m 'Publish original-source 144-frame Making documentary scroll sequence'
+          for i in 1 2 3 4 5 6; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+          done
+          echo "Could not publish original-source frames without force pushing" >&2
+          exit 1

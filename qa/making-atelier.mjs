@@ -53,6 +53,13 @@ try{
   });
   await page.goto(base+'/prototypes/making-atelier.html',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.documentElement.dataset.makingAtelier==='ready');
+  // The 144-frame documentary is enabled only after its matching archive lands.
+  const denseFilm=existsSync(new URL('../public/assets/making-cinema-frames-v3/manifest.json',import.meta.url));
+  if(denseFilm){
+   await page.waitForFunction(()=>window.__mabweMaking.film.edition==='hd-v3',{timeout:25000});
+   assert.equal(await page.evaluate(()=>window.__mabweMaking.film.frames),144,
+    'The 144-frame original HD documentary is not selected');
+  }
   // New assets are made visible only after the matching manifest and actual
   // frames deploy. Once v7 files exist, using the older set is a regression.
   if(hasRegisteredV7){

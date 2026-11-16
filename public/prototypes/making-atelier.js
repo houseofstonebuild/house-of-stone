@@ -27,7 +27,8 @@ const $truck=$('#routeTruck');
 const $routeReadout=$('#routeReadout');
 const mapLength=$mapRoute.getTotalLength?.()||115;
 $mapRoute.style.strokeDasharray=String(mapLength);
-const frameCount=48;
+let frameCount=48;
+let filmEdition='legacy';
 const fallbackFrames=19; // First ~8 seconds only: the lion never comes into view.
 const atlasCount=18;
 let hdFramesReady=false;
@@ -37,7 +38,7 @@ let activeFilmFrame=-1,desiredFilmFrame=-1,filmDuration=0,videoMetadata=false,la
 let storyFrame=0,layoutDirty=true,readings=[],currentScene='',approved=null,approvedPromise=null;
 const formation=createCoilFormation($('#formationStage'),$('#polishStage'),mobile,reduced);
 const approvedOriginalSlot=$('#approvedHost').parentElement;
-const filmState=()=>({paused:$film.paused,time:$film.currentTime,frame:desiredFilmFrame,active:filmActive,videoReady:videoMetadata,hdFrames:hdFramesReady,maxSeconds:8.4});
+const filmState=()=>({paused:$film.paused,time:$film.currentTime,frame:desiredFilmFrame,active:filmActive,videoReady:videoMetadata,hdFrames:hdFramesReady,edition:filmEdition,frames:frameCount,maxSeconds:8.4});
 window.__mabweMaking={get film(){return filmState()},get chapter(){return currentScene},get approved(){return $('#approvedHost').dataset.approvedModelState||'not-started'}};
 
 function recordLayout(){
@@ -50,30 +51,57 @@ function recordLayout(){
 }
 
 function frameUrl(index){
- // Until the HD derivative is published, use only the first 19 frames
- // of the original sequence; later frames show a recognizable lion.
- const sourceFrame=hdFramesReady?index:Math.min(fallbackFrames-1,Math.round(index*(fallbackFrames-1)/(frameCount-1)));
+ // All versions contain ONLY the early 8.4 seconds of the actual documentary.
+ // The new sequence has 144 independent source frames (~17 FPS of scroll)
+ // rather than 48, with the original master preserved.
+ const sourceFrame=filmEdition==='legacy'?
+  Math.min(fallbackFrames-1,Math.round(index*(fallbackFrames-1)/(frameCount-1))):index;
  $filmMedia.dataset.sourceFrame=String(sourceFrame);
- return frameRoot+'/frame_'+String(sourceFrame).padStart(2,'0')+'.webp';
+ const digits=filmEdition==='hd-v3'?3:2;
+ return frameRoot+'/frame_'+String(sourceFrame).padStart(digits,'0')+'.webp';
 }
 async function checkHdFrames(){
+ let selected=null;
  try{
-  const response=await fetch('/assets/making-cinema-frames-v2/manifest.json',{cache:'no-store'});
-  if(!response.ok)return;
-  const manifest=await response.json();
-  if(manifest.version!==2||manifest.frames!==48||manifest.end_seconds>8.5||manifest.width<1280)return;
-  hdFramesReady=true;
-  frameRoot='/assets/making-cinema-frames-v2';
-  // The source is retained for provenance; decoding the MP4 during
-  // scrolling would create a second media pipeline on mobile Safari.
-  const hdSource=$film.querySelector('source');
-  hdSource.src='/assets/making-chiseling-atelier-hd-v2.mp4';
-  frameCache.clear();
-  activeFilmFrame=-1;
-  $filmMedia.dataset.mediaQuality='hd-master';
-  rememberFrame(desiredFilmFrame<0?0:desiredFilmFrame);
+  const response=await fetch('/assets/making-cinema-frames-v3/manifest.json',{cache:'no-store'});
+  if(response.ok){
+   const manifest=await response.json();
+   if(manifest.version===3&&manifest.frames===144&&manifest.width>=1280&&
+      manifest.end_seconds<=8.4&&manifest.start_seconds===0){
+    // An index/manifest-only deploy must not select a missing frame archive.
+    const tested=await Promise.all([0,72,143].map(i=>
+      fetch('/assets/making-cinema-frames-v3/frame_'+String(i).padStart(3,'0')+'.webp',{method:'HEAD'})));
+    if(tested.every(r=>r.ok))selected={root:'/assets/making-cinema-frames-v3',count:144,edition:'hd-v3'};
+   }
+  }
+ }catch(_){/* retain v2 or source-quality fallback */}
+ if(!selected){
+  try{
+   const response=await fetch('/assets/making-cinema-frames-v2/manifest.json',{cache:'no-store'});
+   if(response.ok){
+    const manifest=await response.json();
+    if(manifest.version===2&&manifest.frames===48&&manifest.width>=1280&&manifest.end_seconds<=8.5)
+     selected={root:'/assets/making-cinema-frames-v2',count:48,edition:'hd-v2'};
+   }
+  }catch(_){/* fallback to source 19-frame excerpt */}
+ }
+ if(!selected){
+  $filmMedia.dataset.mediaQuality='original-fallback';
   queueUpdate();
- }catch(_){$filmMedia.dataset.mediaQuality='original-fallback'}
+  return;
+ }
+ frameRoot=selected.root;
+ filmEdition=selected.edition;
+ frameCount=selected.count;
+ hdFramesReady=true;
+ frameCache.clear();
+ activeFilmFrame=-1;
+ $filmMedia.dataset.mobileReady='false';
+ $filmMedia.dataset.mediaQuality=filmEdition;
+ $filmMedia.dataset.totalFrames=String(frameCount);
+ const currentProgress=Number($filmMedia.dataset.scrollPosition||0);
+ rememberFrame(Math.max(0,Math.min(frameCount-1,Math.round(clamp(currentProgress)*(frameCount-1)))));
+ queueUpdate();
 }
 function rememberFrame(index){
  if(index<0||index>=frameCount)return;
@@ -99,9 +127,9 @@ function rememberFrame(index){
  };
  img.src=frameUrl(index);
  // Limit JS Image instances without discarding HTTP cached responses.
- if(frameCache.size>(mobile()?9:13)){
+ if(frameCache.size>(mobile()?10:16)){
   for(const key of frameCache.keys()){
-   if(Math.abs(key-index)>3){frameCache.delete(key);if(frameCache.size<=(mobile()?7:11))break;}
+   if(Math.abs(key-index)>5){frameCache.delete(key);if(frameCache.size<=(mobile()?8:13))break;}
   }
  }
 }
