@@ -25,7 +25,7 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
   const w=Math.max(1,Math.round(stage.clientWidth)),h=Math.max(1,Math.round(stage.clientHeight));
   // Approx 0.2–0.3 megapixels rather than 1–3 megapixels per scroll tick.
   // Retain the exact source-resolution still above this canvas at rest.
-  const previewW=mobile()?Math.min(w,300):Math.min(w,620);
+  const previewW=mobile()?Math.min(w,300):Math.min(w,480);
   const pw=Math.max(1,Math.round(previewW));
   const ph=Math.max(1,Math.round(h*(pw/w)));
   if(canvas.width!==pw||canvas.height!==ph){canvas.width=pw;canvas.height=ph;}
