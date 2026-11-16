@@ -281,15 +281,18 @@ export function createApp(options = {}) {
       let decoded; try { decoded = decodeURIComponent(url.pathname); } catch { throw new HttpError(400, 'Invalid address.'); }
       if (decoded.includes('\\') || decoded.includes('\u0000') || decoded.split('/').some(part => part === '.' || part === '..')) throw new HttpError(400, 'Invalid address.');
       const path = decoded.replace(/\/$/, '') || '/';
-      // Only our own immersive editorial story may be framed, and only from
-      // this exact site. All collection, admin, inquiry and API routes retain
-      // X-Frame-Options: DENY and frame-ancestors 'none'.
-      if(req.method==='GET' && path==='/prototypes/making-atelier.html' &&
-         url.searchParams.get('embed')==='1'){
-        res.setHeader('X-Frame-Options','SAMEORIGIN');
-        const policy=String(res.getHeader('Content-Security-Policy'));
-        res.setHeader('Content-Security-Policy',policy.replace("frame-ancestors 'none'","frame-ancestors 'self'"));
-      }
+      // The immersive story is under review. No public preview or popup
+      // routes are served from the production origin until explicitly approved.
+      // In nonproduction branch QA runs the existing standalone prototype.
+      if(env.NODE_ENV==='production' && (
+        path==='/prototypes/making-atelier.html' ||
+        path==='/prototypes/making-atelier.js' ||
+        path==='/prototypes/making-atelier.css' ||
+        path==='/prototypes/coil-formation.js' ||
+        path==='/prototypes/approved-coil-reveal.js' ||
+        path==='/story-invitation.js' ||
+        path==='/story-invitation.css'
+      )) throw new HttpError(404,'The story is not available on the public website.');
       if (path.toLowerCase().startsWith('/admin') || path.toLowerCase().startsWith('/api/admin')) {
         res.setHeader('Cache-Control', 'no-store');
         res.setHeader('X-Robots-Tag', 'noindex, nofollow');

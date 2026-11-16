@@ -1,7 +1,7 @@
 name: New Making Atelier visual review
 on:
   push:
-    branches: [main]
+    branches: ['review/our-story-scroll-qa-2026-11-16']
     paths:
       - 'public/prototypes/making-atelier.html'
       - 'public/prototypes/making-atelier.css'

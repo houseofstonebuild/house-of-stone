@@ -4,7 +4,6 @@ import { initializeGallery } from './gallery.js';
 import { applyWorkPhotography } from './work-photography.js';
 import { closerLookPhoto, closerLookCrop } from './closer-look.js';
 import { initializeRoomPreview, roomPreviewEligible } from './room-preview.js';
-import { initializeStoryInvitation } from './story-invitation.js';
 const root = document.getElementById('hos-concept');
 const previewMode = location.pathname === '/admin/preview' || location.pathname.startsWith('/admin/preview/');
 const routePath = () => previewMode ? location.pathname.slice('/admin/preview'.length) || '/' : location.pathname;
@@ -897,7 +896,6 @@ async function start() {
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   rememberScroll();
   preferenceUI();route(routePath(),false);scrollToHash();root.dataset.ready='true';
-  initializeStoryInvitation({root,previewMode,routePath});
 }
 start().catch(error => {
   const notice = el('p','hos-form-note',error.message || 'The collection could not load. Please refresh the page.'); notice.setAttribute('role','alert'); $('.hos-hero-copy').append(notice);

@@ -24,7 +24,6 @@
   <link rel="stylesheet" href="/collections.css">
   <link rel="stylesheet" href="/quality.css">
   <link rel="stylesheet" href="/editorial-layout.css">
-  <link rel="stylesheet" href="/story-invitation.css">
   <script type="module" src="/app.js"></script>
 <link rel="stylesheet" href="/round-three.css">
 <link rel="stylesheet" href="/sculpture-page.css">
@@ -48,7 +47,6 @@
       <a data-view="designers" class="cursor-interaction" href="/designers">For designers <span>04</span></a>
       <a data-view="collectors" class="cursor-interaction" href="/collectors">For collectors <span>05</span></a>
       <a data-view="house" class="cursor-interaction" href="/house">The house <span>06</span></a>
-      <button type="button" data-open-story class="hos-story-menu-entry cursor-interaction">Our story <span>07</span></button>
     </div>
     </nav><p class="hos-menu-note">Zimbabwe / New York</p>
   </dialog>
@@ -73,7 +71,7 @@
         <article data-reveal><a class="hos-summary-photo cursor-interaction" data-view="collectors" aria-label="Explore sculpture for collectors" href="/collectors"><img src="/assets/collectors-red-stone-v2.webp" alt="Red stone sculpture in a spare concrete gallery" loading="lazy"></a><div class="hos-summary-copy"><h2>For collectors</h2><p>Learn about the artist, the stone and the work before beginning an acquisition.</p><a class="hos-text-link cursor-interaction" data-view="collectors" href="/collectors">Explore collecting <span class="hos-link-arrow" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></span></a></div></article>
       </section>
       <section class="hos-home-making" data-reveal><a class="hos-summary-photo cursor-interaction" data-view="making" aria-label="Explore the making of a sculpture" href="/making"><img data-asset="process" alt="A sculptor carving stone with a hammer and chisel" loading="lazy"></a><div class="hos-summary-copy"><div class="hos-eyebrow">THE MAKING</div><h2>From the stone to the finished work</h2><p>Learn how artists select, carve and finish each sculpture.</p><a class="hos-text-link cursor-interaction" data-view="making" href="/making">See the process <span class="hos-link-arrow" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></span></a></div></section>
-      <section class="hos-home-house" data-reveal><div><div class="hos-eyebrow">THE HOUSE</div><h2>About House of Mabwe</h2><button type="button" data-open-story class="hos-text-link hos-story-inline">Experience our story</button></div><div><p>Founded by Bradley and Milton, House of Mabwe brings Zimbabwean stone sculpture to collectors and designers.</p><div class="hos-inline-links"><a class="hos-text-link cursor-interaction" data-view="house" href="/house">About us <span class="hos-link-arrow" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></span></a><button class="hos-text-link cursor-interaction" type="button" data-inquiry="Collection interest">Inquire <span class="hos-link-arrow" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M6 18 18 6M6 6h12v12"/></svg></span></button></div></div></section>
+      <section class="hos-home-house" data-reveal><div><div class="hos-eyebrow">THE HOUSE</div><h2>About House of Mabwe</h2></div><div><p>Founded by Bradley and Milton, House of Mabwe brings Zimbabwean stone sculpture to collectors and designers.</p><div class="hos-inline-links"><a class="hos-text-link cursor-interaction" data-view="house" href="/house">About us <span class="hos-link-arrow" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></span></a><button class="hos-text-link cursor-interaction" type="button" data-inquiry="Collection interest">Inquire <span class="hos-link-arrow" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M6 18 18 6M6 6h12v12"/></svg></span></button></div></div></section>
     </section>
     <section class="hos-view" data-page="collection" hidden>
       <div class="hos-page-heading"><div class="hos-eyebrow">THE COLLECTION</div><h1>The Founding Collection</h1><p>Five collections of Zimbabwean stone sculpture, brought together in The Founding Collection.</p></div>
@@ -265,7 +263,6 @@
           <a data-view="collection" class="cursor-interaction" href="/collection">The Founding Collection</a>
           <a data-view="artists" class="cursor-interaction" href="/artists">The artists</a>
           <a data-view="making" class="cursor-interaction" href="/making">The making</a>
-          <button type="button" class="hos-story-footer-action" data-open-story>Our story</button>
         </nav></section>
         <section><h2>For your space</h2><nav aria-label="Sculpture for your space">
           <a data-view="designers" class="cursor-interaction" href="/designers">For designers</a>
@@ -289,19 +286,6 @@
     </div>
   </footer>
 </div>
-<section id="hos-story-invite" class="hos-story-invite" role="region" aria-labelledby="hos-story-invite-title" hidden>
-  <div class="hos-story-invite-top"><span>HOUSE OF MABWE</span><button type="button" id="hos-story-invite-dismiss" aria-label="Dismiss story invitation">Close</button></div>
-  <h2 id="hos-story-invite-title">The story behind the sculpture.</h2>
-  <p>Meet the artists, discover the stone, and see how the work takes shape.</p>
-  <div class="hos-story-invite-actions"><button type="button" id="hos-story-invite-open">Explore our story</button><button type="button" id="hos-story-invite-continue">Continue to website</button></div>
-</section>
-<dialog id="hos-story-dialog" class="hos-story-dialog" aria-label="House of Mabwe - Our Story">
-  <div class="hos-story-dialog-toolbar">
-    <span>HOUSE OF MABWE <span class="hos-story-separator">/</span> OUR STORY</span>
-    <button type="button" id="hos-story-dialog-close">Close <span aria-hidden="true">×</span></button>
-  </div>
-  <iframe id="hos-story-frame" title="Our Story - House of Mabwe" loading="lazy" allow="fullscreen"></iframe>
-</dialog>
 <noscript><p class="hos-no-script">Enable JavaScript to explore the collection and contact House of Mabwe.</p></noscript>
 </body>
 </html>
