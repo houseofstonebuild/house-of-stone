@@ -338,7 +338,7 @@ function queueUpdate(){
  storyFrame=requestAnimationFrame(update);
 }
 addEventListener('scroll',queueUpdate,{passive:true});
-addEventListener('resize',()=>{layoutDirty=true;formation.resize();filmStream.resize();approved?.resize();queueUpdate()},{passive:true});
+addEventListener('resize',()=>{layoutDirty=true;formation.resize();filmStream.resize();approved?.resize();if(approved)approved.update(.999);queueUpdate()},{passive:true});
 addEventListener('orientationchange',()=>{layoutDirty=true;queueUpdate()},{passive:true});
 document.addEventListener('visibilitychange',()=>{$film.pause();queueUpdate()});
 reduced.addEventListener?.('change',queueUpdate);

@@ -11,6 +11,7 @@ export function createFrameStream({stage,image,mobile,src,onDisplay,position=()=
  let count=144,target=-1,displayed=-1,profile=mobile()?'mobile':'desktop';
  let active=true,queued=new Map(),loading=0,lastFrame=null,rootVersion=0,frameErrors=0;
  let memory=new Map(),displayCount=0,requestCount=0,staleCount=0;
+ const retries=new Map();
  let direction=1;
  const budget=()=>mobile()?7:13;
  const inflight=()=>mobile()?2:3;
@@ -25,6 +26,8 @@ export function createFrameStream({stage,image,mobile,src,onDisplay,position=()=
   const dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;
   const {x=50,y=50}=position();
   const dx=(ww-dw)*clamp(x/100,0,1),dy=(hh-dh)*clamp(y/100,0,1);
+  context.imageSmoothingEnabled=true;
+  context.imageSmoothingQuality=mobile()?'medium':'high';
   context.clearRect(0,0,ww,hh);
   context.drawImage(img,dx,dy,dw,dh);
   displayed=index;lastFrame=img;displayCount++;
@@ -94,6 +97,17 @@ export function createFrameStream({stage,image,mobile,src,onDisplay,position=()=
     if(version!==rootVersion||record?.img!==img)return;
     record.state='error';frameErrors++;
     stage.dataset.frameErrors=String(frameErrors);
+    // Recover from transient HTTP/decode failures, but cap retries so a
+    // genuinely missing image never creates an endless network loop.
+    const attempts=retries.get(selected)||0;
+    if(attempts<2){
+     retries.set(selected,attempts+1);
+     memory.delete(selected);
+     setTimeout(()=>{
+      if(version!==rootVersion||!active||target!==selected)return;
+      prioritize(selected,0);pump();
+     },200*(attempts+1));
+    }
    }).finally(()=>{loading--;if(active)pump();});
   }
  }
@@ -131,7 +145,7 @@ export function createFrameStream({stage,image,mobile,src,onDisplay,position=()=
  }
  function configure({frames=count}={}){
   count=frames;rootVersion++;
-  memory.clear();queued.clear();
+  memory.clear();queued.clear();retries.clear();
   target=displayed=-1;lastFrame=null;
   canvas.style.opacity='0';
   stage.dataset.frameStatus='loading';
@@ -142,7 +156,7 @@ export function createFrameStream({stage,image,mobile,src,onDisplay,position=()=
   const next=mobile()?'mobile':'desktop';
   if(next!==profile){
    profile=next;rootVersion++;
-   memory.clear();queued.clear();
+   memory.clear();queued.clear();retries.clear();
    target=displayed=-1;lastFrame=null;
    canvas.style.opacity='0';stage.dataset.frameStatus='loading';
   }else if(lastFrame){
