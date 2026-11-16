@@ -63,6 +63,8 @@ jobs:
         run: sh scripts/run-browser-qa.sh qa/story-scroll-diagnostics.mjs
       - name: Measure interactive scroll pacing and frame readiness
         run: sh scripts/run-browser-qa.sh qa/story-motion-performance.mjs
+      - name: Slow-network, compact-phone, tablet and reverse-scrolling resilience
+        run: sh scripts/run-browser-qa.sh qa/story-resilience.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
