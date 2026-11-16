@@ -545,3 +545,9 @@ html[data-embed="true"] .prologue-content{top:48%}
 .carving-shade{z-index:3}
 .carving-title,.carving-caption,.carving .footnote{z-index:4}
 
+
+/* Experimental GPU-composited documentary tile path for real browser A/B tests.
+   Hardware sprite transforms use no per-frame full-canvas drawImage upload. */
+.film-motion-compositor{position:absolute;inset:0;overflow:hidden;opacity:0;pointer-events:none;z-index:1;contain:paint}
+.film-motion-sprite{position:absolute;top:0;left:0;max-width:none!important;object-fit:fill;
+ transform-origin:0 0;will-change:transform;backface-visibility:hidden;display:block}

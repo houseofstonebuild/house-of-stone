@@ -7,13 +7,20 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
  canvas.className='film-motion-atlas';
  canvas.setAttribute('aria-hidden','true');
  anchor.after(canvas);
- const ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});
+ const mode=new URLSearchParams(location.search).get('filmmode')==='css'?'css':'canvas';
+ const compositor=document.createElement('div');
+ compositor.className='film-motion-compositor';
+ compositor.setAttribute('aria-hidden','true');
+ canvas.after(compositor);
+ const ctx=mode==='canvas'?canvas.getContext('2d',{alpha:false,desynchronized:true}):null;
+ let mountedBlock=-1,mountedProfile='',lastSize='';
  const images=new Map();
  let profile=mobile()?'mobile':'desktop',meta=null,target=-1,ready=0,draws=0;
  let edition=0,loading=false,lastPainted=-1,lastPan=-1;
  function source(index){return '/assets/making-film-atlas-v1/'+profile+'/sheet_'+String(index).padStart(2,'0')+'.webp';}
  function paint(frame,positionX=30,positionY=47){
-  if(!ctx||!meta||frame<0||frame>=meta.frames)return false;
+  if(!meta||frame<0||frame>=meta.frames)return false;
+  if(mode==='canvas'&&!ctx)return false;
   target=frame;
   const block=Math.floor(frame/25);
   const bitmap=images.get(block);
@@ -23,20 +30,39 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
   if(frame===lastPainted&&Math.abs(positionX-lastPan)<.75)return true;
   const sx=(tile%5)*tw,sy=Math.floor(tile/5)*th;
   const w=Math.max(1,Math.round(stage.clientWidth)),h=Math.max(1,Math.round(stage.clientHeight));
-  // Approx 0.2–0.3 megapixels rather than 1–3 megapixels per scroll tick.
-  // Retain the exact source-resolution still above this canvas at rest.
-  const previewW=mobile()?Math.min(w,300):Math.min(w,480);
-  const pw=Math.max(1,Math.round(previewW));
-  const ph=Math.max(1,Math.round(h*(pw/w)));
-  if(canvas.width!==pw||canvas.height!==ph){canvas.width=pw;canvas.height=ph;}
-  const scale=Math.max(pw/tw,ph/th);
-  const dw=tw*scale,dh=th*scale;
-  const dx=(pw-dw)*clamp(positionX/100,0,1);
-  const dy=(ph-dh)*clamp(positionY/100,0,1);
-  ctx.imageSmoothingEnabled=true;
-  ctx.imageSmoothingQuality='medium';
-  ctx.drawImage(bitmap,sx,sy,tw,th,dx,dy,dw,dh);
-  canvas.style.opacity='1';
+  if(mode==='css'){
+   const scale=Math.max(w/tw,h/th);
+   const dw=tw*scale,dh=th*scale;
+   const left=(w-dw)*clamp(positionX/100,0,1)-(tile%5)*dw;
+   const top=(h-dh)*clamp(positionY/100,0,1)-Math.floor(tile/5)*dh;
+   const dimensions=dw.toFixed(2)+':'+dh.toFixed(2);
+   if(mountedBlock!==block||mountedProfile!==profile){
+    compositor.replaceChildren(bitmap);
+    mountedBlock=block;mountedProfile=profile;lastSize='';
+   }
+   if(lastSize!==dimensions){
+    bitmap.style.width=(dw*5).toFixed(2)+'px';
+    bitmap.style.height=(dh*5).toFixed(2)+'px';
+    lastSize=dimensions;
+   }
+   bitmap.className='film-motion-sprite';
+   bitmap.style.transform='translate3d('+left.toFixed(2)+'px,'+top.toFixed(2)+'px,0)';
+   compositor.style.opacity='1';
+  }else{
+   // The original single-canvas compositor is retained as a baseline.
+   const previewW=mobile()?Math.min(w,300):Math.min(w,480);
+   const pw=Math.max(1,Math.round(previewW));
+   const ph=Math.max(1,Math.round(h*(pw/w)));
+   if(canvas.width!==pw||canvas.height!==ph){canvas.width=pw;canvas.height=ph;}
+   const scale=Math.max(pw/tw,ph/th);
+   const dw=tw*scale,dh=th*scale;
+   const dx=(pw-dw)*clamp(positionX/100,0,1);
+   const dy=(ph-dh)*clamp(positionY/100,0,1);
+   ctx.imageSmoothingEnabled=true;
+   ctx.imageSmoothingQuality='medium';
+   ctx.drawImage(bitmap,sx,sy,tw,th,dx,dy,dw,dh);
+   canvas.style.opacity='1';
+  }
   draws++;
   lastPainted=frame;lastPan=positionX;
   stage.dataset.displayedFrame=String(frame);
@@ -77,10 +103,15 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
   if(newProfile!==profile){
    profile=newProfile;images.clear();ready=0;meta=null;edition++;
    lastPainted=-1;lastPan=-1;
+   mountedBlock=-1;mountedProfile='';lastSize='';
+   compositor.replaceChildren();compositor.style.opacity='0';
    canvas.style.opacity='0';verifyAndLoad();
-  }else if(target>=0)paint(target,Number(stage.dataset.filmPan||30),47);
+  }else if(target>=0){
+   lastPainted=-1;lastSize='';
+   paint(target,Number(stage.dataset.filmPan||30),47);
+  }
  }
- function stats(){return {enabled:Boolean(meta),ready,frames:meta?.frames||0,draws,profile,loading};}
+ function stats(){return {enabled:Boolean(meta),ready,frames:meta?.frames||0,draws,profile,loading,mode};}
  verifyAndLoad();
  return {paint,resize,stats,canvas,get available(){return Boolean(meta)},get ready(){return ready}};
 }
