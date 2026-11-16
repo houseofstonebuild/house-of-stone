@@ -65,6 +65,8 @@ jobs:
         run: sh scripts/run-browser-qa.sh qa/story-motion-performance.mjs
       - name: Slow-network, compact-phone, tablet and reverse-scrolling resilience
         run: sh scripts/run-browser-qa.sh qa/story-resilience.mjs
+      - name: Record desktop and mobile story journeys for owner review
+        run: sh scripts/run-browser-qa.sh qa/story-recorded-review.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
