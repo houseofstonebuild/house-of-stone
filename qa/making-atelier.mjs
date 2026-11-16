@@ -113,6 +113,37 @@ try{
     animations:'disabled'
    });
   }
+  // The new transformation must actually remove model-derived volume.
+  await go(page,'detail',.08);
+  await page.waitForFunction(()=>document.querySelector('#formationStage').dataset.modelDerived==='true',{timeout:20000});
+  const earlyCarve=await page.evaluate(()=>({
+   frame:+document.querySelector('#formationStage').dataset.requestedFrame,
+   volume:+document.querySelector('#formationStage').dataset.remainingVoxels
+  }));
+  await go(page,'detail',.55);
+  const middleCarve=await page.evaluate(()=>({
+   frame:+document.querySelector('#formationStage').dataset.requestedFrame,
+   volume:+document.querySelector('#formationStage').dataset.remainingVoxels
+  }));
+  await go(page,'detail',.94);
+  const lateCarve=await page.evaluate(()=>({
+   frame:+document.querySelector('#formationStage').dataset.requestedFrame,
+   volume:+document.querySelector('#formationStage').dataset.remainingVoxels
+  }));
+  assert(earlyCarve.frame<middleCarve.frame&&middleCarve.frame<lateCarve.frame,'Coil is not progressively carved');
+  assert(earlyCarve.volume>middleCarve.volume&&middleCarve.volume>lateCarve.volume,'Stone volume must fall as Coil emerges');
+  assert(await page.locator('#formationChips').count()===1,'Visible stone fragments missing');
+  await go(page,'detail',.19);
+  assert(+await page.locator('#formationStage').getAttribute('data-requested-frame')<middleCarve.frame,'Stone transformation must reverse on reverse scroll');
+  await go(page,'finishing',.19);
+  const startPolish=+await page.locator('#polishStage').getAttribute('data-requested-frame');
+  await go(page,'finishing',.93);
+  const endPolish=+await page.locator('#polishStage').getAttribute('data-requested-frame');
+  assert(endPolish>startPolish+17,'Sanding and polishing must advance with scroll');
+  assert.equal(await page.locator('#approvedHost').getAttribute('data-in-finishing'),'true','Approved Coil must take over at final polish');
+  assert.equal(await page.locator('#approvedHost').getAttribute('data-atelier-no-plinth'),'true','Do not introduce a generic plinth');
+  await go(page,'reveal',.76);
+  assert.equal(await page.locator('#approvedHost').getAttribute('data-in-finishing'),'false','Approved Coil must remain the gallery finale');
   // Reversible film, with visible frame changes on real-source mobile frames.
   await go(page,'carving',.20);
   const early=await page.evaluate(()=>Number(document.querySelector('.carving-media').dataset.requestedFrame));

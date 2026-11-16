@@ -1,8 +1,8 @@
 /* House of Mabwe / The Making
- * A new chapter-local scroll engine, built independently from V3–V8.
- * Video is never autoplayed. Mobile uses real frames from that same film.
- * The sole 3D asset is the already-approved Coil GLB, lazy at the end.
+ * Documentary footage stays source-true and paused; Coil's actual approved
+ * volume drives the separate reversible carving study before the final GLB.
  */
+import {createCoilFormation} from './coil-formation.js';
 const $=s=>document.querySelector(s);
 const clamp=x=>Math.max(0,Math.min(1,x));
 const smooth=x=>{x=clamp(x);return x*x*(3-2*x)};
@@ -14,7 +14,7 @@ const sections=[...document.querySelectorAll('[data-scene]')];
 const names={
  introduction:['01','INTRODUCTION'],origin:['02','ORIGIN'],
  material:['03','PREPARATION'],carving:['04','CARVING'],
- detail:['05','REFINEMENT'],finishing:['06','FINISHING'],reveal:['07','COIL']
+ detail:['05','THE FORM'],finishing:['06','FINISHING'],reveal:['07','COIL']
 };
 const states=new Map();
 const $film=$('#cinemaFilm');
@@ -35,6 +35,8 @@ let frameRoot='/assets/making-cinema-frames';
 const frameCache=new Map();
 let activeFilmFrame=-1,desiredFilmFrame=-1,filmDuration=0,videoMetadata=false,lastSeek=-1,lastSeekAt=0,filmActive=false;
 let storyFrame=0,layoutDirty=true,readings=[],currentScene='',approved=null,approvedPromise=null;
+const formation=createCoilFormation($('#formationStage'),$('#polishStage'),mobile,reduced);
+const approvedOriginalSlot=$('#approvedHost').parentElement;
 const filmState=()=>({paused:$film.paused,time:$film.currentTime,frame:desiredFilmFrame,active:filmActive,videoReady:videoMetadata,hdFrames:hdFramesReady,maxSeconds:8.4});
 window.__mabweMaking={get film(){return filmState()},get chapter(){return currentScene},get approved(){return $('#approvedHost').dataset.approvedModelState||'not-started'}};
 
@@ -219,22 +221,39 @@ function renderMaterial(p){
  $('#materialCount').textContent=mix>.5?'02':'01';
 }
 function renderDetail(p){
- const mix=smooth((p-.34)/.32);
- $('.detail-picture-first').style.opacity=String(1-mix);
- $('.detail-picture-second').style.opacity=String(mix);
- $('#detailIndex').textContent=mix>.5?'02':'01';
- $('.detail-index-bar').style.background='linear-gradient(90deg,#d3bb9c '+(mix*100).toFixed(1)+'%,rgba(240,231,216,.20) 0)';
+ formation.update('carve',p);
+ $('#detailIndexBar').style.setProperty('--carve',(smooth((p-.06)/.91)*100).toFixed(2)+'%');
 }
 function renderFinishing(p){
- const warmth=1-smooth((p-.12)/.66);
- const polish=smooth((p-.43)/.49);
- $('.finishing-model').style.filter='brightness('+(lerp(.69,1.05,polish)).toFixed(3)+') saturate('+(lerp(.45,1,polish)).toFixed(3)+')';
- $('#warmth').style.opacity=(warmth*.96).toFixed(4);
- $('#warmth').style.background='radial-gradient(ellipse 30% 34% at '+lerp(78,43,p).toFixed(2)+'% '+lerp(31,58,p).toFixed(2)+'%,rgba(241,155,67,.33),rgba(228,112,48,.12) 42%,transparent 77%)';
+ formation.update('polish',p);
+ const polish=smooth((p-.13)/.75);
+ $('#polishStage').style.setProperty('--polish',polish.toFixed(4));
+ $('#warmth').style.opacity=(.14*(1-polish)).toFixed(4);
+ $('#warmth').style.background='radial-gradient(ellipse 30% 34% at '+lerp(73,42,polish).toFixed(2)+'% 49%,rgba(241,155,67,.16),transparent 75%)';
  $('#highlight').style.transform='translateX('+lerp(-78,88,polish).toFixed(1)+'%)';
- $('#highlight').style.opacity=(polish*.5).toFixed(3);
+ $('#highlight').style.opacity=(polish*.48).toFixed(3);
  $('#finishTrack').style.width=(polish*100).toFixed(1)+'%';
- $('#finishWord').textContent=p<.4?'WARMING':p<.68?'SMOOTHING':'WAX / BUFF';
+ $('#finishWord').textContent=p<.34?'SANDING':p<.73?'SMOOTHING':'POLISHING';
+}
+function syncApprovedPlacement(y){
+ // One approved model: it takes over during the final polish, then remains
+ // the same exact GLB in the gallery. Never load a substitute sculpture.
+ const finishing=readings.find(r=>r.name==='finishing');
+ const reveal=readings.find(r=>r.name==='reveal');
+ if(!finishing||!reveal)return;
+ const p=clamp((y-finishing.top)/finishing.distance);
+ const inFinalPolish=y>=finishing.top+finishing.distance*.76 && y<reveal.top-innerHeight*.22;
+ const target=inFinalPolish?$('#finishApprovedSpace'):approvedOriginalSlot;
+ const host=$('#approvedHost');
+ if(host.parentElement!==target){target.append(host);approved?.resize();}
+ if(inFinalPolish){
+  initializeApproved();
+  host.style.opacity=smooth((p-.78)/.20).toFixed(4);
+  host.dataset.inFinishing='true';
+ }else{
+  host.style.opacity='1';
+  host.dataset.inFinishing='false';
+ }
 }
 function renderCarving(p,onscreen){
  updateFilm(p,onscreen&&!reduced.matches);
@@ -297,6 +316,7 @@ function update(){
  if(!readings.find(r=>r.name==='carving'&&sceneInView(r,y))) {
   filmActive=false;$film.pause();
  }
+ syncApprovedPlacement(y);
  if(y>=($('.endmatter').offsetTop-view*.6))document.body.dataset.currentChapter='end';
  else setScene(scene);
 }
@@ -305,7 +325,7 @@ function queueUpdate(){
  storyFrame=requestAnimationFrame(update);
 }
 addEventListener('scroll',queueUpdate,{passive:true});
-addEventListener('resize',()=>{layoutDirty=true;approved?.resize();queueUpdate()},{passive:true});
+addEventListener('resize',()=>{layoutDirty=true;formation.resize();approved?.resize();queueUpdate()},{passive:true});
 addEventListener('orientationchange',()=>{layoutDirty=true;queueUpdate()},{passive:true});
 document.addEventListener('visibilitychange',()=>{$film.pause();queueUpdate()});
 reduced.addEventListener?.('change',queueUpdate);

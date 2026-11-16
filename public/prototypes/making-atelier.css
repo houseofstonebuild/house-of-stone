@@ -269,3 +269,45 @@ p{font-weight:400}
  .carving-poster{opacity:1}
  .finishing-model{filter:none!important}
 }
+
+/* Scroll-driven removal of real Coil-derived stone volume; photographic film stays untouched.
+   The original Coil GLB alone supplies the finished gallery artwork. */
+.detail-pin,.finishing-pin{background:#171f19}
+.formation-stage,.finishing-art{position:absolute;inset:0;overflow:hidden;isolation:isolate}
+.formation-frame,.polish-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center}
+.formation-chips{position:absolute;inset:0;z-index:1;width:100%;height:100%;pointer-events:none}
+.formation-shade{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(90deg,rgba(9,16,11,.82),rgba(9,16,11,.52) 26%,transparent 59%),linear-gradient(0deg,rgba(8,12,9,.32),transparent 43%)}
+.detail-copy{position:absolute;z-index:3;left:clamp(65px,9.4vw,165px);right:auto;top:49%;width:min(39vw,480px);transform:translateY(-44%)}
+.detail-copy h2{font-size:clamp(72px,6.7vw,112px)}
+.detail-copy p:not(.kicker){max-width:360px}
+.detail-copy .detail-side-note{margin-top:33px;font-size:8px!important;max-width:380px;letter-spacing:.15em;color:rgba(235,221,194,.62)!important}
+.detail-index{position:absolute;z-index:3;bottom:45px;right:clamp(35px,6vw,100px);left:auto;display:flex;align-items:center;gap:12px;color:rgba(232,222,202,.75);font-size:9px;letter-spacing:.13em}
+.detail-index-bar{width:76px;height:2px;background:linear-gradient(90deg,#d8ba90 var(--carve,0%),rgba(238,224,204,.19) var(--carve,0%))}
+.finishing-art{inset:0}
+.polish-frame{filter:saturate(calc(.63 + var(--polish,0)*.46)) contrast(calc(1 + var(--polish,0)*.07))}
+.finishing-warmth{z-index:1;pointer-events:none}
+.finishing-highlight{z-index:2;pointer-events:none}
+.finish-approved-space{position:absolute;inset:0;z-index:3;pointer-events:none}
+.finishing-art #approvedHost{position:absolute;inset:0 0 0 28%;z-index:3;opacity:0;pointer-events:none;overflow:hidden;max-width:none}
+.finishing-art #approvedHost .approved-coil-reveal{position:absolute;inset:0}
+.finishing-art #approvedHost .reveal-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center}
+.finishing-art #approvedHost .approved-coil-reveal canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.finishing-art #approvedHost .approved-coil-reveal img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#161d19}
+.finishing-copy{z-index:5}
+.finish-note{z-index:5}
+@media(max-width:700px){
+ .formation-frame,.polish-frame{object-fit:cover;object-position:center}
+ .formation-shade{background:linear-gradient(0deg,rgba(8,13,9,.93) 2%,rgba(8,13,9,.75) 27%,transparent 62%)}
+ .detail-copy{top:auto;bottom:clamp(104px,14svh,151px);left:25px;right:24px;width:auto;transform:none}
+ .detail-copy h2{font-size:clamp(66px,12.5vw,89px)}
+ .detail-copy p:not(.kicker){font-size:11px;line-height:1.7;max-width:310px}
+ .detail-copy .detail-side-note{font-size:7px!important;margin-top:18px;max-width:310px}
+ .detail-index{bottom:39px;left:25px;right:auto;gap:10px;font-size:8px}
+ .detail-index-bar{width:55px}
+ .finishing-art{inset:0}
+ .finishing-art #approvedHost{inset:-5% -14% 21% -14%}
+}
+@media(prefers-reduced-motion:reduce){
+ .formation-chips{display:none}
+ .polish-frame{filter:none}
+}
