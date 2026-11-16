@@ -16,6 +16,7 @@ on:
       - 'public/story-invitation.js'
       - 'public/story-invitation.css'
       - 'qa/story-invitation.mjs'
+      - 'server.mjs'
       - '.github/workflows/making-atelier-review.yml'
   workflow_dispatch:
 permissions:
