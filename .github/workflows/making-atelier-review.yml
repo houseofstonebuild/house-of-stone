@@ -20,6 +20,7 @@ on:
       - 'qa/story-motion-performance.mjs'
       - 'public/prototypes/scroll-frame-stream.js'
       - 'public/assets/making-v8/**'
+      - 'public/assets/making-cinema-frames-v4/**'
       - 'server.mjs'
       - '.github/workflows/making-atelier-review.yml'
   workflow_dispatch:

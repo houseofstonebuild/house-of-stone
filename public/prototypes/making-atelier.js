@@ -69,12 +69,25 @@ function frameUrl(index){
  const sourceFrame=filmEdition==='legacy'?
   Math.min(fallbackFrames-1,Math.round(index*(fallbackFrames-1)/(frameCount-1))):index;
  $filmMedia.dataset.sourceFrame=String(sourceFrame);
- const digits=filmEdition==='hd-v3'?3:2;
+ const digits=filmEdition==='hd-v3'||filmEdition==='hd-v4'?3:2;
  return frameRoot+'/frame_'+String(sourceFrame).padStart(digits,'0')+'.webp';
 }
 async function checkHdFrames(){
  let selected=null;
+ // V4 samples the documentary near its original 24 fps. The source frame
+ // count is capped at 200 to balance motion fidelity with phone decoding.
  try{
+  const response=await fetch('/assets/making-cinema-frames-v4/manifest.json',{cache:'no-store'});
+  if(response.ok){
+   const manifest=await response.json();
+   if(manifest.version===4&&manifest.frames===200&&manifest.width>=1280&&manifest.end_seconds<=8.4){
+    const checks=await Promise.all([0,100,199].map(i=>
+     fetch('/assets/making-cinema-frames-v4/frame_'+String(i).padStart(3,'0')+'.webp',{method:'HEAD'})));
+    if(checks.every(r=>r.ok))selected={root:'/assets/making-cinema-frames-v4',count:200,edition:'hd-v4'};
+   }
+  }
+ }catch(_){/* v3 remains available */}
+ if(!selected)try{
   const response=await fetch('/assets/making-cinema-frames-v3/manifest.json',{cache:'no-store'});
   if(response.ok){
    const manifest=await response.json();

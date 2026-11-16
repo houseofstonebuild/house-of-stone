@@ -59,11 +59,13 @@ try{
   await page.goto(base+'/prototypes/making-atelier.html',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.documentElement.dataset.makingAtelier==='ready');
   // The 144-frame documentary is enabled only after its matching archive lands.
-  const denseFilm=existsSync(new URL('../public/assets/making-cinema-frames-v3/manifest.json',import.meta.url));
+  const filmV4=existsSync(new URL('../public/assets/making-cinema-frames-v4/manifest.json',import.meta.url));
+  const denseFilm=filmV4||existsSync(new URL('../public/assets/making-cinema-frames-v3/manifest.json',import.meta.url));
   if(denseFilm){
-   await page.waitForFunction(()=>window.__mabweMaking.film.edition==='hd-v3',{timeout:25000});
-   assert.equal(await page.evaluate(()=>window.__mabweMaking.film.frames),144,
-    'The 144-frame original HD documentary is not selected');
+   const edition=filmV4?'hd-v4':'hd-v3',expected=filmV4?200:144;
+   await page.waitForFunction(edition=>window.__mabweMaking.film.edition===edition,edition,{timeout:25000});
+   assert.equal(await page.evaluate(()=>window.__mabweMaking.film.frames),expected,
+    'The densest available original HD documentary is not selected');
   }
   // New assets are made visible only after the matching manifest and actual
   // frames deploy. Once v7 files exist, using the older set is a regression.
@@ -256,7 +258,7 @@ try{
      Number(document.querySelector('.carving-media').dataset.displayedFrame)<40,
      null,{timeout:25000});
    assert.equal(await page.locator('.carving-media').getAttribute('data-media-quality'),
-     'hd-v3','The 144-frame film must really be displayed, not only loaded');
+     filmV4?'hd-v4':'hd-v3','The source documentary must really be displayed, not only loaded');
   }
   // Reversible film, with visible frame changes on real-source mobile frames.
   await go(page,'carving',.20);

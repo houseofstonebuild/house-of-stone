@@ -1,0 +1,58 @@
+name: Isolated 200-frame documentary review
+on:
+  push:
+    branches: ['review/our-story-scroll-qa-2026-11-16']
+    paths:
+      - 'scripts/build-making-cinema-frames-v4.sh'
+      - '.github/workflows/story-film-v4-review.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: film-v4-review-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install media reader
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Render 200 frames from the original short documentary excerpt
+        run: sh scripts/build-making-cinema-frames-v4.sh
+      - name: Verify frame counts and unique source images
+        run: |
+          python3 - <<'PY'
+          import os,hashlib,json
+          path='public/assets/making-cinema-frames-v4'
+          files=[f'{path}/frame_{i:03d}.webp' for i in range(200)]
+          assert all(os.path.getsize(f)>1200 for f in files)
+          hashes={hashlib.sha256(open(f,'rb').read()).hexdigest() for f in files}
+          assert len(hashes)>=160, f'Insufficient distinct source frames: {len(hashes)}'
+          m=json.load(open(path+'/manifest.json'))
+          assert m['version']==4 and m['frames']==200 and m['end_seconds']==8.4
+          print(f'Validated {len(hashes)} distinct samples from the original footage')
+          PY
+      - name: Review source-frame metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: 200-frame-original-documentary-manifest
+          path: public/assets/making-cinema-frames-v4/manifest.json
+          retention-days: 30
+      - name: Publish only on the isolated review branch
+        if: ${{ success() && github.ref == 'refs/heads/review/our-story-scroll-qa-2026-11-16' }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/assets/making-cinema-frames-v4/
+          git diff --cached --quiet && exit 0
+          git commit -m 'Publish 200 source-documentary frames to review branch'
+          for i in 1 2 3 4 5 6; do
+            git fetch origin review/our-story-scroll-qa-2026-11-16
+            git rebase origin/review/our-story-scroll-qa-2026-11-16
+            if git push origin HEAD:review/our-story-scroll-qa-2026-11-16; then exit 0; fi
+          done
+          exit 1
