@@ -1,4 +1,4 @@
-name: Making v6 offline volumetric media
+name: Making v7 offline source-matched Coil media
 on:
   pull_request:
     paths:
@@ -49,6 +49,7 @@ jobs:
           base='build/making-v6'
           manifest=json.load(open(base+'/manifest.json'))
           n=manifest['frames']
+          assert manifest['version']==7 and manifest['registered_to']=='approved-coil-v1'
           assert n==144
           for profile in ['desktop','mobile']:
             folder=base+'/'+profile
@@ -85,4 +86,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node qa/publish-making-v6-assets.mjs
-# Version 6: render source is pinned to Coil and only publishes validated private media.
+# Version 7: render source is pinned to approved Coil and publishes validated versioned media.

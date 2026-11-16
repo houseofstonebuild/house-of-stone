@@ -93,7 +93,7 @@ def mesh_for(field,data):
  m.fix_normals()
  return m
 
-def render(mesh,data,path,w,h,kind,phone,marking,finish):
+def render(mesh,data,path,w,h,kind,phone,marking,finish,progress,fractures):
  """Render the SAME physical coordinate space, camera and stature as the approved
  Coil GLB viewer, instead of a VTK parallel projection of an unrelated pose.
  Surface is deliberately unpolished until the final approved render takes over.
@@ -119,18 +119,20 @@ def render(mesh,data,path,w,h,kind,phone,marking,finish):
  poly=vtk.vtkPolyData();poly.SetPoints(pts);poly.SetPolys(tris)
  # Subtle 3D mineral colour variation. This remains anchored to the stone
  # rather than flickering in screen-space between carving frames.
- if kind=='raw':base=np.array([.295,.301,.264]);r=.93
- elif kind=='rough':base=np.array([.225,.254,.214]);r=.87
- elif kind=='refined':base=np.array([.172,.208,.174]);r=.72
+ # A neutral, weathered block gradually reveals the deeper dark mineral.
+ # It must not begin as a flat grey CAD maquette or a pre-polished form.
+ if kind=='raw':base=np.array([.395,.381,.345]);r=.94
+ elif kind=='rough':base=np.array([.355,.364,.333]);r=.89
+ elif kind=='refined':base=np.array([.260,.288,.257]);r=.75
  else:
   f=float(smooth(finish))
-  base=np.array([.171-.094*f,.203-.100*f,.171-.086*f])
-  r=.68-.36*f
+  base=np.array([.255-.167*f,.279-.170*f,.245-.145*f])
+  r=.68-.39*f
  q=vertices
- grain=(.045*np.sin(q[:,0]*51.3+q[:,2]*16.8)*np.sin(q[:,1]*43.5)
-       +.026*np.cos(q[:,2]*89.1-q[:,1]*22.4)
-       +.015*np.sin(q[:,0]*136.1+q[:,1]*63.7+q[:,2]*71.1))
- grain*=1-.30*float(smooth(finish))
+ grain=(.028*np.sin(q[:,0]*31.3+q[:,2]*16.8)*np.sin(q[:,1]*25.5+q[:,2]*4.7)
+       +.018*np.cos(q[:,2]*47.1-q[:,1]*22.4+q[:,0]*9.8)
+       +.010*np.sin(q[:,0]*83.1+q[:,1]*63.7+q[:,2]*71.1))
+ grain*=1-.42*float(smooth(finish))
  pigment=np.clip(base[None,:]*(1+grain[:,None]),0,1)
  rgba=np.ascontiguousarray(np.round(pigment*255).astype(np.uint8))
  scalars=numpy_to_vtk(rgba,deep=True,array_type=vtk.VTK_UNSIGNED_CHAR)
@@ -171,6 +173,53 @@ def render(mesh,data,path,w,h,kind,phone,marking,finish):
   light=vtk.vtkLight();light.SetLightTypeToSceneLight()
   light.SetPosition(*position);light.SetFocalPoint(0,1.5,0)
   light.SetIntensity(intensity);light.SetColor(*color);ren.AddLight(light)
+ # Stone fragments are actual small 3D solids lit by the same lights
+ # as the block. Their launch points come from the carved volume at removal,
+ # not a 2D screen-space confetti effect across the finished sculpture.
+ if .565<=progress<.768:
+  for ix,(at,point,direction,size) in enumerate(fractures):
+   age=(progress-at)/.021
+   if age<0 or age>1:continue
+   t=float(smooth(age));fade=float(1-smooth((age-.73)/.27))
+   if fade<.015:continue
+   center=np.asarray(point,dtype=np.float64).copy()
+   center-=[(bounds[0,0]+bounds[1,0])*.5,bounds[0,1],(bounds[0,2]+bounds[1,2])*.5]
+   center*=factor
+   x0=center[0]*c+center[2]*s
+   z0=-center[0]*s+center[2]*c
+   center[0]=x0;center[2]=z0
+   vdir=np.asarray(direction,dtype=np.float64)
+   dx=vdir[0]*c+vdir[2]*s
+   dz=-vdir[0]*s+vdir[2]*c
+   vdir=np.array([dx,0,dz])
+   vdir/=max(.01,float(np.linalg.norm(vdir)))
+   center+=vdir*(.10+.13*(ix%3)/3)*t
+   center[1]-=(.12+.09*(ix%4)/4)*t*t
+   radius=size*factor*(.90-.20*t)
+   corners=np.array([[-.94,-.25,-.14],[.23,-.78,-.49],
+       [.76,.15,.67],[-.21,.69,-.23]],dtype=np.float64)*radius
+   az=ix*.87+t*.65
+   u=np.cos(az);v=np.sin(az)
+   corners[:,[0,2]]=np.stack((corners[:,0]*u+corners[:,2]*v,
+                             -corners[:,0]*v+corners[:,2]*u),axis=1)
+   corners+=center
+   piece=vtk.vtkPolyData();points=vtk.vtkPoints()
+   for vtx in corners:points.InsertNextPoint(*map(float,vtx))
+   piece.SetPoints(points)
+   polys=vtk.vtkCellArray()
+   for tri in [(0,1,2),(0,2,3),(0,3,1),(1,3,2)]:
+    cell=vtk.vtkTriangle()
+    for j,vi in enumerate(tri):cell.GetPointIds().SetId(j,vi)
+    polys.InsertNextCell(cell)
+   piece.SetPolys(polys)
+   norms=vtk.vtkPolyDataNormals();norms.SetInputData(piece)
+   norms.SetConsistency(True);norms.AutoOrientNormalsOn();norms.Update()
+   pieceMapper=vtk.vtkPolyDataMapper();pieceMapper.SetInputConnection(norms.GetOutputPort())
+   pieceActor=vtk.vtkActor();pieceActor.SetMapper(pieceMapper)
+   pieceProp=pieceActor.GetProperty();pieceProp.SetInterpolationToPBR()
+   pieceProp.SetColor(.36,.37,.335);pieceProp.SetMetallic(0)
+   pieceProp.SetRoughness(.93);pieceProp.SetOpacity(fade)
+   ren.AddActor(pieceActor)
  window=vtk.vtkRenderWindow();window.SetSize(w,h)
  window.SetAlphaBitPlanes(1);window.SetMultiSamples(4)
  window.SetOffScreenRendering(True);window.AddRenderer(ren);window.Render()
@@ -206,6 +255,24 @@ def main():
  a=p.parse_args();os.makedirs(a.out,exist_ok=True)
  if a.res<96 or a.res>220 or a.frames<48:raise ValueError('Invalid build settings')
  data=prepare(a.mesh,a.res);original=data[0];rawfield=data[4]
+ # Stable detachment locations sampled on the real outer surface. A chip
+ # therefore falls away from stone being removed, never the polished face.
+ rng=np.random.default_rng(20261115)
+ fractures=[]
+ for k,at in enumerate(np.linspace(.580,.740,17)):
+  t=float(smooth((at-.565)/.20))
+  surface=mesh_for(field(t,data),data)
+  vv=surface.vertices
+  front=np.quantile(vv[:,2],.76)
+  left=np.quantile(vv[:,0],.28)
+  right=np.quantile(vv[:,0],.72)
+  candidates=np.where((vv[:,2]>front)&((vv[:,0]<left)|(vv[:,0]>right)))[0]
+  if len(candidates)==0:candidates=np.arange(len(vv))
+  chosen=vv[int(rng.choice(candidates))]
+  side=1 if chosen[0]>np.median(vv[:,0]) else -1
+  direction=np.array([side,0,.28],dtype=float)
+  fractures.append((float(at),chosen.tolist(),direction.tolist(),
+                    float(original.extents.max()*(.014+.011*rng.random()))))
  phases=[];previous=float('inf');reuse={}
  for index,progress in enumerate(np.linspace(.305,1,a.frames)):
   p=float(progress)
@@ -227,14 +294,14 @@ def main():
     import shutil
     shutil.copyfile(reuse[key],output)
    else:
-    render(mesh,data,output,w,h,kind,profile=='mobile',marking,smooth((p-.90)/.06))
+    render(mesh,data,output,w,h,kind,profile=='mobile',marking,smooth((p-.90)/.06),p,fractures)
     if still:reuse[key]=output
   phases.append({'index':index,'progress':round(p,5),'remaining_voxels':volume})
   if index%12==0:print('Rendered',index,'of',a.frames,'volume',volume,flush=True)
  if phases[-1]['remaining_voxels']>=phases[0]['remaining_voxels']:
   raise RuntimeError('No stone was removed')
- manifest={'version':6,'source_sha256':hashlib.sha256(open(a.mesh,'rb').read()).hexdigest(),
-  'frames':a.frames,'first':.305,'last':1,'registered_to':'approved-coil-v1','camera_revision':2,'profiles':{'desktop':{'width':1280,'height':720},'mobile':{'width':720,'height':1560}},
+ manifest={'version':7,'source_sha256':hashlib.sha256(open(a.mesh,'rb').read()).hexdigest(),
+  'frames':a.frames,'first':.305,'last':1,'registered_to':'approved-coil-v1','camera_revision':3,'fracture_source':'actual outer stone surface','profiles':{'desktop':{'width':1280,'height':720},'mobile':{'width':720,'height':1560}},
   'entries':phases}
  with open(os.path.join(a.out,'manifest.json'),'w') as file:json.dump(manifest,file,indent=2)
  print('SUCCESS: all carving states contain Coil, volume decreases monotonically; final exact Coil mesh rendered.')
