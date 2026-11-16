@@ -27,7 +27,6 @@ try {
     ['zsa-028','Red Interlace','/models/red-interlace-uploaded-v1.glb','58 × 34 × 25 cm'],
     ['zsa-006','Coil','/models/coil-uploaded-v1.glb','60 × 36 × 24 cm'],
     ['zsa-020','Lovers','/models/lovers-uploaded-v1.glb','52 × 26 × 22 cm'],
-    ['hos-tall-attention','Tall Attention','/models/tall-attention-uploaded-v1.glb','On inquiry']
   ]) {
     await page.goto(origin+'/');
     await page.locator('#hos-concept[data-ready="true"]').waitFor();

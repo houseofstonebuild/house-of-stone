@@ -214,9 +214,9 @@
         "photoView": "front",
         "photoSource": "/assets/zsa-027-studio-front-v2.webp",
         "photoCrop": {
-          "x": 0.0,
+          "x": 0,
           "y": 0.149413,
-          "width": 1.0,
+          "width": 1,
           "height": 0.575755,
           "aspectRatio": 0.642396
         },
@@ -308,9 +308,9 @@
         "photoView": "front",
         "photoSource": "/assets/zsa-005-studio-front-v2.webp",
         "photoCrop": {
-          "x": 0.0,
+          "x": 0,
           "y": 0.042595,
-          "width": 1.0,
+          "width": 1,
           "height": 0.694736,
           "aspectRatio": 0.81169
         },
@@ -426,15 +426,6 @@
           "aspectRatio": 0.83
         },
         "photoAlt": "Close-up showing colour emerging from the dark stone"
-      }
-    },
-    "hos-tall-attention": {
-      "editorialShort": "A tall figure bends toward a smaller one held close to the body. That single movement gives the sculpture its meaning: attention is shown through action, not through words. The difference in height might suggest a parent and child, a mentor and learner, or simply someone making space for another person. The sculptor has used the lean of the larger figure to make the smaller figure the centre of the encounter.",
-      "closerLook": {
-        "heading": "The two figures meeting",
-        "copy": "The detail photograph brings the upper figures closer, showing where the taller form bends toward the smaller one. The relationship depends on their different heights and the curve between them. The artist has left the gesture clear without adding a complicated scene around it.",
-        "photoView": "detail",
-        "photoSource": "/assets/hos-tall-attention-detail-v1.png"
       }
     },
     "hos-kissing-lovers": {

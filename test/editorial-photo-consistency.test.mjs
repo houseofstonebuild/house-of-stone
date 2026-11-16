@@ -9,7 +9,7 @@ const story=JSON.parse(readFileSync(at('../public/story.json'),'utf8'));
 const editorial=JSON.parse(readFileSync(at('../public/editorial.json'),'utf8'));
 const allowed=new Set(['front','right','left','back','detail','detail2']);
 const owned=new Set(['hos-queen-mother','hos-celebration','hos-belonging','hos-inner-beauty']);
-const uploaded=new Set(['hos-tall-attention','hos-kissing-lovers']);
+const uploaded=new Set(['hos-kissing-lovers']);
 const photoPath=(id,view)=>{
   if(owned.has(id))return '/assets/'+id+'-'+view+'-v1.webp';
   if(uploaded.has(id))return '/assets/'+id+'-'+view+'-v1.png';
@@ -17,7 +17,7 @@ const photoPath=(id,view)=>{
 };
 
 test('each sculpture story focuses on meaning and has enough substance to be useful',()=>{
-  assert.equal(Object.keys(story.works).length,28,'Include both newly uploaded works');
+  assert.equal(Object.keys(story.works).length,27,'Exclude the archived Tall Attention work');
   for(const [id,work] of Object.entries(story.works)){
     assert(work.editorialShort?.trim().split(/\s+/).length>=55,id+' needs a developed interpretation');
     assert(work.editorialShort?.trim().split(/\s+/).length<=130,id+' reads like an essay, not a blurb');
@@ -43,7 +43,7 @@ test('closer-look text uses a reviewed alternate photograph or a focused crop of
     assert(existsSync(fileURLToPath(at('../public'+path))),id+' view missing from repository: '+path);
     if(note.photoView==='front')assert(closerLookCrop(note),id+' repeats the primary photograph without a reviewed close-up');
   }
-  assert.equal(selected,24,'Only works with matched secondary photographs should show this section');
+  assert.equal(selected,23,'Only works with matched secondary photographs should show this section');
   assert.equal(hidden,4,'Do not substitute unrelated views for four works without extra photographs');
 });
 

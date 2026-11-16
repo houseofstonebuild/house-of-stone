@@ -332,16 +332,6 @@
     "referenceSurface": false,
     "stoneGrain": false
   },
-  "hos-tall-attention": {
-    "workId": "hos-tall-attention",
-    "title": "Tall Attention",
-    "source": "/assets/hos-tall-attention-front-v1.png",
-    "file": "/models/tall-attention-uploaded-v1.glb",
-    "uploaded": true,
-    "ownerApproved": true,
-    "referenceSurface": false,
-    "stoneGrain": false
-  },
   "hos-queen-mother": {
     "workId": "hos-queen-mother",
     "title": "Queen Mother",
