@@ -18,6 +18,10 @@ const files=[
  ['/assets/making-cinema-frames/frame_00.webp',null,1500],
  ['/assets/making-cinema-frames/frame_24.webp',null,1500],
  ['/assets/making-cinema-frames/frame_47.webp',null,1500],
+ ['/assets/making-cinema-frames-v3/manifest.json','"version":3',140],
+ ['/assets/making-cinema-frames-v3/frame_000.webp',null,1500],
+ ['/assets/making-cinema-frames-v3/frame_072.webp',null,1500],
+ ['/assets/making-cinema-frames-v3/frame_143.webp',null,1500],
  ['/assets/making-atelier-final-mobile-v1.png',null,35000],
  ['/assets/making-chiseling-scrub-v1.mp4',null,100000],
  ['/models/coil-uploaded-v1.glb',null,100000]
@@ -43,4 +47,12 @@ assert.equal(manifest.camera_revision,3);
 assert.equal(manifest.frames,144);
 assert(manifest.entries[65].remaining_voxels>manifest.entries[85].remaining_voxels,
   'Coil removal frames do not gradually reduce stone volume');
-console.log('Live source-true Making Atelier v7 verified at',root);
+const denseResponse=await fetch(root+'/assets/making-cinema-frames-v3/manifest.json?dense-source-verified=1',
+ {cache:'no-store',signal:AbortSignal.timeout(25000)});
+assert(denseResponse.ok,'144-frame documentary manifest has not been deployed');
+const dense=await denseResponse.json();
+assert.equal(dense.version,3);
+assert.equal(dense.frames,144);
+assert.equal(dense.width,1600);
+assert.equal(dense.end_seconds,8.4);
+console.log('Live source-true Making Atelier v7 and 144-frame documentary verified at',root);

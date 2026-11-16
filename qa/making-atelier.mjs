@@ -123,6 +123,17 @@ try{
       null,{timeout:25000});
     }
    }
+   if(id==='detail'||id==='finishing'){
+    // Avoid approving screenshots of the stale raw-stone poster at mid-scroll.
+    // The screenshot must show the model-derived frame at this scroll position.
+    await page.waitForFunction(section=>{
+     const node=document.querySelector(section==='detail'?'#formationStage':'#polishStage');
+     const desired=Number(node?.dataset.requestedFrame);
+     const shown=Number(node?.dataset.displayedFrame);
+     return node?.dataset.frameStatus==='ready'&&Number.isFinite(desired)&&
+       Number.isFinite(shown)&&Math.abs(desired-shown)<=1;
+    },id,{timeout:25000});
+   }
    if(id==='reveal'){
     await page.waitForFunction(()=>{
      const status=document.querySelector('#approvedHost').dataset.approvedModelState;
@@ -235,6 +246,18 @@ try{
   assert.equal(await page.locator('#approvedHost').getAttribute('data-atelier-no-plinth'),'true','Do not introduce a generic plinth');
   await go(page,'reveal',.76);
   assert.equal(await page.locator('#approvedHost').getAttribute('data-in-finishing'),'false','Approved Coil must remain the gallery finale');
+  if(denseFilm){
+   await go(page,'carving',.83);
+   await page.waitForFunction(()=>
+     Number(document.querySelector('.carving-media').dataset.displayedFrame)>105,
+     null,{timeout:25000});
+   await go(page,'carving',.17);
+   await page.waitForFunction(()=>
+     Number(document.querySelector('.carving-media').dataset.displayedFrame)<40,
+     null,{timeout:25000});
+   assert.equal(await page.locator('.carving-media').getAttribute('data-media-quality'),
+     'hd-v3','The 144-frame film must really be displayed, not only loaded');
+  }
   // Reversible film, with visible frame changes on real-source mobile frames.
   await go(page,'carving',.20);
   const early=await page.evaluate(()=>Number(document.querySelector('.carving-media').dataset.requestedFrame));
