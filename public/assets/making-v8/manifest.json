@@ -1,0 +1,1230 @@
+{
+  "version": 8,
+  "source_sha256": "60d62a56f20c38f3f7fef16c226288c3347404139a2ea03e5802739ce264bc33",
+  "frames": 240,
+  "first": 0.565,
+  "last": 0.96,
+  "carve_range": [
+    0,
+    169
+  ],
+  "polish_range": [
+    170,
+    239
+  ],
+  "registered_to": "approved-coil-v1",
+  "camera_revision": 4,
+  "fracture_source": "actual outer stone surface",
+  "profiles": {
+    "desktop": {
+      "width": 1280,
+      "height": 720
+    },
+    "mobile": {
+      "width": 720,
+      "height": 1560
+    }
+  },
+  "entries": [
+    {
+      "index": 0,
+      "progress": 0.565,
+      "remaining_voxels": 1119663
+    },
+    {
+      "index": 1,
+      "progress": 0.56618,
+      "remaining_voxels": 1119661
+    },
+    {
+      "index": 2,
+      "progress": 0.56737,
+      "remaining_voxels": 1119661
+    },
+    {
+      "index": 3,
+      "progress": 0.56855,
+      "remaining_voxels": 1119659
+    },
+    {
+      "index": 4,
+      "progress": 0.56973,
+      "remaining_voxels": 1119654
+    },
+    {
+      "index": 5,
+      "progress": 0.57092,
+      "remaining_voxels": 1119641
+    },
+    {
+      "index": 6,
+      "progress": 0.5721,
+      "remaining_voxels": 1119620
+    },
+    {
+      "index": 7,
+      "progress": 0.57328,
+      "remaining_voxels": 1119586
+    },
+    {
+      "index": 8,
+      "progress": 0.57447,
+      "remaining_voxels": 1119533
+    },
+    {
+      "index": 9,
+      "progress": 0.57565,
+      "remaining_voxels": 1119456
+    },
+    {
+      "index": 10,
+      "progress": 0.57683,
+      "remaining_voxels": 1119352
+    },
+    {
+      "index": 11,
+      "progress": 0.57802,
+      "remaining_voxels": 1119213
+    },
+    {
+      "index": 12,
+      "progress": 0.5792,
+      "remaining_voxels": 1119032
+    },
+    {
+      "index": 13,
+      "progress": 0.58038,
+      "remaining_voxels": 1118801
+    },
+    {
+      "index": 14,
+      "progress": 0.58157,
+      "remaining_voxels": 1118517
+    },
+    {
+      "index": 15,
+      "progress": 0.58275,
+      "remaining_voxels": 1118168
+    },
+    {
+      "index": 16,
+      "progress": 0.58393,
+      "remaining_voxels": 1117748
+    },
+    {
+      "index": 17,
+      "progress": 0.58512,
+      "remaining_voxels": 1117247
+    },
+    {
+      "index": 18,
+      "progress": 0.5863,
+      "remaining_voxels": 1116660
+    },
+    {
+      "index": 19,
+      "progress": 0.58749,
+      "remaining_voxels": 1115976
+    },
+    {
+      "index": 20,
+      "progress": 0.58867,
+      "remaining_voxels": 1115186
+    },
+    {
+      "index": 21,
+      "progress": 0.58985,
+      "remaining_voxels": 1114282
+    },
+    {
+      "index": 22,
+      "progress": 0.59104,
+      "remaining_voxels": 1113253
+    },
+    {
+      "index": 23,
+      "progress": 0.59222,
+      "remaining_voxels": 1112094
+    },
+    {
+      "index": 24,
+      "progress": 0.5934,
+      "remaining_voxels": 1110793
+    },
+    {
+      "index": 25,
+      "progress": 0.59459,
+      "remaining_voxels": 1109342
+    },
+    {
+      "index": 26,
+      "progress": 0.59577,
+      "remaining_voxels": 1107733
+    },
+    {
+      "index": 27,
+      "progress": 0.59695,
+      "remaining_voxels": 1105956
+    },
+    {
+      "index": 28,
+      "progress": 0.59814,
+      "remaining_voxels": 1104003
+    },
+    {
+      "index": 29,
+      "progress": 0.59932,
+      "remaining_voxels": 1101864
+    },
+    {
+      "index": 30,
+      "progress": 0.6005,
+      "remaining_voxels": 1099534
+    },
+    {
+      "index": 31,
+      "progress": 0.60169,
+      "remaining_voxels": 1097001
+    },
+    {
+      "index": 32,
+      "progress": 0.60287,
+      "remaining_voxels": 1094261
+    },
+    {
+      "index": 33,
+      "progress": 0.60405,
+      "remaining_voxels": 1091304
+    },
+    {
+      "index": 34,
+      "progress": 0.60524,
+      "remaining_voxels": 1088125
+    },
+    {
+      "index": 35,
+      "progress": 0.60642,
+      "remaining_voxels": 1084715
+    },
+    {
+      "index": 36,
+      "progress": 0.6076,
+      "remaining_voxels": 1081067
+    },
+    {
+      "index": 37,
+      "progress": 0.60879,
+      "remaining_voxels": 1077179
+    },
+    {
+      "index": 38,
+      "progress": 0.60997,
+      "remaining_voxels": 1073040
+    },
+    {
+      "index": 39,
+      "progress": 0.61115,
+      "remaining_voxels": 1068648
+    },
+    {
+      "index": 40,
+      "progress": 0.61234,
+      "remaining_voxels": 1063997
+    },
+    {
+      "index": 41,
+      "progress": 0.61352,
+      "remaining_voxels": 1059082
+    },
+    {
+      "index": 42,
+      "progress": 0.6147,
+      "remaining_voxels": 1053899
+    },
+    {
+      "index": 43,
+      "progress": 0.61589,
+      "remaining_voxels": 1048446
+    },
+    {
+      "index": 44,
+      "progress": 0.61707,
+      "remaining_voxels": 1042719
+    },
+    {
+      "index": 45,
+      "progress": 0.61825,
+      "remaining_voxels": 1036715
+    },
+    {
+      "index": 46,
+      "progress": 0.61944,
+      "remaining_voxels": 1030432
+    },
+    {
+      "index": 47,
+      "progress": 0.62062,
+      "remaining_voxels": 1023868
+    },
+    {
+      "index": 48,
+      "progress": 0.6218,
+      "remaining_voxels": 1017022
+    },
+    {
+      "index": 49,
+      "progress": 0.62299,
+      "remaining_voxels": 1009896
+    },
+    {
+      "index": 50,
+      "progress": 0.62417,
+      "remaining_voxels": 1002486
+    },
+    {
+      "index": 51,
+      "progress": 0.62536,
+      "remaining_voxels": 994796
+    },
+    {
+      "index": 52,
+      "progress": 0.62654,
+      "remaining_voxels": 986824
+    },
+    {
+      "index": 53,
+      "progress": 0.62772,
+      "remaining_voxels": 978574
+    },
+    {
+      "index": 54,
+      "progress": 0.62891,
+      "remaining_voxels": 970045
+    },
+    {
+      "index": 55,
+      "progress": 0.63009,
+      "remaining_voxels": 961244
+    },
+    {
+      "index": 56,
+      "progress": 0.63127,
+      "remaining_voxels": 952171
+    },
+    {
+      "index": 57,
+      "progress": 0.63246,
+      "remaining_voxels": 942829
+    },
+    {
+      "index": 58,
+      "progress": 0.63364,
+      "remaining_voxels": 933224
+    },
+    {
+      "index": 59,
+      "progress": 0.63482,
+      "remaining_voxels": 923361
+    },
+    {
+      "index": 60,
+      "progress": 0.63601,
+      "remaining_voxels": 913244
+    },
+    {
+      "index": 61,
+      "progress": 0.63719,
+      "remaining_voxels": 902877
+    },
+    {
+      "index": 62,
+      "progress": 0.63837,
+      "remaining_voxels": 892270
+    },
+    {
+      "index": 63,
+      "progress": 0.63956,
+      "remaining_voxels": 881428
+    },
+    {
+      "index": 64,
+      "progress": 0.64074,
+      "remaining_voxels": 870356
+    },
+    {
+      "index": 65,
+      "progress": 0.64192,
+      "remaining_voxels": 859063
+    },
+    {
+      "index": 66,
+      "progress": 0.64311,
+      "remaining_voxels": 847559
+    },
+    {
+      "index": 67,
+      "progress": 0.64429,
+      "remaining_voxels": 835848
+    },
+    {
+      "index": 68,
+      "progress": 0.64547,
+      "remaining_voxels": 823943
+    },
+    {
+      "index": 69,
+      "progress": 0.64666,
+      "remaining_voxels": 811848
+    },
+    {
+      "index": 70,
+      "progress": 0.64784,
+      "remaining_voxels": 799578
+    },
+    {
+      "index": 71,
+      "progress": 0.64902,
+      "remaining_voxels": 787139
+    },
+    {
+      "index": 72,
+      "progress": 0.65021,
+      "remaining_voxels": 774543
+    },
+    {
+      "index": 73,
+      "progress": 0.65139,
+      "remaining_voxels": 761800
+    },
+    {
+      "index": 74,
+      "progress": 0.65257,
+      "remaining_voxels": 748921
+    },
+    {
+      "index": 75,
+      "progress": 0.65376,
+      "remaining_voxels": 735916
+    },
+    {
+      "index": 76,
+      "progress": 0.65494,
+      "remaining_voxels": 722797
+    },
+    {
+      "index": 77,
+      "progress": 0.65612,
+      "remaining_voxels": 709573
+    },
+    {
+      "index": 78,
+      "progress": 0.65731,
+      "remaining_voxels": 696259
+    },
+    {
+      "index": 79,
+      "progress": 0.65849,
+      "remaining_voxels": 682867
+    },
+    {
+      "index": 80,
+      "progress": 0.65967,
+      "remaining_voxels": 669405
+    },
+    {
+      "index": 81,
+      "progress": 0.66086,
+      "remaining_voxels": 655889
+    },
+    {
+      "index": 82,
+      "progress": 0.66204,
+      "remaining_voxels": 642330
+    },
+    {
+      "index": 83,
+      "progress": 0.66322,
+      "remaining_voxels": 628740
+    },
+    {
+      "index": 84,
+      "progress": 0.66441,
+      "remaining_voxels": 615132
+    },
+    {
+      "index": 85,
+      "progress": 0.66559,
+      "remaining_voxels": 601516
+    },
+    {
+      "index": 86,
+      "progress": 0.66678,
+      "remaining_voxels": 587908
+    },
+    {
+      "index": 87,
+      "progress": 0.66796,
+      "remaining_voxels": 574318
+    },
+    {
+      "index": 88,
+      "progress": 0.66914,
+      "remaining_voxels": 560759
+    },
+    {
+      "index": 89,
+      "progress": 0.67033,
+      "remaining_voxels": 547242
+    },
+    {
+      "index": 90,
+      "progress": 0.67151,
+      "remaining_voxels": 533781
+    },
+    {
+      "index": 91,
+      "progress": 0.67269,
+      "remaining_voxels": 520389
+    },
+    {
+      "index": 92,
+      "progress": 0.67388,
+      "remaining_voxels": 507075
+    },
+    {
+      "index": 93,
+      "progress": 0.67506,
+      "remaining_voxels": 493851
+    },
+    {
+      "index": 94,
+      "progress": 0.67624,
+      "remaining_voxels": 480732
+    },
+    {
+      "index": 95,
+      "progress": 0.67743,
+      "remaining_voxels": 467727
+    },
+    {
+      "index": 96,
+      "progress": 0.67861,
+      "remaining_voxels": 454847
+    },
+    {
+      "index": 97,
+      "progress": 0.67979,
+      "remaining_voxels": 442104
+    },
+    {
+      "index": 98,
+      "progress": 0.68098,
+      "remaining_voxels": 429509
+    },
+    {
+      "index": 99,
+      "progress": 0.68216,
+      "remaining_voxels": 417070
+    },
+    {
+      "index": 100,
+      "progress": 0.68334,
+      "remaining_voxels": 404800
+    },
+    {
+      "index": 101,
+      "progress": 0.68453,
+      "remaining_voxels": 392705
+    },
+    {
+      "index": 102,
+      "progress": 0.68571,
+      "remaining_voxels": 380799
+    },
+    {
+      "index": 103,
+      "progress": 0.68689,
+      "remaining_voxels": 369090
+    },
+    {
+      "index": 104,
+      "progress": 0.68808,
+      "remaining_voxels": 357585
+    },
+    {
+      "index": 105,
+      "progress": 0.68926,
+      "remaining_voxels": 346292
+    },
+    {
+      "index": 106,
+      "progress": 0.69044,
+      "remaining_voxels": 335221
+    },
+    {
+      "index": 107,
+      "progress": 0.69163,
+      "remaining_voxels": 324377
+    },
+    {
+      "index": 108,
+      "progress": 0.69281,
+      "remaining_voxels": 313770
+    },
+    {
+      "index": 109,
+      "progress": 0.69399,
+      "remaining_voxels": 303405
+    },
+    {
+      "index": 110,
+      "progress": 0.69518,
+      "remaining_voxels": 293287
+    },
+    {
+      "index": 111,
+      "progress": 0.69636,
+      "remaining_voxels": 283424
+    },
+    {
+      "index": 112,
+      "progress": 0.69754,
+      "remaining_voxels": 273818
+    },
+    {
+      "index": 113,
+      "progress": 0.69873,
+      "remaining_voxels": 264477
+    },
+    {
+      "index": 114,
+      "progress": 0.69991,
+      "remaining_voxels": 255404
+    },
+    {
+      "index": 115,
+      "progress": 0.70109,
+      "remaining_voxels": 246603
+    },
+    {
+      "index": 116,
+      "progress": 0.70228,
+      "remaining_voxels": 238074
+    },
+    {
+      "index": 117,
+      "progress": 0.70346,
+      "remaining_voxels": 229823
+    },
+    {
+      "index": 118,
+      "progress": 0.70464,
+      "remaining_voxels": 221852
+    },
+    {
+      "index": 119,
+      "progress": 0.70583,
+      "remaining_voxels": 214161
+    },
+    {
+      "index": 120,
+      "progress": 0.70701,
+      "remaining_voxels": 206752
+    },
+    {
+      "index": 121,
+      "progress": 0.7082,
+      "remaining_voxels": 199625
+    },
+    {
+      "index": 122,
+      "progress": 0.70938,
+      "remaining_voxels": 192781
+    },
+    {
+      "index": 123,
+      "progress": 0.71056,
+      "remaining_voxels": 186217
+    },
+    {
+      "index": 124,
+      "progress": 0.71175,
+      "remaining_voxels": 179933
+    },
+    {
+      "index": 125,
+      "progress": 0.71293,
+      "remaining_voxels": 173929
+    },
+    {
+      "index": 126,
+      "progress": 0.71411,
+      "remaining_voxels": 168202
+    },
+    {
+      "index": 127,
+      "progress": 0.7153,
+      "remaining_voxels": 162749
+    },
+    {
+      "index": 128,
+      "progress": 0.71648,
+      "remaining_voxels": 157566
+    },
+    {
+      "index": 129,
+      "progress": 0.71766,
+      "remaining_voxels": 152651
+    },
+    {
+      "index": 130,
+      "progress": 0.71885,
+      "remaining_voxels": 148001
+    },
+    {
+      "index": 131,
+      "progress": 0.72003,
+      "remaining_voxels": 143608
+    },
+    {
+      "index": 132,
+      "progress": 0.72121,
+      "remaining_voxels": 139469
+    },
+    {
+      "index": 133,
+      "progress": 0.7224,
+      "remaining_voxels": 135580
+    },
+    {
+      "index": 134,
+      "progress": 0.72358,
+      "remaining_voxels": 131933
+    },
+    {
+      "index": 135,
+      "progress": 0.72476,
+      "remaining_voxels": 128523
+    },
+    {
+      "index": 136,
+      "progress": 0.72595,
+      "remaining_voxels": 125343
+    },
+    {
+      "index": 137,
+      "progress": 0.72713,
+      "remaining_voxels": 122387
+    },
+    {
+      "index": 138,
+      "progress": 0.72831,
+      "remaining_voxels": 119646
+    },
+    {
+      "index": 139,
+      "progress": 0.7295,
+      "remaining_voxels": 117114
+    },
+    {
+      "index": 140,
+      "progress": 0.73068,
+      "remaining_voxels": 114783
+    },
+    {
+      "index": 141,
+      "progress": 0.73186,
+      "remaining_voxels": 112646
+    },
+    {
+      "index": 142,
+      "progress": 0.73305,
+      "remaining_voxels": 110693
+    },
+    {
+      "index": 143,
+      "progress": 0.73423,
+      "remaining_voxels": 108914
+    },
+    {
+      "index": 144,
+      "progress": 0.73541,
+      "remaining_voxels": 107306
+    },
+    {
+      "index": 145,
+      "progress": 0.7366,
+      "remaining_voxels": 105854
+    },
+    {
+      "index": 146,
+      "progress": 0.73778,
+      "remaining_voxels": 104553
+    },
+    {
+      "index": 147,
+      "progress": 0.73896,
+      "remaining_voxels": 103394
+    },
+    {
+      "index": 148,
+      "progress": 0.74015,
+      "remaining_voxels": 102367
+    },
+    {
+      "index": 149,
+      "progress": 0.74133,
+      "remaining_voxels": 101463
+    },
+    {
+      "index": 150,
+      "progress": 0.74251,
+      "remaining_voxels": 100673
+    },
+    {
+      "index": 151,
+      "progress": 0.7437,
+      "remaining_voxels": 99989
+    },
+    {
+      "index": 152,
+      "progress": 0.74488,
+      "remaining_voxels": 99401
+    },
+    {
+      "index": 153,
+      "progress": 0.74607,
+      "remaining_voxels": 98901
+    },
+    {
+      "index": 154,
+      "progress": 0.74725,
+      "remaining_voxels": 98480
+    },
+    {
+      "index": 155,
+      "progress": 0.74843,
+      "remaining_voxels": 98131
+    },
+    {
+      "index": 156,
+      "progress": 0.74962,
+      "remaining_voxels": 97847
+    },
+    {
+      "index": 157,
+      "progress": 0.7508,
+      "remaining_voxels": 97617
+    },
+    {
+      "index": 158,
+      "progress": 0.75198,
+      "remaining_voxels": 97436
+    },
+    {
+      "index": 159,
+      "progress": 0.75317,
+      "remaining_voxels": 97297
+    },
+    {
+      "index": 160,
+      "progress": 0.75435,
+      "remaining_voxels": 97191
+    },
+    {
+      "index": 161,
+      "progress": 0.75553,
+      "remaining_voxels": 97116
+    },
+    {
+      "index": 162,
+      "progress": 0.75672,
+      "remaining_voxels": 97063
+    },
+    {
+      "index": 163,
+      "progress": 0.7579,
+      "remaining_voxels": 97028
+    },
+    {
+      "index": 164,
+      "progress": 0.75908,
+      "remaining_voxels": 97007
+    },
+    {
+      "index": 165,
+      "progress": 0.76027,
+      "remaining_voxels": 96995
+    },
+    {
+      "index": 166,
+      "progress": 0.76145,
+      "remaining_voxels": 96989
+    },
+    {
+      "index": 167,
+      "progress": 0.76263,
+      "remaining_voxels": 96987
+    },
+    {
+      "index": 168,
+      "progress": 0.76382,
+      "remaining_voxels": 96987
+    },
+    {
+      "index": 169,
+      "progress": 0.765,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 170,
+      "progress": 0.9,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 171,
+      "progress": 0.90087,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 172,
+      "progress": 0.90174,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 173,
+      "progress": 0.90261,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 174,
+      "progress": 0.90348,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 175,
+      "progress": 0.90435,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 176,
+      "progress": 0.90522,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 177,
+      "progress": 0.90609,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 178,
+      "progress": 0.90696,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 179,
+      "progress": 0.90783,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 180,
+      "progress": 0.9087,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 181,
+      "progress": 0.90957,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 182,
+      "progress": 0.91043,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 183,
+      "progress": 0.9113,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 184,
+      "progress": 0.91217,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 185,
+      "progress": 0.91304,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 186,
+      "progress": 0.91391,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 187,
+      "progress": 0.91478,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 188,
+      "progress": 0.91565,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 189,
+      "progress": 0.91652,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 190,
+      "progress": 0.91739,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 191,
+      "progress": 0.91826,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 192,
+      "progress": 0.91913,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 193,
+      "progress": 0.92,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 194,
+      "progress": 0.92087,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 195,
+      "progress": 0.92174,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 196,
+      "progress": 0.92261,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 197,
+      "progress": 0.92348,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 198,
+      "progress": 0.92435,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 199,
+      "progress": 0.92522,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 200,
+      "progress": 0.92609,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 201,
+      "progress": 0.92696,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 202,
+      "progress": 0.92783,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 203,
+      "progress": 0.9287,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 204,
+      "progress": 0.92957,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 205,
+      "progress": 0.93043,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 206,
+      "progress": 0.9313,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 207,
+      "progress": 0.93217,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 208,
+      "progress": 0.93304,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 209,
+      "progress": 0.93391,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 210,
+      "progress": 0.93478,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 211,
+      "progress": 0.93565,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 212,
+      "progress": 0.93652,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 213,
+      "progress": 0.93739,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 214,
+      "progress": 0.93826,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 215,
+      "progress": 0.93913,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 216,
+      "progress": 0.94,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 217,
+      "progress": 0.94087,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 218,
+      "progress": 0.94174,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 219,
+      "progress": 0.94261,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 220,
+      "progress": 0.94348,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 221,
+      "progress": 0.94435,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 222,
+      "progress": 0.94522,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 223,
+      "progress": 0.94609,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 224,
+      "progress": 0.94696,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 225,
+      "progress": 0.94783,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 226,
+      "progress": 0.9487,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 227,
+      "progress": 0.94957,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 228,
+      "progress": 0.95043,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 229,
+      "progress": 0.9513,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 230,
+      "progress": 0.95217,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 231,
+      "progress": 0.95304,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 232,
+      "progress": 0.95391,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 233,
+      "progress": 0.95478,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 234,
+      "progress": 0.95565,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 235,
+      "progress": 0.95652,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 236,
+      "progress": 0.95739,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 237,
+      "progress": 0.95826,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 238,
+      "progress": 0.95913,
+      "remaining_voxels": 96986
+    },
+    {
+      "index": 239,
+      "progress": 0.96,
+      "remaining_voxels": 96986
+    }
+  ]
+}
