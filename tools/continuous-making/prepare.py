@@ -32,7 +32,7 @@ for ident in ['cross_pein_hammer','propane_torch']:
  try:
   req=urllib.request.Request('https://api.polyhaven.com/files/'+ident,headers={'User-Agent':'HouseOfMabweOfflineStudy/1.0'})
   with urllib.request.urlopen(req,timeout=30) as response:meta=json.load(response)
-  blend=meta['blend']['1k']['blend'];path=folder/(ident+'.blend');download(blend['url'],path)
+  blend=meta['gltf']['1k']['gltf'];path=folder/(ident+'.gltf');download(blend['url'],path)
   for name,info in blend.get('include',{}).items():
    target=folder/name;target.parent.mkdir(parents=True,exist_ok=True);download(info['url'],target)
   assets[ident]={'file':str(path),'url':'https://polyhaven.com/a/'+ident,'license':'CC0','sha256':hashlib.sha256(path.read_bytes()).hexdigest()}

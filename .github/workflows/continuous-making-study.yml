@@ -32,7 +32,7 @@ jobs:
           node tools/continuous-making/decode.mjs
           python tools/continuous-making/prepare.py --keys
       - name: Render representative scenes before approving a full sequence
-        run: xvfb-run -a blender -b -t 4 --python tools/continuous-making/render.py -- --root build/continuous-making
+        run: xvfb-run -a blender -b -t 4 --python-exit-code 1 --python tools/continuous-making/render.py -- --root build/continuous-making
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
       - name: Assemble review contact sheets

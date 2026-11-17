@@ -35,9 +35,8 @@ for obj in approved:
 
 def scan(ident):
  path=pathlib.Path(meta['assets'][ident]['file']).resolve();before=set(bpy.data.objects)
- with bpy.data.libraries.load(str(path),link=False) as (source,dest):dest.objects=source.objects
- items=[o for o in dest.objects if o and o.type=='MESH']
- for o in items:scene.collection.objects.link(o)
+ bpy.ops.import_scene.gltf(filepath=str(path));bpy.context.view_layer.update()
+ items=[o for o in set(bpy.data.objects)-before if o.type=='MESH']
  vertices=[o.matrix_world@Vector(v) for o in items for v in o.bound_box];lo=Vector(tuple(min(v[i] for v in vertices) for i in range(3)));hi=Vector(tuple(max(v[i] for v in vertices) for i in range(3)));ext=hi-lo;axis=max(range(3),key=lambda i:ext[i]);rot=Vector(tuple(1 if i==axis else 0 for i in range(3))).rotation_difference(Vector((0,0,1))).to_matrix().to_4x4();rvs=[rot@v for v in vertices];low=Vector(tuple(min(v[i] for v in rvs) for i in range(3)));high=Vector(tuple(max(v[i] for v in rvs) for i in range(3)));anchor=Vector(((low.x+high.x)/2,(low.y+high.y)/2,high.z-.08*(high.z-low.z)));norm=Matrix.Scale(1/(high.z-low.z),4)@Matrix.Translation(-anchor)@rot
  parent=bpy.data.objects.new(ident,None);scene.collection.objects.link(parent)
  for o in items:o.matrix_world=norm@o.matrix_world;o.parent=parent;o.hide_render=True
@@ -60,7 +59,7 @@ bpy.ops.mesh.primitive_cone_add(vertices=40,radius1=.045,radius2=.006,depth=.32)
 lightdata=bpy.data.lights.new('Flame reflection','POINT');lightdata.energy=0;lightdata.color=(1,.46,.15);heatlight=bpy.data.objects.new('Flame reflection',lightdata);scene.collection.objects.link(heatlight)
 obj=None
 for entry in meta['entries']:
- index=entry['index'];phase=entry['phase'];point=Vector(entry['contact']);working=phase in ['mark','carve'];finished=phase in ['sand','heat','wax','work']
+ index=entry['index'];phase=entry['phase'];point=Vector(entry['contact']);working=phase=='carve';finished=phase in ['sand','heat','wax','work']
  if obj:bpy.data.objects.remove(obj,do_unlink=True)
  data=np.load(root/('mesh_%04d.npz'%index));mesh=bpy.data.meshes.new('Carved state');mesh.from_pydata(data['vertices'].tolist(),[],data['faces'].tolist());mesh.update();obj=bpy.data.objects.new('Source-derived stone',mesh);scene.collection.objects.link(obj);obj.data.materials.append(stone);obj.hide_render=finished
  for poly in obj.data.polygons:poly.use_smooth=True
