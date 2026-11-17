@@ -81,14 +81,17 @@ def hand_asset(side):
  for obj in new:
   if obj.parent not in new:
    world=norm@obj.matrix_world.copy();obj.parent=parent;obj.matrix_parent_inverse=Matrix.Identity(4);obj.matrix_basis=world
+ arm.animation_data_clear();arm.data.pose_position='POSE'
  for pb in arm.pose.bones:
-  name=pb.name.lower()
-  if 'wrist' in name:continue
-  angle=.13 if 'metacarpal' in name else 1.06 if 'proximal' in name else 1.15 if 'intermediate' in name else .7
-  if 'thumb' in name:angle*=.65
-  axis=((norm@original_arm_world@pb.bone.matrix_local).to_3x3().inverted()@Vector((1,0,0))).normalized();pb.rotation_mode='QUATERNION';pb.rotation_quaternion=Quaternion(axis,angle)
-  if 'thumb' in name and 'metacarpal' in name:
-   opposition=((norm@original_arm_world@pb.bone.matrix_local).to_3x3().inverted()@Vector((0,0,1))).normalized();pb.rotation_quaternion=Quaternion(opposition,-.55 if side=='left' else .55)@pb.rotation_quaternion
+  pb.rotation_mode='QUATERNION';pb.rotation_quaternion=Quaternion((1,0,0),0)
+  for constraint in list(pb.constraints):pb.constraints.remove(constraint)
+ for finger in ['index','middle','ring','pinky','thumb']:
+  distal=next(pb for pb in arm.pose.bones if finger in pb.name.lower() and 'distal' in pb.name.lower())
+  proximal=next(pb for pb in arm.pose.bones if finger in pb.name.lower() and 'proximal' in pb.name.lower())
+  canonical=norm@original_arm_world@proximal.bone.head_local
+  target=bpy.data.objects.new(side+' '+finger+' grip',None);scene.collection.objects.link(target);target.parent=parent;target.location=(canonical.x if finger!='thumb' else 0,-.17,.24 if finger!='thumb' else .29)
+  pole=bpy.data.objects.new(side+' '+finger+' bend',None);scene.collection.objects.link(pole);pole.parent=parent;pole.location=(canonical.x,-.65,.60)
+  ik=distal.constraints.new('IK');ik.target=target;ik.pole_target=pole;ik.chain_count=3;ik.use_tail=True;ik.iterations=64
  meshes=[o for o in new if o.type=='MESH']
  for obj in meshes:
   obj.data.materials.clear();obj.data.materials.append(skin)
