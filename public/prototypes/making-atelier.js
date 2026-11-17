@@ -405,9 +405,27 @@ function queueUpdate(){
  if(storyFrame)return;
  storyFrame=requestAnimationFrame(update);
 }
+// Mobile Safari can coalesce scroll events until momentum scrolling ends.
+// A tiny viewport-position observer keeps the documentary and Coil frames
+// synchronized to the actual displayed scroll position on every browser.
+// It only invokes the costly scene update when the scroll coordinate changes.
+let sampledPageTop=-1;
+function observeScrollPosition(){
+ if(!document.hidden){
+  const current=Math.round(window.scrollY);
+  if(current!==sampledPageTop){
+   sampledPageTop=current;
+   queueUpdate();
+  }
+ }
+ requestAnimationFrame(observeScrollPosition);
+}
+requestAnimationFrame(observeScrollPosition);
 addEventListener('scroll',queueUpdate,{passive:true});
 addEventListener('resize',()=>{layoutDirty=true;formation.resize();filmStream.resize();filmAtlas.resize();approved?.resize();if(approved)approved.update(.999);queueUpdate()},{passive:true});
 addEventListener('orientationchange',()=>{layoutDirty=true;queueUpdate()},{passive:true});
+addEventListener('load',()=>{layoutDirty=true;queueUpdate()},{once:true});
+document.fonts?.ready?.then(()=>{layoutDirty=true;queueUpdate()});
 document.addEventListener('visibilitychange',()=>{
  if(document.hidden){
   clearTimeout(filmIdleTimer);filmIdleTimer=0;filmStream.suspend();
