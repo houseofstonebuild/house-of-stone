@@ -15,15 +15,17 @@ export function createFrameStream({stage,image,mobile,src,onDisplay,position=()=
   width=Math.max(1,stage.clientWidth);height=Math.max(1,stage.clientHeight);
   const next=mobile()?'mobile':'desktop';
   if(next!==profile){profile=next;epoch++;cache.clear();queue.clear();attempts.clear();}
-  // Mobile source frames contain enough detail for a retina phone viewport.
-  const ratio=Math.min(devicePixelRatio||1,2,Math.sqrt(3000000/(width*height)));
-  const w=Math.round(width*ratio),h=Math.round(height*ratio);
-  if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
   lastPosition='';if(lastFrame&&active)draw(lastFrame,displayed);
  }
  function draw(img,index){
   if(!context)return;
   if(!width||!height)resize();
+  // Never rasterize pixels that do not exist in the source. Compositing the
+  // native-detail canvas at CSS size preserves the same source sharpness
+  // while avoiding a large software upsampling pass on every new frame.
+  const ratio=Math.min(devicePixelRatio||1,2,Math.sqrt(3000000/(width*height)),img.naturalWidth/width,img.naturalHeight/height);
+  const cw=Math.max(1,Math.round(width*ratio)),ch=Math.max(1,Math.round(height*ratio));
+  if(canvas.width!==cw||canvas.height!==ch){canvas.width=cw;canvas.height=ch;lastPosition='';}
   const {x=50,y=50}=position(),key=x+','+y;
   if(index===displayed&&img===lastFrame&&key===lastPosition)return;
   const scale=Math.max(canvas.width/img.naturalWidth,canvas.height/img.naturalHeight);

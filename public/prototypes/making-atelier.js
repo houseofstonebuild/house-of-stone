@@ -51,7 +51,7 @@ function idleNearProcess(kind){
   if(isTools)toolTimer=0;else approvedTimer=0;
   if(document.hidden||reduced.matches)return;
   const process=readings.find(r=>r.name==='process');
-  if(!process||scrollY+innerHeight*2<process.top||scrollY>process.top+process.height)return;
+  if(!isTools&&(!process||scrollY+innerHeight*2<process.top||scrollY>process.top+process.height))return;
   if(performance.now()-lastInput<180){if(isTools)toolTimer=setTimeout(check,200);else approvedTimer=setTimeout(check,240);return;}
   if(isTools){
    toolsLoading=true;
@@ -159,7 +159,7 @@ addEventListener('scroll',scrollInput,{passive:true});
 addEventListener('resize',resize,{passive:true});
 addEventListener('orientationchange',resize,{passive:true});
 addEventListener('pageshow',()=>{dirty=true;queue()});
-addEventListener('load',()=>{dirty=true;queue()},{once:true});
+addEventListener('load',()=>{dirty=true;idleNearProcess('tools');queue()},{once:true});
 document.fonts?.ready?.then(()=>{dirty=true;queue()});
 document.addEventListener('visibilitychange',()=>{
  if(document.hidden){if(raf)cancelAnimationFrame(raf);raf=0;clearTimeout(toolTimer);clearTimeout(approvedTimer);toolTimer=approvedTimer=0;processStream.suspend();filmStream.suspend();tools?.hide();}
@@ -306,7 +306,11 @@ async function createWorkshopTools(stage){
   // WebGL layer. Copy only a changed tool pose; no hidden animation loop.
   paint.clearRect(0,0,canvas.width,canvas.height);paint.drawImage(surface,0,0);drawCount++;
  }
- await loadFinishMask();resize();hide();
+ await loadFinishMask();
+ // Compile the tiny shared tool materials while the introduction is being
+ // read, so the first chisel stroke does not compile shaders during a gesture.
+ if(renderer.compileAsync)await renderer.compileAsync(scene,camera);else renderer.compile(scene,camera);
+ resize();hide();
  surface.addEventListener('webglcontextlost',event=>{event.preventDefault();state='context-lost';canvas.style.visibility='hidden';});
  surface.addEventListener('webglcontextrestored',()=>{state='ready';canvas.style.visibility='visible';lastKey='';queue();});
  return {update,resize,hide,get state(){return state},stats:()=>({state,draws:drawCount,triangles:renderer.info.render.triangles,visible:!['hidden',''].includes(lastKey),pixels:surface.width*surface.height})};

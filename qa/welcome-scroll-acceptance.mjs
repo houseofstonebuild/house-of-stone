@@ -43,7 +43,7 @@ try{
   await page.goto(base+'/prototypes/making-atelier.html',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.documentElement.dataset.makingAtelier==='ready');
   assert.equal(await page.locator('video[autoplay],video[controls]').count(),0);
-  assert.equal(await page.evaluate(()=>window.__mabwePerformance().tools.state),'idle','Tools must not initialize in the opening');
+  assert.equal(await page.evaluate(()=>window.__mabwePerformance().process.draws),0,'Process frames should not paint in the opening');
   const captures=[];
   for(const scene of ['introduction','origin','material','carving']){
    await go(page,scene,scene==='introduction'?0:.5);
