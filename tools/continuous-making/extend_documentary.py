@@ -8,7 +8,7 @@ with master.open('wb') as out:
  for source in sorted(Path('public/assets/film').glob('making-v2-??.part')):out.write(source.read_bytes())
 assert hashlib.sha256(master.read_bytes()).hexdigest()=='be15b5477458143d2e9f4258a6f124f7828de1ee1bbbd3a126a344ac57aaa98e'
 pack=runpy.run_path('tools/continuous-making/pack.py')['pack']
-for kind,start,count in [('artist',.6,96),('workshop',5.7,116)]:
+for kind,start,count in [('artist',.6,96),('workshop',4.8,108)]:
  folder=root/kind;folder.mkdir(exist_ok=True)
  subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-y','-ss',str(start),'-i',str(master),'-an','-vf','fps=24,scale=1600:900:flags=lanczos','-frames:v',str(count),'-c:v','libwebp','-quality','94','-compression_level','4','-start_number','0',str(folder/'frame_%03d.webp')],check=True)
  def frame(profile,index):

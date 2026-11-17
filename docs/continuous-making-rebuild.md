@@ -16,7 +16,7 @@ The owner requires a continuous, reversible scroll experience showing the comple
 ## Visual sources
 
 - Coil: existing `/models/coil-uploaded-v1.glb`, approved geometry, materials and final renderer. The output manifest records its SHA-256.
-- Documentary: original multipart master, SHA-256 be15b5477458143d2e9f4258a6f124f7828de1ee1bbbd3a126a344ac57aaa98e. Listening uses 0.6–4.6 seconds (96 frames); workshop uses 5.7–10.533 seconds (116 frames), both at 24 fps, original colour and source-detail framing. It shows a representative workshop process rather than Coil's documented production.
+- Documentary: original multipart master, SHA-256 be15b5477458143d2e9f4258a6f124f7828de1ee1bbbd3a126a344ac57aaa98e. Listening uses 0.6–4.6 seconds (96 frames); workshop uses 4.8–9.3 seconds (108 frames), both at 24 fps, original colour and source-detail framing. It shows a representative workshop process rather than Coil's documented production.
 - Photographic opening: restore the earlier `/assets/making-artist-and-block.webp` composition.
 
 ## Evidence required before publishing

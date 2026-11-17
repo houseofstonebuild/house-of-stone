@@ -1,4 +1,5 @@
 name: Extend the original documentary chapters
+# End the workshop passage before the edit to the recognisable lion.
 on:
   push:
     branches: ['rebuild/continuous-making-2026-11-17']

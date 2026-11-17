@@ -42,7 +42,7 @@ function update(){
    const value=frameAt(Math.max(0,y-s.top));if(!reduced.matches){form.request(value,visible);if(near&&!visible)form.warm(value);}
    $('#processProgress').style.transform='scaleX('+clamp((y-s.top)/total)+')';
   }
-  if(['material','carving'].includes(s.name)&&!reduced.matches){const player=s.name==='material'?artist:film,count=s.name==='material'?96:116,value=clamp((p-.08)/.84)*(count-1);player.request(value,visible);if(near&&!visible)player.warm(value);}
+  if(['material','carving'].includes(s.name)&&!reduced.matches){const player=s.name==='material'?artist:film,count=s.name==='material'?96:108,value=clamp((p-.08)/.84)*(count-1);player.request(value,visible);if(near&&!visible)player.warm(value);}
   if(s.name==='origin'&&near){const t=reduced.matches?1:clamp((p-.2)/.6),point=route.getPointAtLength(routeLength*t);route.style.strokeDashoffset=String(routeLength*(1-t));$('#routeStone').setAttribute('cx',point.x);$('#routeStone').setAttribute('cy',point.y);const zoom=reduced.matches?1:1+1.05*(t*t*(3-2*t));$('#mapJourney').setAttribute('transform',`translate(790 215) scale(${zoom}) translate(-790 -215)`);}
  }
  chapter=next;document.body.dataset.currentScene=next;
