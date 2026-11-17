@@ -1,0 +1,56 @@
+name: Immersive Welcome restoration acceptance
+on:
+  push:
+    branches:
+      - review/welcome-scroll-main-compatible-2026-11-16
+  pull_request:
+    branches: [main]
+    paths:
+      - 'public/prototypes/making-atelier.html'
+      - 'public/prototypes/making-atelier.js'
+      - 'public/prototypes/making-atelier.css'
+      - 'public/prototypes/coil-formation.js'
+      - 'public/prototypes/scroll-frame-stream.js'
+      - 'public/prototypes/story-film-atlas.js'
+      - 'qa/welcome-scroll-acceptance.mjs'
+      - '.github/workflows/welcome-scroll-restoration-review.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: immersive-welcome-restoration-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install browser QA
+        run: npm install --prefix qa --no-audit --no-fund
+      - name: Validate review and production separation
+        run: |
+          node --check public/prototypes/making-atelier.js
+          node --check public/prototypes/scroll-frame-stream.js
+          node --check public/prototypes/story-film-atlas.js
+          node --check public/prototypes/coil-formation.js
+          node --check qa/welcome-scroll-acceptance.mjs
+          node --test test/story-removed-from-public-site.test.mjs
+      - name: Responsive WebKit and Chromium reverse scrolling
+        run: sh scripts/run-browser-qa.sh qa/welcome-scroll-acceptance.mjs
+      - name: Record review screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: immersive-welcome-responsive-captures
+          path: test-results/browser/welcome-scroll/
+          retention-days: 14
+          if-no-files-found: warn
