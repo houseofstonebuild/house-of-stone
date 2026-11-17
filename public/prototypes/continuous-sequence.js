@@ -1,22 +1,6 @@
 // A continuous playhead over compressed frame packs. Fetching and decoding are
 // independent; bounded decoded memory never discards the compressed sequence.
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
-// One shared pair of workers bounds decode concurrency across both sequences.
-let decoderPool;
-function frameDecoder(){
- if(decoderPool)return decoderPool;
- let workers=[],next=0,serial=0;const pending=new Map();
- try{for(let i=0;i<2;i++){
-  const worker=new Worker(new URL('./continuous-decode-worker.js',import.meta.url));
-  worker.onmessage=event=>{const {id,bitmap,error}=event.data,item=pending.get(id);if(!item){bitmap?.close?.();return;}pending.delete(id);if(error)item.reject(Error(error));else item.resolve(bitmap);};
-  worker.onerror=event=>{event.preventDefault();workers=[];for(const item of pending.values())item.reject(Error('worker-bitmap-unavailable'));pending.clear();};workers.push(worker);
- }}catch{for(const worker of workers)worker.terminate();workers=[];}
- decoderPool={async decode(blob){
-  if(workers.length){try{const image=await new Promise((resolve,reject)=>{const id=++serial;pending.set(id,{resolve,reject});workers[next++%workers.length].postMessage({id,blob});});return {image,worker:true};}catch(error){if(error.message!=='worker-bitmap-unavailable')throw error;}}
-  if(typeof createImageBitmap==='function')return {image:await createImageBitmap(blob),worker:false};
-  const url=URL.createObjectURL(blob);try{const image=new Image();image.src=url;await image.decode();return {image,worker:false}}finally{URL.revokeObjectURL(url)}
- }};return decoderPool;
-}
 export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=()=>{},onReady=()=>{}}){
  const ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});
  let meta,config,plate=null,baseDirty=true,target=0,current=0,active=false,raf=0,previous=0,drawn=-1,drawnMix=-1,disposed=false,needed=0;
@@ -67,7 +51,9 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
  async function decode(index,pack,entry,version){
   const begin=performance.now();
   const blob=new Blob([new Uint8Array(pack.data,entry.offset,entry.length)],{type:'image/webp'});
-  const decoded=await frameDecoder().decode(blob),image=decoded.image;if(decoded.worker)measures.workerDecodes++;
+  let image;
+  if(typeof createImageBitmap==='function')image=await createImageBitmap(blob);
+  else {const url=URL.createObjectURL(blob);try{image=new Image();image.src=url;await image.decode()}finally{URL.revokeObjectURL(url)}}
   if(disposed||version!==epoch||(active&&workingFrames.size&&!workingFrames.has(index))){image.close?.();return;}
   if(images.has(index))image.close?.();else{images.set(index,image);bytes+=image.width*image.height*4;peakBytes=Math.max(bytes+plateBytes(),peakBytes);trim();}
   measures.decodeCount++;measures.decodeMs.push(performance.now()-begin);if(measures.decodeMs.length>1000)measures.decodeMs.shift();
