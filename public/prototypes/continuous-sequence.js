@@ -106,7 +106,7 @@ export function createContinuousSequence({canvas,root,profile,onSample=()=>{},on
  function warm(value=0){if(!config)return;needImage(Math.floor(value),-100);needImage(Math.floor(value)+1,-99);for(let d=0;d<3;d++)needPack(Math.floor(value)+d*24,d);pumpFetch();pumpDecode();}
  function resize(){dimensions();drawn=-1;wake()}
  function suspend(){active=false;if(raf)cancelAnimationFrame(raf);raf=0;previous=0;}
- const ready=fetch(root+'/manifest.json',{cache:'force-cache'}).then(r=>{if(!r.ok)throw Error('Continuous sequence missing');return r.json()}).then(async m=>{
+ const ready=fetch(root+'/manifest.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Continuous sequence missing');return r.json()}).then(async m=>{
   if(m.version!==1||!m.profiles?.[profile])throw Error('Invalid continuous sequence');meta=m;config=m.profiles[profile];if(config.plate){plate=new Image();plate.src=root+'/'+profile+'/'+config.plate;await plate.decode()}dimensions();warm();if(active){plan();wake()}onReady(m);
  }).catch(error=>{canvas.dataset.frameStatus='unavailable';console.warn(error)});
  const stats=()=>({target,current,images:images.size,decodedBytes:bytes+plateBytes(),peakDecodedBytes:peakBytes,compressedBytes:[...packs.values()].reduce((n,p)=>n+(p.data?.byteLength||0),0),inflightFetches:fetches,inflightDecodes:decodes,...measures});
