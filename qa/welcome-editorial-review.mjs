@@ -86,7 +86,7 @@ try{
          transforms:document.querySelectorAll('[style*="transform:"]').length};
     });
     assert(overflow.overflow<=2,c.name+' horizontal overflow at '+id+': '+overflow.overflow);
-    assert(overflow.scrolling>innerHeight);
+    assert(overflow.scrolling>c.height);
     const filename=new URL(c.name+'-'+id+'.png',out);
     await page.screenshot({path:filename.pathname,fullPage:false});
   }
