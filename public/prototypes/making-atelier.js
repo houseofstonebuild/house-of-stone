@@ -209,7 +209,7 @@ function updateFilm(p,visible){
     filmMoving=true;
     filmStream.canvas.style.opacity='0';
     $filmMedia.dataset.displayQuality='atlas-preview';
-   }else filmStream.request(n,true);
+   }else if(!filmAtlas.available)filmStream.request(n,true);
   }
   if(filmAtlas.available){
    // Never compete with canvas animation by decoding 1600-pixel WebPs.
@@ -388,6 +388,8 @@ function update(){
   else if(r.name==='finishing')renderFinishing(p);
   else if(r.name==='reveal')renderReveal(p,near);
  }
+ if(!readings.find(r=>r.name==='detail'&&sceneInView(r,y)))formation.suspend('carve');
+ if(!readings.find(r=>r.name==='finishing'&&sceneInView(r,y)))formation.suspend('polish');
  if(!readings.find(r=>r.name==='carving'&&sceneInView(r,y))) {
   filmActive=false;
   if(filmIdleTimer){clearTimeout(filmIdleTimer);filmIdleTimer=0;}
