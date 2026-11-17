@@ -17,7 +17,7 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
  const images=new Map();
  let profile=mobile()?'mobile':'desktop',meta=null,target=-1,ready=0,draws=0;
  let edition=0,loading=false,lastPainted=-1,lastPan=-1;
- function source(index){return '/assets/making-film-atlas-v1/'+profile+'/sheet_'+String(index).padStart(2,'0')+'.webp';}
+ function source(index){return '../assets/making-film-atlas-v1/'+profile+'/sheet_'+String(index).padStart(2,'0')+'.webp';}
  function paint(frame,positionX=30,positionY=47){
   if(!meta||frame<0||frame>=meta.frames)return false;
   if(mode==='canvas'&&!ctx)return false;
@@ -73,7 +73,7 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
  }
  async function verifyAndLoad(){
   try{
-   const response=await fetch('/assets/making-film-atlas-v1/manifest.json',{cache:'no-store'});
+   const response=await fetch('../assets/making-film-atlas-v1/manifest.json',{cache:'no-store'});
    if(!response.ok)return;
    const candidate=await response.json();
    if(candidate.version!==1||candidate.frames!==200||candidate.columns!==5||
