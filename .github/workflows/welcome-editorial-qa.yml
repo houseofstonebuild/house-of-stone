@@ -1,0 +1,52 @@
+name: Welcome editorial mobile and desktop QA
+
+on:
+  push:
+    branches:
+      - review/welcome-editorial-rebuild-2026-11-16
+    paths:
+      - 'public/prototypes/making-atelier.html'
+      - 'public/prototypes/making-atelier.css'
+      - 'public/prototypes/making-atelier.js'
+      - 'qa/welcome-editorial-review.mjs'
+      - '.github/workflows/welcome-editorial-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: welcome-editorial-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cross-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install browser QA dependencies
+        run: npm install --prefix qa --no-audit --no-fund
+      - name: Validate source and production isolation
+        run: |
+          node --check public/prototypes/making-atelier.js
+          node --check qa/welcome-editorial-review.mjs
+          node --test test/story-removed-from-public-site.test.mjs
+      - name: Capture responsive photo-led story and check for glitches
+        run: sh scripts/run-browser-qa.sh qa/welcome-editorial-review.mjs
+      - name: Upload browser captures
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: welcome-editorial-webkit-chromium-review
+          path: test-results/browser/welcome-editorial/
+          retention-days: 14
+          if-no-files-found: warn
