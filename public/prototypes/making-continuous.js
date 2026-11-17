@@ -49,7 +49,7 @@ function update(){
  raf=0;if(document.hidden)return;if(dirty)measure();const y=scrollY,view=innerHeight;let next='introduction',header='introduction';
  for(const s of layout){
   if(y+view*.5>=s.top)next=s.name;if(y+45>=s.top)header=s.name;
-  const visible=y+view>s.top&&y<s.top+s.height,near=y+view*3>s.top&&y<s.top+s.height+view;const p=clamp((y-s.top)/Math.max(1,s.height-s.pin));s.el.dataset.progress=String(p);
+  const visible=y+view>s.top&&y<s.top+s.height,near=y+view*1.7>s.top&&y<s.top+s.height+view;const p=clamp((y-s.top)/Math.max(1,s.height-s.pin));s.el.dataset.progress=String(p);
   if(s.name==='process'){
    const value=frameAt(Math.max(0,y-s.top));
    if(!reduced.matches&&(near||form)){const player=near?ensurePlayer('form'):form;if(near)player.warm(value);player.request(value,visible);}
@@ -69,6 +69,11 @@ function update(){
    // Center the movement around the transport corridor while the route advances.
    $('.origin-map').style.transform='scale('+(1+.32*ease).toFixed(4)+')';
   }
+ }
+ // Retire documentary decode caches once the transformation is underway.
+ // Reverse scrolling recreates them from browser-cached, hashed media packs.
+ if((next==='process'||next==='house')&&(film||materialFilm)){
+  film?.destroy();materialFilm?.destroy();film=materialFilm=null;
  }
  chapter=next;document.body.dataset.currentScene=next;
  $('.masthead').dataset.tone=['origin','carving','house'].includes(header)?'light':'dark';$('.masthead').dataset.photo=String(mobile()&&['carving','material'].includes(header));
