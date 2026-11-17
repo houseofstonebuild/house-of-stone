@@ -1,0 +1,41 @@
+name: Full-sequence playback preflight
+on:
+  push:
+    branches: ['rebuild/continuous-making-2026-11-17']
+    paths: ['.github/workflows/continuous-making-preflight.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 44057835063
+          name: continuous-making-form-packs
+          path: public/assets/continuous-making-v1/form/
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 44051932446
+          name: continuous-approved-finish
+          path: public/assets/continuous-making-v1/approved/
+      - run: npm install --prefix qa --no-audit --no-fund
+      - name: Check complete playback using full-size draft media
+        run: sh scripts/run-browser-qa.sh qa/welcome-scroll-acceptance.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: continuous-making-playback-preflight
+          path: test-results/browser/welcome-film/
+          retention-days: 14
