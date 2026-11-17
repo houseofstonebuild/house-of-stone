@@ -122,10 +122,10 @@ function update(){
   if(!near)continue;
   if(r.name==='introduction'&&!reduced.matches)r.el.style.setProperty('--opening-scale',mix(1,1.035,p).toFixed(4));
   if(r.name==='origin')renderOrigin(p);
-  if(r.name==='material')$('.material-second').style.opacity=String(reduced.matches?0:smooth((p-.35)/.5));
+  if(r.name==='material')$('.material-second').style.opacity=String(!reduced.matches&&p>=.55?1:0);
  }
  if(processNear)idleNearProcess('tools');
- if(scene!==currentScene){currentScene=scene;document.body.dataset.scene=scene;}
+ if(scene!==currentScene){currentScene=scene;document.body.dataset.currentScene=scene;}
 }
 function queue(){if(!raf&&!document.hidden)raf=requestAnimationFrame(update);}
 function scrollInput(){lastInput=performance.now();queue();}
@@ -243,6 +243,7 @@ async function createWorkshopTools(stage){
   for(const [name,list] of Object.entries(groups))for(const g of list)g.visible=name===phase;
   const row=phase==='carve'?mix(.40,.62,p):phase==='heat'?mix(.43,.59,p):mix(.44,.6,p);
   const point=contact(img,row),s=phone()?Math.min(1,w/390)*.68:Math.min(1.4,w/1440)*1.1;
+  if(phase==='carve')point.x-=s*35;
   for(const g of groups[phase])g.scale.setScalar(s);
   if(phase==='carve'){
    const a=-.62,stroke=p*14,part=stroke-Math.floor(stroke);
