@@ -19,7 +19,7 @@ try{
   await page.screenshot({path:dest+'/'+name+'-opening.png'});
   async function chapter(name,progress=.5){
    await page.evaluate(({name,progress})=>{const section=document.querySelector('[data-scene="'+name+'"]'),pin=section.querySelector(':scope>.pin');scrollTo(0,section.getBoundingClientRect().top+scrollY+Math.max(1,section.offsetHeight-(pin?.clientHeight||innerHeight))*progress)},{name,progress});
-   await page.waitForFunction(({name,progress})=>document.body.dataset.currentScene===name&&Math.abs(Number(document.querySelector('[data-scene="'+name+'"]').dataset.progress)-progress)<.003,{name,progress});
+   await page.waitForFunction(({name,progress})=>document.body.dataset.currentScene===name&&(name==='house'||Math.abs(Number(document.querySelector('[data-scene="'+name+'"]').dataset.progress)-progress)<.003),{name,progress});
   }
   for(const name of ['origin','material','carving']){
    await chapter(name);if(name==='carving')await page.waitForFunction(()=>{const s=window.__mabweContinuous.stats().film;return s&&Math.abs(s.current-s.target)<.03&&document.querySelector('#workshopCanvas').dataset.frameStatus==='ready'});
@@ -28,8 +28,8 @@ try{
   const workshop=[];for(const progress of [.75,.25,.6]){await chapter('carving',progress);await page.waitForFunction(()=>{const s=window.__mabweContinuous.stats().film;return s&&Math.abs(s.current-s.target)<.03});workshop.push(await page.evaluate(()=>Number(document.querySelector('#workshopCanvas').dataset.displayedFrame)))}assert(workshop[0]>workshop[1]&&workshop[2]>workshop[1],'Workshop must reverse with the scroll on '+name+': '+JSON.stringify(workshop));
   const stages=await page.evaluate(()=>window.__mabweContinuous.stages());assert.equal(stages.length,6);assert(stages[1].length>=2600);assert(stages.slice(2).every(s=>s.length>=1000));
   async function phase(index,local=.5){
-   await page.evaluate(({index,local})=>{const stages=window.__mabweContinuous.stages(),s=stages[index],el=document.querySelector('#process');scrollTo(0,el.getBoundingClientRect().top+scrollY+s.start+s.length*local)}, {index,local});
-   await page.waitForFunction(({name})=>{const state=window.__mabweContinuous.stats();return state.phase===name&&state.form&&Math.abs(state.form.current-state.form.target)<.03&&document.querySelector('#processCanvas').dataset.frameStatus==='ready'},{name:stages[index].name},{timeout:45000});
+   const target=await page.evaluate(({index,local})=>{const stages=window.__mabweContinuous.stages(),s=stages[index],el=document.querySelector('#process'),top=el.getBoundingClientRect().top+scrollY;scrollTo(0,top+s.start+s.length*local);const p=(scrollY-top-s.start)/s.length,motion=Math.max(0,Math.min(1,(p-s.lead)/(1-s.lead-s.tail)));return s.first+(s.last-s.first)*motion}, {index,local});
+   await page.waitForFunction(({name,target})=>{const state=window.__mabweContinuous.stats();return state.phase===name&&state.form&&Math.abs(state.form.target-target)<.03&&Math.abs(state.form.current-state.form.target)<.03&&document.querySelector('#processCanvas').dataset.frameStatus==='ready'},{name:stages[index].name,target},{timeout:45000});
   }
   await phase(0,.5);
   if(width<=1100&&height>width){

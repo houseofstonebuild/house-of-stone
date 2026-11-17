@@ -1,5 +1,5 @@
 name: Full-sequence playback preflight
-# Includes reserved still dimensions and waits for native scroll events.
+# Includes exact playhead targets and the unpinned concluding chapter.
 on:
   push:
     branches: ['rebuild/continuous-making-2026-11-17']
