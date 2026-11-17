@@ -29,6 +29,8 @@ jobs:
       - name: Capture the unchanged approved final sculpture
         run: sh scripts/run-browser-qa.sh qa/capture-story-finish.mjs
       - run: npm run check && npm test
+      - name: Review source footage for editorial selection
+        run: sh scripts/run-browser-qa.sh qa/review-story-source.mjs
       - name: Pacing and responsive review
         run: sh scripts/run-browser-qa.sh qa/welcome-scroll-acceptance.mjs
       - uses: actions/upload-artifact@v4
