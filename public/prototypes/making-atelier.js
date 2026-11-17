@@ -183,7 +183,8 @@ setStep(0);queue();document.documentElement.dataset.makingAtelier='ready';
 // No timer drives them: scroll position determines every tool pose and flame.
 async function createWorkshopTools(stage){
  const T=await import('/vendor/three.module.min.js');
- const canvas=document.createElement('canvas');canvas.setAttribute('aria-hidden','true');stage.append(canvas);
+ const canvas=document.createElement('canvas');canvas.setAttribute('aria-hidden','true');
+ canvas.style.position='absolute';canvas.style.left='0';canvas.style.top='0';stage.append(canvas);
  const surface=document.createElement('canvas');
  const paint=canvas.getContext('2d',{alpha:true,desynchronized:true});
  const renderer=new T.WebGLRenderer({canvas:surface,alpha:true,antialias:false,preserveDrawingBuffer:true,powerPreference:'low-power'});
@@ -240,7 +241,7 @@ async function createWorkshopTools(stage){
  const clothGeo=new T.PlaneGeometry(56,46,14,12),pos=clothGeo.attributes.position;
  for(let i=0;i<pos.count;i++){const x=pos.getX(i),y=pos.getY(i);pos.setZ(i,Math.sin(x*.19)*2.7+Math.cos(y*.29)*2+Math.cos(x*.1+y*.11)*4);}
  clothGeo.computeVertexNormals();mesh(clothGeo,clothMat,cloth);cloth.rotation.set(.2,-.45,-.25);groups.wax=[cloth];
- let w=0,h=0,drawCount=0,state='ready',lastKey='';
+ let w=0,h=0,drawCount=0,state='ready',lastKey='',bufferW=0,bufferH=0;
  const sample=document.createElement('canvas');sample.width=128;sample.height=128;
  const sc=sample.getContext('2d',{willReadFrequently:true});
  let sourceImage=null,pixels=null,finishPixels=null,maskProfile='';
@@ -260,9 +261,7 @@ async function createWorkshopTools(stage){
  }
  function resize(){
   w=Math.max(1,stage.clientWidth);h=Math.max(1,stage.clientHeight);
-  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.25));renderer.setSize(w,h,false);
-  canvas.width=surface.width;canvas.height=surface.height;
-  camera.left=0;camera.right=w;camera.top=h;camera.bottom=0;camera.updateProjectionMatrix();lastKey='';
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.25));bufferW=bufferH=0;lastKey='';
   if(maskProfile&&maskProfile!==(phone()?'mobile':'desktop'))loadFinishMask().catch(()=>{});
  }
  function hide(){for(const list of Object.values(groups))for(const g of list)g.visible=false;if(lastKey!=='hidden'){renderer.clear();paint.clearRect(0,0,canvas.width,canvas.height);lastKey='hidden';}}
@@ -288,6 +287,20 @@ async function createWorkshopTools(stage){
   }else{
    const g=groups[phase][0];g.position.set(point.x-13*s,point.y+Math.sin(p*32)*5*s,8);g.rotation.z=-.2+Math.sin(p*27)*.13;
   }
+  // Render only the tool's local rectangle. A full-screen transparent GPU
+  // surface makes software graphics and iOS readback needlessly expensive.
+  const bounds=phase==='carve'?[-190,120,-20,215]:phase==='heat'?[-35,220,-115,70]:[-65,65,-65,65];
+  const unit=phase==='carve'?toolScale:s;
+  const left=point.x+bounds[0]*unit,right=point.x+bounds[1]*unit;
+  const bottom=point.y+bounds[2]*unit,top=point.y+bounds[3]*unit;
+  const cw=Math.ceil((right-left)/16)*16,ch=Math.ceil((top-bottom)/16)*16;
+  if(cw!==bufferW||ch!==bufferH){
+   renderer.setSize(cw,ch,false);bufferW=cw;bufferH=ch;
+   canvas.width=surface.width;canvas.height=surface.height;
+   canvas.style.width=(right-left)+'px';canvas.style.height=(top-bottom)+'px';
+  }
+  canvas.style.transform='translate3d('+left.toFixed(2)+'px,'+(h-top).toFixed(2)+'px,0)';
+  camera.left=left;camera.right=right;camera.top=top;camera.bottom=bottom;camera.updateProjectionMatrix();
   renderer.render(scene,camera);
   // A persistent 2D presentation avoids WebKit losing an idle transparent
   // WebGL layer. Copy only a changed tool pose; no hidden animation loop.
@@ -296,5 +309,5 @@ async function createWorkshopTools(stage){
  await loadFinishMask();resize();hide();
  surface.addEventListener('webglcontextlost',event=>{event.preventDefault();state='context-lost';canvas.style.visibility='hidden';});
  surface.addEventListener('webglcontextrestored',()=>{state='ready';canvas.style.visibility='visible';lastKey='';queue();});
- return {update,resize,hide,get state(){return state},stats:()=>({state,draws:drawCount,triangles:renderer.info.render.triangles,visible:!['hidden',''].includes(lastKey)})};
+ return {update,resize,hide,get state(){return state},stats:()=>({state,draws:drawCount,triangles:renderer.info.render.triangles,visible:!['hidden',''].includes(lastKey),pixels:surface.width*surface.height})};
 }
