@@ -1,7 +1,7 @@
 """Offline art-direction study: one stone, real scanned tools, contact shadows.
 No browser WebGL, CSS tool overlays, source model edits or catalogue writes.
 """
-import bpy,sys,pathlib,json,math,argparse
+import bpy,sys,pathlib,json,math,argparse,shutil
 import numpy as np
 from mathutils import Vector,Matrix,Quaternion
 p=argparse.ArgumentParser();p.add_argument('--root',required=True);p.add_argument('--profile',default='both',choices=['desktop','mobile','both']);p.add_argument('--full',action='store_true');a=p.parse_args(sys.argv[sys.argv.index('--')+1:]);root=pathlib.Path(a.root);meta=json.loads((root/'scene.json').read_text());out=root/'review';out.mkdir(exist_ok=True)
@@ -13,7 +13,7 @@ scene.view_settings.view_transform='Standard';scene.view_settings.look='Medium H
 
 def material(name,color,roughness=.7,metal=0):
  m=bpy.data.materials.new(name);m.use_nodes=True;p=m.node_tree.nodes.get('Principled BSDF');p.inputs['Base Color'].default_value=(*color,1);p.inputs['Roughness'].default_value=roughness;p.inputs['Metallic'].default_value=metal;return m
-stone=material('Freshly worked springstone',(.15,.17,.145),.9);nodes=stone.node_tree.nodes;links=stone.node_tree.links;noise=nodes.new('ShaderNodeTexNoise');noise.inputs['Scale'].default_value=105;noise.inputs['Detail'].default_value=4;bump=nodes.new('ShaderNodeBump');bump.inputs['Strength'].default_value=.35;bump.inputs['Distance'].default_value=.035;links.new(noise.outputs['Fac'],bump.inputs['Height']);links.new(bump.outputs['Normal'],nodes.get('Principled BSDF').inputs['Normal'])
+stone=material('Freshly worked springstone',(.15,.17,.145),.9);nodes=stone.node_tree.nodes;links=stone.node_tree.links;noise=nodes.new('ShaderNodeTexNoise');noise.inputs['Scale'].default_value=105;noise.inputs['Detail'].default_value=4;bump=nodes.new('ShaderNodeBump');bump.inputs['Strength'].default_value=.35;bump.inputs['Distance'].default_value=.035;links.new(noise.outputs['Fac'],bump.inputs['Height']);links.new(bump.outputs['Normal'],nodes.get('Principled BSDF').inputs['Normal']);ramp=nodes.new('ShaderNodeValToRGB');ramp.color_ramp.elements[0].color=(.13,.145,.13,1);ramp.color_ramp.elements[1].color=(.23,.24,.21,1);links.new(noise.outputs['Fac'],ramp.inputs[0]);links.new(ramp.outputs[0],nodes.get('Principled BSDF').inputs['Base Color'])
 metal=material('Worn forged steel',(.19,.205,.21),.38,.87);n=metal.node_tree.nodes;noise2=n.new('ShaderNodeTexNoise');noise2.inputs['Scale'].default_value=150;b=n.new('ShaderNodeBump');b.inputs['Strength'].default_value=.24;b.inputs['Distance'].default_value=.003;metal.node_tree.links.new(noise2.outputs['Fac'],b.inputs['Height']);metal.node_tree.links.new(b.outputs['Normal'],n.get('Principled BSDF').inputs['Normal'])
 fabric=material('Unbleached cotton',(.48,.42,.31),.96);abrasive=material('Wet abrasive paper',(.16,.12,.08),.94)
 floor=material('Workshop ground',(.023,.033,.025),.9);bpy.ops.mesh.primitive_plane_add(size=200,location=(0,0,-.035));ground=bpy.context.object;ground.data.materials.append(floor)
@@ -89,7 +89,7 @@ def hand_asset(side):
   distal=next(pb for pb in arm.pose.bones if finger in pb.name.lower() and 'distal' in pb.name.lower())
   proximal=next(pb for pb in arm.pose.bones if finger in pb.name.lower() and 'proximal' in pb.name.lower())
   canonical=norm@original_arm_world@proximal.bone.head_local
-  target=bpy.data.objects.new(side+' '+finger+' grip',None);scene.collection.objects.link(target);target.parent=parent;target.location=(canonical.x if finger!='thumb' else 0,-.17,.24 if finger!='thumb' else .29)
+  target=bpy.data.objects.new(side+' '+finger+' grip',None);scene.collection.objects.link(target);target.parent=parent;target.location=(canonical.x if finger!='thumb' else 0,-.08,.27 if finger!='thumb' else .29)
   pole=bpy.data.objects.new(side+' '+finger+' bend',None);scene.collection.objects.link(pole);pole.parent=parent;pole.location=(canonical.x,-.65,.60)
   ik=distal.constraints.new('IK');ik.target=target;ik.pole_target=pole;ik.chain_count=3;ik.use_tail=True;ik.iterations=64
  meshes=[o for o in new if o.type=='MESH']
@@ -99,7 +99,15 @@ def hand_asset(side):
   sub=obj.modifiers.new('Hand surface','SUBSURF');sub.levels=1;sub.render_levels=1
  bpy.ops.mesh.primitive_cone_add(vertices=32,radius1=.13,radius2=.095,depth=1);forearm=bpy.context.object;forearm.data.materials.append(skin)
  for poly in forearm.data.polygons:poly.use_smooth=True
- bpy.ops.mesh.primitive_cone_add(vertices=32,radius1=.19,radius2=.14,depth=1);shirt=bpy.context.object;shirt.data.materials.append(sleeve)
+ verts=[];faces=[]
+ for ring in range(49):
+  t=ring/48
+  for segment in range(40):
+   theta=2*math.pi*segment/40;radius=(.11+.08*t)*(1+.065*math.sin(t*48+math.sin(theta*3))+.035*math.sin(t*90-theta*4));verts.append((radius*math.cos(theta),radius*math.sin(theta),t-.5))
+ for ring in range(48):
+  for segment in range(40):
+   k=ring*40+segment;q=ring*40+(segment+1)%40;faces.append((k,q,q+40,k+40))
+ mesh=bpy.data.meshes.new('Worn cotton sleeve');mesh.from_pydata(verts,[],faces);mesh.update();shirt=bpy.data.objects.new(side+' shirt sleeve',mesh);scene.collection.objects.link(shirt);shirt.data.materials.append(sleeve)
  for poly in shirt.data.polygons:poly.use_smooth=True
  print('HAND BONES',side,[b.name for b in bones],flush=True);return parent,meshes,forearm,shirt
 left_hand=hand_asset('left');right_hand=hand_asset('right')
@@ -107,12 +115,12 @@ def hold(hand,grip,axis,forward,visible,side):
  parent,meshes,forearm,shirt=hand
  for obj in meshes+[forearm,shirt]:obj.hide_render=not visible
  if not visible:return
- x=Vector(axis).normalized();z=(Vector(forward)-x*Vector(forward).dot(x)).normalized();y=z.cross(x).normalized();rotation=Matrix((x,y,z)).transposed();parent.rotation_euler=rotation.to_euler();parent.location=Vector(grip)-rotation@Vector((0,-.09,.27));wrist=parent.location
- elbow=wrist+Vector(((-1 if side=='left' else 1)*1.55,-.25,-.5));delta=elbow-wrist
+ x=Vector(axis).normalized();z=(Vector(forward)-x*Vector(forward).dot(x)).normalized();y=z.cross(x).normalized();rotation=Matrix((x,y,z)).transposed();parent.rotation_euler=rotation.to_euler();parent.location=Vector(grip)-rotation@Vector((0,-.045,.29));wrist=parent.location
+ elbow=wrist+Vector(((-1 if side=='left' else 1)*.16,-.02,-.05));delta=elbow-wrist
  forearm.location=(elbow+wrist)*.5;forearm.rotation_euler=delta.to_track_quat('Z','Y').to_euler();forearm.scale=(1,1,delta.length)
- outer=elbow+Vector(((-1 if side=='left' else 1)*2,-.25,-.4));delta=outer-elbow;shirt.location=(elbow+outer)*.5;shirt.rotation_euler=delta.to_track_quat('Z','Y').to_euler();shirt.scale=(1,1,delta.length)
+ outer=elbow+Vector(((-1 if side=='left' else 1)*3.3,-.35,-.9));delta=outer-elbow;shirt.location=(elbow+outer)*.5;shirt.rotation_euler=delta.to_track_quat('Z','Y').to_euler();shirt.scale=(1,1,delta.length)
 
-obj=None
+obj=None;rendered_holds={}
 for entry in meta['entries']:
  index=entry['index'];phase=entry['phase'];point=Vector(entry['contact']);working=phase=='carve';finished=phase in ['sand','heat','wax','work']
  if obj:
@@ -140,8 +148,16 @@ for entry in meta['entries']:
  rag.data.materials[0]=abrasive if phase=='sand' else fabric
  bpy.context.view_layer.update()
  hold(left_hand,point+direction*.37 if working else rag.location+Vector((0,-.05,0)),direction if working else (0,0,1),(1,.1,.25),working or phase in ['sand','wax'],'left')
- hold(right_hand,hammer.matrix_world@Vector((0,0,-.52)) if working else torch.location+Vector((.25,-.05,0)),hammer.matrix_world.to_3x3()@Vector((0,0,1)) if working else (1,0,0),(-1,.1,.3),working or phase=='heat','right')
+ hold(right_hand,hammer.matrix_world@Vector((0,0,-.52)) if working else torch.matrix_world@Vector((0,0,-.45)),hammer.matrix_world.to_3x3()@Vector((0,0,1)) if working else (1,0,0),(-1,.1,.3),working or phase=='heat','right')
  for profile,w,h,position,target,fov,shift in [('desktop',1280,720,(1.38,-8.55,3.12),(.28,0,1.68),33,-.15),('mobile',720,1560,(.10,-12.5,3.12),(0,0,1.42),36,0)]:
   if a.profile not in ['both',profile]:continue
-  scene.render.resolution_x=w;scene.render.resolution_y=h;scene.render.resolution_percentage=100 if a.full else 75;cam.location=position;cam.rotation_euler=(Vector(target)-cam.location).to_track_quat('-Z','Y').to_euler();camdata.sensor_fit='VERTICAL';camdata.sensor_height=24;camdata.lens=12/math.tan(math.radians(fov)/2);camdata.shift_x=-192/720 if profile=='desktop' else 0;scene.render.filepath=str(out/('%s-%04d-%s.png'%(profile,index,phase)));bpy.ops.render.render(write_still=True)
+  if a.full:
+   w,h=(1440,810) if profile=='desktop' else (960,2080)
+   crop=(0,80,1440,730) if profile=='desktop' else (0,200,960,1700)
+   scene.render.use_border=index!=0;scene.render.use_crop_to_border=True;scene.render.border_min_x=0;scene.render.border_max_x=1;scene.render.border_min_y=(h-crop[1]-crop[3])/h;scene.render.border_max_y=(h-crop[1])/h
+  scene.render.resolution_x=w;scene.render.resolution_y=h;scene.render.resolution_percentage=100 if a.full else 75;cam.location=position;cam.rotation_euler=(Vector(target)-cam.location).to_track_quat('-Z','Y').to_euler();camdata.sensor_fit='VERTICAL';camdata.sensor_height=24;camdata.lens=12/math.tan(math.radians(fov)/2);camdata.shift_x=-192/720 if profile=='desktop' else 0;scene.render.filepath=str(out/('%s-%04d-%s.png'%(profile,index,phase)));key=(profile,phase)
+  if phase in ['mark','work'] and key in rendered_holds:shutil.copyfile(rendered_holds[key],scene.render.filepath)
+  else:
+   bpy.ops.render.render(write_still=True)
+   if phase in ['mark','work']:rendered_holds[key]=scene.render.filepath
  print('RENDERED',index,phase,flush=True)

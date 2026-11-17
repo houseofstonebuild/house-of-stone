@@ -3,12 +3,13 @@
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 export function createContinuousSequence({canvas,root,profile,onSample=()=>{},onReady=()=>{}}){
  const ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});
- let meta,config,target=0,current=0,active=false,raf=0,previous=0,drawn=-1,drawnMix=-1,disposed=false,needed=0;
+ let meta,config,plate=null,baseDirty=true,target=0,current=0,active=false,raf=0,previous=0,drawn=-1,drawnMix=-1,disposed=false,needed=0;
  let fetches=0,decodes=0,direction=1,epoch=0,width=1,height=1,bytes=0,peakBytes=0;
  const packs=new Map(),images=new Map(),fetchQueue=new Map(),decodeQueue=new Map();
  const measures={requests:0,draws:0,stalls:0,decodeMs:[],paintMs:[],fetchErrors:0,decodeErrors:0};
  const sourceBytes=()=>config.width*config.height*4;
- const limit=()=>Math.max(6,Math.min(24,Math.floor((profile==='mobile'?56:80)*1024*1024/sourceBytes())));
+ const plateBytes=()=>plate?config.source_width*config.source_height*4:0;
+ const limit=()=>Math.max(6,Math.min(24,Math.floor(((profile==='mobile'?56:80)*1024*1024-plateBytes())/sourceBytes())));
  function trim(){
   if(!config)return;const keep=limit();
   const protectedFrames=new Set([Math.floor(current),Math.ceil(current),Math.floor(needed),Math.ceil(needed)]);
@@ -52,7 +53,7 @@ export function createContinuousSequence({canvas,root,profile,onSample=()=>{},on
   if(typeof createImageBitmap==='function')image=await createImageBitmap(blob);
   else {const url=URL.createObjectURL(blob);try{image=new Image();image.src=url;await image.decode()}finally{URL.revokeObjectURL(url)}}
   if(disposed||version!==epoch){image.close?.();return;}
-  if(images.has(index))image.close?.();else{images.set(index,image);bytes+=sourceBytes();peakBytes=Math.max(bytes,peakBytes);trim();}
+  if(images.has(index))image.close?.();else{images.set(index,image);bytes+=sourceBytes();peakBytes=Math.max(bytes+plateBytes(),peakBytes);trim();}
   measures.decodeMs.push(performance.now()-begin);if(measures.decodeMs.length>1000)measures.decodeMs.shift();
  }
  const decoding=new Set();
@@ -69,7 +70,7 @@ export function createContinuousSequence({canvas,root,profile,onSample=()=>{},on
  function dimensions(){
   const rect=canvas.getBoundingClientRect(),ratio=Math.min(devicePixelRatio||1,2,config?config.source_width/rect.width:2,config?config.source_height/rect.height:2);
   width=Math.max(1,Math.round(rect.width*ratio));height=Math.max(1,Math.round(rect.height*ratio));
-  if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;drawn=-1;}
+  if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;drawn=-1;baseDirty=true;}
  }
  function paint(value){
   const low=Math.floor(value),high=Math.min(meta.frames-1,low+1),a=images.get(low),b=images.get(high);
@@ -79,7 +80,7 @@ export function createContinuousSequence({canvas,root,profile,onSample=()=>{},on
   const begin=performance.now(),scale=Math.max(width/config.source_width,height/config.source_height);
   const x=(width-config.source_width*scale)/2+config.crop[0]*scale,y=(height-config.source_height*scale)/2+config.crop[1]*scale;
   const w=config.width*scale,h=config.height*scale;
-  ctx.globalAlpha=1;ctx.fillStyle=meta.background||'#161d19';ctx.fillRect(0,0,width,height);ctx.drawImage(a,x,y,w,h);
+  ctx.globalAlpha=1;if(!plate||baseDirty){ctx.fillStyle=meta.background||'#161d19';ctx.fillRect(0,0,width,height);if(plate)ctx.drawImage(plate,(width-config.source_width*scale)/2,(height-config.source_height*scale)/2,config.source_width*scale,config.source_height*scale);baseDirty=false;}ctx.drawImage(a,x,y,w,h);
   if(b&&mix){ctx.globalAlpha=mix;ctx.drawImage(b,x,y,w,h);ctx.globalAlpha=1;}
   drawn=low;drawnMix=mix;measures.draws++;measures.paintMs.push(performance.now()-begin);if(measures.paintMs.length>1000)measures.paintMs.shift();
   canvas.dataset.displayedFrame=String(value);canvas.dataset.frameStatus='ready';onSample(value);return true;
@@ -105,9 +106,9 @@ export function createContinuousSequence({canvas,root,profile,onSample=()=>{},on
  function warm(value=0){if(!config)return;needImage(Math.floor(value),-100);needImage(Math.floor(value)+1,-99);for(let d=0;d<3;d++)needPack(Math.floor(value)+d*24,d);pumpFetch();pumpDecode();}
  function resize(){dimensions();drawn=-1;wake()}
  function suspend(){active=false;if(raf)cancelAnimationFrame(raf);raf=0;previous=0;}
- const ready=fetch(root+'/manifest.json',{cache:'force-cache'}).then(r=>{if(!r.ok)throw Error('Continuous sequence missing');return r.json()}).then(m=>{
-  if(m.version!==1||!m.profiles?.[profile])throw Error('Invalid continuous sequence');meta=m;config=m.profiles[profile];dimensions();warm();if(active){plan();wake()}onReady(m);
+ const ready=fetch(root+'/manifest.json',{cache:'force-cache'}).then(r=>{if(!r.ok)throw Error('Continuous sequence missing');return r.json()}).then(async m=>{
+  if(m.version!==1||!m.profiles?.[profile])throw Error('Invalid continuous sequence');meta=m;config=m.profiles[profile];if(config.plate){plate=new Image();plate.src=root+'/'+profile+'/'+config.plate;await plate.decode()}dimensions();warm();if(active){plan();wake()}onReady(m);
  }).catch(error=>{canvas.dataset.frameStatus='unavailable';console.warn(error)});
- const stats=()=>({target,current,images:images.size,decodedBytes:bytes,peakDecodedBytes:peakBytes,compressedBytes:[...packs.values()].reduce((n,p)=>n+(p.data?.byteLength||0),0),inflightFetches:fetches,inflightDecodes:decodes,...measures});
- return {request,warm,resize,suspend,ready,stats,destroy(){disposed=true;epoch++;suspend();for(const img of images.values())img.close?.();images.clear();packs.clear();}};
+ const stats=()=>({target,current,images:images.size,decodedBytes:bytes+plateBytes(),peakDecodedBytes:peakBytes,compressedBytes:[...packs.values()].reduce((n,p)=>n+(p.data?.byteLength||0),0),inflightFetches:fetches,inflightDecodes:decodes,...measures});
+ return {request,warm,resize,suspend,ready,stats,destroy(){disposed=true;epoch++;suspend();for(const img of images.values())img.close?.();images.clear();packs.clear();plate=null;}};
 }

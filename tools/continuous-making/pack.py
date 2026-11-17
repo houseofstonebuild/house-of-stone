@@ -7,17 +7,23 @@ from io import BytesIO
 import json,argparse,hashlib
 p=argparse.ArgumentParser();p.add_argument('--workshop',action='store_true');p.add_argument('--form',action='store_true');a=p.parse_args()
 base=Path('public/assets/continuous-making-v1')
-def pack(kind,profiles,count,openframe,bg='#161d19'):
+def pack(kind,profiles,count,openframe,bg='#161d19',source_profiles=None):
  root=base/kind;root.mkdir(parents=True,exist_ok=True);manifest={'version':1,'frames':count,'background':bg,'profiles':{}}
  for profile,w,h in profiles:
   folder=root/profile;folder.mkdir(exist_ok=True);packs=[]
   for start in range(0,count,24):
-   payload=bytearray();entries=[]
+   payload=bytearray();entries=[];deduplicated={}
    for index in range(start,min(count,start+24)):
     image=openframe(profile,index).convert('RGB');assert image.size==(w,h),(profile,index,image.size)
-    buf=BytesIO();image.save(buf,'WEBP',quality=90,method=5);data=buf.getvalue();entries.append({'offset':len(payload),'length':len(data)});payload.extend(data)
+    buf=BytesIO();image.save(buf,'WEBP',quality=90,method=5);data=buf.getvalue();key=hashlib.sha256(data).hexdigest()
+    if key in deduplicated:entries.append(deduplicated[key].copy())
+    else:
+     entry={'offset':len(payload),'length':len(data)};entries.append(entry);deduplicated[key]=entry;payload.extend(data)
    name='pack_%03d.bin'%(start//24);(folder/name).write_bytes(payload);packs.append({'url':name,'start':start,'entries':entries,'bytes':len(payload),'sha256':hashlib.sha256(payload).hexdigest()})
-  manifest['profiles'][profile]={'width':w,'height':h,'source_width':w,'source_height':h,'crop':[0,0,w,h],'packs':packs}
+  source=(source_profiles or {}).get(profile,{'width':w,'height':h,'crop':[0,0,w,h]});manifest['profiles'][profile]={'width':w,'height':h,'source_width':source['width'],'source_height':source['height'],'crop':source['crop'],'packs':packs}
+  if source_profiles:manifest['profiles'][profile]['plate']='plate.webp'
+ if kind=='form':
+  manifest['source_model']='/models/coil-uploaded-v1.glb';manifest['source_sha256']=hashlib.sha256(Path('public/models/coil-uploaded-v1.glb').read_bytes()).hexdigest()
  (root/'manifest.json').write_text(json.dumps(manifest,separators=(',',':')))
  print(kind,'compressed packs',sum(p['bytes'] for pr in manifest['profiles'].values() for p in pr['packs']))
 if a.workshop:
@@ -26,7 +32,24 @@ if a.workshop:
   return image.crop((0,0,1000,900)) if profile=='mobile' else image
  pack('workshop',[('desktop',1600,900),('mobile',1000,900)],58,film)
 if a.form:
+ dimensions={'desktop':{'width':1440,'height':810,'crop':[0,80,1440,730]},'mobile':{'width':960,'height':2080,'crop':[0,200,960,1700]}}
+ plates={};approved={}
+ for profile,config in dimensions.items():
+  initial=list(Path('build/continuous-making/review').glob(profile+'-0000-*.png'));assert len(initial)==1
+  plates[profile]=Image.open(initial[0]).convert('RGB');assert plates[profile].size==(config['width'],config['height'])
+  approved[profile]=Image.open(base/'approved'/(profile+'.png')).convert('RGB');assert approved[profile].size==plates[profile].size
+  folder=base/'form'/profile;folder.mkdir(parents=True,exist_ok=True);plates[profile].save(folder/'plate.webp','WEBP',quality=94,method=5)
  def form(profile,index):
+  config=dimensions[profile];x,y,w,h=config['crop'];box=(x,y,x+w,y+h)
   matches=list(Path('build/continuous-making/review').glob('%s-%04d-*.png'%(profile,index)));assert len(matches)==1,(profile,index)
-  return Image.open(matches[0])
- pack('form',[('desktop',1280,720),('mobile',720,1560)],480,form)
+  image=Image.open(matches[0]).convert('RGB')
+  if image.size==plates[profile].size:image=image.crop(box)
+  assert image.size==(w,h),(profile,index,image.size,(w,h))
+  final=approved[profile].crop(box)
+  if index>=464:image=final
+  elif index>=440:
+   t=(index-440)/23;t=t*t*(3-2*t);image=Image.blend(image,final,t)
+  if index in [0,144,280,360,430,479]:
+   folder=base/'form'/'stills'/profile;folder.mkdir(parents=True,exist_ok=True);full=plates[profile].copy();full.paste(image,(x,y));full.save(folder/('frame_%03d.webp'%index),'WEBP',quality=94,method=5)
+  return image
+ pack('form',[('desktop',1440,730),('mobile',960,1700)],480,form,source_profiles=dimensions)

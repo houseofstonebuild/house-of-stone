@@ -1,0 +1,144 @@
+name: Render and review the continuous making experience
+on:
+  push:
+    branches: ['rebuild/continuous-making-2026-11-17']
+    paths: ['tools/continuous-making/render-full.json', '.github/workflows/continuous-making-full.yml']
+permissions:
+  contents: write
+concurrency:
+  group: continuous-making-full-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --prefix qa --no-audit --no-fund
+      - run: sh scripts/run-browser-qa.sh qa/capture-continuous-finish.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: continuous-approved-finish
+          path: public/assets/continuous-making-v1/approved/
+          retention-days: 14
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [desktop, mobile]
+        start: [0, 80, 160, 240, 320, 400]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install offline source preparation tools
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund @gltf-transform/core @gltf-transform/extensions meshoptimizer
+          python -m pip install numpy scipy scikit-image trimesh vtk pillow
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1 libxrender1 libxext6 libxkbcommon0 libsm6 libice6
+      - uses: actions/cache@v4
+        id: blender
+        with:
+          path: /tmp/blender-4.3.2-linux-x64
+          key: mabwe-offline-blender-4.3.2
+      - name: Install full CPU renderer
+        if: steps.blender.outputs.cache-hit != 'true'
+        run: |
+          curl --fail --location --silent --show-error https://download.blender.org/release/Blender4.3/blender-4.3.2-linux-x64.tar.xz --output /tmp/blender.tar.xz
+          tar -xf /tmp/blender.tar.xz -C /tmp
+      - name: Prepare source-derived solid states
+        run: |
+          node tools/carving-pilot/decode-coil.mjs public/models/coil-uploaded-v1.glb build/continuous-making/coil.obj
+          node tools/continuous-making/decode.mjs
+          python tools/continuous-making/prepare.py --start ${{ matrix.start }} --end $(( ${{ matrix.start }} + 80 ))
+      - name: Render the authored frames at full source detail
+        run: xvfb-run -a /tmp/blender-4.3.2-linux-x64/blender -b -t 4 --python-exit-code 1 --python tools/continuous-making/render.py -- --root build/continuous-making --profile ${{ matrix.profile }} --full
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: continuous-frames-${{ matrix.profile }}-${{ matrix.start }}
+          path: build/continuous-making/review/${{ matrix.profile }}-*.png
+          compression-level: 0
+          retention-days: 7
+  pack:
+    needs: [render, capture]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: continuous-frames-*
+          merge-multiple: true
+          path: build/continuous-making/review
+      - uses: actions/download-artifact@v4
+        with:
+          name: continuous-approved-finish
+          path: public/assets/continuous-making-v1/approved/
+      - run: python -m pip install pillow
+      - name: Pack every source frame and preserve the approved finish
+        run: python tools/continuous-making/pack.py --form
+      - uses: actions/upload-artifact@v4
+        with:
+          name: continuous-making-form-packs
+          path: public/assets/continuous-making-v1/form/
+          compression-level: 0
+          retention-days: 14
+  review:
+    needs: pack
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/download-artifact@v4
+        with:
+          name: continuous-making-form-packs
+          path: public/assets/continuous-making-v1/form/
+      - uses: actions/download-artifact@v4
+        with:
+          name: continuous-approved-finish
+          path: public/assets/continuous-making-v1/approved/
+      - run: npm install --prefix qa --no-audit --no-fund
+      - run: npm run check && npm test
+      - name: Review continuous motion, stage completeness and responsive composition
+        run: sh scripts/run-browser-qa.sh qa/continuous-making-acceptance.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: continuous-making-full-review
+          path: test-results/browser/continuous-making-full/
+          retention-days: 14
+      - name: Retain validated making media on the review branch
+        if: success()
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name houseofstonebuild
+          git config user.email houseofstonebuild@users.noreply.github.com
+          git add public/assets/continuous-making-v1/form public/assets/continuous-making-v1/approved
+          git diff --cached --quiet && exit 0
+          git commit -m 'Retain the reviewed continuous making sequence from unchanged Coil source'
+          git fetch origin rebuild/continuous-making-2026-11-17
+          git rebase origin/rebuild/continuous-making-2026-11-17
+          git push origin HEAD:rebuild/continuous-making-2026-11-17

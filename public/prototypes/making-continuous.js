@@ -5,12 +5,14 @@ const definitions=[['mark',0,39,1.1,650],['carve',40,247,4.3,2600],['sand',248,3
 const articles=[...document.querySelectorAll('[data-step]')],sections=[...document.querySelectorAll('[data-scene]')];
 let form,film,profile='',stages=[],layout=[],dirty=true,raf=0,lastWidth=innerWidth,total=0,phase='',chapter='introduction';
 function copy(frame){
+ $('#exactFinish').style.opacity=String(clamp((frame-474)/5));
  const index=definitions.findIndex((s,i)=>frame<s[2]+.5||i===5),name=definitions[index][0];
  if(phase===name)return;phase=name;$('#processArt').dataset.step=name;
- for(const a of articles){const yes=a.dataset.step===name;a.classList.toggle('is-current',yes);a.setAttribute('aria-hidden',String(!yes));}
+ for(const a of articles){const yes=a.dataset.step===name;a.classList.toggle('is-current',yes);if(reduced.matches)a.removeAttribute('aria-hidden');else a.setAttribute('aria-hidden',String(!yes));}
  $('#processCaption').textContent=['THE BLOCK','CARVING THE FORM','REFINING THE SURFACE','WARMING THE STONE','WAX AND POLISH','COIL · DOUGLAS MUSEKIWA'][index];
 }
 function players(){
+ if(reduced.matches){form?.destroy();film?.destroy();form=film=null;profile='';return;}
  const next=mobile()?'mobile':'desktop';if(next===profile)return;profile=next;form?.destroy();film?.destroy();
  form=createContinuousSequence({canvas:$('#processCanvas'),root:'/assets/continuous-making-v1/form',profile,onSample:copy});
  film=createContinuousSequence({canvas:$('#workshopCanvas'),root:'/assets/continuous-making-v1/workshop',profile});
@@ -41,9 +43,14 @@ function update(){
  document.documentElement.dataset.storyLayout='ready';
 }
 function queue(){if(!raf&&!document.hidden)raf=requestAnimationFrame(update)}
-function resize(){const changed=innerWidth!==lastWidth;lastWidth=innerWidth;dirty=true;if(changed)players();form.resize();film.resize();queue();}
+function resize(){
+ const changed=innerWidth!==lastWidth,old=layout.find(s=>s.name==='process'),distance=old?scrollY-old.top:-1,stage=stages.find(s=>distance>=s.start&&distance<s.end),local=stage?(distance-stage.start)/stage.length:0;
+ lastWidth=innerWidth;dirty=true;if(changed)players();measure();
+ if(changed&&stage&&!reduced.matches){const next=stages.find(s=>s.name===stage.name),section=layout.find(s=>s.name==='process');scrollTo(0,section.top+next.start+next.length*local);}
+ form?.resize();film?.resize();queue();
+}
 addEventListener('scroll',queue,{passive:true});addEventListener('resize',resize,{passive:true});addEventListener('load',()=>{dirty=true;queue()},{once:true});addEventListener('pageshow',()=>{dirty=true;queue()});document.fonts?.ready.then(()=>{dirty=true;queue()});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){form.suspend();film.suspend();}else{dirty=true;queue()}});
-reduced.addEventListener('change',()=>{dirty=true;if(reduced.matches){form.suspend();film.suspend();for(const a of articles)a.removeAttribute('aria-hidden')}queue()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){form?.suspend();film?.suspend();}else{dirty=true;queue()}});
+reduced.addEventListener('change',()=>{dirty=true;players();if(reduced.matches){form?.suspend();film?.suspend();for(const a of articles)a.removeAttribute('aria-hidden')}queue()});
 players();copy(0);document.documentElement.classList.add('js');queue();
-window.__mabweContinuous={stats:()=>({chapter,phase,form:form.stats(),film:film.stats()}),stages:()=>stages};
+window.__mabweContinuous={stats:()=>({chapter,phase,form:form?.stats()||null,film:film?.stats()||null}),stages:()=>stages};
