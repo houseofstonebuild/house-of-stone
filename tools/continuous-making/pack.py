@@ -5,13 +5,15 @@ from pathlib import Path
 from PIL import Image
 from io import BytesIO
 import json,argparse,hashlib
-p=argparse.ArgumentParser();p.add_argument('--workshop',action='store_true');p.add_argument('--form',action='store_true');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--workshop',action='store_true');p.add_argument('--form',action='store_true');p.add_argument('--flat',action='store_true');a=p.parse_args()
 base=Path('public/assets/continuous-making-v1')
 def pack(kind,profiles,count,openframe,bg='#161d19',source_profiles=None):
  root=base/kind;root.mkdir(parents=True,exist_ok=True);manifest={'version':1,'frames':count,'background':bg,'profiles':{}}
  for profile,w,h in profiles:
   folder=root/profile;folder.mkdir(exist_ok=True);packs=[]
   for stale in folder.glob('pack_*.bin'):stale.unlink()
+  if source_profiles and a.flat:
+   for stale in folder.glob('plate*.webp'):stale.unlink()
   for start in range(0,count,24):
    payload=bytearray();entries=[];deduplicated={}
    for index in range(start,min(count,start+24)):
@@ -22,7 +24,7 @@ def pack(kind,profiles,count,openframe,bg='#161d19',source_profiles=None):
      entry={'offset':len(payload),'length':len(data)};entries.append(entry);deduplicated[key]=entry;payload.extend(data)
    name='pack_%03d_%s.bin'%(start//24,hashlib.sha256(payload).hexdigest()[:16]);(folder/name).write_bytes(payload);packs.append({'url':name,'start':start,'entries':entries,'bytes':len(payload),'sha256':hashlib.sha256(payload).hexdigest()})
   source=(source_profiles or {}).get(profile,{'width':w,'height':h,'crop':[0,0,w,h]});manifest['profiles'][profile]={'width':w,'height':h,'source_width':source['width'],'source_height':source['height'],'crop':source['crop'],'packs':packs}
-  if source_profiles:
+  if source_profiles and not a.flat:
    plate=folder/'plate.webp';name='plate_'+hashlib.sha256(plate.read_bytes()).hexdigest()[:16]+'.webp';plate.rename(folder/name);manifest['profiles'][profile]['plate']=name
  if kind=='form':
   manifest['source_model']='/models/coil-uploaded-v1.glb';manifest['source_sha256']=hashlib.sha256(Path('public/models/coil-uploaded-v1.glb').read_bytes()).hexdigest()
@@ -40,7 +42,8 @@ if a.form:
   initial=list(Path('build/continuous-making/review').glob(profile+'-0000-*.png'));assert len(initial)==1
   plates[profile]=Image.open(initial[0]).convert('RGB');assert plates[profile].size==(config['width'],config['height'])
   approved[profile]=Image.open(base/'approved'/(profile+'.png')).convert('RGB');assert approved[profile].size==plates[profile].size
-  folder=base/'form'/profile;folder.mkdir(parents=True,exist_ok=True);plates[profile].save(folder/'plate.webp','WEBP',quality=94,method=5)
+  folder=base/'form'/profile;folder.mkdir(parents=True,exist_ok=True);
+  if not a.flat:plates[profile].save(folder/'plate.webp','WEBP',quality=94,method=5)
  def form(profile,index):
   config=dimensions[profile];x,y,w,h=config['crop'];box=(x,y,x+w,y+h)
   matches=list(Path('build/continuous-making/review').glob('%s-%04d-*.png'%(profile,index)));assert len(matches)==1,(profile,index)
@@ -58,6 +61,6 @@ if a.form:
   elif index>=440:
    t=(index-440)/23;t=t*t*(3-2*t);image=Image.blend(image,final,t)
   if index in [0,144,280,360,430,479]:
-   folder=base/'form'/'stills'/profile;folder.mkdir(parents=True,exist_ok=True);full=plates[profile].copy();full.paste(image,(x,y));full.save(folder/('frame_%03d.webp'%index),'WEBP',quality=94,method=5)
+   folder=base/'form'/'stills'/profile;folder.mkdir(parents=True,exist_ok=True);full=Image.new('RGB',plates[profile].size,'#161d19') if a.flat else plates[profile].copy();full.paste(image,(x,y));full.save(folder/('frame_%03d.webp'%index),'WEBP',quality=94,method=5)
   return image
  pack('form',[('desktop',1440,730),('mobile',960,1700)],480,form,source_profiles=dimensions)

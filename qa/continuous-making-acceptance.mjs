@@ -22,6 +22,11 @@ try{
    await page.evaluate(({index,local})=>{const stages=window.__mabweContinuous.stages(),s=stages[index],el=document.querySelector('#process');scrollTo(0,el.getBoundingClientRect().top+scrollY+s.start+s.length*local)}, {index,local});
    await page.waitForFunction(({name})=>{const state=window.__mabweContinuous.stats();return state.phase===name&&state.form&&Math.abs(state.form.current-state.form.target)<.03&&document.querySelector('#processCanvas').dataset.frameStatus==='ready'},{name:stages[index].name},{timeout:45000});
   }
+  await phase(0,.5);
+  if(width<=1100&&height>width){
+   const pixels=await page.locator('#processCanvas').evaluate(canvas=>{const {data,width,height}=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height);let top=height,bottom=-1;for(let y=0;y<height;y++)for(let x=0;x<width;x++){const i=(y*width+x)*4;if(data[i]>85&&data[i+1]>85&&data[i+2]>70){top=Math.min(top,y);bottom=Math.max(bottom,y)}}const rect=canvas.getBoundingClientRect();return {top:rect.top+top/height*rect.height,bottom:rect.top+bottom/height*rect.height,header:document.querySelector('.masthead').getBoundingClientRect().bottom,copy:document.querySelector('.process-step.is-current').getBoundingClientRect().top}});
+   assert(pixels.top>=pixels.header-8,'The visible block must clear the header on '+name+': '+JSON.stringify(pixels));assert(pixels.bottom<=pixels.copy-5,'The visible block must clear the caption on '+name+': '+JSON.stringify(pixels));
+  }
   const pictureHashes=[];
   for(let index=0;index<6;index++){
    await phase(index);const file=dest+'/'+name+'-'+stages[index].name+'.png';const pixels=await page.screenshot({path:file});pictureHashes.push(createHash('sha256').update(pixels).digest('hex'));

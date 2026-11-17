@@ -17,11 +17,18 @@ function players(){
  form=createContinuousSequence({canvas:$('#processCanvas'),root:'/assets/continuous-making-v1/form',profile,focus:profile==='desktop'?.65:.5,onSample:copy});
  film=createContinuousSequence({canvas:$('#workshopCanvas'),root:'/assets/continuous-making-v1/workshop',profile});
 }
+function frameMedia(){
+ const art=$('#processArt');if(profile!=='mobile'||reduced.matches){art.style.setProperty('--scene-scale','1');art.style.setProperty('--scene-y','0px');return;}
+ const width=art.clientWidth,height=art.clientHeight,sourceScale=Math.max(width/960,height/2080),offset=(height-2080*sourceScale)/2;
+ const top=offset+.258*2080*sourceScale,bottom=offset+.690*2080*sourceScale,limitTop=$('.masthead').clientHeight-6,limitBottom=$('#processCopies').offsetTop-8;
+ const fit=Math.min(1,Math.max(.2,(limitBottom-limitTop)/(bottom-top))),naturalCenter=(top+bottom)/2,desiredCenter=(limitTop+limitBottom)/2,translate=desiredCenter-(height/2+fit*(naturalCenter-height/2));
+ art.style.setProperty('--scene-scale',String(fit));art.style.setProperty('--scene-y',translate.toFixed(2)+'px');
+}
 function measure(){
  const view=$('.process-pin').clientHeight||document.documentElement.clientHeight;let start=0;
  stages=definitions.map(([name,first,last,views,min])=>{const length=Math.max(min,view*views),s={name,first,last,start,end:start+length,length};start+=length;return s});total=start;
  $('#process').style.height=reduced.matches?'auto':Math.round(start+view)+'px';
- layout=sections.map(el=>({el,name:el.dataset.scene,top:el.getBoundingClientRect().top+scrollY,height:el.offsetHeight,pin:el.querySelector(':scope>.pin')?.clientHeight||view}));dirty=false;
+ layout=sections.map(el=>({el,name:el.dataset.scene,top:el.getBoundingClientRect().top+scrollY,height:el.offsetHeight,pin:el.querySelector(':scope>.pin')?.clientHeight||view}));frameMedia();form?.resize();film?.resize();dirty=false;
 }
 function frameAt(distance){const s=stages.find(s=>distance<s.end)||stages.at(-1),p=clamp((distance-s.start)/s.length),motion=clamp((p-.10)/.76);return s.first+(s.last-s.first)*motion;}
 const route=$('#mapRoute'),routeLength=route.getTotalLength();route.style.strokeDasharray=String(routeLength);
