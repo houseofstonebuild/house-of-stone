@@ -8,6 +8,7 @@ Catalogue data that is not verified is identified as working information.
 from __future__ import annotations
 
 from pathlib import Path
+from io import BytesIO
 from PIL import Image, ImageOps
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
@@ -136,12 +137,20 @@ def img(c, filename, x, y, w, h, mode="contain"):
         iw, ih = im.size
         scale = min(w / iw, h / ih) if mode == "contain" else max(w / iw, h / ih)
         sw, sh = iw * scale, ih * scale
+        # PDF-ready JPEG encoding preserves the website photo composition
+        # while avoiding large raw RGB image streams in a sales brochure.
+        max_edge = max(1100, int(max(w,h) * 2.3))
+        if max(im.size) > max_edge:
+            im.thumbnail((max_edge, max_edge), Image.Resampling.LANCZOS)
+        encoded = BytesIO()
+        im.save(encoded, format="JPEG", quality=87, optimize=True, subsampling=0)
+        encoded.seek(0)
         c.saveState()
         if mode == "cover":
             p = c.beginPath()
             p.rect(x, y, w, h)
             c.clipPath(p, stroke=0)
-        c.drawImage(ImageReader(im), x + (w - sw) / 2, y + (h - sh) / 2, sw, sh)
+        c.drawImage(ImageReader(encoded), x + (w - sw) / 2, y + (h - sh) / 2, sw, sh)
         c.restoreState()
 def page(c, no, section="SELECTED WORKS", dark=False):
     r(c, 0, 0, W, H, DARK if dark else PAPER)
