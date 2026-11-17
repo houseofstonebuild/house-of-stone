@@ -43,8 +43,9 @@ try{
   });
   await page.goto(base+'/prototypes/making-atelier.html',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.documentElement.dataset.makingAtelier==='ready');
-  await page.waitForFunction(()=>window.__mabweMaking?.film?.edition==='hd-v3'||
-   window.__mabweMaking?.film?.edition==='hd-v2',{timeout:30000});
+  await page.waitForFunction(()=>window.__mabweMaking?.film?.edition==='hd-v4',{timeout:30000});
+  assert.equal(await page.evaluate(()=>window.__mabweMaking.film.frames),200,
+    'All original 200 chiseling frames must be selectable');
   await page.waitForFunction(()=>window.__mabwePerformance?.().filmAtlas.legacySprite||
     window.__mabwePerformance?.().filmAtlas.ready>0,{timeout:20000});
   const sections=['introduction','origin','material','carving','detail','finishing','reveal','house'];
