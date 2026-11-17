@@ -7,6 +7,39 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
  let fetches=0,decodes=0,direction=1,epoch=0,width=1,height=1,pixelScale=0,bytes=0,peakBytes=0;
  const packs=new Map(),images=new Map(),fetchQueue=new Map(),decodeQueue=new Map();let workingFrames=new Set();
  const measures={requests:0,draws:0,stalls:0,decodeCount:0,workerDecodes:0,decodeMs:[],paintMs:[],fetchErrors:0,decodeErrors:0};
+ // Keep full-resolution WebP decoding off the scroll/paint thread when supported.
+ // Fall back to the native asynchronous decoder if worker bitmaps are unavailable.
+ let worker=null,workerId=0;const workerJobs=new Map();
+ function nativeDecode(blob){
+  if(typeof createImageBitmap==='function')return createImageBitmap(blob);
+  return new Promise((resolve,reject)=>{const url=URL.createObjectURL(blob),img=new Image();img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};img.onerror=()=>{URL.revokeObjectURL(url);reject(Error('Frame image decode failed'))};img.src=url;});
+ }
+ function disableWorker(){
+  if(worker){worker.terminate();worker=null;}
+  for(const job of workerJobs.values())nativeDecode(job.blob).then(job.resolve,job.reject);
+  workerJobs.clear();
+ }
+ try{
+  if(typeof Worker==='function'){
+   worker=new Worker('/prototypes/continuous-decode-worker.js');
+   worker.onmessage=event=>{
+    const {id,bitmap,error}=event.data||{},job=workerJobs.get(id);
+    if(!job){bitmap?.close?.();return;}workerJobs.delete(id);
+    if(bitmap){measures.workerDecodes++;job.resolve(bitmap);}
+    else nativeDecode(job.blob).then(job.resolve,job.reject);
+   };
+   worker.onerror=disableWorker;
+   worker.onmessageerror=disableWorker;
+  }
+ }catch{disableWorker();}
+ function decodeBitmap(blob){
+  if(!worker)return nativeDecode(blob);
+  return new Promise((resolve,reject)=>{
+   const id=++workerId;workerJobs.set(id,{resolve,reject,blob});
+   try{worker.postMessage({id,blob});}
+   catch{workerJobs.delete(id);nativeDecode(blob).then(resolve,reject);}
+  });
+ }
  const sourceBytes=()=>config.width*config.height*4;
  const plateBytes=()=>plate?config.source_width*config.source_height*4:0;
  const limit=()=>Math.max(6,Math.min(24,Math.floor(((profile==='mobile'?56:80)*1024*1024-plateBytes())/sourceBytes())));
@@ -51,9 +84,7 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
  async function decode(index,pack,entry,version){
   const begin=performance.now();
   const blob=new Blob([new Uint8Array(pack.data,entry.offset,entry.length)],{type:'image/webp'});
-  let image;
-  if(typeof createImageBitmap==='function')image=await createImageBitmap(blob);
-  else {const url=URL.createObjectURL(blob);try{image=new Image();image.src=url;await image.decode()}finally{URL.revokeObjectURL(url)}}
+  const image=await decodeBitmap(blob);
   if(disposed||version!==epoch||(active&&workingFrames.size&&!workingFrames.has(index))){image.close?.();return;}
   if(images.has(index))image.close?.();else{images.set(index,image);bytes+=image.width*image.height*4;peakBytes=Math.max(bytes+plateBytes(),peakBytes);trim();}
   measures.decodeCount++;measures.decodeMs.push(performance.now()-begin);if(measures.decodeMs.length>1000)measures.decodeMs.shift();
@@ -98,9 +129,9 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   const delta=target-current,settled=Math.abs(delta)<.015;
   // Time-based damping gives wheels, trackpads and touch the same response.
   const proposed=settled?target:current+delta*(1-Math.exp(-dt/95));
-  // During a fast gesture, spend the decode budget on one sharp source frame.
-  // Subframe blending resumes for slow motion and the final settle.
-  const candidate=Math.abs(proposed-current)>1.5?Math.round(proposed):proposed;
+  // One sharp full-resolution source frame is cheaper than two composited
+  // frames during motion. Restore fractional blending as the gesture settles.
+  const candidate=Math.abs(delta)>1.4&&Math.abs(proposed-current)>.3?Math.round(proposed):proposed;
   needed=candidate;
   if(paint(candidate)){current=candidate;plan();}
   else{measures.stalls++;plan();}
@@ -120,5 +151,5 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   if(m.version!==1||!m.profiles?.[profile])throw Error('Invalid continuous sequence');meta=m;config=m.profiles[profile];if(config.plate){plate=new Image();plate.src=root+'/'+profile+'/'+config.plate;await plate.decode()}dimensions();warm();if(active){plan();wake()}onReady(m);
  }).catch(error=>{canvas.dataset.frameStatus='unavailable';console.warn(error)});
  const stats=()=>({target,current,pixelScale,images:images.size,decodedBytes:bytes+plateBytes(),peakDecodedBytes:peakBytes,compressedBytes:[...packs.values()].reduce((n,p)=>n+(p.data?.byteLength||0),0),inflightFetches:fetches,inflightDecodes:decodes,...measures});
- return {request,warm,resize,suspend,ready,stats,destroy(){disposed=true;epoch++;suspend();for(const img of images.values())img.close?.();images.clear();packs.clear();plate=null;}};
+ return {request,warm,resize,suspend,ready,stats,destroy(){disposed=true;epoch++;suspend();disableWorker();for(const img of images.values())img.close?.();images.clear();packs.clear();plate=null;}};
 }
