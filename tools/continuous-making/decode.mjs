@@ -1,0 +1,10 @@
+import {NodeIO} from '@gltf-transform/core';
+import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
+import {MeshoptDecoder} from 'meshoptimizer';
+import {mkdirSync} from 'node:fs';
+await MeshoptDecoder.ready;
+const io=new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({'meshopt.decoder':MeshoptDecoder});
+const doc=await io.read('public/models/coil-uploaded-v1.glb');
+for(const ext of doc.getRoot().listExtensionsUsed())if(ext.extensionName==='EXT_meshopt_compression')ext.dispose();
+mkdirSync('build/continuous-making',{recursive:true});
+await io.write('build/continuous-making/approved-decoded.glb',doc);

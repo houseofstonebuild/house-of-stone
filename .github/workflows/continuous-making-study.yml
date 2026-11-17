@@ -1,0 +1,47 @@
+name: Continuous making production study
+on:
+  push:
+    branches: ['rebuild/continuous-making-2026-11-17']
+    paths: ['tools/continuous-making/**', '.github/workflows/continuous-making-study.yml']
+permissions:
+  contents: write
+concurrency:
+  group: continuous-making-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  study:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install offline study tools
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund @gltf-transform/core @gltf-transform/extensions meshoptimizer
+          python -m pip install numpy scipy scikit-image trimesh vtk pillow
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq blender xvfb libgl1 libxrender1 libxext6 python3-numpy
+      - name: Prepare unchanged source and solid geometry
+        run: |
+          node tools/carving-pilot/decode-coil.mjs public/models/coil-uploaded-v1.glb build/continuous-making/coil.obj
+          node tools/continuous-making/decode.mjs
+          python tools/continuous-making/prepare.py --keys
+      - name: Render representative scenes before approving a full sequence
+        run: xvfb-run -a blender -b -t 4 --python tools/continuous-making/render.py -- --root build/continuous-making
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+      - name: Assemble review contact sheets
+        run: python tools/continuous-making/review.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: continuous-making-art-direction
+          path: |
+            build/continuous-making/review/
+            build/continuous-making/scene.json
+          retention-days: 14
