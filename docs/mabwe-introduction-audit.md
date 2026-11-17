@@ -39,3 +39,18 @@ Full repository checks, all 119 unit/integration tests, and all five responsive 
 - ZimSculpt, [Care and repair](https://zimsculpt.com/care-and-repair/): heating with a hand-held torch and using wax on the warm stone.
 
 The copy describes a representative process, with artist-specific variation. It does not attribute another artist's statements or a documented quarry journey to Douglas Musekiwa or Coil.
+
+## Second review: remove the gimmicks and correct the pacing
+
+Owner feedback on the first published rebuild: the floating tools look gimmicky, some stages pass too quickly, and the experience does not feel smooth. Passing functional tests did not establish a convincing visual experience.
+
+Changes in the second review:
+
+- Remove all procedural tools, the game-like stage buttons, and client-side WebGL startup. Handwork appears in the existing workshop footage. Lead with the owner's photograph of Douglas Musekiwa and Coil.
+- Replace six equal percentage slices with authored pixel/viewport distances. On a compact phone, carving has at least 2,200 px; sanding, warming, finishing and the finished work each have at least 1,100 px. Entry/exit holds protect the key poses.
+- Keep sanding and warming honest: the source generator produces repeated matte stills there. Stop implying that props on top of those stills constitute process footage. Describe those stages over the completed matte form.
+- Dissolve the registered matte sculpture gradually into a still baked from the original approved renderer. The same finish value holds across the wax/final boundary, avoiding a second reveal, a camera change, or a cold model load. Both approved camera captures retain the exact source GLB and material settings.
+- Replace per-frame network/decode work with source-detail four-frame sheets, with two decoded sheets per active sequence. Phone workshop sheets use a native 600 × 900 crop of the 1600 × 900 source; no lower-resolution motion mode is selected. All original sources are retained.
+- Calculate progress from the actual sticky element height, so mobile browser chrome changes cannot squeeze the same phase into a shorter span.
+
+Validation includes authored minimum reading distances, endpoint holds, forward/reverse native-detail motion, continuous finishing across its boundary, no floating tool elements, idle rendering, actual wheel input, compact phone layouts, and reduced-motion reading.

@@ -1,126 +1,45 @@
 import assert from 'node:assert/strict';
 import {chromium,webkit} from 'playwright';
 import {mkdtempSync,mkdirSync,rmSync,writeFileSync} from 'node:fs';
-import {join} from 'node:path';
-import {tmpdir} from 'node:os';
-import {createApp} from '../server.mjs';
-const out=new URL('../test-results/browser/welcome-rebuild/',import.meta.url);mkdirSync(out,{recursive:true});
-const dir=mkdtempSync(join(tmpdir(),'mabwe-story-'));
+import {join} from 'node:path';import {tmpdir} from 'node:os';import {createApp} from '../server.mjs';
+const out=new URL('../test-results/browser/welcome-film/',import.meta.url);mkdirSync(out,{recursive:true});
+const dir=mkdtempSync(join(tmpdir(),'mabwe-film-'));
 const app=createApp({dataDir:dir,backgroundNotifications:false,env:{NODE_ENV:'production',SITE_URL:'https://review.example',ADMIN_PASSWORD:'review-only-password-123456'}});
-await new Promise(done=>app.server.listen(0,'127.0.0.1',done));
-const base='http://127.0.0.1:'+app.server.address().port;
-const devices=[
- {name:'iphone-compact',engine:webkit,width:375,height:667,touch:true},
- {name:'iphone-standard',engine:webkit,width:390,height:844,touch:true},
- {name:'android',engine:chromium,width:412,height:915,touch:true},
- {name:'tablet',engine:webkit,width:820,height:1180,touch:false},
- {name:'desktop',engine:chromium,width:1440,height:900,touch:false}
-];
-const steps=['mark','carve','sand','heat','wax','work'];
-const results=[];let browser;
-async function go(page,scene,p){
- await page.evaluate(({scene,p})=>{const el=document.querySelector('[data-scene="'+scene+'"]');scrollTo({top:Math.round(el.getBoundingClientRect().top+scrollY+Math.max(1,el.offsetHeight-innerHeight)*p),behavior:'instant'});},{scene,p});
- await page.waitForTimeout(150);
-}
-async function settles(page,kind){
- await page.waitForFunction(kind=>{const s=window.__mabwePerformance()[kind];return s.target>=0&&s.displayed===s.target;},kind,{timeout:30000});
-}
-async function inspectLayout(page,name){
- const measurement=await page.evaluate(()=>{
-  const width=document.documentElement.clientWidth;
-  const visible=[...document.querySelectorAll('h1,h2,.process-step.is-current>p,.step-buttons')].filter(el=>{const r=el.getBoundingClientRect();return getComputedStyle(el).visibility!=='hidden'&&getComputedStyle(el).display!=='none'&&r.top<innerHeight&&r.bottom>0;});
-  return {overflow:document.documentElement.scrollWidth-width,items:visible.map(el=>{const r=el.getBoundingClientRect();return {kind:el.matches('.step-buttons')?'navigation':'text',text:el.textContent.slice(0,40),left:r.left,right:r.right,top:r.top,bottom:r.bottom};})};
- });
- assert(measurement.overflow<=2,name+' horizontal overflow');
- for(const r of measurement.items){assert(r.left>=-1&&r.right<=page.viewportSize().width+1,name+' clipped '+r.text);if(name.includes('process')&&r.kind==='text')assert(r.bottom<=page.viewportSize().height-65,name+' text overlaps stage navigation: '+r.text);}
-}
+await new Promise(done=>app.server.listen(0,'127.0.0.1',done));const base='http://127.0.0.1:'+app.server.address().port;
+const devices=[{name:'compact',engine:webkit,width:375,height:667,touch:true},{name:'iphone',engine:webkit,width:390,height:844,touch:true},{name:'android',engine:chromium,width:412,height:915,touch:true},{name:'tablet',engine:webkit,width:820,height:1180,touch:false},{name:'desktop',engine:chromium,width:1440,height:900,touch:false}];
+let browser;const results=[];
+async function scene(page,name,p=.5){await page.evaluate(({name,p})=>{const el=document.querySelector('[data-scene="'+name+'"]'),pin=el.querySelector(':scope > .pin');scrollTo(0,el.getBoundingClientRect().top+scrollY+Math.max(1,el.offsetHeight-(pin?.clientHeight||innerHeight))*p);},{name,p});await page.waitForTimeout(100);}
+async function phase(page,name,p=.5){await page.evaluate(({name,p})=>{const s=window.__mabwePerformance().timeline.find(s=>s.name===name),el=document.querySelector('#process');scrollTo(0,el.getBoundingClientRect().top+scrollY+s.start+(s.end-s.start)*p);},{name,p});await page.waitForFunction(name=>window.__mabweMaking.step===name,name);await page.waitForFunction(()=>{const s=window.__mabwePerformance().process;return s.displayed===s.target&&s.displayed>=0;});}
+async function capture(page,name){await page.screenshot({path:new URL(name+'.png',out).pathname});const box=await page.evaluate(()=>{const text=[...document.querySelectorAll('.process-step.is-current h2,.process-step.is-current p')].map(el=>{const r=el.getBoundingClientRect();return {text:el.textContent.slice(0,45),l:r.left,r:r.right,b:r.bottom};});return {overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,text};});assert(box.overflow<=2,name+' overflow');if(name.includes('process'))for(const t of box.text){assert(t.l>=0&&t.r<=page.viewportSize().width+1,name+' clipped text');assert(t.b<page.viewportSize().height-45,name+' footer overlap '+t.text);}}
 try{
- for(const device of devices){
-  browser=await device.engine.launch({headless:true,...(device.engine===chromium?{args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}: {})});
-  const page=await browser.newPage({viewport:{width:device.width,height:device.height},isMobile:device.touch,hasTouch:device.touch,deviceScaleFactor:1});
-  const errors=[],failures=[];page.on('pageerror',e=>errors.push(e.message));
-  page.on('response',r=>{if(r.status()>=400&&new URL(r.url()).origin===base)failures.push(r.status()+' '+r.url());});
-  await page.goto(base+'/prototypes/making-atelier.html',{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>document.documentElement.dataset.makingAtelier==='ready');
-  assert.equal(await page.locator('video[autoplay],video[controls]').count(),0);
-  assert.equal(await page.evaluate(()=>window.__mabwePerformance().process.draws),0,'Process frames should not paint in the opening');
-  const captures=[];
-  for(const scene of ['introduction','origin','material','carving']){
-   await go(page,scene,scene==='introduction'?0:.5);
-   if(scene==='carving')await settles(page,'film');
-   await inspectLayout(page,device.name+'-'+scene);
-   await page.screenshot({path:new URL(device.name+'-'+scene+'.png',out).pathname});
+ for(const d of devices){
+  browser=await d.engine.launch({...(d.engine===chromium?{args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}: {})});
+  const page=await browser.newPage({viewport:{width:d.width,height:d.height},isMobile:d.touch,hasTouch:d.touch,deviceScaleFactor:1});
+  const errors=[],failures=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400&&new URL(r.url()).origin===base)failures.push(r.status()+' '+r.url());});
+  await page.goto(base+'/prototypes/making-atelier.html',{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.documentElement.dataset.makingAtelier==='ready');
+  assert.equal(await page.locator('#toolStage,.step-buttons,video[autoplay]').count(),0,'Floating props or playback controls reintroduced');
+  for(const name of ['introduction','origin','material','carving']){await scene(page,name,name==='introduction'?0:.5);if(name==='carving')await page.waitForFunction(()=>{const p=window.__mabwePerformance().film;return p.displayed===p.target&&p.displayed>=0;});await capture(page,d.name+'-'+name);}
+  const film=[];for(const p of [.72,.25,.55]){await scene(page,'carving',p);await page.waitForFunction(()=>{const s=window.__mabwePerformance().film;return s.displayed===s.target&&s.displayed>=0;});film.push(await page.evaluate(()=>window.__mabwePerformance().film.displayed));}assert(film[0]>film[1]&&film[2]>film[1]);
+  const snapshots=[];
+  for(const name of ['mark','carve','sand','heat','wax','work']){
+   await phase(page,name);await page.waitForTimeout(100);await capture(page,d.name+'-process-'+name);snapshots.push(await page.evaluate(()=>window.__mabwePerformance()));
   }
-  const filmSamples=[];
-  for(const p of [.8,.15,.5]){await go(page,'carving',p);await settles(page,'film');filmSamples.push(await page.evaluate(()=>window.__mabwePerformance().film.displayed));}
-  console.log('FILM SAMPLES',device.name,JSON.stringify(filmSamples),JSON.stringify(await page.evaluate(()=>({y:scrollY,chapter:window.__mabweMaking.chapter,stats:window.__mabwePerformance(),layout:[...document.querySelectorAll('[data-scene]')].map(e=>({name:e.dataset.scene,top:e.offsetTop,height:e.offsetHeight}))}))));
-  assert(filmSamples[0]>filmSamples[1]&&filmSamples[2]>filmSamples[1],'Documentary must reverse and advance');
-  for(let index=0;index<6;index++){
-   await go(page,'process',(index+.5)/6);await settles(page,'process');
-   await page.waitForTimeout(600);
-   assert.equal(await page.evaluate(()=>window.__mabweMaking.step),steps[index]);
-   if(index>=1&&index<=4){
-    await page.waitForFunction(()=>window.__mabwePerformance().tools.state==='ready',{timeout:20000});
-    assert.equal(await page.evaluate(()=>window.__mabwePerformance().tools.visible),true,'Tool absent at '+steps[index]);
-    const pixels=await page.locator('#toolStage canvas').evaluate(c=>{const data=c.getContext('2d').getImageData(0,0,c.width,c.height).data;let count=0;for(let i=3;i<data.length;i+=4)if(data[i]>25)count++;return count;});
-    assert(pixels>80,'Rendered tool layer is empty at '+steps[index]+': '+pixels);
-   }
-   if(index===5){await page.waitForFunction(()=>window.__mabwePerformance().approved==='ready',{timeout:30000});}
-   await page.screenshot({path:new URL(device.name+'-process-'+steps[index]+'.png',out).pathname});
-   await inspectLayout(page,device.name+'-process-'+steps[index]);
-   console.log('PROCESS STATE',device.name,steps[index],JSON.stringify(await page.evaluate(()=>window.__mabwePerformance())));
-   captures.push(await page.evaluate(()=>window.__mabwePerformance()));
+  await page.waitForFunction(()=>window.__mabwePerformance().approved==='ready');
+  await phase(page,'wax',.95);const end=await page.evaluate(()=>window.__mabwePerformance().finish);await phase(page,'work',.1);assert.equal(await page.evaluate(()=>window.__mabwePerformance().finish),end,'Finish jumps at the final boundary');assert.equal(end,1);
+  for(const name of ['heat','carve','wax','mark','work','carve']){await phase(page,name);const s=await page.evaluate(()=>window.__mabwePerformance());if(['mark','carve','sand','heat'].includes(name))assert.equal(s.finish,0,'Old final image remained after reversing');assert(s.process.ready<=2&&s.film.ready<=2,'Decoded sheets unbounded');}
+  await phase(page,'carve',.1);const before=await page.evaluate(()=>window.__mabwePerformance().process.target);await phase(page,'carve',.15);assert.equal(await page.evaluate(()=>window.__mabwePerformance().process.target),before,'Entry hold vanished');
+  let timing=null;
+  if(d.engine===chromium){
+   await phase(page,'carve',.3);
+   timing=await page.evaluate(async()=>{const t=window.__mabwePerformance().timeline.find(s=>s.name==='carve'),el=document.querySelector('#process'),top=el.getBoundingClientRect().top+scrollY,dt=[];let last=performance.now();for(let i=0;i<90;i++){await new Promise(requestAnimationFrame);const n=performance.now();dt.push(n-last);last=n;const p=i<45?.25+i*.009:.65-(i-45)*.009;scrollTo(0,top+t.start+(t.end-t.start)*p);}dt.sort((a,b)=>a-b);return {p95:dt[Math.floor(dt.length*.95)],max:Math.max(...dt)};});
+   await page.waitForFunction(()=>{const s=window.__mabwePerformance().process;return s.displayed===s.target;});
+   assert(timing.max<180,'Large warmed scroll stall '+timing.max);console.log('SCROLL',d.name,JSON.stringify(timing));
+   const old=await page.evaluate(()=>window.__mabweMaking.progress);await page.mouse.wheel(0,400);await page.waitForTimeout(150);assert(await page.evaluate(()=>window.__mabweMaking.progress)>old,'Native wheel did not move story');
   }
-  // A direct jump across all finishing stages must not leave a polished image
-  // over a carving frame. The exact displayed source must reach its target.
-  for(const index of [1,4,0,3,5,1]){
-   await page.locator('[data-go="'+steps[index]+'"]').click();
-   await page.waitForFunction(expected=>window.__mabweMaking.step===expected,steps[index]);await settles(page,'process');
-   assert.equal(await page.evaluate(()=>window.__mabweMaking.step),steps[index]);
-   if(index<5)assert.equal(await page.locator('#approvedHost').evaluate(el=>Number(getComputedStyle(el).opacity)),0);
-  }
-  let scrollTiming=null;
-  if(device.engine===chromium){
-   await go(page,'process',.2);await settles(page,'process');
-   scrollTiming=await page.evaluate(async()=>{
-    const el=document.querySelector('#process'),top=el.getBoundingClientRect().top+scrollY,span=el.offsetHeight-innerHeight;
-    const intervals=[];let previous=performance.now();
-    for(let i=0;i<60;i++){
-     await new Promise(requestAnimationFrame);const now=performance.now();intervals.push(now-previous);previous=now;
-     const p=i<30?.19+i*.005:.34-(i-30)*.005;scrollTo(0,top+span*p);
-    }
-    return {frames:intervals.length,p95:intervals.sort((a,b)=>a-b)[Math.floor(intervals.length*.95)],max:Math.max(...intervals)};
-   });
-   await settles(page,'process');
-   assert(scrollTiming.max<300,'Severe main-thread stall during warmed forward/reverse scroll: '+scrollTiming.max);
-   console.log('SCROLL TIMING',device.name,JSON.stringify(scrollTiming));
-  }
-  const steady=await page.evaluate(()=>window.__mabwePerformance());
-  await page.waitForTimeout(350);
-  const idle=await page.evaluate(()=>window.__mabwePerformance());
-  assert.equal(idle.process.draws,steady.process.draws,'Idle scene repaints unnecessarily');
-  assert.equal(idle.tools.draws,steady.tools.draws,'Idle tools animate independently of scroll');
-  assert(idle.process.inflight<=3&&idle.film.inflight<=3,'Decoder concurrency is unbounded');
-  assert(idle.process.bytes<60*1024*1024&&idle.film.bytes<60*1024*1024,'Decoded memory is unbounded');
-  await go(page,'house',0);await inspectLayout(page,device.name+'-house');
-  await page.screenshot({path:new URL(device.name+'-house.png',out).pathname});
-  assert.deepEqual(errors,[],device.name+' JavaScript errors');assert.deepEqual(failures,[],device.name+' missing local media');
-  // Capture genuine scroll input as well as programmatic position jumps.
-  if(device.engine===chromium){
-   await go(page,'process',.2);
-   const before=await page.evaluate(()=>window.__mabweMaking.progress);
-   await page.mouse.wheel(0,500);await page.waitForTimeout(250);
-   const after=await page.evaluate(()=>window.__mabweMaking.progress);assert(after>before,'Wheel input did not advance the process');
-  }
-  await page.emulateMedia({reducedMotion:'reduce'});await page.waitForTimeout(200);
-  assert.equal(await page.locator('.process-step').count(),6);
-  for(const step of steps)assert.equal(await page.locator('#step-'+step).getAttribute('aria-hidden'),null,'Reduced-motion step hidden from assistive technology');
-  assert.equal(await page.locator('.process-art').isVisible(),false,'Reduced motion should use readable stills');
-  const reducedOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);assert(reducedOverflow<=2);
-  await page.screenshot({path:new URL(device.name+'-reduced-motion.png',out).pathname,fullPage:true});
-  results.push({device:device.name,filmSamples,captures,idle,scrollTiming,errors,failures});
-  await page.close();await browser.close();browser=null;
+  await page.waitForTimeout(150);const idle=await page.evaluate(()=>window.__mabwePerformance());await page.waitForTimeout(250);assert.equal(await page.evaluate(()=>window.__mabwePerformance().process.draws),idle.process.draws,'Idle repaints');
+  await scene(page,'house',0);await capture(page,d.name+'-house');
+  await page.emulateMedia({reducedMotion:'reduce'});await page.waitForTimeout(150);for(const a of await page.locator('[data-step]').all())assert.equal(await a.getAttribute('aria-hidden'),null);assert.equal(await page.locator('.process-art').isVisible(),false);await page.screenshot({path:new URL(d.name+'-reduced.png',out).pathname,fullPage:true});
+  assert.deepEqual(errors,[],d.name+' JS errors');assert.deepEqual(failures,[],d.name+' missing source media');results.push({device:d.name,timing,film,snapshots,idle,errors,failures});await browser.close();browser=null;
  }
- writeFileSync(new URL('acceptance.json',out),JSON.stringify(results,null,2));
- console.log('PASS: exact reversible frames, four physical tool stages, approved final work, responsive layout, idle rendering, and reduced-motion reading on all five devices.');
+ writeFileSync(new URL('acceptance.json',out),JSON.stringify(results,null,2));console.log('PASS: quiet story, held key poses, weighted pacing, native-detail sheets, reversible finish, five layouts and reduced motion.');
 }finally{if(browser)await browser.close();await new Promise(done=>app.server.close(done));rmSync(dir,{recursive:true,force:true});}

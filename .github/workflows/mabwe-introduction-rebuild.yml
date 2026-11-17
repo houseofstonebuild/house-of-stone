@@ -1,18 +1,17 @@
 name: Mabwe introduction rebuild review
 on:
   push:
-    branches: ['rebuild/mabwe-introduction-2026-11-16']
+    branches: ['refine/mabwe-film-2026-11-17']
   pull_request:
     paths:
       - 'public/prototypes/making-atelier.*'
-      - 'public/prototypes/scroll-frame-stream.js'
+      - 'public/prototypes/coil-formation.js'
+      - 'public/prototypes/story-film-atlas.js'
       - 'qa/welcome-scroll-acceptance.mjs'
-      - '.github/workflows/mabwe-introduction-rebuild.yml'
-  workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 concurrency:
-  group: mabwe-introduction-${{ github.ref }}
+  group: mabwe-film-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   review:
@@ -23,24 +22,28 @@ jobs:
       options: --ipc=host
     steps:
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - run: npm run check && npm test
       - run: npm install --prefix qa --no-audit --no-fund
-      - name: Check story modules
-        run: |
-          node --check public/prototypes/making-atelier.js
-          node --check public/prototypes/scroll-frame-stream.js
-          node --check qa/welcome-scroll-acceptance.mjs
-      - name: Reversible process and five responsive browser layouts
+      - name: Capture the unchanged approved final sculpture
+        run: sh scripts/run-browser-qa.sh qa/capture-story-finish.mjs
+      - run: npm run check && npm test
+      - name: Pacing and responsive review
         run: sh scripts/run-browser-qa.sh qa/welcome-scroll-acceptance.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: mabwe-introduction-visual-review
-          path: test-results/browser/welcome-rebuild/
+          name: mabwe-quiet-film-review
+          path: test-results/browser/welcome-film/
           retention-days: 14
-          if-no-files-found: warn
+      - name: Retain the validated final stills on the review branch
+        if: github.ref == 'refs/heads/refine/mabwe-film-2026-11-17' && success()
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name houseofstonebuild
+          git config user.email 'houseofstonebuild@users.noreply.github.com'
+          git add public/assets/story-sequence-v1/approved
+          git diff --cached --quiet && exit 0
+          git commit -m 'Retain registered final stills from unchanged approved Coil renderer'
+          git push origin HEAD:refine/mabwe-film-2026-11-17

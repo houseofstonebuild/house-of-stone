@@ -6,7 +6,8 @@ import {createHash} from 'node:crypto';
 const root=process.env.MABWE_ORIGIN||'https://houseofmabwe.com';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 for(const path of ['/prototypes/making-atelier.html','/prototypes/making-atelier.css',
- '/prototypes/making-atelier.js','/prototypes/scroll-frame-stream.js','/prototypes/approved-coil-reveal.js']){
+ '/prototypes/making-atelier.js','/prototypes/scroll-frame-stream.js','/prototypes/approved-coil-reveal.js',
+ '/prototypes/coil-formation.js','/prototypes/story-film-atlas.js']){
  const response=await fetch(root+path+'?mabwe-rebuild-verification='+Date.now(),{headers:{'cache-control':'no-cache'},signal:AbortSignal.timeout(25000)});
  assert.equal(response.status,200,path);
  const actual=new Uint8Array(await response.arrayBuffer());
@@ -23,7 +24,9 @@ for(const path of ['/assets/making-v7/manifest.json','/assets/making-cinema-fram
 for(const path of ['/assets/making-v7/mobile/frame_045.webp','/assets/making-v7/mobile/frame_078.webp',
  '/assets/making-v7/desktop/frame_120.webp','/assets/making-v7/desktop/frame_138.webp',
  '/assets/making-cinema-frames-v4/frame_000.webp','/assets/making-cinema-frames-v4/frame_100.webp',
- '/assets/making-cinema-frames-v4/frame_199.webp','/assets/making-atelier-final-mobile-v1.png','/models/coil-uploaded-v1.glb']){
+ '/assets/making-cinema-frames-v4/frame_199.webp','/assets/making-atelier-final-mobile-v1.png','/models/coil-uploaded-v1.glb','/assets/story-sequence-v1/approved/desktop.png',
+ '/assets/story-sequence-v1/approved/mobile.png','/assets/story-sequence-v1/form/manifest.json',
+ '/assets/story-sequence-v1/workshop/manifest.json']){
  const response=await fetch(root+path,{signal:AbortSignal.timeout(25000)});assert(response.ok,path);
  const actual=new Uint8Array(await response.arrayBuffer()),expected=readFileSync(new URL('../public'+path,import.meta.url));
  assert.equal(hash(actual),hash(expected),path+' source asset differs');console.log('SOURCE VERIFIED',path);

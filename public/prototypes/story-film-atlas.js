@@ -1,155 +1,59 @@
-/* Source-traceable documentary scrubber.
- * Scroll synchronizes a low-resolution presentation canvas to the selected
- * original source frame, in BOTH directions. It never plays the video.
- * Decode only the current sprite sheet and one adjacent sheet; avoid
- * permanently uploading eight 5x5 sprites to Safari GPU memory. */
-const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
-export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
- const canvas=document.createElement('canvas');
- canvas.className='film-motion-atlas';
- canvas.setAttribute('aria-hidden','true');
- anchor.after(canvas);
+// Native-detail, four-frame sheets: adjacent motion needs no network or decode.
+// Only the active sheet and one neighboring sheet remain decoded.
+export function createStorySequence({stage,image,kind,mobile,onDisplay}){
+ const canvas=document.createElement('canvas');canvas.className='scroll-frame-canvas';canvas.setAttribute('aria-hidden','true');image.after(canvas);
  const ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});
- const compositor=document.createElement('div');
- compositor.className='film-motion-compositor';
- compositor.setAttribute('aria-hidden','true');
- compositor.hidden=true;
- canvas.after(compositor);
- const images=new Map();
- let profile=mobile()?'mobile':'desktop';
- let meta=null,epoch=0,target=-1,draws=0,ready=0,loading=0;
- let sourceSprite=null,spriteLoading=false;
- let painted=-1,pan=30,lastHeight=-1,lastWidth=-1;
- const maxSheets=()=>mobile()?2:3;
- function source(index){return '/assets/making-film-atlas-v1/'+profile+'/sheet_'+String(index).padStart(2,'0')+'.webp';}
+ let meta=null,profile=mobile()?'mobile':'desktop',epoch=0,target=0,displayed=-1,active=false,loading=0,direction=1;
+ let w=0,h=0,lastSheet=null,draws=0,requests=0,errors=0,lastX=-1,lastY=-1;
+ const cache=new Map(),queue=new Map();let pending=-1;
+ const root='/assets/story-sequence-v1/'+kind;
+ function dimensions(){w=Math.max(1,stage.clientWidth);h=Math.max(1,stage.clientHeight)}
+ function paint(){
+  if(!meta||!active)return;
+  const sheet=Math.floor(target/4),entry=cache.get(sheet);if(entry?.state!=='ready')return;
+  const {width:tw,height:th}=meta.profiles[profile];if(!w||!h)dimensions();
+  const ratio=Math.min(devicePixelRatio||1,2,tw/w,th/h),cw=Math.max(1,Math.round(w*ratio)),ch=Math.max(1,Math.round(h*ratio));
+  if(canvas.width!==cw||canvas.height!==ch){canvas.width=cw;canvas.height=ch;displayed=-1;}
+  if(displayed===target&&lastX===w&&lastY===h)return;
+  const cell=target%4,scale=Math.max(cw/tw,ch/th),dw=tw*scale,dh=th*scale;
+  ctx.drawImage(entry.img,cell%2*tw,Math.floor(cell/2)*th,tw,th,(cw-dw)/2,(ch-dh)/2,dw,dh);
+  displayed=target;lastSheet=sheet;lastX=w;lastY=h;draws++;
+  canvas.style.opacity='1';stage.dataset.displayedFrame=String(displayed);stage.dataset.frameStatus='ready';onDisplay?.(displayed);
+ }
  function trim(){
-  if(target<0)return;
-  const active=Math.floor(target/25);
-  const keep=[...images.keys()].sort((a,b)=>Math.abs(a-active)-Math.abs(b-active));
-  for(const key of keep.slice(maxSheets()))images.delete(key);
+  const sheet=Math.floor(target/4),keep=[...cache.keys()].sort((a,b)=>Math.abs(a-sheet)-Math.abs(b-sheet));
+  for(const n of keep.slice(2)){if(cache.get(n)?.state==='ready')cache.delete(n);}
  }
- function queue(index,version=epoch){
-  if(index<0||index>7||images.has(index))return;
-  const img=new Image();
-  img.decoding='async';
-  images.set(index,{img,state:'loading'});
-  loading++;
-  img.onload=()=>{
-   loading=Math.max(0,loading-1);
-   if(version!==epoch)return;
-   const entry=images.get(index);
-   if(!entry||entry.img!==img)return;
-   entry.state='ready';
-   ready++;
-   if(target>=0&&Math.floor(target/25)===index)paint(target,pan,47);
-   trim();
-  };
-  img.onerror=()=>{
-   loading=Math.max(0,loading-1);
-   if(version!==epoch)return;
-   if(images.get(index)?.img===img)images.delete(index);
-  };
-  img.src=source(index);
+ function add(sheet,priority){
+  if(!meta||sheet<0||sheet>=Math.ceil(meta.frames/4)||cache.has(sheet))return;
+  queue.set(sheet,priority);
  }
- function paint(frame,positionX=30,positionY=47){
-  if(!meta||!ctx||frame<0||frame>=meta.frames)return false;
-  target=frame;pan=positionX;
-  const sheet=Math.floor(frame/25);
-  // No frame-by-frame network access: source frames are grouped into tiles.
-  // The matching 1600-pixel source is displayed by the separate HD renderer
-  // after the scroll gesture settles.
-  const entry=images.get(sheet);
-  if(!sourceSprite&&(!entry||entry.state!=='ready')){
-   queue(sheet);
-   return false;
-  }
-  const width=Math.max(1,Math.round(stage.clientWidth));
-  const height=Math.max(1,Math.round(stage.clientHeight));
-  const renderW=Math.max(1,Math.min(width,mobile()?360:640));
-  const renderH=Math.max(1,Math.round(height*(renderW/width)));
-  if(renderW!==lastWidth||renderH!==lastHeight){
-   canvas.width=lastWidth=renderW;
-   canvas.height=lastHeight=renderH;
-  }
-  if(frame!==painted){
-   const source=sourceSprite||entry.img;
-   const tile=sourceSprite?Math.round(frame*17/199):frame%25;
-   const tw=sourceSprite?source.naturalWidth/7:meta.profiles[profile].tile_width;
-   const th=sourceSprite?source.naturalHeight/6:meta.profiles[profile].tile_height;
-   const sx=sourceSprite?tile%7*tw:tile%5*tw;
-   const sy=sourceSprite?Math.floor(tile/7)*th:Math.floor(tile/5)*th;
-   const scale=Math.max(renderW/tw,renderH/th);
-   const dw=tw*scale,dh=th*scale;
-   const dx=(renderW-dw)*clamp(positionX/100,0,1);
-   const dy=(renderH-dh)*clamp(positionY/100,0,1);
-   ctx.imageSmoothingEnabled=true;
-   ctx.imageSmoothingQuality='medium';
-   ctx.drawImage(source,sx,sy,tw,th,dx,dy,dw,dh);
-   painted=frame;draws++;
-  }
-  canvas.style.opacity='1';
-  stage.dataset.displayedFrame=String(sourceSprite?Number(stage.dataset.requestedFrame||frame):frame);
-  stage.dataset.displayQuality='atlas-preview';
-  stage.dataset.mobileReady='true';
-  onDisplay?.(frame);
-  // Only one speculative sheet: do not decode all eight at first paint.
-  // Queue it only when the active sheet is almost exhausted.
-  const nearEnd=(frame%25)>19;
-  const nearStart=(frame%25)<5;
-  if(!sourceSprite){
-   if(nearEnd)queue(sheet+1);
-   else if(nearStart)queue(sheet-1);
-  }
-  trim();
-  return true;
- }
- async function verifyAndLoad(){
-  const version=++epoch;
-  try{
-   const response=await fetch('/assets/making-film-atlas-v1/manifest.json',{cache:'no-store'});
-   if(!response.ok){loadLegacySprite(version);return;}
-   const candidate=await response.json();
-   if(version!==epoch||candidate.version!==1||candidate.frames!==200||
-     candidate.columns!==5||candidate.rows!==5||
-     candidate.frames_per_sheet!==25||!candidate.profiles?.[profile])return;
-   meta=candidate;
-   // First paint costs a single source image instead of all 8 atlas sheets.
-   queue(Math.max(0,Math.floor(Math.max(0,target)/25)),version);
-  }catch(_){loadLegacySprite(version);}
- }
- function loadLegacySprite(version){
-  if(version!==epoch||sourceSprite||spriteLoading)return;
-  spriteLoading=true;
-  const img=new Image();
-  img.decoding='async';
-  img.onload=()=>{
-   spriteLoading=false;
-   if(version!==epoch)return;
-   sourceSprite=img;
-   meta={frames:200};
-   canvas.style.opacity='0';
-   if(target>=0)paint(target,pan,47);
-  };
-  img.onerror=()=>{spriteLoading=false;};
-  img.src='/assets/making-chiseling-scroll-frames-v1.webp';
- }
- function resize(){
-  const newProfile=mobile()?'mobile':'desktop';
-  if(newProfile!==profile){
-   profile=newProfile;epoch++;images.clear();ready=0;loading=0;meta=null;
-   sourceSprite=null;spriteLoading=false;
-   canvas.style.opacity='0';painted=-1;lastWidth=lastHeight=-1;
-   verifyAndLoad();
-  }else{
-   lastWidth=lastHeight=-1;painted=-1;
-   if(target>=0)paint(target,pan,47);
+ function pump(){
+  if(!meta||!active)return;
+  while(loading<1&&queue.size){
+   const n=[...queue].sort((a,b)=>a[1]-b[1])[0][0];queue.delete(n);if(cache.has(n))continue;
+   const img=new Image(),version=epoch,record={img,state:'loading'};img.decoding='async';cache.set(n,record);loading++;requests++;
+   img.src=root+'/'+profile+'/sheet_'+String(n).padStart(3,'0')+'.webp';
+   img.decode().then(()=>{
+    if(epoch!==version||cache.get(n)!==record)return;
+    record.state='ready';if(!active){cache.delete(n);return;}paint();trim();
+   }).catch(()=>{if(epoch!==version)return;errors++;record.state='error';stage.dataset.frameStatus='unavailable';}).finally(()=>{loading--;pump()});
   }
  }
- function stats(){
-  return {enabled:Boolean(meta),ready:sourceSprite?1:[...images.values()].filter(v=>v.state==='ready').length,
-    frames:meta?.frames||0,draws,profile,loading,mode:'single-canvas',
-    cachedSheets:images.size,legacySprite:Boolean(sourceSprite)};
+ function request(frame,visible=true){
+  if(frame!==target)direction=frame>target?1:-1;target=Math.max(0,Math.round(frame));active=visible;
+  stage.dataset.requestedFrame=String(target);pending=target;
+  if(!visible){suspend();return;}
+  if(!meta)return;
+  const next=mobile()?'mobile':'desktop';if(next!==profile){profile=next;epoch++;cache.clear();queue.clear();displayed=-1;dimensions();}
+  target=Math.min(meta.frames-1,target);paint();queue.clear();const sheet=Math.floor(target/4);
+  add(sheet,0);add(sheet+direction,1);pump();trim();
  }
- verifyAndLoad();
- return {paint,resize,stats,canvas,get available(){return Boolean(meta)},get ready(){return stats().ready}};
+ function suspend(){active=false;queue.clear();for(const [n,e] of cache)if(e.state==='ready')cache.delete(n);lastSheet=null;}
+ function resize(){dimensions();lastX=lastY=-1;if(active)request(target,true)}
+ function stats(){const ready=[...cache.values()].filter(e=>e.state==='ready');return {target,displayed,ready:ready.length,inflight:loading,requests,draws,errors,profile,bytes:ready.reduce((n,e)=>n+e.img.naturalWidth*e.img.naturalHeight*4,0),mode:'native-detail-sheets',pixels:canvas.width*canvas.height};}
+ const ready=fetch(root+'/manifest.json').then(r=>{if(!r.ok)throw Error('Story media missing: '+kind);return r.json()}).then(m=>{
+  if(m.version!==1||m.per_sheet!==4||!m.profiles?.[profile])throw Error('Invalid source sheet manifest');meta=m;if(active)request(pending,true);
+ }).catch(error=>{stage.dataset.frameStatus='unavailable';console.warn(error);});
+ return {request,resize,suspend,stats,ready,canvas};
 }
