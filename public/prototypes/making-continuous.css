@@ -1,0 +1,26 @@
+/* Isolated continuous-sequence study. The earlier photographic entrance is restored. */
+.continuous-story .prologue{height:100svh;min-height:600px;background:#242a24;color:#f2f1e9}
+.continuous-story .opening-photo{inset:0;width:100%;height:100%;object-fit:cover;object-position:65% 40%;transform:none}
+.continuous-story .opening-shade{display:block;opacity:1;background:linear-gradient(90deg,#0e1711c9 0%,#111b1355 60%,#111b1315),linear-gradient(0deg,#0c140de0,transparent 55%)}
+.continuous-story .opening-copy{left:var(--gutter);right:var(--gutter);width:auto;top:48%;bottom:auto;transform:translateY(-40%);color:#f2f1e9}
+.continuous-story .opening-copy h1{font-size:clamp(80px,10vw,158px);line-height:.99;max-width:1100px;margin-bottom:30px}
+.continuous-story .opening-copy .intro{font-size:15px;line-height:1.8;color:#eeede4da;max-width:400px}
+.continuous-story .opening-footer{left:var(--gutter);right:var(--gutter);bottom:35px;width:auto;color:#f2f1e9;display:flex;justify-content:space-between}
+.continuous-story .opening-footer>span{display:inline}.continuous-story .opening-footer i{background:#eeede4a0}
+.continuous-story .js .workshop,.js .continuous-story .workshop{height:200svh}
+.continuous-story #processCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;display:block;opacity:0}
+.continuous-story #processCanvas[data-frame-status="ready"]{opacity:1}
+.continuous-story #workshopCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;display:block;opacity:0}
+.continuous-story #workshopCanvas[data-frame-status="ready"]{opacity:1}
+.continuous-story .process-step{transition:opacity .18s linear,visibility .18s linear}
+.continuous-story .process-step.is-current{opacity:1}
+.continuous-story .masthead[data-tone="dark"]{color:#f2f1e9}.continuous-story .masthead[data-tone="dark"] .face-mark{filter:invert(1)}
+@media(max-width:700px), (max-width:1100px) and (orientation:portrait){
+ .continuous-story .prologue{min-height:560px}.continuous-story .opening-photo{inset:0;width:100%;height:100%;object-position:62% 40%}
+ .continuous-story .opening-copy{top:auto;bottom:130px;left:var(--gutter);right:var(--gutter);width:auto;transform:none}
+ .continuous-story .opening-copy h1{font-size:clamp(64px,15vw,90px);line-height:1.02;margin-bottom:24px}
+ .continuous-story .opening-copy .eyebrow{font-size:9px;margin-bottom:20px}.continuous-story .opening-copy .intro{font-size:13px;line-height:1.85;max-width:320px}
+ .continuous-story .opening-footer{bottom:30px}.continuous-story .opening-footer>span{display:none}
+ .js .continuous-story .workshop{height:190svh}
+}
+@media(prefers-reduced-motion:reduce){.continuous-story #workshopCanvas,.continuous-story #processCanvas{display:none}.continuous-story .process-step{transition:none}.js .continuous-story .workshop{height:auto}}

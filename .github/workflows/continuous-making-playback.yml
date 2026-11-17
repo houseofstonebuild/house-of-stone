@@ -1,0 +1,47 @@
+name: Continuous making playback benchmark
+on:
+  push:
+    branches: ['rebuild/continuous-making-2026-11-17']
+    paths: ['public/prototypes/continuous-sequence.js', 'qa/continuous-sequence.mjs', 'tools/continuous-making/pack.py', '.github/workflows/continuous-making-playback.yml']
+permissions:
+  contents: write
+concurrency:
+  group: continuous-playback-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  playback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --prefix qa --no-audit --no-fund
+      - name: Pack original source detail without giant decoded sheets
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq python3-pil
+          python3 tools/continuous-making/pack.py --workshop
+      - run: npm run check && npm test
+      - name: Measure actual painted motion and reversals
+        run: sh scripts/run-browser-qa.sh qa/continuous-sequence.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: continuous-playback-review
+          path: test-results/browser/continuous-making/
+          retention-days: 14
+      - name: Retain validated workshop frame packs on the review branch
+        if: success()
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name houseofstonebuild
+          git config user.email houseofstonebuild@users.noreply.github.com
+          git add public/assets/continuous-making-v1/workshop
+          git diff --cached --quiet && exit 0
+          git commit -m 'Retain original-detail workshop frame packs for continuous playback'
+          git push origin HEAD:rebuild/continuous-making-2026-11-17
