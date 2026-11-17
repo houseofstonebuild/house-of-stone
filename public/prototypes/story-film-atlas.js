@@ -73,7 +73,7 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
   }
   if(frame!==painted){
    const source=sourceSprite||entry.img;
-   const tile=sourceSprite?Math.round(frame*41/199):frame%25;
+   const tile=sourceSprite?Math.round(frame*17/199):frame%25;
    const tw=sourceSprite?source.naturalWidth/7:meta.profiles[profile].tile_width;
    const th=sourceSprite?source.naturalHeight/6:meta.profiles[profile].tile_height;
    const sx=sourceSprite?tile%7*tw:tile%5*tw;
