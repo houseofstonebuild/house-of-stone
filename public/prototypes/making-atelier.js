@@ -45,7 +45,7 @@ let filmEdition='legacy';
 const fallbackFrames=19; // First ~8 seconds only: the lion never comes into view.
 const atlasCount=18;
 let hdFramesReady=false;
-let frameRoot='/assets/making-cinema-frames';
+let frameRoot='../assets/making-cinema-frames';
 let activeFilmFrame=-1,desiredFilmFrame=-1,filmDuration=0,videoMetadata=false,filmActive=false;
 let filmPan=18;
 // Preserve the fluid source-atlas timeline during touch/trackpad movement.
@@ -113,36 +113,36 @@ async function checkHdFrames(){
  // V4 samples the documentary near its original 24 fps. The source frame
  // count is capped at 200 to balance motion fidelity with phone decoding.
  try{
-  const response=await fetch('/assets/making-cinema-frames-v4/manifest.json',{cache:'no-store'});
+  const response=await fetch('../assets/making-cinema-frames-v4/manifest.json',{cache:'no-store'});
   if(response.ok){
    const manifest=await response.json();
    if(manifest.version===4&&manifest.frames===200&&manifest.width>=1280&&manifest.end_seconds<=8.4){
     const checks=await Promise.all([0,100,199].map(i=>
-     fetch('/assets/making-cinema-frames-v4/frame_'+String(i).padStart(3,'0')+'.webp',{method:'HEAD'})));
-    if(checks.every(r=>r.ok))selected={root:'/assets/making-cinema-frames-v4',count:200,edition:'hd-v4'};
+     fetch('../assets/making-cinema-frames-v4/frame_'+String(i).padStart(3,'0')+'.webp',{method:'HEAD'})));
+    if(checks.every(r=>r.ok))selected={root:'../assets/making-cinema-frames-v4',count:200,edition:'hd-v4'};
    }
   }
  }catch(_){/* v3 remains available */}
  if(!selected)try{
-  const response=await fetch('/assets/making-cinema-frames-v3/manifest.json',{cache:'no-store'});
+  const response=await fetch('../assets/making-cinema-frames-v3/manifest.json',{cache:'no-store'});
   if(response.ok){
    const manifest=await response.json();
    if(manifest.version===3&&manifest.frames===144&&manifest.width>=1280&&
       manifest.end_seconds<=8.4&&manifest.start_seconds===0){
     // An index/manifest-only deploy must not select a missing frame archive.
     const tested=await Promise.all([0,72,143].map(i=>
-      fetch('/assets/making-cinema-frames-v3/frame_'+String(i).padStart(3,'0')+'.webp',{method:'HEAD'})));
-    if(tested.every(r=>r.ok))selected={root:'/assets/making-cinema-frames-v3',count:144,edition:'hd-v3'};
+      fetch('../assets/making-cinema-frames-v3/frame_'+String(i).padStart(3,'0')+'.webp',{method:'HEAD'})));
+    if(tested.every(r=>r.ok))selected={root:'../assets/making-cinema-frames-v3',count:144,edition:'hd-v3'};
    }
   }
  }catch(_){/* retain v2 or source-quality fallback */}
  if(!selected){
   try{
-   const response=await fetch('/assets/making-cinema-frames-v2/manifest.json',{cache:'no-store'});
+   const response=await fetch('../assets/making-cinema-frames-v2/manifest.json',{cache:'no-store'});
    if(response.ok){
     const manifest=await response.json();
     if(manifest.version===2&&manifest.frames===48&&manifest.width>=1280&&manifest.end_seconds<=8.5)
-     selected={root:'/assets/making-cinema-frames-v2',count:48,edition:'hd-v2'};
+     selected={root:'../assets/making-cinema-frames-v2',count:48,edition:'hd-v2'};
    }
   }catch(_){/* fallback to source 19-frame excerpt */}
  }
@@ -239,13 +239,13 @@ $film.addEventListener('error',()=>{
  if(hdFramesReady){
   // Remain functional if the deployment contains frames before the HD MP4.
   hdFramesReady=false;
-  frameRoot='/assets/making-cinema-frames';
+  frameRoot='../assets/making-cinema-frames';
   filmStream.configure({frames:frameCount});
   lastFilmTarget=-1;
   activeFilmFrame=-1;
   $filmMedia.dataset.mediaQuality='original-fallback';
   const source=$film.querySelector('source');
-  source.src='/assets/making-chiseling-scrub-v1.mp4';
+  source.src='../assets/making-chiseling-scrub-v1.mp4';
   queueUpdate();
  }
 });
@@ -329,12 +329,12 @@ async function initializeApproved(){
  if(approved||approvedPromise)return;
  const host=$('#approvedHost');
  host.dataset.approvedModelState='loading';
- approvedPromise=import('/prototypes/approved-coil-reveal.js').then(mod=>{
+ approvedPromise=import('./approved-coil-reveal.js').then(mod=>{
   approved=mod.createApprovedCoilReveal(host,st=>host.dataset.approvedModelState=st);
   // Its original render is driven with a constant final-state parameter.
   // We are not importing any of the old scroll controller or animation.
   approved.update(.999);
-  host.dataset.approvedSource='/models/coil-uploaded-v1.glb';
+  host.dataset.approvedSource='../models/coil-uploaded-v1.glb';
  }).catch(error=>{
   host.dataset.approvedModelState='fallback';
   console.warn('Approved Coil model presentation unavailable',error);
