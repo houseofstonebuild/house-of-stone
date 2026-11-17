@@ -281,18 +281,20 @@ export function createApp(options = {}) {
       let decoded; try { decoded = decodeURIComponent(url.pathname); } catch { throw new HttpError(400, 'Invalid address.'); }
       if (decoded.includes('\\') || decoded.includes('\u0000') || decoded.split('/').some(part => part === '.' || part === '..')) throw new HttpError(400, 'Invalid address.');
       const path = decoded.replace(/\/$/, '') || '/';
-      // The immersive story is under review. No public preview or popup
-      // routes are served from the production origin until explicitly approved.
-      // In nonproduction branch QA runs the existing standalone prototype.
+      // Keep the unfinished Welcome story available only at its unlinked
+      // standalone review address. It does not initialize on the homepage.
+      // The invitation/popup modules remain disabled in production.
+      if (path.startsWith('/prototypes/making-atelier.') ||
+          path==='/prototypes/coil-formation.js' ||
+          path==='/prototypes/approved-coil-reveal.js' ||
+          path==='/prototypes/scroll-frame-stream.js' ||
+          path==='/prototypes/story-film-atlas.js') {
+        res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');
+      }
       if(env.NODE_ENV==='production' && (
-        path==='/prototypes/making-atelier.html' ||
-        path==='/prototypes/making-atelier.js' ||
-        path==='/prototypes/making-atelier.css' ||
-        path==='/prototypes/coil-formation.js' ||
-        path==='/prototypes/approved-coil-reveal.js' ||
         path==='/story-invitation.js' ||
         path==='/story-invitation.css'
-      )) throw new HttpError(404,'The story is not available on the public website.');
+      )) throw new HttpError(404,'The invitation is not available on the public website.');
       if (path.toLowerCase().startsWith('/admin') || path.toLowerCase().startsWith('/api/admin')) {
         res.setHeader('Cache-Control', 'no-store');
         res.setHeader('X-Robots-Tag', 'noindex, nofollow');
