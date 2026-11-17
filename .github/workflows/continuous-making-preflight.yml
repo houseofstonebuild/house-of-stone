@@ -1,5 +1,5 @@
 name: Full-sequence playback preflight
-# Includes complete native-wheel settle before measuring idle work.
+# Includes actual bitmap memory accounting at retina density.
 on:
   push:
     branches: ['rebuild/continuous-making-2026-11-17']

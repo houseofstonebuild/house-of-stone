@@ -7,14 +7,14 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
  let fetches=0,decodes=0,direction=1,epoch=0,width=1,height=1,pixelScale=0,bytes=0,peakBytes=0;
  const packs=new Map(),images=new Map(),fetchQueue=new Map(),decodeQueue=new Map();let workingFrames=new Set();
  const measures={requests:0,draws:0,stalls:0,decodeCount:0,decodeMs:[],paintMs:[],fetchErrors:0,decodeErrors:0};
- const sourceBytes=()=>config.width*config.height*4;
+ const sourceBytes=()=>Math.ceil(config.width*(pixelScale||1))*Math.ceil(config.height*(pixelScale||1))*4;
  const plateBytes=()=>plate?config.source_width*config.source_height*4:0;
  const limit=()=>Math.max(6,Math.min(24,Math.floor(((profile==='mobile'?56:80)*1024*1024-plateBytes())/sourceBytes())));
  function trim(){
   if(!config)return;const keep=limit();
   const protectedFrames=new Set([Math.floor(current),Math.ceil(current),Math.floor(needed),Math.ceil(needed)]);
   const entries=[...images].sort((a,b)=>(protectedFrames.has(b[0])-protectedFrames.has(a[0]))||(workingFrames.has(b[0])-workingFrames.has(a[0]))||Math.abs(a[0]-needed)-Math.abs(b[0]-needed));
-  for(const [index,img] of entries.slice(keep)){img.close?.();images.delete(index);bytes-=sourceBytes();}
+  for(const [index,img] of entries.slice(keep)){const size=img.width*img.height*4;img.close?.();images.delete(index);bytes-=size;}
  }
  function packFor(index){return config.packs.findIndex(p=>index>=p.start&&index<p.start+p.entries.length)}
  function needPack(index,priority){
@@ -55,7 +55,7 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   if(typeof createImageBitmap==='function'){const resizeWidth=Math.max(1,Math.ceil(config.width*pixelScale)),resizeHeight=Math.max(1,Math.ceil(config.height*pixelScale));image=await createImageBitmap(blob,{resizeWidth,resizeHeight,resizeQuality:'high'});}
   else {const url=URL.createObjectURL(blob);try{image=new Image();image.src=url;await image.decode()}finally{URL.revokeObjectURL(url)}}
   if(disposed||version!==epoch||(active&&workingFrames.size&&!workingFrames.has(index))){image.close?.();return;}
-  if(images.has(index))image.close?.();else{images.set(index,image);bytes+=sourceBytes();peakBytes=Math.max(bytes+plateBytes(),peakBytes);trim();}
+  if(images.has(index))image.close?.();else{images.set(index,image);bytes+=image.width*image.height*4;peakBytes=Math.max(bytes+plateBytes(),peakBytes);trim();}
   measures.decodeCount++;measures.decodeMs.push(performance.now()-begin);if(measures.decodeMs.length>1000)measures.decodeMs.shift();
  }
  const decoding=new Set();
