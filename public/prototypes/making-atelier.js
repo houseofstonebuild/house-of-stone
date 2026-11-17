@@ -17,6 +17,7 @@ const steps=[
 ];
 let readings=[],dirty=true,raf=0,currentScene='',currentStep='',lastInput=0;
 let processProgress=0,tools=null,toolsLoading=false,toolsError=false,approved=null,approvedLoading=false;
+let approvedProfile=null;
 let approvedTimer=0,toolTimer=0,active=false,filmActive=false,toolFrame=0;
 let frameImage=null,displayedFrame=-1;
 const art=$('#processArt'),workshop=$('#workshopMedia'),host=$('#approvedHost');
@@ -56,7 +57,7 @@ function idleNearProcess(kind){
    toolsLoading=true;
    createWorkshopTools($('#toolStage')).then(result=>{tools=result;toolsLoading=false;paintTools();}).catch(error=>{toolsError=true;toolsLoading=false;art.dataset.tools='unavailable';console.warn('Workshop tool study unavailable',error)});
   }else{
-   approvedLoading=true;
+   approvedLoading=true;approvedProfile=phone()?'portrait':'landscape';
    if(phone()){
     host.dataset.approvedModelState='loading';
     host.querySelector('.approved-poster').decode().then(()=>{
@@ -67,7 +68,7 @@ function idleNearProcess(kind){
    }
    import('./approved-coil-reveal.js').then(mod=>{
     approved=mod.createApprovedCoilReveal(host,state=>{host.dataset.approvedModelState=state;queue();});
-    approved.update(.999);host.dataset.approvedSource='/models/coil-uploaded-v1.glb';
+    approved.update(.999);alignApproved();host.dataset.approvedSource='/models/coil-uploaded-v1.glb';
    }).catch(error=>{host.dataset.approvedModelState='fallback';console.warn('Approved Coil presentation unavailable',error)});
   }
  };
@@ -135,7 +136,22 @@ for(const button of buttons)button.addEventListener('click',()=>{
  scrollTo({top:Math.round(r.top+r.span*(index+.48)/6),behavior:'instant'});
  queue();
 });
-function resize(){dirty=true;processStream.resize();filmStream.resize();tools?.resize();approved?.resize();if(approved)approved.update(.999);queue();}
+function alignApproved(){
+ const layer=host.querySelector('.approved-coil-reveal');
+ if(layer&&!phone()){
+  const scale=Math.max(art.clientWidth/1280,art.clientHeight/720);
+  layer.style.transform='translateX('+Math.round(1280*scale*.15)+'px)';
+ }
+}
+function resize(){
+ dirty=true;processStream.resize();filmStream.resize();tools?.resize();
+ const next=phone()?'portrait':'landscape';
+ if(approvedProfile&&approvedProfile!==next){
+  approved?.dispose?.();host.querySelector('.approved-coil-reveal')?.remove();
+  approved=null;approvedLoading=false;approvedProfile=null;host.dataset.approvedModelState='idle';
+ }
+ approved?.resize();if(approved)approved.update(.999);alignApproved();queue();
+}
 addEventListener('scroll',scrollInput,{passive:true});
 addEventListener('resize',resize,{passive:true});
 addEventListener('orientationchange',resize,{passive:true});

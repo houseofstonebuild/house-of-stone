@@ -29,10 +29,10 @@ async function inspectLayout(page,name){
  const measurement=await page.evaluate(()=>{
   const width=document.documentElement.clientWidth;
   const visible=[...document.querySelectorAll('h1,h2,.process-step.is-current>p,.step-buttons')].filter(el=>{const r=el.getBoundingClientRect();return getComputedStyle(el).visibility!=='hidden'&&getComputedStyle(el).display!=='none'&&r.top<innerHeight&&r.bottom>0;});
-  return {overflow:document.documentElement.scrollWidth-width,items:visible.map(el=>{const r=el.getBoundingClientRect();return {text:el.textContent.slice(0,40),left:r.left,right:r.right,top:r.top,bottom:r.bottom};})};
+  return {overflow:document.documentElement.scrollWidth-width,items:visible.map(el=>{const r=el.getBoundingClientRect();return {kind:el.matches('.step-buttons')?'navigation':'text',text:el.textContent.slice(0,40),left:r.left,right:r.right,top:r.top,bottom:r.bottom};})};
  });
  assert(measurement.overflow<=2,name+' horizontal overflow');
- for(const r of measurement.items){assert(r.left>=-1&&r.right<=page.viewportSize().width+1,name+' clipped '+r.text);if(name.includes('process'))assert(r.bottom<=page.viewportSize().height-65,name+' text overlaps stage navigation: '+r.text);}
+ for(const r of measurement.items){assert(r.left>=-1&&r.right<=page.viewportSize().width+1,name+' clipped '+r.text);if(name.includes('process')&&r.kind==='text')assert(r.bottom<=page.viewportSize().height-65,name+' text overlaps stage navigation: '+r.text);}
 }
 try{
  for(const device of devices){
@@ -64,8 +64,9 @@ try{
     assert.equal(await page.evaluate(()=>window.__mabwePerformance().tools.visible),true,'Tool absent at '+steps[index]);
    }
    if(index===5){await page.waitForFunction(()=>window.__mabwePerformance().approved==='ready',{timeout:30000});}
-   await inspectLayout(page,device.name+'-process-'+steps[index]);
    await page.screenshot({path:new URL(device.name+'-process-'+steps[index]+'.png',out).pathname});
+   await inspectLayout(page,device.name+'-process-'+steps[index]);
+   console.log('PROCESS STATE',device.name,steps[index],JSON.stringify(await page.evaluate(()=>window.__mabwePerformance())));
    captures.push(await page.evaluate(()=>window.__mabwePerformance()));
   }
   // A direct jump across all finishing stages must not leave a polished image
