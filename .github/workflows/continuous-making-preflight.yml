@@ -1,5 +1,5 @@
 name: Full-sequence playback preflight
-# Includes a bounded decode plan and verifies no idle decoding.
+# Includes native device-pixel decoding and retina phone review.
 on:
   push:
     branches: ['rebuild/continuous-making-2026-11-17']

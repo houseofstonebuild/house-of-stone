@@ -4,7 +4,7 @@ const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=()=>{},onReady=()=>{}}){
  const ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});
  let meta,config,plate=null,baseDirty=true,target=0,current=0,active=false,raf=0,previous=0,drawn=-1,drawnMix=-1,disposed=false,needed=0;
- let fetches=0,decodes=0,direction=1,epoch=0,width=1,height=1,bytes=0,peakBytes=0;
+ let fetches=0,decodes=0,direction=1,epoch=0,width=1,height=1,pixelScale=0,bytes=0,peakBytes=0;
  const packs=new Map(),images=new Map(),fetchQueue=new Map(),decodeQueue=new Map();let workingFrames=new Set();
  const measures={requests:0,draws:0,stalls:0,decodeCount:0,decodeMs:[],paintMs:[],fetchErrors:0,decodeErrors:0};
  const sourceBytes=()=>config.width*config.height*4;
@@ -52,7 +52,7 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   const begin=performance.now();
   const blob=new Blob([new Uint8Array(pack.data,entry.offset,entry.length)],{type:'image/webp'});
   let image;
-  if(typeof createImageBitmap==='function')image=await createImageBitmap(blob);
+  if(typeof createImageBitmap==='function'){const resizeWidth=Math.max(1,Math.ceil(config.width*pixelScale)),resizeHeight=Math.max(1,Math.ceil(config.height*pixelScale));image=await createImageBitmap(blob,{resizeWidth,resizeHeight,resizeQuality:'high'});}
   else {const url=URL.createObjectURL(blob);try{image=new Image();image.src=url;await image.decode()}finally{URL.revokeObjectURL(url)}}
   if(disposed||version!==epoch||(active&&workingFrames.size&&!workingFrames.has(index))){image.close?.();return;}
   if(images.has(index))image.close?.();else{images.set(index,image);bytes+=sourceBytes();peakBytes=Math.max(bytes+plateBytes(),peakBytes);trim();}
@@ -73,6 +73,13 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   const rect=canvas.getBoundingClientRect(),ratio=Math.min(devicePixelRatio||1,2,config?config.source_width/rect.width:2,config?config.source_height/rect.height:2);
   width=Math.max(1,Math.round(rect.width*ratio));height=Math.max(1,Math.round(rect.height*ratio));
   if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;drawn=-1;baseDirty=true;}
+  if(config){
+   const required=Math.min(1,Math.max(width/config.source_width,height/config.source_height));
+   // Decode to the canvas' actual device-pixel density. Keep original media
+   // compressed, and refresh the working window if the viewport needs more detail.
+   if(pixelScale&&required>pixelScale*1.04){epoch++;for(const img of images.values())img.close?.();images.clear();bytes=0;drawn=-1;}
+   pixelScale=Math.max(pixelScale,required);
+  }
  }
  function paint(value){
   const low=Math.floor(value),high=Math.min(meta.frames-1,low+1),a=images.get(low),b=images.get(high);
@@ -115,6 +122,6 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
  const ready=fetch(root+'/manifest.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Continuous sequence missing');return r.json()}).then(async m=>{
   if(m.version!==1||!m.profiles?.[profile])throw Error('Invalid continuous sequence');meta=m;config=m.profiles[profile];if(config.plate){plate=new Image();plate.src=root+'/'+profile+'/'+config.plate;await plate.decode()}dimensions();warm();if(active){plan();wake()}onReady(m);
  }).catch(error=>{canvas.dataset.frameStatus='unavailable';console.warn(error)});
- const stats=()=>({target,current,images:images.size,decodedBytes:bytes+plateBytes(),peakDecodedBytes:peakBytes,compressedBytes:[...packs.values()].reduce((n,p)=>n+(p.data?.byteLength||0),0),inflightFetches:fetches,inflightDecodes:decodes,...measures});
+ const stats=()=>({target,current,pixelScale,images:images.size,decodedBytes:bytes+plateBytes(),peakDecodedBytes:peakBytes,compressedBytes:[...packs.values()].reduce((n,p)=>n+(p.data?.byteLength||0),0),inflightFetches:fetches,inflightDecodes:decodes,...measures});
  return {request,warm,resize,suspend,ready,stats,destroy(){disposed=true;epoch++;suspend();for(const img of images.values())img.close?.();images.clear();packs.clear();plate=null;}};
 }
