@@ -285,6 +285,8 @@ export function createApp(options = {}) {
       // standalone review address. It does not initialize on the homepage.
       // The invitation/popup modules remain disabled in production.
       if (path.startsWith('/prototypes/making-atelier.') ||
+          path.startsWith('/prototypes/making-continuous.') ||
+          path==='/prototypes/continuous-sequence.js' ||
           path==='/prototypes/coil-formation.js' ||
           path==='/prototypes/approved-coil-reveal.js' ||
           path==='/prototypes/scroll-frame-stream.js' ||
@@ -484,7 +486,7 @@ export function createApp(options = {}) {
       }
       const filePath = resolve(PUBLIC, path === '/admin' ? 'admin.html' : path === '/admin/content' ? 'admin-content.html' : '.' + path);
       if (!filePath.startsWith(PUBLIC + '/') || !existsSync(filePath)) throw new HttpError(404, 'This page could not be found.');
-      const types = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.json':'application/json; charset=utf-8', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.webp':'image/webp', '.png':'image/png', '.ico':'image/x-icon', '.glb':'model/gltf-binary', '.txt':'text/plain; charset=utf-8', '.mp4':'video/mp4' };
+      const types = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.json':'application/json; charset=utf-8', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.webp':'image/webp', '.png':'image/png', '.ico':'image/x-icon', '.glb':'model/gltf-binary', '.txt':'text/plain; charset=utf-8', '.mp4':'video/mp4', '.bin':'application/octet-stream' };
       const type = types[extname(filePath)];
       if (!type) throw new HttpError(404, 'This file could not be found.');
       if (extname(filePath)==='.mp4') {

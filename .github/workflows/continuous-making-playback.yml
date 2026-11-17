@@ -2,7 +2,7 @@ name: Continuous making playback benchmark
 on:
   push:
     branches: ['rebuild/continuous-making-2026-11-17']
-    paths: ['public/prototypes/continuous-sequence.js', 'qa/continuous-sequence.mjs', 'tools/continuous-making/pack.py', '.github/workflows/continuous-making-playback.yml']
+    paths: ['server.mjs', 'public/prototypes/continuous-sequence.js', 'qa/continuous-sequence.mjs', 'tools/continuous-making/pack.py', '.github/workflows/continuous-making-playback.yml']
 permissions:
   contents: write
 concurrency:
