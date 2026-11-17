@@ -203,7 +203,7 @@ function updateFilm(p,visible){
  if(visible){
   if(n!==lastFilmTarget){
    lastFilmTarget=n;
-   const atlasShown=filmAtlas.available&&filmAtlas.paint(n,filmPan,47);
+   const atlasShown=filmAtlas.available&&filmAtlas.paint(Math.round(clamp(p)*199),filmPan,47);
    // When the atlas is not available, retain the existing HD fallback.
    if(atlasShown){
     filmMoving=true;
