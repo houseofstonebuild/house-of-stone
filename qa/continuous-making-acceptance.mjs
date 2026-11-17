@@ -14,7 +14,7 @@ const app=createApp({dataDir:dir,backgroundNotifications:false,env:{NODE_ENV:'pr
 try{
  for(const [name,type,width,height] of [['compact',webkit,375,667],['iphone',webkit,390,844],['android',chromium,412,915],['tablet',webkit,820,1180],['desktop',chromium,1440,900]]){
   const browser=await type.launch({args:type===chromium?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[]});const page=await browser.newPage({viewport:{width,height},recordVideo:name==='iphone'||name==='desktop'?{dir:dest+'/video',size:{width:Math.min(width,960),height:Math.min(height,900)}}:undefined});const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(base+'/prototypes/making-continuous.html',{waitUntil:'load'});await page.bringToFront();await page.waitForFunction(()=>document.documentElement.dataset.storyLayout==='ready');
+  await page.goto(base+(process.env.MABWE_STUDY_PATH||'/prototypes/making-continuous.html'),{waitUntil:'load'});await page.bringToFront();await page.waitForFunction(()=>document.documentElement.dataset.storyLayout==='ready');
   assert.match(await page.locator('.opening-photo').getAttribute('src'),/making-artist-and-block/);assert.equal(await page.locator('video,#toolStage,.step-buttons').count(),0);
   await page.screenshot({path:dest+'/'+name+'-opening.png'});
   const stages=await page.evaluate(()=>window.__mabweContinuous.stages());assert.equal(stages.length,6);assert(stages[1].length>=2600);assert(stages.slice(2).every(s=>s.length>=1000));
@@ -33,7 +33,7 @@ try{
    const rect=await page.locator('.process-step.is-current').boundingBox();assert(rect&&rect.x>=-1&&rect.x+rect.width<=width+1&&rect.y>=60&&rect.y+rect.height<=height-35,'Current copy must fit at '+name+' '+stages[index].name);
   }
   assert.equal(new Set(pictureHashes).size,6,'Every making stage must have a distinct visible presentation');
-  await phase(5,.98);assert.equal(await page.locator('#exactFinish').evaluate(el=>Number(getComputedStyle(el).opacity)),1,'End must show the unchanged approved image');
+  await phase(5,.98);await page.waitForFunction(()=>Number(getComputedStyle(document.querySelector('#exactFinish')).opacity)===1,undefined,{timeout:5000});assert.equal(await page.locator('#exactFinish').evaluate(el=>Number(getComputedStyle(el).opacity)),1,'End must show the unchanged approved image');
   for(const index of [4,3,2,1,0])await phase(index);
   await phase(1,.2);
   await page.evaluate(()=>{window.motionSamples=[];window.recordMotion=true;let last=performance.now();function record(now){const s=window.__mabweContinuous.stats();window.motionSamples.push({time:now,elapsed:now-last,frame:s.form.current,painted:Number(document.querySelector('#processCanvas').dataset.displayedFrame)});last=now;if(window.recordMotion)requestAnimationFrame(record)}requestAnimationFrame(record)});

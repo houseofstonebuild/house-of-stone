@@ -83,7 +83,8 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   ctx.globalAlpha=1;if(!plate||baseDirty){ctx.fillStyle=meta.background||'#161d19';ctx.fillRect(0,0,width,height);if(plate)ctx.drawImage(plate,(width-config.source_width*scale)*focus,(height-config.source_height*scale)/2,config.source_width*scale,config.source_height*scale);baseDirty=false;}ctx.drawImage(a,x,y,w,h);
   if(b&&mix){ctx.globalAlpha=mix;ctx.drawImage(b,x,y,w,h);ctx.globalAlpha=1;}
   drawn=low;drawnMix=mix;measures.draws++;measures.paintMs.push(performance.now()-begin);if(measures.paintMs.length>1000)measures.paintMs.shift();
-  canvas.dataset.displayedFrame=String(value);canvas.dataset.frameStatus='ready';onSample(value);return true;
+  const displayed=low+mix;
+  canvas.dataset.displayedFrame=String(displayed);canvas.dataset.frameStatus='ready';onSample(displayed);return true;
  }
  function tick(now){
   raf=0;if(!active||!config||disposed||document.hidden)return;
