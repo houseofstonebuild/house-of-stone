@@ -206,7 +206,7 @@ p{font-weight:400}
  .carving-media>.carving-poster,.carving-media>video,.mobile-film-frame,.atlas-film-frame{object-position:52% center}
  .carving-media>video{display:none}
  .mobile-film-frame{opacity:0;display:block}
- .atlas-film-frame{display:none;background-image:url('/assets/making-chiseling-scroll-frames-v1.webp');background-repeat:no-repeat;background-size:700% 600%;background-position:0% 0%;filter:saturate(.82) contrast(1.01)}
+ .atlas-film-frame{display:none;background-image:url('../assets/making-chiseling-scroll-frames-v1.webp');background-repeat:no-repeat;background-size:700% 600%;background-position:0% 0%;filter:saturate(.82) contrast(1.01)}
  .carving-media[data-fallback="atlas"] .atlas-film-frame{display:block}
  .carving-media[data-mobile-ready="true"] .mobile-film-frame{opacity:1}
  .carving-media[data-mobile-ready="true"] .atlas-film-frame{opacity:0}
