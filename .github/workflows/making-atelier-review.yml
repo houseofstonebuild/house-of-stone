@@ -1,7 +1,7 @@
 name: Isolated Our Story browser review
 on:
   push:
-    branches: ['review/our-story-scroll-qa-2026-11-16']
+    branches: ['review/our-story-scroll-qa-2026-11-16', 'review/welcome-immersive-scroll-restoration-2026-11-16']
     paths:
       - 'public/prototypes/making-atelier.html'
       - 'public/prototypes/making-atelier.css'
@@ -25,6 +25,8 @@ on:
       - 'public/prototypes/story-film-atlas.js'
       - 'server.mjs'
       - '.github/workflows/making-atelier-review.yml'
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
