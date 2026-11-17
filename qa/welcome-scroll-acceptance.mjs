@@ -59,6 +59,9 @@ try{
     requested:Number(document.querySelector('.carving-media').dataset.requestedFrame),
     displayed:Number(document.querySelector('.carving-media').dataset.displayedFrame),
     paused:document.querySelector('#cinemaFilm').paused,
+    scrollY:window.scrollY,
+    chapter:window.__mabweMaking.chapter,
+    sceneProgress:document.querySelector('[data-scene="carving"]').dataset.progress,
     atlas:window.__mabwePerformance().filmAtlas
    })));
   }
