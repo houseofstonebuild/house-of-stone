@@ -1,5 +1,5 @@
 name: Full-sequence playback preflight
-# Includes actual bitmap memory accounting at retina density.
+# Includes a short landscape phone alongside retina portrait phones.
 on:
   push:
     branches: ['rebuild/continuous-making-2026-11-17']
