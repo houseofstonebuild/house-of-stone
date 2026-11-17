@@ -5,9 +5,9 @@
 import {createFrameStream} from './scroll-frame-stream.js';
 const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)};
 const lerp=(a,b,t)=>a+(b-a)*t;
-const CURRENT='/assets/making-v8';
-const FALLBACK='/assets/making-v7';
-const LEGACY='/assets/making-v6';
+const CURRENT='../assets/making-v8';
+const FALLBACK='../assets/making-v7';
+const LEGACY='../assets/making-v6';
 export function createCoilFormation(carveStage,polishStage,mobile,reduced){
  const stages={carve:carveStage,polish:polishStage};
  const images={carve:carveStage.querySelector('#formationFrame'),
@@ -36,7 +36,7 @@ export function createCoilFormation(carveStage,polishStage,mobile,reduced){
  const stageData=(stage,frame)=>{
   stage.dataset.requestedFrame=String(frame);
   stage.dataset.frameAssetVersion=edition;
-  stage.dataset.modelSource='/models/coil-uploaded-v1.glb';
+  stage.dataset.modelSource='../models/coil-uploaded-v1.glb';
   if(manifest?.entries?.[frame])
    stage.dataset.remainingVoxels=String(manifest.entries[frame].remaining_voxels);
  };
