@@ -100,7 +100,7 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   const proposed=settled?target:current+delta*(1-Math.exp(-dt/95));
   // During a fast gesture, spend the decode budget on one sharp source frame.
   // Subframe blending resumes for slow motion and the final settle.
-  const candidate=Math.abs(delta)>1.4&&Math.abs(proposed-current)>.3?Math.round(proposed):proposed;
+  const candidate=Math.abs(delta)>1.4&&Math.abs(proposed-current)>=.5?Math.round(proposed):proposed;
   needed=candidate;
   if(paint(candidate)){current=candidate;plan();}
   else{measures.stalls++;plan();}
