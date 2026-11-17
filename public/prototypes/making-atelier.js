@@ -3,6 +3,8 @@
  * volume drives the separate reversible carving study before the final GLB.
  */
 import {createCoilFormation} from './coil-formation.js';
+import {createFrameStream} from './scroll-frame-stream.js';
+import {createFilmAtlas} from './story-film-atlas.js';
 const $=s=>document.querySelector(s);
 const clamp=x=>Math.max(0,Math.min(1,x));
 const smooth=x=>{x=clamp(x);return x*x*(3-2*x)};
@@ -26,6 +28,17 @@ const $mapRoute=$('#mapRoute');
 const $truck=$('#routeTruck');
 const $routeReadout=$('#routeReadout');
 const mapLength=$mapRoute.getTotalLength?.()||115;
+// Pre-sample the fixed SVG path once. getPointAtLength() during scrolling can
+// force a costly geometry query after moving the map on slower mobile devices.
+const routeSamples=Array.from({length:257},(_,i)=>{
+ const point=$mapRoute.getPointAtLength(mapLength*i/256);
+ return {x:point.x,y:point.y};
+});
+function routePoint(t){
+ const u=clamp(t)*256,index=Math.min(255,Math.floor(u));
+ const f=u-index,a=routeSamples[index],b=routeSamples[index+1];
+ return {x:lerp(a.x,b.x,f),y:lerp(a.y,b.y,f)};
+}
 $mapRoute.style.strokeDasharray=String(mapLength);
 let frameCount=48;
 let filmEdition='legacy';
@@ -33,12 +46,55 @@ const fallbackFrames=19; // First ~8 seconds only: the lion never comes into vie
 const atlasCount=18;
 let hdFramesReady=false;
 let frameRoot='/assets/making-cinema-frames';
-const frameCache=new Map();
-let activeFilmFrame=-1,desiredFilmFrame=-1,filmDuration=0,videoMetadata=false,lastSeek=-1,lastSeekAt=0,filmActive=false;
+let activeFilmFrame=-1,desiredFilmFrame=-1,filmDuration=0,videoMetadata=false,filmActive=false;
+let filmPan=18;
+// Preserve the fluid source-atlas timeline during touch/trackpad movement.
+// Decode full-resolution source photography only when the gesture settles.
+let filmIdleTimer=0,filmMoving=false,lastFilmTarget=-1;
+const filmStream=createFrameStream({
+ stage:$filmMedia,image:$mobileFrame,mobile,
+ src:index=>frameUrl(index),
+ position:()=>({x:filmPan,y:47}),
+ onDisplay:(index,img)=>{
+  if(!$mobileFrame.hasAttribute('src'))$mobileFrame.src=img.src;
+  activeFilmFrame=index;
+  $filmMedia.dataset.mobileReady='true';
+  $filmMedia.dataset.displayedFrame=String(index);
+  if(filmAtlas.available){
+   const showHD=index===desiredFilmFrame&&!filmMoving&&filmActive;
+   filmStream.canvas.style.opacity=showHD?'1':'0';
+   $filmMedia.dataset.displayQuality=showHD?'hd-source':'atlas-preview';
+  }
+ }
+});
+const filmAtlas=createFilmAtlas({
+ stage:$filmMedia,anchor:$poster,mobile,
+ onDisplay:frame=>{
+  if(filmStream.displayed!==frame)filmStream.canvas.style.opacity='0';
+ }
+});
 let storyFrame=0,layoutDirty=true,readings=[],currentScene='',approved=null,approvedPromise=null;
+let approvedIdleHandle=null;
+let lastScrollMovement=0;
+function scheduleApprovedInit(){
+ if(approved||approvedPromise||approvedIdleHandle!==null||document.hidden)return;
+ // WebGL shaders and the original GLB may only initialize once scrolling
+ // has settled at the final sculpture. No forced timeout on active gestures.
+ const check=()=>{
+  approvedIdleHandle=null;
+  if(document.hidden||approved||approvedPromise)return;
+  if(performance.now()-lastScrollMovement<650){
+   approvedIdleHandle=setTimeout(check,360);return;
+  }
+  const reveal=$('#approvedHost').getBoundingClientRect();
+  if(reveal.bottom<0||reveal.top>innerHeight)return;
+  initializeApproved();
+ };
+ approvedIdleHandle=setTimeout(check,700);
+}
 const formation=createCoilFormation($('#formationStage'),$('#polishStage'),mobile,reduced);
 const approvedOriginalSlot=$('#approvedHost').parentElement;
-const filmState=()=>({paused:$film.paused,time:$film.currentTime,frame:desiredFilmFrame,active:filmActive,videoReady:videoMetadata,hdFrames:hdFramesReady,edition:filmEdition,frames:frameCount,maxSeconds:8.4});
+const filmState=()=>({paused:$film.paused,time:$film.currentTime,frame:desiredFilmFrame,active:filmActive,videoReady:videoMetadata,hdFrames:hdFramesReady,edition:filmEdition,frames:frameCount,maxSeconds:8.4,stream:filmStream.stats(),atlas:filmAtlas.stats(),coil:formation.stats()});
 window.__mabweMaking={get film(){return filmState()},get chapter(){return currentScene},get approved(){return $('#approvedHost').dataset.approvedModelState||'not-started'}};
 
 function recordLayout(){
@@ -57,12 +113,25 @@ function frameUrl(index){
  const sourceFrame=filmEdition==='legacy'?
   Math.min(fallbackFrames-1,Math.round(index*(fallbackFrames-1)/(frameCount-1))):index;
  $filmMedia.dataset.sourceFrame=String(sourceFrame);
- const digits=filmEdition==='hd-v3'?3:2;
+ const digits=filmEdition==='hd-v3'||filmEdition==='hd-v4'?3:2;
  return frameRoot+'/frame_'+String(sourceFrame).padStart(digits,'0')+'.webp';
 }
 async function checkHdFrames(){
  let selected=null;
+ // V4 samples the documentary near its original 24 fps. The source frame
+ // count is capped at 200 to balance motion fidelity with phone decoding.
  try{
+  const response=await fetch('/assets/making-cinema-frames-v4/manifest.json',{cache:'no-store'});
+  if(response.ok){
+   const manifest=await response.json();
+   if(manifest.version===4&&manifest.frames===200&&manifest.width>=1280&&manifest.end_seconds<=8.4){
+    const checks=await Promise.all([0,100,199].map(i=>
+     fetch('/assets/making-cinema-frames-v4/frame_'+String(i).padStart(3,'0')+'.webp',{method:'HEAD'})));
+    if(checks.every(r=>r.ok))selected={root:'/assets/making-cinema-frames-v4',count:200,edition:'hd-v4'};
+   }
+  }
+ }catch(_){/* v3 remains available */}
+ if(!selected)try{
   const response=await fetch('/assets/making-cinema-frames-v3/manifest.json',{cache:'no-store'});
   if(response.ok){
    const manifest=await response.json();
@@ -94,80 +163,64 @@ async function checkHdFrames(){
  filmEdition=selected.edition;
  frameCount=selected.count;
  hdFramesReady=true;
- frameCache.clear();
  activeFilmFrame=-1;
  $filmMedia.dataset.mobileReady='false';
  $filmMedia.dataset.mediaQuality=filmEdition;
  $filmMedia.dataset.totalFrames=String(frameCount);
+ filmStream.configure({frames:frameCount});
+ lastFilmTarget=-1;
  const currentProgress=Number($filmMedia.dataset.scrollPosition||0);
  rememberFrame(Math.max(0,Math.min(frameCount-1,Math.round(clamp(currentProgress)*(frameCount-1)))));
  queueUpdate();
 }
 function rememberFrame(index){
  if(index<0||index>=frameCount)return;
- const cached=frameCache.get(index);
- if(cached)return;
- const img=new Image();
- frameCache.set(index,{img,ready:false,failed:false});
- img.decoding='async';
- img.onload=()=>{
-  const entry=frameCache.get(index);
-  if(!entry)return;
-  entry.ready=true;
-  if(index===desiredFilmFrame&&entry.img===img){
-   $mobileFrame.src=img.src;
-   $filmMedia.dataset.mobileReady='true';
-   activeFilmFrame=index;
-   $filmMedia.dataset.displayedFrame=String(index);
-  }
- };
- img.onerror=()=>{
-  const entry=frameCache.get(index);if(entry)entry.failed=true;
-  $filmMedia.dataset.fallback='atlas';
- };
- img.src=frameUrl(index);
- // Limit JS Image instances without discarding HTTP cached responses.
- if(frameCache.size>(mobile()?10:16)){
-  for(const key of frameCache.keys()){
-   if(Math.abs(key-index)>5){frameCache.delete(key);if(frameCache.size<=(mobile()?8:13))break;}
-  }
- }
+ filmStream.prime(index);
 }
-
+function settleFilm(){
+ filmIdleTimer=0;
+ if(!filmActive||document.hidden)return;
+ filmMoving=false;
+ // Reuse a previously decoded exact source frame when available, otherwise
+ // fetch the single current target. No old frame may obscure active motion.
+ filmStream.request(desiredFilmFrame,true);
+}
 function updateFilm(p,visible){
  const n=Math.max(0,Math.min(frameCount-1,Math.round(clamp(p)*(frameCount-1))));
  const sprite=Math.max(0,Math.min(atlasCount-1,Math.round(clamp(p)*(atlasCount-1))));
  desiredFilmFrame=n;
  $filmMedia.dataset.requestedFrame=String(n);
  $filmMedia.dataset.scrollPosition=p.toFixed(4);
- // Portrait footage reframes the actual chisel contact first, then travels
- // across the worked stone. No small inset and no synthetic hammer image.
- const pan=lerp(18,40,p);
- $mobileFrame.style.objectPosition=pan.toFixed(2)+'% 47%';
- $poster.style.objectPosition=pan.toFixed(2)+'% 47%';
- $filmMedia.dataset.filmPan=pan.toFixed(2);
+ filmPan=lerp(18,40,p);
+ $mobileFrame.style.objectPosition=filmPan.toFixed(2)+'% 47%';
+ $poster.style.objectPosition=filmPan.toFixed(2)+'% 47%';
+ $filmMedia.dataset.filmPan=filmPan.toFixed(2);
  const x=sprite%7,y=Math.floor(sprite/7);
  $atlas.style.backgroundPosition=(x/6*100).toFixed(3)+'% '+(y/5*100).toFixed(3)+'%';
  $atlas.dataset.spriteFrame=String(sprite);
- $film.pause();
  filmActive=Boolean(visible);
- if(!visible)return;
- // Desktop and mobile share the same reversible film-frame timeline, avoiding
- // browser video seek jitter and Safari's intermittently blank video canvas.
- rememberFrame(n);
- const previous=Number($filmMedia.dataset.previousScroll||0);
- const neighbor=n+(p>=previous?1:-1);
- if(neighbor>=0&&neighbor<frameCount)rememberFrame(neighbor);
- const item=frameCache.get(n);
- if(item?.ready&&activeFilmFrame!==n){
-  $mobileFrame.src=item.img.src;
-  $filmMedia.dataset.mobileReady='true';
-  activeFilmFrame=n;
-  $filmMedia.dataset.displayedFrame=String(n);
- }else if(item?.failed){
-  $filmMedia.dataset.mobileReady='false';
+ if(filmIdleTimer){clearTimeout(filmIdleTimer);filmIdleTimer=0;}
+ if(visible){
+  if(n!==lastFilmTarget){
+   lastFilmTarget=n;
+   const atlasShown=filmAtlas.available&&filmAtlas.paint(Math.round(clamp(p)*199),filmPan,47);
+   // When the atlas is not available, retain the existing HD fallback.
+   if(atlasShown){
+    filmMoving=true;
+    filmStream.canvas.style.opacity='0';
+    $filmMedia.dataset.displayQuality='atlas-preview';
+   }else if(!filmAtlas.available)filmStream.request(n,true);
+  }
+  if(filmAtlas.available){
+   // Never compete with canvas animation by decoding 1600-pixel WebPs.
+   filmStream.suspend();
+   filmIdleTimer=setTimeout(settleFilm,150);
+  }
+ }else{
+  lastFilmTarget=-1;
+  filmMoving=false;
+  filmStream.suspend();
  }
- $filmMedia.dataset.previousScroll=String(p);
 }
 
 $film.loop=false;
@@ -195,7 +248,8 @@ $film.addEventListener('error',()=>{
   // Remain functional if the deployment contains frames before the HD MP4.
   hdFramesReady=false;
   frameRoot='/assets/making-cinema-frames';
-  frameCache.clear();
+  filmStream.configure({frames:frameCount});
+  lastFilmTarget=-1;
   activeFilmFrame=-1;
   $filmMedia.dataset.mediaQuality='original-fallback';
   const source=$film.querySelector('source');
@@ -227,7 +281,7 @@ function renderOrigin(p){
  $('.origin-map-wrap').style.transform='translate3d('+shiftX.toFixed(1)+'px,'+shiftY.toFixed(1)+'px,0) scale('+factor.toFixed(4)+')';
  const travel=reduced.matches?1:smooth((p-.41)/.43);
  $mapRoute.style.strokeDashoffset=String((mapLength*(1-travel)).toFixed(2));
- const point=$mapRoute.getPointAtLength(mapLength*travel);
+ const point=routePoint(travel);
  $truck.setAttribute('transform','translate('+point.x.toFixed(2)+' '+point.y.toFixed(2)+')');
  $truck.style.opacity=String(reduced.matches?1:smooth((p-.38)/.08)*(1-smooth((p-.95)/.05)));
  $('#hararePin').style.opacity=String(reduced.matches?1:smooth((p-.22)/.18));
@@ -253,7 +307,7 @@ function renderFinishing(p){
  // The authored v7 frames already contain real directional highlights.
  // Do not slide a rectangular light layer over the image while scrolling.
  $('#highlight').style.opacity='0';
- $('#finishTrack').style.width=(polish*100).toFixed(1)+'%';
+ $('#finishTrack').style.transform='scaleX('+polish.toFixed(4)+')';
  $('#finishWord').textContent=p<.34?'SANDING':p<.73?'SMOOTHING':'POLISHING';
 }
 function syncApprovedPlacement(y){
@@ -268,7 +322,7 @@ function syncApprovedPlacement(y){
  stage.dataset.modelAlpha='0';
  if(host.parentElement!==approvedOriginalSlot)approvedOriginalSlot.append(host);
  host.dataset.inFinishing='false';
- if(p>.74&&y<finishing.top+finishing.height+innerHeight*.2)initializeApproved();
+ if(p>.61&&y<finishing.top+finishing.height+innerHeight*.2)scheduleApprovedInit();
 }
 
 function renderCarving(p,onscreen){
@@ -301,8 +355,9 @@ function renderReveal(p,near){
  art.style.opacity=smooth((p-.005)/.18).toFixed(4);
  // Load the GLB only near the final chapter; the fallback remains visible
  // until the original model is ready, so iOS never shows a blank final frame.
- if(near)initializeApproved();
- if(approved)approved.update(.999);
+ if(near&&p>.05)scheduleApprovedInit();
+ // The approved artwork is a still presentation. Do not re-render the
+ // exact same WebGL frame on every scroll tick.
  $('.reveal-poster').style.opacity=art.dataset.approvedModelState==='ready'?'0':'1';
 }
 function sceneInView(reading,y){
@@ -312,10 +367,11 @@ function sceneInView(reading,y){
 }
 function update(){
  storyFrame=0;
+ lastScrollMovement=performance.now();
  if(layoutDirty)recordLayout();
  const y=scrollY,view=innerHeight;
  const max=Math.max(1,document.documentElement.scrollHeight-view);
- $('#readingProgress').style.width=(clamp(y/max)*100).toFixed(3)+'%';
+ $('#readingProgress').style.transform='scaleX('+clamp(y/max).toFixed(5)+')';
  let scene='introduction';
  for(const r of readings){
   const p=clamp((y-r.top)/r.distance);
@@ -332,8 +388,12 @@ function update(){
   else if(r.name==='finishing')renderFinishing(p);
   else if(r.name==='reveal')renderReveal(p,near);
  }
+ if(!readings.find(r=>r.name==='detail'&&sceneInView(r,y)))formation.suspend('carve');
+ if(!readings.find(r=>r.name==='finishing'&&sceneInView(r,y)))formation.suspend('polish');
  if(!readings.find(r=>r.name==='carving'&&sceneInView(r,y))) {
-  filmActive=false;$film.pause();
+  filmActive=false;
+  if(filmIdleTimer){clearTimeout(filmIdleTimer);filmIdleTimer=0;}
+  filmStream.suspend();
  }
  const nextFilm=readings.find(r=>r.name==='carving');
  if(nextFilm&&y+view*1.4>=nextFilm.top&&y<nextFilm.top)rememberFrame(0);
@@ -346,15 +406,26 @@ function queueUpdate(){
  storyFrame=requestAnimationFrame(update);
 }
 addEventListener('scroll',queueUpdate,{passive:true});
-addEventListener('resize',()=>{layoutDirty=true;formation.resize();approved?.resize();queueUpdate()},{passive:true});
+addEventListener('resize',()=>{layoutDirty=true;formation.resize();filmStream.resize();filmAtlas.resize();approved?.resize();if(approved)approved.update(.999);queueUpdate()},{passive:true});
 addEventListener('orientationchange',()=>{layoutDirty=true;queueUpdate()},{passive:true});
-document.addEventListener('visibilitychange',()=>{$film.pause();queueUpdate()});
+document.addEventListener('visibilitychange',()=>{
+ if(document.hidden){
+  clearTimeout(filmIdleTimer);filmIdleTimer=0;filmStream.suspend();
+  if(approvedIdleHandle!==null){
+   if('cancelIdleCallback' in window)cancelIdleCallback(approvedIdleHandle);
+   else clearTimeout(approvedIdleHandle);
+   approvedIdleHandle=null;
+  }
+ }
+ queueUpdate();
+});
 reduced.addEventListener?.('change',queueUpdate);
 // The story's skip action now leads to the collection rather than to Coil.
 // Do not trap or intercept the native navigation.
 // Prime real mobile documentary frames, without decoding an entire video on load.
-if(mobile()){rememberFrame(0);rememberFrame(1);}
+if(mobile()){rememberFrame(0);}
 checkHdFrames();
 queueUpdate();
 document.documentElement.dataset.makingAtelier='ready';
+window.__mabwePerformance=()=>({film:filmStream.stats(),filmAtlas:filmAtlas.stats(),coil:formation.stats(),filmMoving,chapter:currentScene,scroll:scrollY});
 if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.dataset.embed='true';
