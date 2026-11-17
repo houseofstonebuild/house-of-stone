@@ -1,242 +1,106 @@
-/* Model-derived, source-true Coil stone removal.
- * Each displayed frame is one volumetric state made from Coil's approved
- * geometry (see tools/carving-pilot/build_making_v6.py). The canvas shows
- * discrete chips only; it does not invent the main statue silhouette.
- * No timers, continuous playback, WebGL or video seeks on mobile.
+/* Coil's approved geometry and color are never modified in-browser.
+ * Every carving image is an offline physical volume derived from that model.
+ * Predictive frame loading is strictly bounded on phone and desktop.
  */
-const clamp=x=>Math.max(0,Math.min(1,x));
-const smooth=x=>{x=clamp(x);return x*x*(3-2*x)};
-const mix=(a,b,t)=>a+(b-a)*t;
-const FALLBACK_ROOT='/assets/making-v6';
-const CURRENT_ROOT='/assets/making-v7';
-const FRAME_COUNT=144;
-const random=(seed)=>{let x=Math.sin(seed*128.376+19.117)*43758.5453;return x-Math.floor(x)};
+import {createFrameStream} from './scroll-frame-stream.js';
+const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const CURRENT='/assets/making-v8';
+const FALLBACK='/assets/making-v7';
+const LEGACY='/assets/making-v6';
 export function createCoilFormation(carveStage,polishStage,mobile,reduced){
- const elements={carve:carveStage.querySelector('#formationFrame'),polish:polishStage.querySelector('#polishFrame')};
- const chips=carveStage.querySelector('#formationChips');
- // The previous screen-space particles floated across Coil instead of
- // detaching from its surface. Version 7 renders real 3D fragments with the
- // same lighting and camera as the stone, so this overlay stays disabled.
- chips.style.display='none';
- const ctx=null;
- const cache=new Map();
- const recentDemand={carve:54,polish:95};
- const want={carve:-1,polish:-1};
- const shown={carve:-1,polish:-1};
- let manifest=null;
- let activeRoot=CURRENT_ROOT;
- let currentProfile=mobile()?'mobile':'desktop';
- const url=(frame)=>activeRoot+'/'+currentProfile+'/frame_'+String(frame).padStart(3,'0')+'.webp';
- function load(frame){
-  if(frame<0||frame>=FRAME_COUNT)return;
-  const key=activeRoot+':'+currentProfile+':'+frame;
-  if(cache.has(key))return;
-  const image=new Image();
-  image.decoding='async';
-  const item={image,ready:false,error:false,profile:currentProfile};
-  cache.set(key,item);
-  image.onload=()=>{
-   item.ready=true;
-   for(const phase of ['carve','polish']){
-    if(want[phase]===frame&&currentProfile===item.profile)display(phase,frame);
+ const stages={carve:carveStage,polish:polishStage};
+ const images={carve:carveStage.querySelector('#formationFrame'),
+   polish:polishStage.querySelector('#polishFrame')};
+ const requirements={carve:54,polish:95};
+ let root=FALLBACK,count=144,manifest=null,edition='v7';
+ let frameRange={carve:[54,95],polish:[95,132]};
+ const players={};
+ const source=(index,profile)=>root+'/'+profile+'/frame_'+String(index).padStart(3,'0')+'.webp';
+ for(const phase of ['carve','polish']){
+  const stage=stages[phase],image=images[phase];
+  players[phase]=createFrameStream({
+   stage,image,mobile,src:source,
+   onDisplay:(frame,item)=>{
+    // Retain the image for existing tests and screen readers, but keep it
+    // behind the canvas to avoid two different frame layers crossfading.
+    // The hidden compatibility image only needs a first decoded frame.
+    // Duplicating every frame in an <img> doubles Safari's decode workload.
+    if(!image.hasAttribute('src'))image.src=item.src;
+    stage.dataset.displayedFrame=String(frame);
+    stage.dataset.frameStatus='ready';
    }
-  };
-  image.onerror=()=>{item.error=true;};
-  image.src=url(frame);
-  const limit=mobile()?10:16;
-  if(cache.size>limit){
-   for(const [name,entry] of cache){
-    const n=Number(name.split(':').at(-1));
-    const nearCarve=Math.abs(n-recentDemand.carve)<=2;
-    const nearPolish=Math.abs(n-recentDemand.polish)<=2;
-    if(entry.profile!==currentProfile||(!nearCarve&&!nearPolish)){
-     cache.delete(name);
-     if(cache.size<=limit)break;
-    }
-   }
-  }
+  });
  }
- function display(phase,frame){
-  const item=cache.get(activeRoot+':'+currentProfile+':'+frame);
-  if(!item?.ready||shown[phase]===frame)return;
-  elements[phase].src=item.image.src;
-  shown[phase]=frame;
-  const stage=phase==='carve'?carveStage:polishStage;
-  stage.dataset.displayedFrame=String(frame);
-  stage.dataset.frameStatus='ready';
- }
- function updateFrame(phase,frame){
-  frame=Math.max(0,Math.min(FRAME_COUNT-1,frame));
-  const stage=phase==='carve'?carveStage:polishStage;
+ carveStage.querySelector('#formationChips').style.display='none';
+ const stageData=(stage,frame)=>{
   stage.dataset.requestedFrame=String(frame);
+  stage.dataset.frameAssetVersion=edition;
   stage.dataset.modelSource='/models/coil-uploaded-v1.glb';
-  stage.dataset.frameAssetVersion=activeRoot===CURRENT_ROOT?'v7':'v6-fallback';
-  if(manifest?.entries?.[frame])stage.dataset.remainingVoxels=String(manifest.entries[frame].remaining_voxels);
-  if(want[phase]!==frame)want[phase]=frame;
-  recentDemand[phase]=frame;
-  load(frame);
-  // Predecode only the direction of travel and one nearby frame.
-  // Avoid growing mobile image memory with every 60 Hz scroll event.
-  const previous=shown[phase];
-  const direction=previous<=frame?1:-1;
-  load(frame+direction);
-  if(!mobile())load(frame-direction);
-  if(cache.get(activeRoot+':'+currentProfile+':'+frame)?.ready)display(phase,frame);
-  // A nearby decoded frame is safer than a missing image on low-memory iOS.
-  else if(shown[phase]===-1){
-   for(let d=1;d<=4;d++){
-    for(const n of [frame-d,frame+d]){
-     if(cache.get(activeRoot+':'+currentProfile+':'+n)?.ready){display(phase,n);break;}
-    }
-    if(shown[phase]!==-1)break;
-   }
-  }
- }
- // Deterministic fractures on the OUTSIDE of the diminishing stone volume.
- // A shard falls outward and down, then vanishes, when its carving phase passes.
- const shards=Array.from({length:32},(_,i)=>({
-  at:.09+random(i+11)*.65,
-  angle:(random(i+28)-.5)*2.8,
-  side:random(i+35)>.5?1:-1,
-  y:random(i+49)*2-1,
-  size:8+random(i+97)*13,
-  spin:random(i+79)*3-1.5,
-  drift:random(i+88)*.7+.3
- }));
- function drawChips(progress){
-  if(!ctx||reduced.matches){if(ctx)ctx.clearRect(0,0,chips.width,chips.height);return;}
-  const w=carveStage.clientWidth,h=carveStage.clientHeight;
-  const dpr=Math.min(devicePixelRatio||1,1.35);
-  const width=Math.round(w*dpr),height=Math.round(h*dpr);
-  if(chips.width!==width||chips.height!==height){chips.width=width;chips.height=height;chips.style.width=w+'px';chips.style.height=h+'px';}
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.clearRect(0,0,w,h);
-  const phone=mobile();
-  // The VTK source render is centered at x=.66 desktop and .50 phone.
-  const cx=w*(phone?.50:.66),cy=h*(phone?.42:.45);
-  const rx=w*(phone?.20:.145),ry=h*(phone?.145:.29);
-  for(let i=0;i<shards.length;i++){
-   const s=shards[i],t=(progress-s.at)/.165;
-   if(t<0||t>1||progress>.86)continue;
-   const q=smooth(t),fade=(1-smooth((t-.52)/.45))*(1-smooth((progress-.69)/.17));
-   // Chips detach at the OUTER perimeter of the stone and fall away from
-   // the mass; never scatter imaginary marks across Coil's finished face.
-   const shrinking=1-progress*.33;
-   const ox=s.side*rx*shrinking,oy=s.y*ry*shrinking;
-   const spread=s.side*(25+30*s.drift)*q;
-   const fall=(45+Math.abs(s.y)*80)*q*q;
-   const x=cx+ox+spread,y=cy+oy+fall;
-   const radius=s.size*(phone?.62:1)*(1-.34*q);
-   ctx.save();
-   ctx.translate(x,y);ctx.rotate(s.angle+s.spin*q);
-   ctx.globalAlpha=Math.min(1,fade*.77);
-   ctx.shadowColor='rgba(0,0,0,.30)';ctx.shadowBlur=radius*.48;ctx.shadowOffsetY=radius*.25;
-   ctx.beginPath();
-   ctx.moveTo(-radius*.91,-radius*.36);
-   ctx.lineTo(-radius*.13,-radius*.92);
-   ctx.lineTo(radius*.68,-radius*.47);
-   ctx.lineTo(radius*.94,radius*.20);
-   ctx.lineTo(radius*.18,radius*.65);
-   ctx.lineTo(-radius*.80,radius*.37);
-   ctx.closePath();
-   ctx.fillStyle='#62685a';ctx.fill();
-   ctx.shadowColor='transparent';
-   ctx.beginPath();
-   ctx.moveTo(-radius*.91,-radius*.36);
-   ctx.lineTo(-radius*.13,-radius*.92);
-   ctx.lineTo(radius*.68,-radius*.47);
-   ctx.lineTo(radius*.12,radius*.02);
-   ctx.closePath();ctx.fillStyle='#9e9a84';ctx.fill();
-   ctx.beginPath();ctx.moveTo(radius*.12,radius*.02);
-   ctx.lineTo(radius*.94,radius*.20);ctx.lineTo(radius*.18,radius*.65);
-   ctx.lineTo(-radius*.80,radius*.37);ctx.closePath();
-   ctx.fillStyle='#303e34';ctx.fill();
-   ctx.restore();
-   if(i%3===0){
-    ctx.fillStyle='rgba(207,192,163,'+(fade*.27).toFixed(3)+')';
-    ctx.beginPath();ctx.arc(x+8*q,y+15*q,Math.max(.5,radius*.085),0,Math.PI*2);ctx.fill();
-   }
-  }
- }
- function update(phase,p){
-  if(mobile()!==(currentProfile==='mobile')){
-   currentProfile=mobile()?'mobile':'desktop';
-   shown.carve=shown.polish=-1;
-  }
-  p=clamp(p);
-  // Source frames 54–95 carve extra stone away; 95–132 sand and wax.
-  // Zero transparency tricks: the form itself changes at each voxel state.
-  const frame=phase==='carve'?
-   Math.round(mix(54,95,smooth((p-.07)/.9))):
-   Math.round(mix(95,132,smooth(p)));
-  updateFrame(phase,frame);
-  const stage=phase==='carve'?carveStage:polishStage;
+  if(manifest?.entries?.[frame])
+   stage.dataset.remainingVoxels=String(manifest.entries[frame].remaining_voxels);
+ };
+ function update(phase,progress){
+  const p=Math.max(0,Math.min(1,progress));
+  const bounds=frameRange[phase];
+  const normalized=phase==='carve'?smooth((p-.07)/.90):smooth(p);
+  const frame=Math.round(lerp(bounds[0],bounds[1],normalized));
+  const stage=stages[phase];
+  stageData(stage,frame);
   stage.dataset.phaseProgress=p.toFixed(4);
   stage.dataset.stage=phase;
-  if(phase==='carve')drawChips(smooth((p-.035)/.94));
-  if(phase==='polish')polishStage.style.setProperty('--polish',smooth(p).toFixed(4));
- }
- function resize(){
-  const next=mobile()?'mobile':'desktop';
-  if(next!==currentProfile){
-   currentProfile=next;
-   shown.carve=shown.polish=-1;
-   for(const phase of ['carve','polish']){
-    const stage=phase==='carve'?carveStage:polishStage;
-    stage.dataset.frameStatus='loading';
-    if(want[phase]>=0)load(want[phase]);
-   }
-  }
+  players[phase].request(frame,true);
+  if(phase==='polish')stage.style.setProperty('--polish',smooth(p).toFixed(4));
  }
  async function loadManifest(){
   try{
-   // The checked-in v6 frames are retained only as a non-broken fallback.
-   // Never claim a visual improvement merely because the renderer changed:
-   // the v7 manifest and representative frames must be live first.
-   let response=await fetch(CURRENT_ROOT+'/manifest.json',{cache:'no-store'});
-   if(response.ok){
-    const candidate=await response.json();
-    const valid=candidate.version===7&&candidate.frames===FRAME_COUNT&&
-     candidate.registered_to==='approved-coil-v1'&&candidate.camera_revision===3&&
-     Array.isArray(candidate.entries)&&candidate.entries.length===FRAME_COUNT;
-    if(valid){
-     const check=await Promise.all(['054','085','095','132'].map(i=>
-       fetch(CURRENT_ROOT+'/'+currentProfile+'/frame_'+i.padStart(3,'0')+'.webp',{method:'HEAD'})));
-     if(check.every(x=>x.ok)){
-      if(activeRoot!==CURRENT_ROOT){
-       activeRoot=CURRENT_ROOT;
-       cache.clear();
-       shown.carve=shown.polish=-1;
-      }
-      manifest=candidate;
-      carveStage.dataset.mediaVerified='v7';
-      polishStage.dataset.mediaVerified='v7';
-      for(const phase of ['carve','polish'])if(want[phase]>=0)load(want[phase]);
+   const options=[
+    {path:CURRENT,version:8,count:240,carve:[0,169],polish:[170,239],edition:'v8'},
+    {path:FALLBACK,version:7,count:144,carve:[54,95],polish:[95,132],edition:'v7'},
+    {path:LEGACY,version:6,count:144,carve:[54,95],polish:[95,132],edition:'v6-fallback'}
+   ];
+   for(const choice of options){
+    try{
+     const response=await fetch(choice.path+'/manifest.json',{cache:'no-store'});
+     if(!response.ok)continue;
+     const candidate=await response.json();
+     if(candidate.version!==choice.version||candidate.frames!==choice.count||
+        candidate.registered_to!=='approved-coil-v1'||!Array.isArray(candidate.entries)||
+        candidate.entries.length!==choice.count)continue;
+     if(choice.version===8 && candidate.camera_revision!==4)continue;
+     const required=[choice.carve[0],choice.carve[1],choice.polish[1]];
+     const ok=await Promise.all(required.map(async index=>{
+      const r=await fetch(choice.path+'/'+(mobile()?'mobile':'desktop')+
+       '/frame_'+String(index).padStart(3,'0')+'.webp',{method:'HEAD'});
+      return r.ok;
+     }));
+     if(!ok.every(Boolean))continue;
+     root=choice.path;edition=choice.edition;count=choice.count;
+     frameRange={carve:choice.carve,polish:choice.polish};
+     manifest=candidate;
+     for(const phase of ['carve','polish']){
+      stages[phase].dataset.modelDerived='true';
+      stages[phase].dataset.mediaVerified=edition;
+      players[phase].configure({frames:count});
+      players[phase].prime(frameRange[phase][0]);
+      const previous=Number(stages[phase].dataset.phaseProgress||0);
+      update(phase,previous);
      }
-    }
+     return;
+    }catch(error){console.debug('Optional Coil asset unavailable',choice.edition,error)}
    }
-   if(!manifest){
-    response=await fetch(FALLBACK_ROOT+'/manifest.json');
-    if(!response.ok)throw Error('Missing source-derived frames');
-    const candidate=await response.json();
-    if(candidate.version!==6||candidate.frames!==FRAME_COUNT||!Array.isArray(candidate.entries)||
-      candidate.entries.length!==FRAME_COUNT)throw Error('Invalid source-derived frames');
-    activeRoot=FALLBACK_ROOT;
-    cache.clear();
-    shown.carve=shown.polish=-1;
-    manifest=candidate;
-    for(const phase of ['carve','polish'])if(want[phase]>=0)load(want[phase]);
-    carveStage.dataset.mediaVerified='v6-fallback';
-    polishStage.dataset.mediaVerified='v6-fallback';
-   }
-   carveStage.dataset.modelDerived='true';
-   polishStage.dataset.modelDerived='true';
+   throw Error('No valid source-derived Coil media set available');
   }catch(error){
-   carveStage.dataset.modelDerived='unavailable';
-   polishStage.dataset.modelDerived='unavailable';
-   console.warn('Coil frame manifest unavailable',error);
+   for(const phase of ['carve','polish'])stages[phase].dataset.modelDerived='unavailable';
+   console.warn('Carving source verification failed',error);
   }
  }
+ players.carve.prime(requirements.carve);
+ players.polish.prime(requirements.polish);
  loadManifest();
- return {update,resize,get registered(){return activeRoot===CURRENT_ROOT&&manifest?.registered_to==='approved-coil-v1'&&manifest?.camera_revision===3}};
+ function resize(){players.carve.resize();players.polish.resize()}
+ function suspend(phase){players[phase]?.suspend()}
+ function stats(){return {edition,root,carve:players.carve.stats(),polish:players.polish.stats()}}
+ return {update,resize,suspend,stats,
+  get registered(){return edition==='v8'||edition==='v7';}};
 }
