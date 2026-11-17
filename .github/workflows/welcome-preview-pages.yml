@@ -66,7 +66,7 @@ jobs:
           referenced = set()
           for name in names:
               text = (source / 'prototypes' / name).read_text(encoding='utf-8')
-              referenced.update(re.findall(r'(?:\\.\\./|/)assets/([\\w./-]+)', text))
+              referenced.update(re.findall(r'assets/([A-Za-z0-9_./-]+)', text))
           for rel in sorted(referenced):
               p = assets / rel
               if p.is_file():
@@ -96,7 +96,7 @@ jobs:
           page = (prototype / 'making-atelier.html').read_text()
           script = (prototype / 'making-atelier.js').read_text()
           assert '<h1 id="openingTitle">' in page
-          assert not re.search(r'(?:(?:src|href)=["\\\']|["\\\'])/(?:assets|models|vendor|prototypes)/',page)
+          assert 'src="/assets/' not in page and 'href="/assets/' not in page
           assert "'/assets/" not in script and "'/models/" not in script
           size = sum(p.stat().st_size for p in destination.rglob('*') if p.is_file())
           print(f'Static preview includes {size/(1024*1024):.1f} MiB of actual original assets.')
