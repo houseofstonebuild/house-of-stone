@@ -1,0 +1,65 @@
+name: Review convincing physical tool grips
+on:
+  push:
+    branches: ['rebuild/continuous-making-2026-11-17']
+    paths: ['.github/workflows/continuous-making-grip-poses.yml']
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: continuous-making-grip-poses-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [desktop]
+        range: [{start: 220, end: 221}]
+        pole: [.1, .2, .3, .4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install offline source preparation tools
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund @gltf-transform/core @gltf-transform/extensions meshoptimizer
+          python -m pip install numpy scipy scikit-image trimesh vtk pillow
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1 libxrender1 libxext6 libxkbcommon0 libsm6 libice6 libgl1-mesa-dri libglx-mesa0 libegl-mesa0
+      - uses: actions/cache@v4
+        id: blender
+        with:
+          path: /tmp/blender-4.3.2-linux-x64
+          key: mabwe-offline-blender-4.3.2
+      - name: Install full CPU renderer
+        if: steps.blender.outputs.cache-hit != 'true'
+        run: |
+          if ! curl --fail --retry 2 --retry-all-errors --retry-delay 5 --location --silent --show-error https://download.blender.org/release/Blender4.3/blender-4.3.2-linux-x64.tar.xz --output /tmp/blender.tar.xz; then
+            curl --fail --retry 3 --retry-all-errors --retry-delay 5 --location --silent --show-error https://mirror.clarkson.edu/blender/release/Blender4.3/blender-4.3.2-linux-x64.tar.xz --output /tmp/blender.tar.xz
+          fi
+          tar -xf /tmp/blender.tar.xz -C /tmp
+      - name: Prepare source-derived solid states
+        run: |
+          node tools/carving-pilot/decode-coil.mjs public/models/coil-uploaded-v1.glb build/continuous-making/coil.obj
+          node tools/continuous-making/decode.mjs
+          python tools/continuous-making/prepare.py --start ${{ matrix.range.start }} --end ${{ matrix.range.end }}
+      - name: Render the corrected gripping region
+        run: |
+          xvfb-run -a /tmp/blender-4.3.2-linux-x64/blender -b -t 4 --python-exit-code 1 --python tools/continuous-making/grip_pose_study.py -- --root build/continuous-making --profile ${{ matrix.profile }} --full
+          xvfb-run -a /tmp/blender-4.3.2-linux-x64/blender -b -t 4 --python-exit-code 1 --python tools/continuous-making/grip_pose_study.py -- --root build/continuous-making --profile ${{ matrix.profile }} --full --matte
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          GRIP_POLE_Z: ${{ matrix.pole }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: continuous-grip-pose-${{ matrix.pole }}
+          path: build/continuous-making/grip-patches/
+          compression-level: 0
+          retention-days: 7
