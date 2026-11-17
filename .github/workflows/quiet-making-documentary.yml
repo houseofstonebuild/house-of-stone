@@ -1,0 +1,50 @@
+name: Package extended Mabwe documentary passages
+on:
+  push:
+    branches: ['refine/quiet-stone-journey-2026-11-17']
+    paths:
+      - 'tools/continuous-making/pack.py'
+      - '.github/workflows/quiet-making-documentary.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: quiet-making-documentary-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pillow
+      - name: Pack consecutive original source footage for the listening and workshop sections
+        run: python tools/continuous-making/pack.py --documentary
+      - name: Confirm continuous source boundaries and packs
+        run: |
+          python - <<'PY'
+          import json,hashlib,pathlib
+          base=pathlib.Path('public/assets/continuous-making-v1')
+          for name,first,count in [('material',0,60),('workshop',60,140)]:
+            m=json.loads((base/name/'manifest.json').read_text())
+            assert m['frames']==count
+            for profile in ('mobile','desktop'):
+              packs=m['profiles'][profile]['packs']
+              assert sum(len(p['entries']) for p in packs)==count
+              for p in packs:
+                data=(base/name/profile/p['url']).read_bytes()
+                assert hashlib.sha256(data).hexdigest()==p['sha256']
+                assert all(e['offset']+e['length']<=len(data) for e in p['entries'])
+          print('Both passages preserve their consecutive original source frames')
+          PY
+      - name: Save verified documentary media to the review branch
+        run: |
+          git config user.name houseofstonebuild
+          git config user.email houseofstonebuild@users.noreply.github.com
+          git add public/assets/continuous-making-v1/material public/assets/continuous-making-v1/workshop
+          git diff --cached --quiet && exit 0
+          git commit -m 'Retain original documentary passages across both narrative chapters'
+          git push origin HEAD:refine/quiet-stone-journey-2026-11-17
