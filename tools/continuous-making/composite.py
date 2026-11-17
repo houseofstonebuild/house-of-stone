@@ -24,7 +24,13 @@ for profile,(sw,sh,crop) in configs.items():
   a=np.asarray(mask,np.float32)[:,:,3:4]/255;assert float(a.min())<.01 and float(a.max())>.98,(profile,file.name,'Invalid object matte');a=np.where(a>.99,1,a);rgb=linear(np.asarray(image,np.float32)/255);old=linear(np.asarray(old_bg,np.float32)/255)
   lum=lambda c:np.sum(c*np.array([.2126,.7152,.0722],np.float32),axis=2,keepdims=True)
   ratio=np.clip(lum(rgb)/np.maximum(.001,lum(old)),.03,1);ratio=np.where(ratio>.97,1,ratio)
-  shadow=base[None,None,:]*ratio
+  # The gallery canvas can scale within the viewport. Keep the real contact
+  # shadow, but let its distant floor fade into the canvas before the crop edge.
+  # The object matte is applied separately, so no sculpture/tool pixels fade.
+  yy,xx=np.ogrid[:image.height,:image.width]
+  edge=np.minimum(np.minimum(xx/(image.width*.12),(image.width-1-xx)/(image.width*.12)),np.minimum(yy/(image.height*.08),(image.height-1-yy)/(image.height*.12)))
+  edge=np.clip(edge,0,1);edge=edge*edge*(3-2*edge)
+  shadow=base[None,None,:]*(1-(1-ratio)*edge[:,:,None])
   foreground=(rgb-(1-a)*old)/np.maximum(a,.02)
   result=np.clip(a*foreground+(1-a)*shadow,0,1);out=np.round(np.clip(srgb(result),0,1)*255).astype('uint8')
   Image.fromarray(out,'RGB').save(file)
