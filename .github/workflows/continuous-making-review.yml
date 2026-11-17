@@ -2,9 +2,9 @@ name: Continuous making acceptance
 on:
   push:
     branches: ['rebuild/continuous-making-2026-11-17']
-    paths: ['public/prototypes/making-continuous.*', 'public/prototypes/making-atelier.html', 'public/prototypes/continuous-sequence.js', 'public/assets/continuous-making-v1/**', 'qa/continuous-making-acceptance.mjs', '.github/workflows/continuous-making-review.yml']
+    paths: ['public/prototypes/making-continuous.*', 'public/prototypes/making-atelier.html', 'public/prototypes/continuous-sequence.js', 'public/prototypes/continuous-decode-worker.js', 'public/assets/continuous-making-v1/**', 'qa/continuous-making-acceptance.mjs', '.github/workflows/continuous-making-review.yml']
   pull_request:
-    paths: ['public/prototypes/making-continuous.*', 'public/prototypes/making-atelier.html', 'public/prototypes/continuous-sequence.js', 'qa/continuous-making-acceptance.mjs']
+    paths: ['public/prototypes/making-continuous.*', 'public/prototypes/making-atelier.html', 'public/prototypes/continuous-sequence.js', 'public/prototypes/continuous-decode-worker.js', 'qa/continuous-making-acceptance.mjs']
 permissions:
   contents: read
 concurrency:

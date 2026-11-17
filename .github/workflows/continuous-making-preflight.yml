@@ -1,5 +1,5 @@
 name: Full-sequence playback preflight
-# Includes a short landscape phone alongside retina portrait phones.
+# Includes worker decoding and measured frame-time/update-rate thresholds.
 on:
   push:
     branches: ['rebuild/continuous-making-2026-11-17']

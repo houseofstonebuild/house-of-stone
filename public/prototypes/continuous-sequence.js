@@ -1,13 +1,29 @@
 // A continuous playhead over compressed frame packs. Fetching and decoding are
 // independent; bounded decoded memory never discards the compressed sequence.
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+// One shared pair of workers bounds decode concurrency across both sequences.
+let decoderPool;
+function frameDecoder(){
+ if(decoderPool)return decoderPool;
+ let workers=[],next=0,serial=0;const pending=new Map();
+ try{for(let i=0;i<2;i++){
+  const worker=new Worker(new URL('./continuous-decode-worker.js',import.meta.url));
+  worker.onmessage=event=>{const {id,bitmap,error}=event.data,item=pending.get(id);if(!item){bitmap?.close?.();return;}pending.delete(id);if(error)item.reject(Error(error));else item.resolve(bitmap);};
+  worker.onerror=event=>{event.preventDefault();workers=[];for(const item of pending.values())item.reject(Error('worker-bitmap-unavailable'));pending.clear();};workers.push(worker);
+ }}catch{for(const worker of workers)worker.terminate();workers=[];}
+ decoderPool={async decode(blob){
+  if(workers.length){try{const image=await new Promise((resolve,reject)=>{const id=++serial;pending.set(id,{resolve,reject});workers[next++%workers.length].postMessage({id,blob});});return {image,worker:true};}catch(error){if(error.message!=='worker-bitmap-unavailable')throw error;}}
+  if(typeof createImageBitmap==='function')return {image:await createImageBitmap(blob),worker:false};
+  const url=URL.createObjectURL(blob);try{const image=new Image();image.src=url;await image.decode();return {image,worker:false}}finally{URL.revokeObjectURL(url)}
+ }};return decoderPool;
+}
 export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=()=>{},onReady=()=>{}}){
  const ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});
  let meta,config,plate=null,baseDirty=true,target=0,current=0,active=false,raf=0,previous=0,drawn=-1,drawnMix=-1,disposed=false,needed=0;
  let fetches=0,decodes=0,direction=1,epoch=0,width=1,height=1,pixelScale=0,bytes=0,peakBytes=0;
  const packs=new Map(),images=new Map(),fetchQueue=new Map(),decodeQueue=new Map();let workingFrames=new Set();
- const measures={requests:0,draws:0,stalls:0,decodeCount:0,decodeMs:[],paintMs:[],fetchErrors:0,decodeErrors:0};
- const sourceBytes=()=>Math.ceil(config.width*(pixelScale||1))*Math.ceil(config.height*(pixelScale||1))*4;
+ const measures={requests:0,draws:0,stalls:0,decodeCount:0,workerDecodes:0,decodeMs:[],paintMs:[],fetchErrors:0,decodeErrors:0};
+ const sourceBytes=()=>config.width*config.height*4;
  const plateBytes=()=>plate?config.source_width*config.source_height*4:0;
  const limit=()=>Math.max(6,Math.min(24,Math.floor(((profile==='mobile'?56:80)*1024*1024-plateBytes())/sourceBytes())));
  function trim(){
@@ -51,9 +67,7 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
  async function decode(index,pack,entry,version){
   const begin=performance.now();
   const blob=new Blob([new Uint8Array(pack.data,entry.offset,entry.length)],{type:'image/webp'});
-  let image;
-  if(typeof createImageBitmap==='function'){const resizeWidth=Math.max(1,Math.ceil(config.width*pixelScale)),resizeHeight=Math.max(1,Math.ceil(config.height*pixelScale));image=await createImageBitmap(blob,{resizeWidth,resizeHeight,resizeQuality:'high'});}
-  else {const url=URL.createObjectURL(blob);try{image=new Image();image.src=url;await image.decode()}finally{URL.revokeObjectURL(url)}}
+  const decoded=await frameDecoder().decode(blob),image=decoded.image;if(decoded.worker)measures.workerDecodes++;
   if(disposed||version!==epoch||(active&&workingFrames.size&&!workingFrames.has(index))){image.close?.();return;}
   if(images.has(index))image.close?.();else{images.set(index,image);bytes+=image.width*image.height*4;peakBytes=Math.max(bytes+plateBytes(),peakBytes);trim();}
   measures.decodeCount++;measures.decodeMs.push(performance.now()-begin);if(measures.decodeMs.length>1000)measures.decodeMs.shift();
@@ -75,10 +89,7 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;drawn=-1;baseDirty=true;}
   if(config){
    const required=Math.min(1,Math.max(width/config.source_width,height/config.source_height));
-   // Decode to the canvas' actual device-pixel density. Keep original media
-   // compressed, and refresh the working window if the viewport needs more detail.
-   if(pixelScale&&required>pixelScale*1.04){epoch++;for(const img of images.values())img.close?.();images.clear();bytes=0;drawn=-1;}
-   pixelScale=Math.max(pixelScale,required);
+   pixelScale=required;
   }
  }
  function paint(value){
