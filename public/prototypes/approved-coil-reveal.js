@@ -29,7 +29,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
       workshop.alt='';
       still.className='approved-mobile-still';
       still.alt='Coil, with its original approved stone finish and gallery plinth';
-      host.dataset.approvedModelUrl='/models/coil-uploaded-v1.glb';
+      host.dataset.approvedModelUrl='../models/coil-uploaded-v1.glb';
       host.dataset.approvedMaterialsPreserved='true';
       host.dataset.approvedPresentation='baked-original-glb';
       state.workingStill=workshop;state.finalStill=still;
@@ -39,14 +39,14 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
         const image=event.currentTarget;
         if(image.dataset.fallback)return;
         image.dataset.fallback='true';host.dataset.approvedPresentation='studio-photo-fallback';
-        image.src='/assets/zsa-006-studio-front-v2.webp';
+        image.src='../assets/zsa-006-studio-front-v2.webp';
       };
       workshop.addEventListener('load',done,{once:true});
       still.addEventListener('load',done,{once:true});
       workshop.addEventListener('error',fail);
       still.addEventListener('error',fail);
-      workshop.src=minimalGallery?'/assets/making-atelier-final-mobile-v1.png':'/assets/making-coil-approved-workshop-v1.png';
-      still.src=minimalGallery?'/assets/making-atelier-final-mobile-v1.png':'/assets/making-coil-approved-mobile-v2.png';
+      workshop.src=minimalGallery?'../assets/making-atelier-final-mobile-v1.png':'../assets/making-coil-approved-workshop-v1.png';
+      still.src=minimalGallery?'../assets/making-atelier-final-mobile-v1.png':'../assets/making-coil-approved-mobile-v2.png';
       layer.append(workshop,still);
       return;
     }
@@ -54,9 +54,9 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
     try {
       [{default:THREE}, {GLTFLoader}, {MeshoptDecoder}]=await Promise.all([
         // Importing a namespace has no default export: the wrapper below fills it.
-        import('/vendor/three.module.min.js').then(m=>({default:m})),
-        import('/vendor/GLTFLoader.js'),
-        import('/vendor/meshopt_decoder.js')
+        import('../vendor/three.module.min.js').then(m=>({default:m})),
+        import('../vendor/GLTFLoader.js'),
+        import('../vendor/meshopt_decoder.js')
       ]);
       const canvas=document.createElement('canvas');
       canvas.setAttribute('aria-label','The approved three-dimensional Coil model by Douglas Musekiwa');
@@ -81,7 +81,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
       const camera=new THREE.PerspectiveCamera(34,1,.1,100);
       state.scene=scene;state.camera=camera;
       const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
-      const gltf=await loader.loadAsync('/models/coil-uploaded-v1.glb');
+      const gltf=await loader.loadAsync('../models/coil-uploaded-v1.glb');
       const original=gltf.scene;
       const bounds=new THREE.Box3().setFromObject(original);
       const dimensions=bounds.getSize(new THREE.Vector3());
@@ -119,7 +119,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
       let meshes=0,materials=0;
       original.traverse(node=>{if(node.isMesh){meshes++;materials+=Array.isArray(node.material)?node.material.length:1;}});
       if(meshes<1||materials<1)throw Error('Approved GLB contains no renderable materials');
-      host.dataset.approvedModelUrl='/models/coil-uploaded-v1.glb';
+      host.dataset.approvedModelUrl='../models/coil-uploaded-v1.glb';
       host.dataset.approvedMeshCount=String(meshes);
       host.dataset.approvedMaterialsPreserved='true';
       canvas.addEventListener('webglcontextlost',e=>{
@@ -134,7 +134,7 @@ export function createApprovedCoilReveal(host, onState=()=>{}) {
       // the generic offline-rendered approximation for the approved finish.
       layer.classList.add('approved-photo-fallback');
       const img=document.createElement('img');
-      img.src='/assets/zsa-006-studio-front-v2.webp';
+      img.src='../assets/zsa-006-studio-front-v2.webp';
       img.alt='Photograph of the original Coil sculpture';
       layer.append(img);
       update(state.lastP);
