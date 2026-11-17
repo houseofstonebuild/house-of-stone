@@ -11,9 +11,10 @@ try{
  for(const [name,type,width,height] of [['iphone',webkit,390,844],['android',chromium,412,915],['desktop',chromium,1440,900]]){
   const browser=await type.launch({args:type===chromium?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[]});const page=await browser.newPage({viewport:{width,height}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(base+'/health');await page.evaluate(async({profile})=>{
-   document.body.innerHTML='<canvas id="sample" style="width:100vw;height:100vh;display:block"></canvas>';document.body.style.margin='0';const {createContinuousSequence}=await import('/prototypes/continuous-sequence.js');window.player=createContinuousSequence({canvas:document.querySelector('canvas'),root:'/assets/continuous-making-v1/workshop',profile});await window.player.ready;window.player.request(0,true);
+   document.body.innerHTML='<canvas id="sample"></canvas>';document.body.style.margin='0';Object.assign(document.querySelector('canvas').style,{width:'100vw',height:'100vh',display:'block'});const {createContinuousSequence}=await import('/prototypes/continuous-sequence.js');window.player=createContinuousSequence({canvas:document.querySelector('canvas'),root:'/assets/continuous-making-v1/workshop',profile});await window.player.ready;window.player.request(0,true);
   },{profile:name==='desktop'?'desktop':'mobile'});
   await page.waitForFunction(()=>window.player.stats().draws>0,null,{timeout:30000});
+  assert.deepEqual(await page.evaluate(()=>({width:document.querySelector('canvas').width,height:document.querySelector('canvas').height})),{width,height},'Benchmark must paint the full viewport');
   // A large discontinuity formerly deadlocked a narrow frame cache.
   for(const value of [52.5,3.2,57,0,29.6]){
    await page.evaluate(value=>window.player.request(value,true),value);
