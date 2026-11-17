@@ -34,7 +34,7 @@ try{
   const routeWide=await page.locator('.origin-map').evaluate(el=>getComputedStyle(el).transform);
   await chapter('origin',.8);
   const routeClose=await page.locator('.origin-map').evaluate(el=>getComputedStyle(el).transform);
-  const zoom=matrix=>Number(matrix.match(/^matrix\\(([^,]+)/)?.[1]||1);
+  const zoom=matrix=>Number(matrix.split('(')[1]?.split(',')[0]||1);
   assert(zoom(routeClose)>zoom(routeWide)+.2,'Transport route must visibly zoom as scrolling advances on '+name);
   const listening=[];for(const progress of [.75,.25,.6]){
    await chapter('material',progress);
