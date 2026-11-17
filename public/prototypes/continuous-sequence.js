@@ -1,7 +1,7 @@
 // A continuous playhead over compressed frame packs. Fetching and decoding are
 // independent; bounded decoded memory never discards the compressed sequence.
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
-export function createContinuousSequence({canvas,root,profile,onSample=()=>{},onReady=()=>{}}){
+export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=()=>{},onReady=()=>{}}){
  const ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});
  let meta,config,plate=null,baseDirty=true,target=0,current=0,active=false,raf=0,previous=0,drawn=-1,drawnMix=-1,disposed=false,needed=0;
  let fetches=0,decodes=0,direction=1,epoch=0,width=1,height=1,bytes=0,peakBytes=0;
@@ -78,9 +78,9 @@ export function createContinuousSequence({canvas,root,profile,onSample=()=>{},on
   const mix=b?Math.round((value-low)*60)/60:0;
   if(drawn===low&&drawnMix===mix)return true;
   const begin=performance.now(),scale=Math.max(width/config.source_width,height/config.source_height);
-  const x=(width-config.source_width*scale)/2+config.crop[0]*scale,y=(height-config.source_height*scale)/2+config.crop[1]*scale;
+  const x=(width-config.source_width*scale)*focus+config.crop[0]*scale,y=(height-config.source_height*scale)/2+config.crop[1]*scale;
   const w=config.width*scale,h=config.height*scale;
-  ctx.globalAlpha=1;if(!plate||baseDirty){ctx.fillStyle=meta.background||'#161d19';ctx.fillRect(0,0,width,height);if(plate)ctx.drawImage(plate,(width-config.source_width*scale)/2,(height-config.source_height*scale)/2,config.source_width*scale,config.source_height*scale);baseDirty=false;}ctx.drawImage(a,x,y,w,h);
+  ctx.globalAlpha=1;if(!plate||baseDirty){ctx.fillStyle=meta.background||'#161d19';ctx.fillRect(0,0,width,height);if(plate)ctx.drawImage(plate,(width-config.source_width*scale)*focus,(height-config.source_height*scale)/2,config.source_width*scale,config.source_height*scale);baseDirty=false;}ctx.drawImage(a,x,y,w,h);
   if(b&&mix){ctx.globalAlpha=mix;ctx.drawImage(b,x,y,w,h);ctx.globalAlpha=1;}
   drawn=low;drawnMix=mix;measures.draws++;measures.paintMs.push(performance.now()-begin);if(measures.paintMs.length>1000)measures.paintMs.shift();
   canvas.dataset.displayedFrame=String(value);canvas.dataset.frameStatus='ready';onSample(value);return true;

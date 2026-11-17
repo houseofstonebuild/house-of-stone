@@ -14,7 +14,7 @@ function copy(frame){
 function players(){
  if(reduced.matches){form?.destroy();film?.destroy();form=film=null;profile='';return;}
  const next=mobile()?'mobile':'desktop';if(next===profile)return;profile=next;form?.destroy();film?.destroy();
- form=createContinuousSequence({canvas:$('#processCanvas'),root:'/assets/continuous-making-v1/form',profile,onSample:copy});
+ form=createContinuousSequence({canvas:$('#processCanvas'),root:'/assets/continuous-making-v1/form',profile,focus:profile==='desktop'?.65:.5,onSample:copy});
  film=createContinuousSequence({canvas:$('#workshopCanvas'),root:'/assets/continuous-making-v1/workshop',profile});
 }
 function measure(){
