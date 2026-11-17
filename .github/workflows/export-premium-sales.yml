@@ -1,0 +1,61 @@
+name: Export premium House of Mabwe sales materials
+on:
+  push:
+    branches:
+      - sales/refined-materials-2026-11-17
+    paths:
+      - scripts/export-premium-sales.py
+      - .github/workflows/export-premium-sales.yml
+  workflow_dispatch:
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install publishing libraries
+        run: python -m pip install reportlab pillow pypdf pymupdf
+      - name: Generate all three sales documents
+        run: python scripts/export-premium-sales.py
+      - name: Render page previews and inspect PDFs
+        run: |
+          python - <<'PY'
+          import fitz, pathlib
+          from PIL import Image,ImageOps,ImageDraw
+          out=pathlib.Path('sales-output')
+          proofs=out/'preview'
+          proofs.mkdir(exist_ok=True)
+          for pdf in out.glob('*.pdf'):
+              doc=fitz.open(pdf)
+              previews=[]
+              for i,page in enumerate(doc):
+                  pix=page.get_pixmap(matrix=fitz.Matrix(1.2,1.2),alpha=False)
+                  p=proofs/(pdf.stem+f'-{i+1:02d}.png')
+                  pix.save(str(p))
+                  im=Image.open(p).convert('RGB')
+                  im.thumbnail((460,330))
+                  previews.append((i+1,im.copy()))
+              w=480*3
+              rows=(len(previews)+2)//3
+              mont=Image.new('RGB',(w,355*rows),'#dddcd5')
+              d=ImageDraw.Draw(mont)
+              for j,(page_num,img) in enumerate(previews):
+                  x=(j%3)*480+(480-img.width)//2
+                  y=(j//3)*355+15
+                  mont.paste(img,(x,y))
+                  d.text(((j%3)*480+18,(j//3)*355+335),f'{pdf.name} / {page_num:02d}',fill='#202820')
+              mont.save(proofs/(pdf.stem+'-montage.jpg'),quality=88)
+              print(f'Validated {pdf.name}: {len(doc)} pages')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: House-of-Mabwe-Premium-Sales-2026
+          path: |
+            sales-output/*.pdf
+            sales-output/*.zip
+            sales-output/preview/*montage.jpg
+          retention-days: 90
