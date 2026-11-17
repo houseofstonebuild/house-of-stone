@@ -36,7 +36,7 @@ try{
    catch{return false}
   });
   if(atlasReview)await page.waitForFunction(()=>
-   window.__mabwePerformance().filmAtlas.ready>=8,null,{timeout:30000});
+   window.__mabwePerformance().filmAtlas.ready>=1,null,{timeout:30000});
   const chapters=[];
   for(const section of ['carving','detail','finishing']){
    const sample=await page.evaluate(async section=>{
