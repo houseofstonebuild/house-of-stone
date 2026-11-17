@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "source_model": "/models/coil-uploaded-v1.glb",
+  "sha256": "9edc0d86359cd30559bc11d4ec57c05bdce0b0fa8a86ad5929f0a444efc18fb3",
+  "materials": "unchanged original approved renderer",
+  "desktop": {
+    "width": 1280,
+    "height": 720,
+    "offset_x": 192
+  },
+  "mobile": {
+    "width": 720,
+    "height": 1560,
+    "offset_x": 0
+  }
+}
