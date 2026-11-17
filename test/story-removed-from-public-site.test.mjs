@@ -14,7 +14,7 @@ test('Homepage contains no first-visit story overlay or CTA',()=>{
  assert.match(html,/hos-home-mission/);
 });
 
-test('Production denies standalone experimental story; main site remains accessible',async()=>{
+test('Production serves only the unlinked standalone review, not the invitation',async()=>{
  const dir=mkdtempSync(join(tmpdir(),'hos-story-off-'));
  let server;
  try{
@@ -27,9 +27,16 @@ test('Production denies standalone experimental story; main site remains accessi
   await new Promise(done=>server.listen(0,'127.0.0.1',done));
   const root='http://127.0.0.1:'+server.address().port;
   for(const path of ['/prototypes/making-atelier.html','/prototypes/making-atelier.js',
-    '/story-invitation.js','/story-invitation.css']){
+    '/prototypes/making-atelier.css','/prototypes/coil-formation.js',
+    '/prototypes/approved-coil-reveal.js','/prototypes/scroll-frame-stream.js',
+    '/prototypes/story-film-atlas.js']){
    const response=await fetch(root+path);
-   assert.equal(response.status,404,path+' remains exposed');
+   assert.equal(response.status,200,path+' review route is inaccessible');
+   assert.match(response.headers.get('x-robots-tag')||'',/noindex/);
+  }
+  for(const path of ['/story-invitation.js','/story-invitation.css']){
+   const response=await fetch(root+path);
+   assert.equal(response.status,404,path+' invitation was re-exposed');
   }
   for(const path of ['/','/collection','/making']){
    const response=await fetch(root+path);
