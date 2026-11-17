@@ -30,6 +30,12 @@ try{
    if(name==='carving')await page.waitForFunction(()=>{const s=window.__mabweContinuous.stats().film;return s&&Math.abs(s.current-s.target)<.03&&document.querySelector('#workshopCanvas').dataset.frameStatus==='ready'});
    await page.screenshot({path:dest+'/'+name+'-'+width+'.png'});
   }
+  await chapter('origin',.2);
+  const routeWide=await page.locator('.origin-map').evaluate(el=>getComputedStyle(el).transform);
+  await chapter('origin',.8);
+  const routeClose=await page.locator('.origin-map').evaluate(el=>getComputedStyle(el).transform);
+  const zoom=matrix=>Number(matrix.match(/^matrix\\(([^,]+)/)?.[1]||1);
+  assert(zoom(routeClose)>zoom(routeWide)+.2,'Transport route must visibly zoom as scrolling advances on '+name);
   const listening=[];for(const progress of [.75,.25,.6]){
    await chapter('material',progress);
    await page.waitForFunction(()=>{const s=window.__mabweContinuous.stats().material;return s&&Math.abs(s.current-s.target)<.03});
