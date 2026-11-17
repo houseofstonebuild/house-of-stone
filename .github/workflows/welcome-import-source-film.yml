@@ -1,0 +1,35 @@
+name: Import approved documentary film assets into isolated Welcome review
+on:
+  push:
+    branches:
+      - review/welcome-scroll-main-compatible-2026-11-16
+    paths:
+      - '.github/workflows/welcome-import-source-film.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 1
+      - name: Recover verified source-only chiseling frames and responsive atlas
+        run: |
+          git fetch --depth=1 origin review/our-story-scroll-qa-2026-11-16
+          git checkout FETCH_HEAD -- public/assets/making-film-atlas-v1 public/assets/making-cinema-frames-v4
+          test -s public/assets/making-film-atlas-v1/manifest.json
+          test -s public/assets/making-cinema-frames-v4/manifest.json
+          test "$(find public/assets/making-cinema-frames-v4 -name 'frame_*.webp' | wc -l)" -eq 200
+          test "$(find public/assets/making-film-atlas-v1/mobile -name 'sheet_*.webp' | wc -l)" -eq 8
+          test "$(find public/assets/making-film-atlas-v1/desktop -name 'sheet_*.webp' | wc -l)" -eq 8
+          git config user.name 'houseofstonebuild-review'
+          git config user.email 'review@users.noreply.github.com'
+          git add public/assets/making-film-atlas-v1 public/assets/making-cinema-frames-v4
+          if ! git diff --cached --quiet; then
+            git commit -m 'Add original 200-frame chiseling excerpt with responsive bounded contact sheets'
+            git push origin HEAD:review/welcome-scroll-main-compatible-2026-11-16
+          fi
