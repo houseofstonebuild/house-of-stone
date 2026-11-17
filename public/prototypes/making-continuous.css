@@ -69,3 +69,10 @@
  .continuous-story .process-step .eyebrow{font-size:7px;margin-bottom:12px}
  .continuous-story .process-footer{bottom:18px;font-size:7px}
 }
+
+/* More time with the original documentary, in the existing compositions. */
+.js .continuous-story .material{height:340svh}
+.js .continuous-story .workshop{height:380svh}
+.continuous-story #artistCanvas{position:absolute;inset:0;width:100%;height:100%;opacity:0}
+.continuous-story #artistCanvas[data-frame-status="ready"]{opacity:1}
+@media(prefers-reduced-motion:reduce){.continuous-story #artistCanvas{display:none}.js .continuous-story .material,.js .continuous-story .workshop{height:auto}}

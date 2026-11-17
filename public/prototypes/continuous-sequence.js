@@ -3,6 +3,7 @@
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=()=>{},onReady=()=>{}}){
  const ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});
+ let started=false,warmTarget=0,resolveReady;const ready=new Promise(resolve=>{resolveReady=resolve});
  let meta,config,plate=null,baseDirty=true,target=0,current=0,active=false,raf=0,previous=0,drawn=-1,drawnMix=-1,disposed=false,needed=0;
  let fetches=0,decodes=0,direction=1,epoch=0,width=1,height=1,pixelScale=0,bytes=0,peakBytes=0;
  const packs=new Map(),images=new Map(),fetchQueue=new Map(),decodeQueue=new Map();let workingFrames=new Set();
@@ -28,7 +29,7 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
  function plan(){
   if(!config||disposed)return;
   const base=Math.floor(current),wanted=Math.round(target),count=limit();
-  decodeQueue.clear();const selected=new Set();
+  decodeQueue.clear();fetchQueue.clear();const selected=new Set();
   function choose(index,priority){if(index<0||index>=meta.frames||(!selected.has(index)&&selected.size>=count))return;selected.add(index);needImage(index,priority);}
   choose(Math.floor(needed),-102);choose(Math.ceil(needed),-101);choose(base,-100);choose(base+1,-99);
   if(Math.abs(wanted-base)<count){choose(wanted,-90);choose(wanted+direction,-89);}
@@ -37,12 +38,12 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   // Whole compressed packs are fetched early. Their blobs remain cheap to retain
   // after decoded pixels leave the working window, making reverse scroll warm.
   needPack(wanted,-80);needPack(base+direction*count,0);
-  if(active){for(let d=1;d<config.packs.length;d++){const n=packFor(base);const next=n+d*direction;if(next>=0&&next<config.packs.length&&!packs.has(next))fetchQueue.set(next,30+d);}}
+  if(active){for(let d=1;d<=2;d++){const n=packFor(base);const next=n+d*direction;if(next>=0&&next<config.packs.length&&!packs.has(next))fetchQueue.set(next,30+d);}}
   pumpFetch();pumpDecode();
  }
  function pumpFetch(){
   if(disposed||!config)return;
-  while(fetches<4&&fetchQueue.size){
+  while(fetches<2&&fetchQueue.size){
    const [index]=[...fetchQueue].sort((a,b)=>a[1]-b[1])[0];fetchQueue.delete(index);if(packs.has(index))continue;
    const item=config.packs[index];const record={state:'loading',data:null};packs.set(index,record);fetches++;measures.requests++;
    fetch(root+'/'+profile+'/'+item.url,{cache:'force-cache'}).then(r=>{if(!r.ok)throw Error('Frame pack '+r.status);return r.arrayBuffer()}).then(data=>{if(disposed)return;record.data=data;record.state='ready';pumpDecode();wake();}).catch(()=>{packs.delete(index);measures.fetchErrors++;}).finally(()=>{fetches--;pumpFetch()});
@@ -54,7 +55,7 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   let image;
   if(typeof createImageBitmap==='function')image=await createImageBitmap(blob);
   else {const url=URL.createObjectURL(blob);try{image=new Image();image.src=url;await image.decode()}finally{URL.revokeObjectURL(url)}}
-  if(disposed||version!==epoch||(active&&workingFrames.size&&!workingFrames.has(index))){image.close?.();return;}
+  if(disposed||version!==epoch||(active&&workingFrames.size&&!workingFrames.has(index))||(!active&&Math.abs(index-needed)>1)){image.close?.();return;}
   if(images.has(index))image.close?.();else{images.set(index,image);bytes+=image.width*image.height*4;peakBytes=Math.max(bytes+plateBytes(),peakBytes);trim();}
   measures.decodeCount++;measures.decodeMs.push(performance.now()-begin);if(measures.decodeMs.length>1000)measures.decodeMs.shift();
  }
@@ -110,15 +111,19 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
  function request(value,visible=true){
   if(value!==target)direction=value>target?1:-1;target=clamp(value,0,(meta?.frames||480)-1);
   const entering=!active&&visible;active=visible;if(entering){current=target;needed=target;previous=0;}
-  if(!visible){if(raf)cancelAnimationFrame(raf);raf=0;previous=0;return;}
-  if(config){plan();wake();}
+  if(!visible){if(raf)cancelAnimationFrame(raf);raf=0;previous=0;if(!entering)release();return;}
+  start();if(config){plan();wake();}
  }
- function warm(value=0){if(!config)return;if(!active)needed=value;needImage(Math.floor(value),-100);needImage(Math.floor(value)+1,-99);for(let d=0;d<3;d++)needPack(Math.floor(value)+d*24,d);pumpFetch();pumpDecode();}
+ function release(){
+  decodeQueue.clear();fetchQueue.clear();workingFrames.clear();
+  for(const [index,img] of images){if(Math.abs(index-current)<=1)continue;bytes-=img.width*img.height*4;img.close?.();images.delete(index);}
+ }
+ function warm(value=0){warmTarget=value;start();if(!config||active)return;needed=value;needImage(Math.floor(value),-100);needImage(Math.floor(value)+1,-99);needPack(Math.floor(value),0);pumpFetch();pumpDecode();}
  function resize(){dimensions();drawn=-1;wake()}
  function suspend(){active=false;if(raf)cancelAnimationFrame(raf);raf=0;previous=0;}
- const ready=fetch(root+'/manifest.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Continuous sequence missing');return r.json()}).then(async m=>{
-  if(m.version!==1||!m.profiles?.[profile])throw Error('Invalid continuous sequence');meta=m;config=m.profiles[profile];if(config.plate){plate=new Image();plate.src=root+'/'+profile+'/'+config.plate;await plate.decode()}dimensions();warm();if(active){plan();wake()}onReady(m);
- }).catch(error=>{canvas.dataset.frameStatus='unavailable';console.warn(error)});
- const stats=()=>({target,current,pixelScale,images:images.size,decodedBytes:bytes+plateBytes(),peakDecodedBytes:peakBytes,compressedBytes:[...packs.values()].reduce((n,p)=>n+(p.data?.byteLength||0),0),inflightFetches:fetches,inflightDecodes:decodes,...measures});
+ function start(){if(started||disposed)return;started=true;fetch(root+'/manifest.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Continuous sequence missing');return r.json()}).then(async m=>{
+  if(m.version!==1||!m.profiles?.[profile])throw Error('Invalid continuous sequence');meta=m;config=m.profiles[profile];if(config.plate){plate=new Image();plate.src=root+'/'+profile+'/'+config.plate;await plate.decode()}dimensions();if(active){plan();wake()}else warm(warmTarget);onReady(m);resolveReady(m);
+ }).catch(error=>{canvas.dataset.frameStatus='unavailable';console.warn(error);resolveReady(null)});}
+ const stats=()=>({target,current,started,pixelScale,images:images.size,decodedBytes:bytes+plateBytes(),peakDecodedBytes:peakBytes,compressedBytes:[...packs.values()].reduce((n,p)=>n+(p.data?.byteLength||0),0),inflightFetches:fetches,inflightDecodes:decodes,...measures});
  return {request,warm,resize,suspend,ready,stats,destroy(){disposed=true;epoch++;suspend();for(const img of images.values())img.close?.();images.clear();packs.clear();plate=null;}};
 }
