@@ -1,5 +1,5 @@
 name: Full-sequence playback preflight
-# Includes exact playhead targets and the unpinned concluding chapter.
+# Includes a bounded decode plan and verifies no idle decoding.
 on:
   push:
     branches: ['rebuild/continuous-making-2026-11-17']

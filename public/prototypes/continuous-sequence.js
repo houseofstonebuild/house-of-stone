@@ -5,15 +5,15 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
  const ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});
  let meta,config,plate=null,baseDirty=true,target=0,current=0,active=false,raf=0,previous=0,drawn=-1,drawnMix=-1,disposed=false,needed=0;
  let fetches=0,decodes=0,direction=1,epoch=0,width=1,height=1,bytes=0,peakBytes=0;
- const packs=new Map(),images=new Map(),fetchQueue=new Map(),decodeQueue=new Map();
- const measures={requests:0,draws:0,stalls:0,decodeMs:[],paintMs:[],fetchErrors:0,decodeErrors:0};
+ const packs=new Map(),images=new Map(),fetchQueue=new Map(),decodeQueue=new Map();let workingFrames=new Set();
+ const measures={requests:0,draws:0,stalls:0,decodeCount:0,decodeMs:[],paintMs:[],fetchErrors:0,decodeErrors:0};
  const sourceBytes=()=>config.width*config.height*4;
  const plateBytes=()=>plate?config.source_width*config.source_height*4:0;
  const limit=()=>Math.max(6,Math.min(24,Math.floor(((profile==='mobile'?56:80)*1024*1024-plateBytes())/sourceBytes())));
  function trim(){
   if(!config)return;const keep=limit();
   const protectedFrames=new Set([Math.floor(current),Math.ceil(current),Math.floor(needed),Math.ceil(needed)]);
-  const entries=[...images].sort((a,b)=>(protectedFrames.has(b[0])-protectedFrames.has(a[0]))||Math.abs(a[0]-needed)-Math.abs(b[0]-needed));
+  const entries=[...images].sort((a,b)=>(protectedFrames.has(b[0])-protectedFrames.has(a[0]))||(workingFrames.has(b[0])-workingFrames.has(a[0]))||Math.abs(a[0]-needed)-Math.abs(b[0]-needed));
   for(const [index,img] of entries.slice(keep)){img.close?.();images.delete(index);bytes-=sourceBytes();}
  }
  function packFor(index){return config.packs.findIndex(p=>index>=p.start&&index<p.start+p.entries.length)}
@@ -28,10 +28,12 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
  function plan(){
   if(!config||disposed)return;
   const base=Math.floor(current),wanted=Math.round(target),count=limit();
-  decodeQueue.clear();
-  needImage(Math.floor(needed),-102);needImage(Math.ceil(needed),-101);needImage(base,-100);needImage(base+1,-99);
-  if(Math.abs(wanted-base)<count){needImage(wanted,-90);needImage(wanted+direction,-89);}
-  for(let d=1;d<count;d++){needImage(base+d*direction,d);if(d<count/3)needImage(base-d*direction,d+2);}
+  decodeQueue.clear();const selected=new Set();
+  function choose(index,priority){if(index<0||index>=meta.frames||(!selected.has(index)&&selected.size>=count))return;selected.add(index);needImage(index,priority);}
+  choose(Math.floor(needed),-102);choose(Math.ceil(needed),-101);choose(base,-100);choose(base+1,-99);
+  if(Math.abs(wanted-base)<count){choose(wanted,-90);choose(wanted+direction,-89);}
+  for(let d=1;d<count;d++){choose(base+d*direction,d);if(d<count/3)choose(base-d*direction,d+2);}
+  workingFrames=selected;trim();
   // Whole compressed packs are fetched early. Their blobs remain cheap to retain
   // after decoded pixels leave the working window, making reverse scroll warm.
   needPack(wanted,-80);needPack(base+direction*count,0);
@@ -52,9 +54,9 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   let image;
   if(typeof createImageBitmap==='function')image=await createImageBitmap(blob);
   else {const url=URL.createObjectURL(blob);try{image=new Image();image.src=url;await image.decode()}finally{URL.revokeObjectURL(url)}}
-  if(disposed||version!==epoch){image.close?.();return;}
+  if(disposed||version!==epoch||(active&&workingFrames.size&&!workingFrames.has(index))){image.close?.();return;}
   if(images.has(index))image.close?.();else{images.set(index,image);bytes+=sourceBytes();peakBytes=Math.max(bytes+plateBytes(),peakBytes);trim();}
-  measures.decodeMs.push(performance.now()-begin);if(measures.decodeMs.length>1000)measures.decodeMs.shift();
+  measures.decodeCount++;measures.decodeMs.push(performance.now()-begin);if(measures.decodeMs.length>1000)measures.decodeMs.shift();
  }
  const decoding=new Set();
  function pumpDecode(){
@@ -107,7 +109,7 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   if(!visible){if(raf)cancelAnimationFrame(raf);raf=0;previous=0;return;}
   if(config){plan();wake();}
  }
- function warm(value=0){if(!config)return;needImage(Math.floor(value),-100);needImage(Math.floor(value)+1,-99);for(let d=0;d<3;d++)needPack(Math.floor(value)+d*24,d);pumpFetch();pumpDecode();}
+ function warm(value=0){if(!config)return;if(!active)needed=value;needImage(Math.floor(value),-100);needImage(Math.floor(value)+1,-99);for(let d=0;d<3;d++)needPack(Math.floor(value)+d*24,d);pumpFetch();pumpDecode();}
  function resize(){dimensions();drawn=-1;wake()}
  function suspend(){active=false;if(raf)cancelAnimationFrame(raf);raf=0;previous=0;}
  const ready=fetch(root+'/manifest.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Continuous sequence missing');return r.json()}).then(async m=>{
