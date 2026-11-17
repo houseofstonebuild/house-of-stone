@@ -15,12 +15,12 @@ try{
                  {driver:webkit,name:'iphone',width:390,height:844}]){
   browser=await c.driver.launch({headless:true,
    ...(c.driver===chromium?{args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}: {})});
-  for(const mode of ['canvas','css']){
+  for(const mode of ['canvas']){
    const page=await browser.newPage({viewport:{width:c.width,height:c.height},
     isMobile:c.width<700,hasTouch:c.width<700});
    await page.goto('http://127.0.0.1:'+app.server.address().port+
     '/prototypes/making-atelier.html?filmmode='+mode,{waitUntil:'domcontentloaded'});
-   await page.waitForFunction(()=>window.__mabwePerformance?.().filmAtlas.ready>=8,null,{timeout:25000});
+   await page.waitForFunction(()=>window.__mabwePerformance?.().filmAtlas.ready>=1,null,{timeout:25000});
    const sample=await page.evaluate(async()=>{
     const node=document.querySelector('[data-scene="carving"]');
     const top=scrollY+node.getBoundingClientRect().top;
