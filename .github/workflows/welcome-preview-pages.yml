@@ -1,0 +1,125 @@
+name: Isolated Welcome Experience preview
+
+on:
+  push:
+    branches:
+      - preview/welcome-standalone-2026-11-16
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: welcome-preview-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Prepare standalone site with original sculpture assets
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import shutil, re, sys
+          source = Path('public')
+          destination = Path('_site')
+          prototype = destination / 'prototypes'
+          prototype.mkdir(parents=True, exist_ok=True)
+          (destination / '.nojekyll').touch()
+          (destination / 'robots.txt').write_text('User-agent: *\nDisallow: /\n', encoding='utf-8')
+          (destination / 'index.html').write_text('<!doctype html><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=prototypes/making-atelier.html"><a href="prototypes/making-atelier.html">Open Welcome Experience</a>', encoding='utf-8')
+          names = ['making-atelier.html','making-atelier.css','making-atelier.js',
+                   'coil-formation.js','approved-coil-reveal.js',
+                   'scroll-frame-stream.js','story-film-atlas.js']
+          for name in names:
+              p = source / 'prototypes' / name
+              assert p.is_file(), str(p)
+              shutil.copy2(p, prototype / name)
+          shutil.copytree(source / 'vendor', destination / 'vendor', dirs_exist_ok=True)
+          (destination / 'models').mkdir(exist_ok=True)
+          model = source / 'models' / 'coil-uploaded-v1.glb'
+          assert model.is_file() and model.stat().st_size > 1000
+          shutil.copy2(model, destination / 'models' / model.name)
+          assets = source / 'assets'
+          out = destination / 'assets'
+          out.mkdir(exist_ok=True)
+          for folder in ['making-v8', 'making-cinema-frames-v4', 'making-film-atlas-v1']:
+              original = assets / folder
+              assert original.is_dir(), str(original)
+              shutil.copytree(original, out / folder)
+          # The two approved introduction posters reference previous-frame stills.
+          for folder,frame in [('desktop','frame_054.webp'),('mobile','frame_054.webp'),
+                               ('desktop','frame_095.webp'),('mobile','frame_095.webp')]:
+              p = assets / 'making-v7' / folder / frame
+              assert p.exists(), str(p)
+              (out / 'making-v7' / folder).mkdir(parents=True,exist_ok=True)
+              shutil.copy2(p, out / 'making-v7' / folder / frame)
+          # Copy all directly referenced static photos/films from the source UI and scripts.
+          referenced = set()
+          for name in names:
+              text = (source / 'prototypes' / name).read_text(encoding='utf-8')
+              referenced.update(re.findall(r'(?:\\.\\./|/)assets/([\\w./-]+)', text))
+          for rel in sorted(referenced):
+              p = assets / rel
+              if p.is_file():
+                  dest = out / rel
+                  dest.parent.mkdir(parents=True,exist_ok=True)
+                  shutil.copy2(p,dest)
+          required = [
+            'making-artist-and-block.webp','making-marked-stone.webp',
+            'making-chisel-at-work.webp','making-chiseling-poster-v1.jpg',
+            'making-chiseling-scrub-v1.mp4',
+            'making-atelier-final-mobile-v1.png','making-coil-approved-workshop-v1.png',
+            'making-coil-approved-mobile-v2.png','zsa-006-studio-front-v2.webp',
+            'logo.png',
+          ]
+          for rel in required:
+              p = assets / rel
+              assert p.is_file(), str(p)
+              shutil.copy2(p,out / rel)
+          for glob,minimum in [
+              ('making-v8/desktop/frame_*.webp',200),
+              ('making-v8/mobile/frame_*.webp',200),
+              ('making-cinema-frames-v4/frame_*.webp',200),
+              ('making-film-atlas-v1/desktop/sheet_*.webp',8),
+              ('making-film-atlas-v1/mobile/sheet_*.webp',8)]:
+              actual = len(list(out.glob(glob)))
+              assert actual >= minimum, f'{glob}: expected at least {minimum}, found {actual}'
+          page = (prototype / 'making-atelier.html').read_text()
+          script = (prototype / 'making-atelier.js').read_text()
+          assert '<h1 id="openingTitle">' in page
+          assert not re.search(r'(?:(?:src|href)=["\\\']|["\\\'])/(?:assets|models|vendor|prototypes)/',page)
+          assert "'/assets/" not in script and "'/models/" not in script
+          size = sum(p.stat().st_size for p in destination.rglob('*') if p.is_file())
+          print(f'Static preview includes {size/(1024*1024):.1f} MiB of actual original assets.')
+          assert size < 950*1024*1024, 'Review assets exceed GitHub Pages site size; reduce to approved-source subset'
+          PY
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload isolated preview
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 12
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy without changing production
+        id: deployment
+        uses: actions/deploy-pages@v4
