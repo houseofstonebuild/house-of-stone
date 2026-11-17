@@ -1,4 +1,5 @@
 name: Full-sequence playback preflight
+# Includes reserved reduced-motion still dimensions.
 on:
   push:
     branches: ['rebuild/continuous-making-2026-11-17']
