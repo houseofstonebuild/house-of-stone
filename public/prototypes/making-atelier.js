@@ -75,14 +75,22 @@ const filmAtlas=createFilmAtlas({
 });
 let storyFrame=0,layoutDirty=true,readings=[],currentScene='',approved=null,approvedPromise=null;
 let approvedIdleHandle=null;
+let lastScrollMovement=0;
 function scheduleApprovedInit(){
- if(approved||approvedPromise||approvedIdleHandle!==null)return;
- // WebGL shader compilation and GLB uploads must not interrupt a gesture.
- // The original still remains visible until the approved asset is ready.
- const load=()=>{approvedIdleHandle=null;if(!document.hidden)initializeApproved();};
- if('requestIdleCallback' in window)
-  approvedIdleHandle=requestIdleCallback(load,{timeout:1400});
- else approvedIdleHandle=setTimeout(load,260);
+ if(approved||approvedPromise||approvedIdleHandle!==null||document.hidden)return;
+ // WebGL shaders and the original GLB may only initialize once scrolling
+ // has settled at the final sculpture. No forced timeout on active gestures.
+ const check=()=>{
+  approvedIdleHandle=null;
+  if(document.hidden||approved||approvedPromise)return;
+  if(performance.now()-lastScrollMovement<650){
+   approvedIdleHandle=setTimeout(check,360);return;
+  }
+  const reveal=$('#approvedHost').getBoundingClientRect();
+  if(reveal.bottom<0||reveal.top>innerHeight)return;
+  initializeApproved();
+ };
+ approvedIdleHandle=setTimeout(check,700);
 }
 const formation=createCoilFormation($('#formationStage'),$('#polishStage'),mobile,reduced);
 const approvedOriginalSlot=$('#approvedHost').parentElement;
@@ -347,7 +355,7 @@ function renderReveal(p,near){
  art.style.opacity=smooth((p-.005)/.18).toFixed(4);
  // Load the GLB only near the final chapter; the fallback remains visible
  // until the original model is ready, so iOS never shows a blank final frame.
- if(near)scheduleApprovedInit();
+ if(near&&p>.05)scheduleApprovedInit();
  // The approved artwork is a still presentation. Do not re-render the
  // exact same WebGL frame on every scroll tick.
  $('.reveal-poster').style.opacity=art.dataset.approvedModelState==='ready'?'0':'1';
@@ -359,6 +367,7 @@ function sceneInView(reading,y){
 }
 function update(){
  storyFrame=0;
+ lastScrollMovement=performance.now();
  if(layoutDirty)recordLayout();
  const y=scrollY,view=innerHeight;
  const max=Math.max(1,document.documentElement.scrollHeight-view);
@@ -412,7 +421,7 @@ reduced.addEventListener?.('change',queueUpdate);
 // The story's skip action now leads to the collection rather than to Coil.
 // Do not trap or intercept the native navigation.
 // Prime real mobile documentary frames, without decoding an entire video on load.
-if(mobile()){rememberFrame(0);rememberFrame(1);}
+if(mobile()){rememberFrame(0);}
 checkHdFrames();
 queueUpdate();
 document.documentElement.dataset.makingAtelier='ready';
