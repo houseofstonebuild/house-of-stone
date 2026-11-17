@@ -21,7 +21,7 @@ for profile,(sw,sh,crop) in configs.items():
   if mask.size!=image.size:
    assert abs(mask.width-image.width)<=1 and abs(mask.height-image.height)<=2,(profile,file.name,image.size,mask.size)
    mask=mask.resize(image.size,Image.Resampling.BILINEAR)
-  a=np.asarray(mask,np.float32)[:,:,3:4]/255;rgb=linear(np.asarray(image,np.float32)/255);old=linear(np.asarray(old_bg,np.float32)/255)
+  a=np.asarray(mask,np.float32)[:,:,3:4]/255;assert float(a.min())<.01 and float(a.max())>.98,(profile,file.name,'Invalid object matte');a=np.where(a>.99,1,a);rgb=linear(np.asarray(image,np.float32)/255);old=linear(np.asarray(old_bg,np.float32)/255)
   lum=lambda c:np.sum(c*np.array([.2126,.7152,.0722],np.float32),axis=2,keepdims=True)
   ratio=np.clip(lum(rgb)/np.maximum(.001,lum(old)),.03,1);ratio=np.where(ratio>.97,1,ratio)
   shadow=base[None,None,:]*ratio
