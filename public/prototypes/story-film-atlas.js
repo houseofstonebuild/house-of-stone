@@ -18,6 +18,7 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
  const images=new Map();
  let profile=mobile()?'mobile':'desktop';
  let meta=null,epoch=0,target=-1,draws=0,ready=0,loading=0;
+ let sourceSprite=null,spriteLoading=false;
  let painted=-1,pan=30,lastHeight=-1,lastWidth=-1;
  const maxSheets=()=>mobile()?2:3;
  function source(index){return '/assets/making-film-atlas-v1/'+profile+'/sheet_'+String(index).padStart(2,'0')+'.webp';}
@@ -58,7 +59,7 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
   // The matching 1600-pixel source is displayed by the separate HD renderer
   // after the scroll gesture settles.
   const entry=images.get(sheet);
-  if(!entry||entry.state!=='ready'){
+  if(!sourceSprite&&(!entry||entry.state!=='ready')){
    queue(sheet);
    return false;
   }
@@ -71,20 +72,23 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
    canvas.height=lastHeight=renderH;
   }
   if(frame!==painted){
-   const {tile_width:tw,tile_height:th}=meta.profiles[profile];
-   const tile=frame%25;
-   const sx=tile%5*tw,sy=Math.floor(tile/5)*th;
+   const source=sourceSprite||entry.img;
+   const tile=sourceSprite?Math.round(frame*41/199):frame%25;
+   const tw=sourceSprite?source.naturalWidth/7:meta.profiles[profile].tile_width;
+   const th=sourceSprite?source.naturalHeight/6:meta.profiles[profile].tile_height;
+   const sx=sourceSprite?tile%7*tw:tile%5*tw;
+   const sy=sourceSprite?Math.floor(tile/7)*th:Math.floor(tile/5)*th;
    const scale=Math.max(renderW/tw,renderH/th);
    const dw=tw*scale,dh=th*scale;
    const dx=(renderW-dw)*clamp(positionX/100,0,1);
    const dy=(renderH-dh)*clamp(positionY/100,0,1);
    ctx.imageSmoothingEnabled=true;
    ctx.imageSmoothingQuality='medium';
-   ctx.drawImage(entry.img,sx,sy,tw,th,dx,dy,dw,dh);
+   ctx.drawImage(source,sx,sy,tw,th,dx,dy,dw,dh);
    painted=frame;draws++;
   }
   canvas.style.opacity='1';
-  stage.dataset.displayedFrame=String(frame);
+  stage.dataset.displayedFrame=String(sourceSprite?Number(stage.dataset.requestedFrame||frame):frame);
   stage.dataset.displayQuality='atlas-preview';
   stage.dataset.mobileReady='true';
   onDisplay?.(frame);
@@ -92,8 +96,10 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
   // Queue it only when the active sheet is almost exhausted.
   const nearEnd=(frame%25)>19;
   const nearStart=(frame%25)<5;
-  if(nearEnd)queue(sheet+1);
-  else if(nearStart)queue(sheet-1);
+  if(!sourceSprite){
+   if(nearEnd)queue(sheet+1);
+   else if(nearStart)queue(sheet-1);
+  }
   trim();
   return true;
  }
@@ -101,7 +107,7 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
   const version=++epoch;
   try{
    const response=await fetch('/assets/making-film-atlas-v1/manifest.json',{cache:'no-store'});
-   if(!response.ok)return;
+   if(!response.ok){loadLegacySprite(version);return;}
    const candidate=await response.json();
    if(version!==epoch||candidate.version!==1||candidate.frames!==200||
      candidate.columns!==5||candidate.rows!==5||
@@ -109,12 +115,29 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
    meta=candidate;
    // First paint costs a single source image instead of all 8 atlas sheets.
    queue(Math.max(0,Math.floor(Math.max(0,target)/25)),version);
-  }catch(_){/* the HD source player remains the fallback */}
+  }catch(_){loadLegacySprite(version);}
+ }
+ function loadLegacySprite(version){
+  if(version!==epoch||sourceSprite||spriteLoading)return;
+  spriteLoading=true;
+  const img=new Image();
+  img.decoding='async';
+  img.onload=()=>{
+   spriteLoading=false;
+   if(version!==epoch)return;
+   sourceSprite=img;
+   meta={frames:200};
+   canvas.style.opacity='0';
+   if(target>=0)paint(target,pan,47);
+  };
+  img.onerror=()=>{spriteLoading=false;};
+  img.src='/assets/making-chiseling-scroll-frames-v1.webp';
  }
  function resize(){
   const newProfile=mobile()?'mobile':'desktop';
   if(newProfile!==profile){
    profile=newProfile;epoch++;images.clear();ready=0;loading=0;meta=null;
+   sourceSprite=null;spriteLoading=false;
    canvas.style.opacity='0';painted=-1;lastWidth=lastHeight=-1;
    verifyAndLoad();
   }else{
@@ -123,9 +146,9 @@ export function createFilmAtlas({stage,anchor,mobile,onDisplay}){
   }
  }
  function stats(){
-  return {enabled:Boolean(meta),ready:[...images.values()].filter(v=>v.state==='ready').length,
+  return {enabled:Boolean(meta),ready:sourceSprite?1:[...images.values()].filter(v=>v.state==='ready').length,
     frames:meta?.frames||0,draws,profile,loading,mode:'single-canvas',
-    cachedSheets:images.size};
+    cachedSheets:images.size,legacySprite:Boolean(sourceSprite)};
  }
  verifyAndLoad();
  return {paint,resize,stats,canvas,get available(){return Boolean(meta)},get ready(){return stats().ready}};
