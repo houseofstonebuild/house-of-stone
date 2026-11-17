@@ -1,0 +1,25 @@
+name: Verify standalone review preview
+on:
+  push:
+    branches: ['refine/quiet-stone-journey-2026-11-17']
+    paths:
+      - '.github/workflows/quiet-preview-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Confirm browser preview responds with executable HTML and assets
+        run: |
+          set -eu
+          root='https://raw.githack.com/houseofstonebuild/house-of-stone/refine/quiet-stone-journey-2026-11-17/public'
+          for path in             prototypes/making-continuous-preview.html             prototypes/making-continuous-preview.js             prototypes/continuous-sequence.js             prototypes/making-continuous.css             assets/continuous-making-v1/material/manifest.json             assets/continuous-making-v1/workshop/manifest.json; do
+            curl --fail --location --retry 3 --retry-delay 2 --show-error --silent --output /tmp/preview-file "$root/$path"
+            test -s /tmp/preview-file
+            echo "OK $path"
+          done
+          curl --fail --location --show-error --silent --output /tmp/preview-file "$root/prototypes/making-continuous-preview.html"
+          grep -q 'making-continuous-preview.js' /tmp/preview-file

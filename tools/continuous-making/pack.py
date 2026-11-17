@@ -5,7 +5,7 @@ from pathlib import Path
 from PIL import Image
 from io import BytesIO
 import json,argparse,hashlib
-p=argparse.ArgumentParser();p.add_argument('--workshop',action='store_true');p.add_argument('--form',action='store_true');p.add_argument('--flat',action='store_true');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--workshop',action='store_true');p.add_argument('--documentary',action='store_true');p.add_argument('--form',action='store_true');p.add_argument('--flat',action='store_true');a=p.parse_args()
 base=Path('public/assets/continuous-making-v1')
 def pack(kind,profiles,count,openframe,bg='#161d19',source_profiles=None):
  root=base/kind;root.mkdir(parents=True,exist_ok=True);manifest={'version':1,'frames':count,'background':bg,'profiles':{}}
@@ -35,6 +35,15 @@ if a.workshop:
   image=Image.open('public/assets/making-cinema-frames-v4/frame_%03d.webp'%(index+135))
   return image.crop((0,0,1000,900)) if profile=='mobile' else image
  pack('workshop',[('desktop',1600,900),('mobile',1000,900)],58,film)
+# The supplied master contains 200 verified early-carving source frames.
+# Split them into consecutive passages, never repeat or interpolate the frames.
+# The listening chapter holds 0-59; the handwork chapter continues at 60-199.
+if a.documentary:
+ for kind,first,end in [('material',0,60),('workshop',60,200)]:
+  def passage(profile,index,first=first):
+   image=Image.open('public/assets/making-cinema-frames-v4/frame_%03d.webp'%(index+first))
+   return image.crop((0,0,1000,900)) if profile=='mobile' else image
+  pack(kind,[('desktop',1600,900),('mobile',1000,900)],end-first,passage)
 if a.form:
  dimensions={'desktop':{'width':1440,'height':810,'crop':[0,80,1440,730]},'mobile':{'width':960,'height':2080,'crop':[0,200,960,1700]}}
  plates={};approved={}

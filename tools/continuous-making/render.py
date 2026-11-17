@@ -4,7 +4,7 @@ No browser WebGL, CSS tool overlays, source model edits or catalogue writes.
 import bpy,sys,pathlib,json,math,argparse,shutil
 import numpy as np
 from mathutils import Vector,Matrix,Quaternion
-p=argparse.ArgumentParser();p.add_argument('--root',required=True);p.add_argument('--profile',default='both',choices=['desktop','mobile','both']);p.add_argument('--full',action='store_true');a=p.parse_args(sys.argv[sys.argv.index('--')+1:]);root=pathlib.Path(a.root);meta=json.loads((root/'scene.json').read_text());out=root/'review';out.mkdir(exist_ok=True)
+p=argparse.ArgumentParser();p.add_argument('--root',required=True);p.add_argument('--profile',default='both',choices=['desktop','mobile','both']);p.add_argument('--full',action='store_true');p.add_argument('--quiet',action='store_true',help='Render only the changing stone form, with no illustrative hands or tools');a=p.parse_args(sys.argv[sys.argv.index('--')+1:]);root=pathlib.Path(a.root);meta=json.loads((root/'scene.json').read_text());out=root/'review';out.mkdir(exist_ok=True)
 bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
 scene=bpy.context.scene;scene.render.engine='CYCLES';scene.cycles.samples=16;scene.cycles.use_denoising=True;scene.cycles.seed=6;scene.cycles.max_bounces=4
 scene.render.image_settings.file_format='PNG';scene.render.film_transparent=False
@@ -149,6 +149,13 @@ for entry in meta['entries']:
  bpy.context.view_layer.update()
  hold(left_hand,point+direction*.37 if working else rag.location+Vector((0,-.05,0)),direction if working else (0,0,1),(1,.1,.25),working or phase in ['sand','wax'],'left')
  hold(right_hand,hammer.matrix_world@Vector((0,0,-.52)) if working else torch.matrix_world@Vector((0,0,-.45)),hammer.matrix_world.to_3x3()@Vector((0,0,1)) if working else (1,0,0),(-1,.1,.3),working or phase=='heat','right')
+ # Editorial-only version: exact same source-derived changing solid and
+ # approved last frame, but no visible illustrative props at any stage.
+ # Suppression happens BEFORE both the beauty and geometry-matte passes.
+ if a.quiet:
+  for prop in [chisel,rag,flame,*hparts,*tparts,*left_hand[1],left_hand[2],left_hand[3],*right_hand[1],right_hand[2],right_hand[3]]:
+   prop.hide_render=True
+  heatlight.data.energy=0
  for profile,w,h,position,target,fov,shift in [('desktop',1280,720,(1.38,-8.55,3.12),(.28,0,1.68),33,-.15),('mobile',720,1560,(.10,-12.5,3.12),(0,0,1.42),36,0)]:
   if a.profile not in ['both',profile]:continue
   if a.full:

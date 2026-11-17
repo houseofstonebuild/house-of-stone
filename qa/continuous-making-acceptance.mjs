@@ -16,15 +16,32 @@ try{
   const browser=await type.launch({args:type===chromium?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[]});const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:['iphone','android'].includes(name)?2:1});const errors=[],failures=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400&&new URL(r.url()).origin===base)failures.push(r.status()+' '+r.url())});
   await page.goto(base+(process.env.MABWE_STUDY_PATH||'/prototypes/making-continuous.html'),{waitUntil:'load'});await page.bringToFront();await page.waitForFunction(()=>document.documentElement.dataset.storyLayout==='ready');
   assert.match(await page.locator('.opening-photo').getAttribute('src'),/making-artist-and-block/);assert.equal(await page.locator('video,#toolStage,.step-buttons').count(),0);
+  assert.equal(await page.evaluate(()=>window.__mabweContinuous.stats().form),null,'Do not decode sculpture frames during first paint');
+  assert.equal(await page.evaluate(()=>window.__mabweContinuous.stats().film),null,'Do not decode workshop frames during first paint');
+  assert.equal(await page.evaluate(()=>window.__mabweContinuous.stats().material),null,'Do not decode documentary frames during first paint');
   await page.screenshot({path:dest+'/'+name+'-opening.png'});
   async function chapter(name,progress=.5){
    await page.evaluate(({name,progress})=>{const section=document.querySelector('[data-scene="'+name+'"]'),pin=section.querySelector(':scope>.pin');scrollTo(0,section.getBoundingClientRect().top+scrollY+Math.max(1,section.offsetHeight-(pin?.clientHeight||innerHeight))*progress)},{name,progress});
    await page.waitForFunction(({name,progress})=>document.body.dataset.currentScene===name&&(name==='house'||Math.abs(Number(document.querySelector('[data-scene="'+name+'"]').dataset.progress)-progress)<.003),{name,progress});
   }
   for(const name of ['origin','material','carving']){
-   await chapter(name);if(name==='carving')await page.waitForFunction(()=>{const s=window.__mabweContinuous.stats().film;return s&&Math.abs(s.current-s.target)<.03&&document.querySelector('#workshopCanvas').dataset.frameStatus==='ready'});
+   await chapter(name);
+   if(name==='material')await page.waitForFunction(()=>{const s=window.__mabweContinuous.stats().material;return s&&Math.abs(s.current-s.target)<.03&&document.querySelector('#materialCanvas').dataset.frameStatus==='ready'});
+   if(name==='carving')await page.waitForFunction(()=>{const s=window.__mabweContinuous.stats().film;return s&&Math.abs(s.current-s.target)<.03&&document.querySelector('#workshopCanvas').dataset.frameStatus==='ready'});
    await page.screenshot({path:dest+'/'+name+'-'+width+'.png'});
   }
+  await chapter('origin',.2);
+  const routeWide=await page.locator('.origin-map').evaluate(el=>getComputedStyle(el).transform);
+  await chapter('origin',.8);
+  const routeClose=await page.locator('.origin-map').evaluate(el=>getComputedStyle(el).transform);
+  const zoom=matrix=>Number(matrix.split('(')[1]?.split(',')[0]||1);
+  assert(zoom(routeClose)>zoom(routeWide)+.2,'Transport route must visibly zoom as scrolling advances on '+name);
+  const listening=[];for(const progress of [.75,.25,.6]){
+   await chapter('material',progress);
+   await page.waitForFunction(()=>{const s=window.__mabweContinuous.stats().material;return s&&Math.abs(s.current-s.target)<.03});
+   listening.push(await page.evaluate(()=>Number(document.querySelector('#materialCanvas').dataset.displayedFrame)));
+  }
+  assert(listening[0]>listening[1]&&listening[2]>listening[1],'Listening footage must reverse with scroll on '+name+': '+JSON.stringify(listening));
   const workshop=[];for(const progress of [.75,.25,.6]){await chapter('carving',progress);await page.waitForFunction(()=>{const s=window.__mabweContinuous.stats().film;return s&&Math.abs(s.current-s.target)<.03});workshop.push(await page.evaluate(()=>Number(document.querySelector('#workshopCanvas').dataset.displayedFrame)))}assert(workshop[0]>workshop[1]&&workshop[2]>workshop[1],'Workshop must reverse with the scroll on '+name+': '+JSON.stringify(workshop));
   const stages=await page.evaluate(()=>window.__mabweContinuous.stages());assert.equal(stages.length,6);assert(stages[1].length>=2600);assert(stages.slice(2).every(s=>s.length>=1000));
   async function phase(index,local=.5){
