@@ -61,6 +61,7 @@ try{
     atlas:window.__mabwePerformance().filmAtlas
    })));
   }
+  console.log('SCRUB DEBUG',d.name,JSON.stringify(samples.map(v=>({requested:v.requested,displayed:v.displayed,paused:v.paused,atlas:v.atlas}))), 'page errors',JSON.stringify(errors));
   assert(samples[0].requested<samples[1].requested,'Forward scroll did not advance footage');
   assert(samples[2].requested<samples[1].requested,'Reverse scroll did not reverse footage');
   assert(samples[3].requested>samples[2].requested,'Re-entry did not resume scroll control');
