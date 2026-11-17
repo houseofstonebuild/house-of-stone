@@ -11,14 +11,14 @@ center=np.array([bounds.mean(axis=0)[0],bounds[0,1],bounds.mean(axis=0)[2]])
 def transform(v):
  v=(np.asarray(v)-center)*factor;c=np.cos(.14);s=np.sin(.14);x=v[:,0]*c+v[:,2]*s;z=-v[:,0]*s+v[:,2]*c
  return np.column_stack((x,-z,v[:,1]))
-frames=480;keys=[0,20,45,80,130,180,235,270,310,345,380,405,430,455,479] if a.keys else list(range(frames));entries=[]
+frames=480;keys=[0,130,235,290,365,430,479] if a.keys else list(range(frames));entries=[]
 for i in keys:
  phase='mark' if i<40 else 'carve' if i<248 else 'sand' if i<328 else 'heat' if i<400 else 'wax' if i<464 else 'work'
- t=float(np.clip((i-40)/207,0,1));mesh=coil if t>=1 else solid.mesh_for(solid.field(t,data),data)
+ u=max(0,(i-40)/16);whole=int(u);local=u-whole;cut=float(solid.smooth(np.clip((local-.62)/.3175,0,1)));t=float(np.clip((whole+cut)/13,0,1));mesh=coil if t>=1 else solid.mesh_for(solid.field(t,data),data)
  vertices=transform(mesh.vertices).astype(np.float32);faces=np.asarray(mesh.faces,dtype=np.int32)
  # Contact points on the actual visible surface, away from the central opening.
  eligible=vertices[(vertices[:,1]<np.quantile(vertices[:,1],.30))&(vertices[:,0]>np.quantile(vertices[:,0],.60))]
- desired=np.array([.6,-.20,1.25+.65*np.sin(i*.022)])
+ desired=np.array([.6,-.20,1.25+.65*np.sin(i*.022)]) if phase in ['mark','carve'] else np.array([.50,-.25,.68+.18*np.sin(i*.09)])
  contact=eligible[np.argmin(np.sum((eligible-desired)**2,axis=1))] if len(eligible) else vertices[np.argmin(vertices[:,1])]
  np.savez_compressed(root/('mesh_%04d.npz'%i),vertices=vertices,faces=faces)
  entries.append({'index':i,'phase':phase,'contact':contact.tolist(),'carving':t})
@@ -37,5 +37,7 @@ for ident in ['cross_pein_hammer','propane_torch']:
    target=folder/name;target.parent.mkdir(parents=True,exist_ok=True);download(info['url'],target)
   assets[ident]={'file':str(path),'url':'https://polyhaven.com/a/'+ident,'license':'CC0','sha256':hashlib.sha256(path.read_bytes()).hexdigest()}
  except Exception as e:raise RuntimeError('Required scanned tool unavailable '+ident+': '+str(e))
+for side in ['left','right']:
+ path=root/(side+'-hand.glb');url='https://raw.githubusercontent.com/immersive-web/webxr-input-profiles/main/packages/assets/profiles/generic-hand/'+side+'.glb';download(url,path);assets[side+'-hand']={'file':str(path),'url':url,'license':'MIT'}
 manifest={'version':1,'frames':frames,'entries':entries,'assets':assets,'source_model':'/models/coil-uploaded-v1.glb','source_sha256':hashlib.sha256(pathlib.Path('public/models/coil-uploaded-v1.glb').read_bytes()).hexdigest()}
 (root/'scene.json').write_text(json.dumps(manifest));print('Prepared',len(entries),'authored states; approved model is unchanged',flush=True)
