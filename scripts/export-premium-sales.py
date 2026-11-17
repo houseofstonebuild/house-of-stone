@@ -107,6 +107,7 @@ def kicker(c, x, y, string, col=SAGE, size=9.2, tracking=1.3):
     ob.setFillColor(col)
     ob.setCharSpace(tracking)
     ob.textLine(string.upper())
+    ob.setCharSpace(0)
     c.drawText(ob)
 def wrap(text, width, face, size):
     out = []
@@ -186,12 +187,13 @@ def cover(c):
 def overview(c):
     page(c, 2, "THE COLLECTION")
     kicker(c, 56, 551, "THE HOUSE", SAGE)
-    t(c, 54, 494, "Stone, considered individually.", 33, "Serif")
-    y = para(c, 56, 440, "House of Mabwe presents stone sculptures by artists in Zimbabwe. The selected works range from open abstract forms to paired figures and portraiture.", 410, 12.2, 23)
-    y -= 30
-    y = para(c, 56, y, "Each artwork is considered by its shape, surface, material and relationship to the room in which it may be placed.", 408, 12.2, 23)
-    y -= 30
-    y = para(c, 56, y, "Artwork photographs are documentary images. Interior images illustrate possible placement; they are not evidence of scale.", 407, 10.5, 19, "Sans", SAGE)
+    t(c, 54, 501, "Stone, considered", 32, "Serif")
+    t(c, 54, 462, "individually.", 32, "Serif")
+    y = para(c, 56, 393, "House of Mabwe presents sculpture made by artists in Zimbabwe. The selection includes abstract forms and paired figures.", 396, 12, 23)
+    y -= 27
+    y = para(c, 56, y, "Each work is considered by its material, silhouette, surface and relationship to the room.", 396, 12, 23)
+    y -= 26
+    y = para(c, 56, y, "Studio photographs show individual works. Interior images illustrate potential placement and do not establish scale.", 396, 10.3, 19, "Sans", SAGE)
     r(c, 522, 105, 421, 440, IVORY)
     img(c, DETAILS[0]["setting"], 522, 128, 421, 417, "cover")
     t(c, 522, 105, "ILLUSTRATIVE INTERIOR PLACEMENT", 8.2, "Sans", SAGE)
@@ -223,7 +225,7 @@ def collection_transition(c):
 def acquisition(c):
     page(c, 9, "INQUIRIES & ACQUISITION")
     kicker(c, 56, 547, "COLLECTING AND SOURCING", SAGE)
-    t(c, 54, 483, "From interest to acquisition", 36, "Serif")
+    t(c, 54, 483, "From interest to acquisition", 32, "Serif")
     items=[
         ("01", "Select a work", "Tell us which sculpture interests you, or describe the scale and setting you are considering."),
         ("02", "Review the details", "Request additional photographs, recorded dimensions, material information and an individual quotation."),
