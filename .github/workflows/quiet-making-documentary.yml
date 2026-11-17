@@ -47,4 +47,6 @@ jobs:
           git add public/assets/continuous-making-v1/material public/assets/continuous-making-v1/workshop
           git diff --cached --quiet && exit 0
           git commit -m 'Retain original documentary passages across both narrative chapters'
+          git fetch origin refine/quiet-stone-journey-2026-11-17
+          git rebase origin/refine/quiet-stone-journey-2026-11-17
           git push origin HEAD:refine/quiet-stone-journey-2026-11-17
