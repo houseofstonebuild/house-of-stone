@@ -1,0 +1,44 @@
+name: Continuous making acceptance
+on:
+  push:
+    branches: ['rebuild/continuous-making-2026-11-17']
+    paths: ['public/prototypes/making-continuous.*', 'public/prototypes/making-atelier.html', 'public/prototypes/continuous-sequence.js', 'public/assets/continuous-making-v1/**', 'qa/continuous-making-acceptance.mjs', '.github/workflows/continuous-making-review.yml']
+  pull_request:
+    paths: ['public/prototypes/making-continuous.*', 'public/prototypes/making-atelier.html', 'public/prototypes/continuous-sequence.js', 'qa/continuous-making-acceptance.mjs']
+permissions:
+  contents: read
+concurrency:
+  group: continuous-review-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check whether the full rendered media is available
+        id: media
+        shell: bash
+        run: |
+          if [ -f public/assets/continuous-making-v1/form/manifest.json ]; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+          fi
+      - run: npm run check && npm test
+      - if: steps.media.outputs.ready == 'true'
+        run: npm install --prefix qa --no-audit --no-fund
+      - if: steps.media.outputs.ready == 'true'
+        run: sh scripts/run-browser-qa.sh qa/continuous-making-acceptance.mjs
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.media.outputs.ready == 'true'
+        with:
+          name: continuous-making-final-review
+          path: test-results/browser/continuous-making-full/
+          retention-days: 14
