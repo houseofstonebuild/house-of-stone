@@ -53,6 +53,7 @@ try{
   }
   const filmSamples=[];
   for(const p of [.8,.15,.5]){await go(page,'carving',p);await settles(page,'film');filmSamples.push(await page.evaluate(()=>window.__mabwePerformance().film.displayed));}
+  console.log('FILM SAMPLES',device.name,JSON.stringify(filmSamples),JSON.stringify(await page.evaluate(()=>({y:scrollY,chapter:window.__mabweMaking.chapter,stats:window.__mabwePerformance(),layout:[...document.querySelectorAll('[data-scene]')].map(e=>({name:e.dataset.scene,top:e.offsetTop,height:e.offsetHeight}))}))));
   assert(filmSamples[0]>filmSamples[1]&&filmSamples[2]>filmSamples[1],'Documentary must reverse and advance');
   for(let index=0;index<6;index++){
    await go(page,'process',(index+.5)/6);await settles(page,'process');

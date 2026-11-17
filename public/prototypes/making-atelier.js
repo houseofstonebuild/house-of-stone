@@ -3,7 +3,7 @@ const $=selector=>document.querySelector(selector);
 const clamp=x=>Math.max(0,Math.min(1,x));
 const mix=(a,b,t)=>a+(b-a)*t;
 const smooth=x=>{x=clamp(x);return x*x*(3-2*x)};
-const phone=()=>innerWidth<=700;
+const phone=()=>innerWidth<=700||(innerWidth<=1100&&innerHeight>innerWidth);
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const scenes=[...document.querySelectorAll('[data-scene]')];
 const articles=[...document.querySelectorAll('[data-step]')];
@@ -57,6 +57,14 @@ function idleNearProcess(kind){
    createWorkshopTools($('#toolStage')).then(result=>{tools=result;toolsLoading=false;paintTools();}).catch(error=>{toolsError=true;toolsLoading=false;art.dataset.tools='unavailable';console.warn('Workshop tool study unavailable',error)});
   }else{
    approvedLoading=true;
+   if(phone()){
+    host.dataset.approvedModelState='loading';
+    host.querySelector('.approved-poster').decode().then(()=>{
+     approved={resize(){},update(){}};host.dataset.approvedModelState='ready';
+     host.dataset.approvedSource='/models/coil-uploaded-v1.glb';queue();
+    }).catch(()=>{host.dataset.approvedModelState='fallback';});
+    return;
+   }
    import('./approved-coil-reveal.js').then(mod=>{
     approved=mod.createApprovedCoilReveal(host,state=>{host.dataset.approvedModelState=state;queue();});
     approved.update(.999);host.dataset.approvedSource='/models/coil-uploaded-v1.glb';
