@@ -1,449 +1,257 @@
-/* House of Mabwe / The Making
- * Documentary footage stays source-true and paused; Coil's actual approved
- * volume drives the separate reversible carving study before the final GLB.
- */
-import {createCoilFormation} from './coil-formation.js';
 import {createFrameStream} from './scroll-frame-stream.js';
-import {createFilmAtlas} from './story-film-atlas.js';
-const $=s=>document.querySelector(s);
+const $=selector=>document.querySelector(selector);
 const clamp=x=>Math.max(0,Math.min(1,x));
+const mix=(a,b,t)=>a+(b-a)*t;
 const smooth=x=>{x=clamp(x);return x*x*(3-2*x)};
-const lerp=(a,b,t)=>a+(b-a)*t;
-const mobile=()=>innerWidth<=700;
+const phone=()=>innerWidth<=700;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-const saveData=Boolean(navigator.connection?.saveData);
-const sections=[...document.querySelectorAll('[data-scene]')];
-const names={
- introduction:['01','INTRODUCTION'],origin:['02','ORIGIN'],
- material:['03','PREPARATION'],carving:['04','CARVING'],
- detail:['05','THE FORM'],finishing:['06','FINISHING'],reveal:['07','THE WORK'],house:['08','THE HOUSE']
-};
-const states=new Map();
-const $film=$('#cinemaFilm');
-const $filmMedia=$('.carving-media');
-const $atlas=$('#atlasFilmFrame');
-const $mobileFrame=$('#mobileFilmFrame');
-const $poster=$('.carving-poster');
-const $mapRoute=$('#mapRoute');
-const $truck=$('#routeTruck');
-const $routeReadout=$('#routeReadout');
-const mapLength=$mapRoute.getTotalLength?.()||115;
-// Pre-sample the fixed SVG path once. getPointAtLength() during scrolling can
-// force a costly geometry query after moving the map on slower mobile devices.
-const routeSamples=Array.from({length:257},(_,i)=>{
- const point=$mapRoute.getPointAtLength(mapLength*i/256);
- return {x:point.x,y:point.y};
-});
-function routePoint(t){
- const u=clamp(t)*256,index=Math.min(255,Math.floor(u));
- const f=u-index,a=routeSamples[index],b=routeSamples[index+1];
- return {x:lerp(a.x,b.x,f),y:lerp(a.y,b.y,f)};
+const scenes=[...document.querySelectorAll('[data-scene]')];
+const articles=[...document.querySelectorAll('[data-step]')];
+const buttons=[...document.querySelectorAll('[data-go]')];
+// One camera and one frame stream from the untouched block to the last polish.
+// The frame ranges follow the source generator's physical carving intervals.
+const steps=[
+ {name:'mark',start:45,end:53}, {name:'carve',start:54,end:94},
+ {name:'sand',start:95,end:113}, {name:'heat',start:114,end:123},
+ {name:'wax',start:124,end:138}, {name:'work',start:139,end:143}
+];
+let readings=[],dirty=true,raf=0,currentScene='',currentStep='',lastInput=0;
+let processProgress=0,tools=null,toolsLoading=false,toolsError=false,approved=null,approvedLoading=false;
+let approvedTimer=0,toolTimer=0,active=false,filmActive=false,toolFrame=0;
+let frameImage=null,displayedFrame=-1;
+const art=$('#processArt'),workshop=$('#workshopMedia'),host=$('#approvedHost');
+const route=$('#mapRoute'),routeLength=route.getTotalLength();
+route.style.strokeDasharray=String(routeLength);
+const routeSamples=Array.from({length:101},(_,i)=>{const p=route.getPointAtLength(routeLength*i/100);return {x:p.x,y:p.y}});
+const processStream=createFrameStream({stage:art,image:$('#processFrame'),mobile:phone,
+ src:(i,profile)=>'/assets/making-v7/'+profile+'/frame_'+String(i).padStart(3,'0')+'.webp',
+ onDisplay:(i,img)=>{displayedFrame=i;frameImage=img;paintTools();queue();}});
+const filmStream=createFrameStream({stage:workshop,image:$('#documentaryFrame'),mobile:phone,
+ src:i=>'/assets/making-cinema-frames-v4/frame_'+String(i).padStart(3,'0')+'.webp',
+ position:()=>({x:25,y:46})});
+filmStream.configure({frames:200});
+function layout(){
+ readings=scenes.map(el=>({el,name:el.dataset.scene,top:el.getBoundingClientRect().top+scrollY,
+  height:el.offsetHeight,span:Math.max(1,el.offsetHeight-innerHeight)}));
+ dirty=false;
 }
-$mapRoute.style.strokeDasharray=String(mapLength);
-let frameCount=48;
-let filmEdition='legacy';
-const fallbackFrames=19; // First ~8 seconds only: the lion never comes into view.
-const atlasCount=18;
-let hdFramesReady=false;
-let frameRoot='/assets/making-cinema-frames';
-let activeFilmFrame=-1,desiredFilmFrame=-1,filmDuration=0,videoMetadata=false,filmActive=false;
-let filmPan=18;
-// Preserve the fluid source-atlas timeline during touch/trackpad movement.
-// Decode full-resolution source photography only when the gesture settles.
-let filmIdleTimer=0,filmMoving=false,lastFilmTarget=-1;
-const filmStream=createFrameStream({
- stage:$filmMedia,image:$mobileFrame,mobile,
- src:index=>frameUrl(index),
- position:()=>({x:filmPan,y:47}),
- onDisplay:(index,img)=>{
-  if(!$mobileFrame.hasAttribute('src'))$mobileFrame.src=img.src;
-  activeFilmFrame=index;
-  $filmMedia.dataset.mobileReady='true';
-  $filmMedia.dataset.displayedFrame=String(index);
-  if(filmAtlas.available){
-   const showHD=index===desiredFilmFrame&&!filmMoving&&filmActive;
-   filmStream.canvas.style.opacity=showHD?'1':'0';
-   $filmMedia.dataset.displayQuality=showHD?'hd-source':'atlas-preview';
-  }
- }
-});
-const filmAtlas=createFilmAtlas({
- stage:$filmMedia,anchor:$poster,mobile,
- onDisplay:frame=>{
-  if(filmStream.displayed!==frame)filmStream.canvas.style.opacity='0';
- }
-});
-let storyFrame=0,layoutDirty=true,readings=[],currentScene='',approved=null,approvedPromise=null;
-let approvedIdleHandle=null;
-let lastScrollMovement=0;
-function scheduleApprovedInit(){
- if(approved||approvedPromise||approvedIdleHandle!==null||document.hidden)return;
- // WebGL shaders and the original GLB may only initialize once scrolling
- // has settled at the final sculpture. No forced timeout on active gestures.
+function stepAt(p){const t=clamp(p)*6,index=Math.min(5,Math.floor(t));return {index,local:Math.min(1,t-index),step:steps[index]};}
+function setStep(index){
+ const next=steps[index].name;if(currentStep===next)return;currentStep=next;
+ for(const article of articles){const yes=article.dataset.step===next;article.classList.toggle('is-current',yes);if(!reduced.matches)article.setAttribute('aria-hidden',String(!yes));else article.removeAttribute('aria-hidden');}
+ for(const button of buttons){if(button.dataset.go===next)button.setAttribute('aria-current','step');else button.removeAttribute('aria-current');}
+ $('#stepCounter').textContent=String(index+1).padStart(2,'0')+' / 06';
+ art.dataset.step=next;
+}
+function idleNearProcess(kind){
+ const isTools=kind==='tools';
+ if((isTools&&(tools||toolsLoading||toolsError||toolTimer))||(!isTools&&(approved||approvedLoading||approvedTimer)))return;
  const check=()=>{
-  approvedIdleHandle=null;
-  if(document.hidden||approved||approvedPromise)return;
-  if(performance.now()-lastScrollMovement<650){
-   approvedIdleHandle=setTimeout(check,360);return;
+  if(isTools)toolTimer=0;else approvedTimer=0;
+  if(document.hidden||reduced.matches)return;
+  const process=readings.find(r=>r.name==='process');
+  if(!process||scrollY+innerHeight*2<process.top||scrollY>process.top+process.height)return;
+  if(performance.now()-lastInput<180){if(isTools)toolTimer=setTimeout(check,200);else approvedTimer=setTimeout(check,240);return;}
+  if(isTools){
+   toolsLoading=true;
+   createWorkshopTools($('#toolStage')).then(result=>{tools=result;toolsLoading=false;paintTools();}).catch(error=>{toolsError=true;toolsLoading=false;art.dataset.tools='unavailable';console.warn('Workshop tool study unavailable',error)});
+  }else{
+   approvedLoading=true;
+   import('./approved-coil-reveal.js').then(mod=>{
+    approved=mod.createApprovedCoilReveal(host,state=>{host.dataset.approvedModelState=state;queue();});
+    approved.update(.999);host.dataset.approvedSource='/models/coil-uploaded-v1.glb';
+   }).catch(error=>{host.dataset.approvedModelState='fallback';console.warn('Approved Coil presentation unavailable',error)});
   }
-  const reveal=$('#approvedHost').getBoundingClientRect();
-  if(reveal.bottom<0||reveal.top>innerHeight)return;
-  initializeApproved();
  };
- approvedIdleHandle=setTimeout(check,700);
+ if(isTools)toolTimer=setTimeout(check,200);else approvedTimer=setTimeout(check,260);
 }
-const formation=createCoilFormation($('#formationStage'),$('#polishStage'),mobile,reduced);
-const approvedOriginalSlot=$('#approvedHost').parentElement;
-const filmState=()=>({paused:$film.paused,time:$film.currentTime,frame:desiredFilmFrame,active:filmActive,videoReady:videoMetadata,hdFrames:hdFramesReady,edition:filmEdition,frames:frameCount,maxSeconds:8.4,stream:filmStream.stats(),atlas:filmAtlas.stats(),coil:formation.stats()});
-window.__mabweMaking={get film(){return filmState()},get chapter(){return currentScene},get approved(){return $('#approvedHost').dataset.approvedModelState||'not-started'}};
-
-function recordLayout(){
- readings=sections.map(el=>{
-  const rect=el.getBoundingClientRect();
-  const top=rect.top+scrollY;
-  return {el,name:el.dataset.scene,top,height:el.offsetHeight,distance:Math.max(1,el.offsetHeight-innerHeight)};
- });
- layoutDirty=false;
+function paintTools(){
+ if(!tools||!frameImage)return;
+ const selected=stepAt(processProgress);
+ // Do not animate a tool against a frame from another stage after a fast jump.
+ const matches=displayedFrame>=selected.step.start&&displayedFrame<=selected.step.end;
+ tools.update(matches&&active?selected.step.name:'none',selected.local,frameImage);
+ art.dataset.tools=tools.state;
 }
-
-function frameUrl(index){
- // All versions contain ONLY the early 8.4 seconds of the actual documentary.
- // The new sequence has 144 independent source frames (~17 FPS of scroll)
- // rather than 48, with the original master preserved.
- const sourceFrame=filmEdition==='legacy'?
-  Math.min(fallbackFrames-1,Math.round(index*(fallbackFrames-1)/(frameCount-1))):index;
- $filmMedia.dataset.sourceFrame=String(sourceFrame);
- const digits=filmEdition==='hd-v3'||filmEdition==='hd-v4'?3:2;
- return frameRoot+'/frame_'+String(sourceFrame).padStart(digits,'0')+'.webp';
-}
-async function checkHdFrames(){
- let selected=null;
- // V4 samples the documentary near its original 24 fps. The source frame
- // count is capped at 200 to balance motion fidelity with phone decoding.
- try{
-  const response=await fetch('/assets/making-cinema-frames-v4/manifest.json',{cache:'no-store'});
-  if(response.ok){
-   const manifest=await response.json();
-   if(manifest.version===4&&manifest.frames===200&&manifest.width>=1280&&manifest.end_seconds<=8.4){
-    const checks=await Promise.all([0,100,199].map(i=>
-     fetch('/assets/making-cinema-frames-v4/frame_'+String(i).padStart(3,'0')+'.webp',{method:'HEAD'})));
-    if(checks.every(r=>r.ok))selected={root:'/assets/making-cinema-frames-v4',count:200,edition:'hd-v4'};
-   }
-  }
- }catch(_){/* v3 remains available */}
- if(!selected)try{
-  const response=await fetch('/assets/making-cinema-frames-v3/manifest.json',{cache:'no-store'});
-  if(response.ok){
-   const manifest=await response.json();
-   if(manifest.version===3&&manifest.frames===144&&manifest.width>=1280&&
-      manifest.end_seconds<=8.4&&manifest.start_seconds===0){
-    // An index/manifest-only deploy must not select a missing frame archive.
-    const tested=await Promise.all([0,72,143].map(i=>
-      fetch('/assets/making-cinema-frames-v3/frame_'+String(i).padStart(3,'0')+'.webp',{method:'HEAD'})));
-    if(tested.every(r=>r.ok))selected={root:'/assets/making-cinema-frames-v3',count:144,edition:'hd-v3'};
-   }
-  }
- }catch(_){/* retain v2 or source-quality fallback */}
- if(!selected){
-  try{
-   const response=await fetch('/assets/making-cinema-frames-v2/manifest.json',{cache:'no-store'});
-   if(response.ok){
-    const manifest=await response.json();
-    if(manifest.version===2&&manifest.frames===48&&manifest.width>=1280&&manifest.end_seconds<=8.5)
-     selected={root:'/assets/making-cinema-frames-v2',count:48,edition:'hd-v2'};
-   }
-  }catch(_){/* fallback to source 19-frame excerpt */}
- }
- if(!selected){
-  $filmMedia.dataset.mediaQuality='original-fallback';
-  queueUpdate();
-  return;
- }
- frameRoot=selected.root;
- filmEdition=selected.edition;
- frameCount=selected.count;
- hdFramesReady=true;
- activeFilmFrame=-1;
- $filmMedia.dataset.mobileReady='false';
- $filmMedia.dataset.mediaQuality=filmEdition;
- $filmMedia.dataset.totalFrames=String(frameCount);
- filmStream.configure({frames:frameCount});
- lastFilmTarget=-1;
- const currentProgress=Number($filmMedia.dataset.scrollPosition||0);
- rememberFrame(Math.max(0,Math.min(frameCount-1,Math.round(clamp(currentProgress)*(frameCount-1)))));
- queueUpdate();
-}
-function rememberFrame(index){
- if(index<0||index>=frameCount)return;
- filmStream.prime(index);
-}
-function settleFilm(){
- filmIdleTimer=0;
- if(!filmActive||document.hidden)return;
- filmMoving=false;
- // Reuse a previously decoded exact source frame when available, otherwise
- // fetch the single current target. No old frame may obscure active motion.
- filmStream.request(desiredFilmFrame,true);
-}
-function updateFilm(p,visible){
- const n=Math.max(0,Math.min(frameCount-1,Math.round(clamp(p)*(frameCount-1))));
- const sprite=Math.max(0,Math.min(atlasCount-1,Math.round(clamp(p)*(atlasCount-1))));
- desiredFilmFrame=n;
- $filmMedia.dataset.requestedFrame=String(n);
- $filmMedia.dataset.scrollPosition=p.toFixed(4);
- filmPan=lerp(18,40,p);
- $mobileFrame.style.objectPosition=filmPan.toFixed(2)+'% 47%';
- $poster.style.objectPosition=filmPan.toFixed(2)+'% 47%';
- $filmMedia.dataset.filmPan=filmPan.toFixed(2);
- const x=sprite%7,y=Math.floor(sprite/7);
- $atlas.style.backgroundPosition=(x/6*100).toFixed(3)+'% '+(y/5*100).toFixed(3)+'%';
- $atlas.dataset.spriteFrame=String(sprite);
- filmActive=Boolean(visible);
- if(filmIdleTimer){clearTimeout(filmIdleTimer);filmIdleTimer=0;}
- if(visible){
-  if(n!==lastFilmTarget){
-   lastFilmTarget=n;
-   const atlasShown=filmAtlas.available&&filmAtlas.paint(Math.round(clamp(p)*199),filmPan,47);
-   // When the atlas is not available, retain the existing HD fallback.
-   if(atlasShown){
-    filmMoving=true;
-    filmStream.canvas.style.opacity='0';
-    $filmMedia.dataset.displayQuality='atlas-preview';
-   }else if(!filmAtlas.available)filmStream.request(n,true);
-  }
-  if(filmAtlas.available){
-   // Never compete with canvas animation by decoding 1600-pixel WebPs.
-   filmStream.suspend();
-   filmIdleTimer=setTimeout(settleFilm,150);
-  }
- }else{
-  lastFilmTarget=-1;
-  filmMoving=false;
-  filmStream.suspend();
- }
-}
-
-$film.loop=false;
-$film.pause();
-$film.addEventListener('loadedmetadata',()=>{
- videoMetadata=true;
- filmDuration=$film.duration||0;
- $filmMedia.dataset.metadata='true';
- queueUpdate();
-});
-$film.addEventListener('seeked',()=>{
- $filmMedia.dataset.videoReady='true';
- if(!filmActive)return;
- const p=Number($filmMedia.dataset.scrollPosition||0);
- const expected=clamp(p)*Math.min(8.4,Math.max(.1,filmDuration-.09));
- if(Math.abs($film.currentTime-expected)>.12){
-  lastSeekAt=0;
-  updateFilm(p,true);
- }
-});
-$film.addEventListener('error',()=>{
- $filmMedia.dataset.videoReady='false';
- $filmMedia.dataset.fallback='photo';
- if(hdFramesReady){
-  // Remain functional if the deployment contains frames before the HD MP4.
-  hdFramesReady=false;
-  frameRoot='/assets/making-cinema-frames';
-  filmStream.configure({frames:frameCount});
-  lastFilmTarget=-1;
-  activeFilmFrame=-1;
-  $filmMedia.dataset.mediaQuality='original-fallback';
-  const source=$film.querySelector('source');
-  source.src='/assets/making-chiseling-scrub-v1.mp4';
-  queueUpdate();
- }
-});
-if($film.readyState>=1){videoMetadata=true;filmDuration=$film.duration||0;}
-$film.preload='none';
-
-function setScene(name){
- if(name===currentScene)return;
- currentScene=name;
- const [number,title]=names[name]||['',''];
- $('#chapterNumber').textContent=number;
- $('#chapterName').textContent=title;
- document.body.dataset.currentChapter=name;
-}
-function renderIntroduction(p){
- $('.prologue-visual img').style.transform='scale('+(1+.055*p).toFixed(4)+')';
+function renderProcess(p,visible){
+ processProgress=p;active=visible;
+ const {index,local,step}=stepAt(p);setStep(index);
+ const frame=Math.round(mix(step.start,step.end,local));
+ art.dataset.phaseProgress=p.toFixed(5);
+ art.dataset.source='/models/coil-uploaded-v1.glb';
+ if(!reduced.matches)processStream.request(frame,visible);
+ if(visible){idleNearProcess('tools');if(p>.48)idleNearProcess('approved');}
+ // The exact approved sculpture occupies the same stage. Reverse scrolling
+ // always restores the source-derived frame, even while the GLB is loading.
+ const finalAlpha=index===5?smooth((local-.12)/.43):0;
+ const exactReady=host.dataset.approvedModelState==='ready';
+ host.style.opacity=String(exactReady?finalAlpha:0);
+ host.setAttribute('aria-hidden',String(!(exactReady&&finalAlpha>.5)));
+ processStream.canvas.style.opacity=String(1-(exactReady?finalAlpha:0));
+ paintTools();
 }
 function renderOrigin(p){
- // Country first, then a legible close-up of the illustrative Guruve–Harare road.
- // The truck stays upright; its position is tied to scroll in both directions.
- const zoom=smooth((p-.045)/.34);
- const factor=lerp(1,mobile()?1.18:2.55,zoom);
- const shiftX=lerp(0,-innerWidth*(mobile()?.085:.16),zoom);
- const shiftY=lerp(0,innerHeight*(mobile()?0:.11),zoom);
- $('.origin-map-wrap').style.transform='translate3d('+shiftX.toFixed(1)+'px,'+shiftY.toFixed(1)+'px,0) scale('+factor.toFixed(4)+')';
- const travel=reduced.matches?1:smooth((p-.41)/.43);
- $mapRoute.style.strokeDashoffset=String((mapLength*(1-travel)).toFixed(2));
- const point=routePoint(travel);
- $truck.setAttribute('transform','translate('+point.x.toFixed(2)+' '+point.y.toFixed(2)+')');
- $truck.style.opacity=String(reduced.matches?1:smooth((p-.38)/.08)*(1-smooth((p-.95)/.05)));
- $('#hararePin').style.opacity=String(reduced.matches?1:smooth((p-.22)/.18));
- $routeReadout.style.opacity=String(reduced.matches?1:smooth((p-.32)/.18));
-}
-function renderMaterial(p){
- const mix=smooth((p-.36)/.28);
- $('.material-photo.first').style.opacity=String(1-mix);
- $('.material-photo.second').style.opacity=String(mix);
- $('#materialCount').textContent=mix>.5?'02':'01';
-}
-function renderDetail(p){
- formation.update('carve',p);
- $('#detailIndexBar').style.setProperty('--carve',(smooth((p-.06)/.91)*100).toFixed(2)+'%');
-}
-function renderFinishing(p){
- formation.update('polish',p);
- const polish=smooth((p-.13)/.75);
- $('#polishStage').style.setProperty('--polish',polish.toFixed(4));
- $('#warmth').style.opacity=(.14*(1-polish)).toFixed(4);
- $('#warmth').style.transform='translate3d('+lerp(9,-13,polish).toFixed(2)+'%,0,0)';
- $('#polishStage').style.setProperty('--finishOutro',smooth((p-.91)/.09).toFixed(4));
- // The authored v7 frames already contain real directional highlights.
- // Do not slide a rectangular light layer over the image while scrolling.
- $('#highlight').style.opacity='0';
- $('#finishTrack').style.transform='scaleX('+polish.toFixed(4)+')';
- $('#finishWord').textContent=p<.34?'SANDING':p<.73?'SMOOTHING':'POLISHING';
-}
-function syncApprovedPlacement(y){
- // One art object per chapter. Reparenting live WebGL while scrolling causes
- // a canvas resize, a GPU reallocation, and a visible sculpture jump.
- const finishing=readings.find(r=>r.name==='finishing');
- if(!finishing)return;
- const p=clamp((y-finishing.top)/finishing.distance);
- const stage=$('#polishStage'),host=$('#approvedHost');
- stage.dataset.handoffMode='single-source';
- stage.dataset.frameAlpha='1';
- stage.dataset.modelAlpha='0';
- if(host.parentElement!==approvedOriginalSlot)approvedOriginalSlot.append(host);
- host.dataset.inFinishing='false';
- if(p>.61&&y<finishing.top+finishing.height+innerHeight*.2)scheduleApprovedInit();
-}
-
-function renderCarving(p,onscreen){
- updateFilm(p,onscreen&&!reduced.matches);
- const percent=String(Math.round(p*100)).padStart(2,'0');
- $('#carvingTime').textContent=percent+' / 100';
- const phrase=p<.31?'CARVING BY HAND':p<.68?'THE FORM TAKES SHAPE':'WORK IN PROGRESS';
- if($('#filmPhrase').textContent!==phrase)$('#filmPhrase').textContent=phrase;
-}
-
-async function initializeApproved(){
- if(approved||approvedPromise)return;
- const host=$('#approvedHost');
- host.dataset.approvedModelState='loading';
- approvedPromise=import('/prototypes/approved-coil-reveal.js').then(mod=>{
-  approved=mod.createApprovedCoilReveal(host,st=>host.dataset.approvedModelState=st);
-  // Its original render is driven with a constant final-state parameter.
-  // We are not importing any of the old scroll controller or animation.
-  approved.update(.999);
-  host.dataset.approvedSource='/models/coil-uploaded-v1.glb';
- }).catch(error=>{
-  host.dataset.approvedModelState='fallback';
-  console.warn('Approved Coil model presentation unavailable',error);
- });
-}
-function renderReveal(p,near){
- const art=$('#approvedHost');
- // Fade the gallery in from the dark finish. There is never a translucent
- // overlay of two separately rendered versions of Coil.
- art.style.opacity=smooth((p-.005)/.18).toFixed(4);
- // Load the GLB only near the final chapter; the fallback remains visible
- // until the original model is ready, so iOS never shows a blank final frame.
- if(near&&p>.05)scheduleApprovedInit();
- // The approved artwork is a still presentation. Do not re-render the
- // exact same WebGL frame on every scroll tick.
- $('.reveal-poster').style.opacity=art.dataset.approvedModelState==='ready'?'0':'1';
-}
-function sceneInView(reading,y){
- const y1=reading.top-reading.distance*.12;
- const y2=reading.top+reading.height+innerHeight*.12;
- return y>=y1&&y<=y2;
+ const t=reduced.matches?1:smooth((p-.14)/.75),sample=routeSamples[Math.round(t*100)];
+ route.style.strokeDashoffset=String(routeLength*(1-t));
+ $('#routeStone').setAttribute('cx',sample.x);$('#routeStone').setAttribute('cy',sample.y);
+ $('.origin-map').style.transform='scale('+mix(1,phone()?1.12:1.28,smooth(p)).toFixed(4)+')';
 }
 function update(){
- storyFrame=0;
- lastScrollMovement=performance.now();
- if(layoutDirty)recordLayout();
- const y=scrollY,view=innerHeight;
- const max=Math.max(1,document.documentElement.scrollHeight-view);
- $('#readingProgress').style.transform='scaleX('+clamp(y/max).toFixed(5)+')';
- let scene='introduction';
+ raf=0;if(document.hidden)return;if(dirty)layout();
+ const y=scrollY,view=innerHeight;let scene='introduction',processNear=false;
+ $('#readingProgress').style.transform='scaleX('+clamp(y/Math.max(1,document.documentElement.scrollHeight-view)).toFixed(5)+')';
  for(const r of readings){
-  const p=clamp((y-r.top)/r.distance);
-  const near=sceneInView(r,y);
-  if(y+view*.48>=r.top&&y<r.top+r.height)scene=r.name;
+  if(y+view*.5>=r.top)scene=r.name;
+  const visible=y+view>r.top&&y<r.top+r.height;
+  const near=y+view*1.8>r.top&&y<r.top+r.height+view*.2;
+  const p=clamp((y-r.top)/r.span);
+  if(r.name==='process'){processNear=near;if(near)renderProcess(p,visible);else if(active){active=false;processStream.suspend();tools?.hide();}continue;}
+  if(r.name==='carving'){
+   filmActive=visible;
+   if(near&&!reduced.matches)filmStream.request(Math.round(p*199),true);else filmStream.suspend();
+   r.el.dataset.progress=p.toFixed(5);
+  }
   if(!near)continue;
-  r.el.dataset.progress=p.toFixed(4);
-  if(r.name==='introduction'){
-   renderIntroduction(clamp((y-r.top)/Math.max(1,r.height-view)));
-  }else if(r.name==='origin')renderOrigin(p);
-  else if(r.name==='material')renderMaterial(p);
-  else if(r.name==='carving')renderCarving(p,y+view>=r.top&&y<r.top+r.height);
-  else if(r.name==='detail')renderDetail(p);
-  else if(r.name==='finishing')renderFinishing(p);
-  else if(r.name==='reveal')renderReveal(p,near);
+  if(r.name==='introduction'&&!reduced.matches)r.el.style.setProperty('--opening-scale',mix(1,1.035,p).toFixed(4));
+  if(r.name==='origin')renderOrigin(p);
+  if(r.name==='material')$('.material-second').style.opacity=String(reduced.matches?0:smooth((p-.35)/.5));
  }
- if(!readings.find(r=>r.name==='detail'&&sceneInView(r,y)))formation.suspend('carve');
- if(!readings.find(r=>r.name==='finishing'&&sceneInView(r,y)))formation.suspend('polish');
- if(!readings.find(r=>r.name==='carving'&&sceneInView(r,y))) {
-  filmActive=false;
-  if(filmIdleTimer){clearTimeout(filmIdleTimer);filmIdleTimer=0;}
-  filmStream.suspend();
- }
- const nextFilm=readings.find(r=>r.name==='carving');
- if(nextFilm&&y+view*1.4>=nextFilm.top&&y<nextFilm.top)rememberFrame(0);
- syncApprovedPlacement(y);
- if(y>=($('.endmatter').offsetTop-view*.6))document.body.dataset.currentChapter='end';
- else setScene(scene);
+ if(processNear)idleNearProcess('tools');
+ if(scene!==currentScene){currentScene=scene;document.body.dataset.scene=scene;}
 }
-function queueUpdate(){
- if(storyFrame)return;
- storyFrame=requestAnimationFrame(update);
-}
-// Mobile Safari can coalesce scroll events until momentum scrolling ends.
-// A tiny viewport-position observer keeps the documentary and Coil frames
-// synchronized to the actual displayed scroll position on every browser.
-// It only invokes the costly scene update when the scroll coordinate changes.
-let sampledPageTop=-1;
-function observeScrollPosition(){
- if(!document.hidden){
-  const current=Math.round(window.scrollY);
-  if(current!==sampledPageTop){
-   sampledPageTop=current;
-   queueUpdate();
-  }
- }
- requestAnimationFrame(observeScrollPosition);
-}
-requestAnimationFrame(observeScrollPosition);
-addEventListener('scroll',queueUpdate,{passive:true});
-addEventListener('resize',()=>{layoutDirty=true;formation.resize();filmStream.resize();filmAtlas.resize();approved?.resize();if(approved)approved.update(.999);queueUpdate()},{passive:true});
-addEventListener('orientationchange',()=>{layoutDirty=true;queueUpdate()},{passive:true});
-addEventListener('load',()=>{layoutDirty=true;queueUpdate()},{once:true});
-document.fonts?.ready?.then(()=>{layoutDirty=true;queueUpdate()});
-document.addEventListener('visibilitychange',()=>{
- if(document.hidden){
-  clearTimeout(filmIdleTimer);filmIdleTimer=0;filmStream.suspend();
-  if(approvedIdleHandle!==null){
-   if('cancelIdleCallback' in window)cancelIdleCallback(approvedIdleHandle);
-   else clearTimeout(approvedIdleHandle);
-   approvedIdleHandle=null;
-  }
- }
- queueUpdate();
+function queue(){if(!raf&&!document.hidden)raf=requestAnimationFrame(update);}
+function scrollInput(){lastInput=performance.now();queue();}
+for(const button of buttons)button.addEventListener('click',()=>{
+ if(dirty)layout();const r=readings.find(r=>r.name==='process');
+ const index=steps.findIndex(s=>s.name===button.dataset.go);
+ scrollTo({top:Math.round(r.top+r.span*(index+.48)/6),behavior:'instant'});
+ queue();
 });
-reduced.addEventListener?.('change',queueUpdate);
-// The story's skip action now leads to the collection rather than to Coil.
-// Do not trap or intercept the native navigation.
-// Prime real mobile documentary frames, without decoding an entire video on load.
-if(mobile()){rememberFrame(0);}
-checkHdFrames();
-queueUpdate();
-document.documentElement.dataset.makingAtelier='ready';
-window.__mabwePerformance=()=>({film:filmStream.stats(),filmAtlas:filmAtlas.stats(),coil:formation.stats(),filmMoving,chapter:currentScene,scroll:scrollY});
-if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.dataset.embed='true';
+function resize(){dirty=true;processStream.resize();filmStream.resize();tools?.resize();approved?.resize();if(approved)approved.update(.999);queue();}
+addEventListener('scroll',scrollInput,{passive:true});
+addEventListener('resize',resize,{passive:true});
+addEventListener('orientationchange',resize,{passive:true});
+addEventListener('pageshow',()=>{dirty=true;queue()});
+addEventListener('load',()=>{dirty=true;queue()},{once:true});
+document.fonts?.ready?.then(()=>{dirty=true;queue()});
+document.addEventListener('visibilitychange',()=>{
+ if(document.hidden){if(raf)cancelAnimationFrame(raf);raf=0;clearTimeout(toolTimer);clearTimeout(approvedTimer);toolTimer=approvedTimer=0;processStream.suspend();filmStream.suspend();tools?.hide();}
+ else {dirty=true;queue();}
+});
+reduced.addEventListener('change',()=>{
+ for(const article of articles)article.removeAttribute('aria-hidden');
+ currentStep='';if(reduced.matches){processStream.suspend();filmStream.suspend();tools?.hide();}
+ resize();
+});
+// Observe only while the story is in motion; no perpetual RAF polling on idle.
+window.__mabweMaking={get chapter(){return currentScene},get step(){return currentStep},get progress(){return processProgress}};
+window.__mabwePerformance=()=>({process:processStream.stats(),film:filmStream.stats(),
+ tools:tools?.stats()||{state:toolsError?'unavailable':toolsLoading?'loading':'idle'},
+ approved:host.dataset.approvedModelState||'idle',active,filmActive,chapter:currentScene,step:currentStep});
+document.documentElement.classList.add('js');
+setStep(0);queue();document.documentElement.dataset.makingAtelier='ready';
+
+// Low-complexity, physically lit tools. They use the same fixed camera space as
+// the source photograph; their contact point is sampled from the displayed stone.
+// No timer drives them: scroll position determines every tool pose and flame.
+async function createWorkshopTools(stage){
+ const T=await import('/vendor/three.module.min.js');
+ const canvas=document.createElement('canvas');canvas.setAttribute('aria-hidden','true');stage.append(canvas);
+ const renderer=new T.WebGLRenderer({canvas,alpha:true,antialias:false,powerPreference:'low-power'});
+ renderer.setClearColor(0,0);renderer.outputColorSpace=T.SRGBColorSpace;
+ renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;
+ const scene=new T.Scene(),camera=new T.OrthographicCamera(0,1,1,0,-1000,1000);
+ camera.position.z=600;
+ scene.add(new T.HemisphereLight(0xe7e7dc,0x303a2d,2.1));
+ for(const [color,intensity,x,y,z] of [[0xffedcf,3,-400,500,500],[0xd7e2ed,1.4,400,250,300]]){const light=new T.DirectionalLight(color,intensity);light.position.set(x,y,z);scene.add(light);}
+ const metal=new T.MeshStandardMaterial({color:0x777d78,metalness:.78,roughness:.38});
+ const edge=new T.MeshStandardMaterial({color:0xaeb2a9,metalness:.88,roughness:.29});
+ const dark=new T.MeshStandardMaterial({color:0x252a27,metalness:.28,roughness:.76});
+ const brass=new T.MeshStandardMaterial({color:0x93743c,metalness:.76,roughness:.36});
+ const woodCanvas=document.createElement('canvas');woodCanvas.width=64;woodCanvas.height=256;
+ const wc=woodCanvas.getContext('2d');wc.fillStyle='#83603c';wc.fillRect(0,0,64,256);
+ let seed=29;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+ for(let n=0;n<180;n++){wc.strokeStyle='rgba('+(rand()>.5?'40,25,13':'202,160,100')+','+(rand()*.25)+')';wc.lineWidth=.3+rand();wc.beginPath();const x=rand()*64;wc.moveTo(x,0);wc.bezierCurveTo(x+rand()*6,80,x-4,190,x+2,256);wc.stroke();}
+ const woodTex=new T.CanvasTexture(woodCanvas);woodTex.colorSpace=T.SRGBColorSpace;
+ const wood=new T.MeshStandardMaterial({map:woodTex,roughness:.86});
+ const grit=new T.MeshStandardMaterial({color:0x7d6950,roughness:1});
+ const clothMat=new T.MeshStandardMaterial({color:0xb9b3a1,roughness:1,side:T.DoubleSide});
+ const groups={};
+ const mesh=(geometry,material,parent,x=0,y=0,z=0)=>{const m=new T.Mesh(geometry,material);m.position.set(x,y,z);parent.add(m);return m};
+ const cyl=(r1,r2,h,material,parent,x=0,y=0,z=0,sides=12)=>mesh(new T.CylinderGeometry(r1,r2,h,sides),material,parent,x,y,z);
+ const group=()=>{const g=new T.Group();scene.add(g);return g};
+ // Stone-carving chisel: solid forged steel, a hexagonal shaft and worn butt.
+ const chisel=group();cyl(4.4,3.2,112,metal,chisel,0,65,0,6);
+ mesh(new T.BoxGeometry(11,12,3.2),edge,chisel,0,7,1);
+ cyl(6.5,5.5,9,dark,chisel,0,125,0);cyl(6.8,6.8,2.8,edge,chisel,0,130,0);
+ for(let j=0;j<3;j++)mesh(new T.BoxGeometry(.65,70,.5),edge,chisel,-2+j*2,68,3.1);
+ const hammer=group();
+ const handle=cyl(7,5.7,145,wood,hammer,36,-64,0,14);handle.rotation.z=.51;
+ cyl(8.1,8.1,13,dark,hammer,3,-7,0);
+ const head=cyl(13.5,13.5,59,metal,hammer,0,5,0,12);head.rotation.z=Math.PI/2;
+ for(const x of [-29,29]){const cap=cyl(13,13,3.8,edge,hammer,x,5,0,16);cap.rotation.z=Math.PI/2;}
+ mesh(new T.BoxGeometry(2,13,6),dark,hammer,0,8,12);
+ groups.carve=[chisel,hammer];
+ // A folded abrasive strip. Fine surface grain is fixed to the tool.
+ const sanding=group();const pad=mesh(new T.BoxGeometry(49,34,8,6,4,1),grit,sanding);pad.rotation.set(.12,-.3,.15);
+ for(let j=0;j<60;j++)mesh(new T.BoxGeometry(.7,.8,.4),dark,sanding,(rand()-.5)*43,(rand()-.5)*28,5+rand());
+ groups.sand=[sanding];
+ const torch=group();
+ const tube=cyl(5.4,5.4,97,brass,torch,58,0,0);tube.rotation.z=Math.PI/2;
+ const nozzle=cyl(8.7,6.5,24,metal,torch,1,0,0,16);nozzle.rotation.z=Math.PI/2;
+ for(const x of [11,16,21]){const ring=cyl(7,7,2,brass,torch,x,0,0,16);ring.rotation.z=Math.PI/2;}
+ const grip=cyl(12,10,100,dark,torch,125,-37,0);grip.rotation.z=.35;
+ const dial=cyl(13,13,7,dark,torch,100,18,0,12);dial.rotation.x=Math.PI/2;
+ const flameMat=new T.ShaderMaterial({transparent:true,depthWrite:false,blending:T.AdditiveBlending,
+  uniforms:{u:{value:0}},vertexShader:'varying vec2 v; void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+  fragmentShader:'varying vec2 v; uniform float u; void main(){float x=v.x;float w=.08+.30*x;float d=abs(v.y-.5+sin(x*20.+u*40.)*.018);float a=(1.-smoothstep(w*.25,w,d))*smoothstep(0.,.2,x)*(1.-smoothstep(.92,1.,x));vec3 c=mix(vec3(.06,.24,.95),vec3(.52,.81,1.),pow(x,3.));gl_FragColor=vec4(c,a*.8);}' });
+ const flame=mesh(new T.PlaneGeometry(55,33),flameMat,torch,-37,0,5);
+ groups.heat=[torch];
+ const cloth=group();
+ const clothGeo=new T.PlaneGeometry(56,46,14,12),pos=clothGeo.attributes.position;
+ for(let i=0;i<pos.count;i++){const x=pos.getX(i),y=pos.getY(i);pos.setZ(i,Math.sin(x*.19)*2.7+Math.cos(y*.29)*2+Math.cos(x*.1+y*.11)*4);}
+ clothGeo.computeVertexNormals();mesh(clothGeo,clothMat,cloth);cloth.rotation.set(.2,-.45,-.25);groups.wax=[cloth];
+ let w=0,h=0,drawCount=0,state='ready',lastKey='';
+ const sample=document.createElement('canvas');sample.width=128;sample.height=128;
+ const sc=sample.getContext('2d',{willReadFrequently:true});
+ let sourceImage=null,pixels=null;
+ function contact(img,row){
+  if(sourceImage!==img){sc.drawImage(img,0,0,128,128);pixels=sc.getImageData(0,0,128,128).data;sourceImage=img;}
+  const sy=Math.max(0,Math.min(127,Math.round(row*127)));let x=84;
+  for(let sx=124;sx>=12;sx--){const i=(sy*128+sx)*4;if(Math.abs(pixels[i]-23)+Math.abs(pixels[i+1]-31)+Math.abs(pixels[i+2]-25)>65){x=sx;break;}}
+  const scale=Math.max(w/img.naturalWidth,h/img.naturalHeight),dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;
+  return {x:(w-dw)*.5+x/128*dw,y:h-((h-dh)*.5+row*dh)};
+ }
+ function resize(){
+  w=Math.max(1,stage.clientWidth);h=Math.max(1,stage.clientHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.25));renderer.setSize(w,h,false);
+  camera.left=0;camera.right=w;camera.top=h;camera.bottom=0;camera.updateProjectionMatrix();lastKey='';
+ }
+ function hide(){for(const list of Object.values(groups))for(const g of list)g.visible=false;if(lastKey!=='hidden'){renderer.clear();lastKey='hidden';}}
+ function update(phase,p,img){
+  if(!w||!h)resize();
+  if(!groups[phase]){hide();return;}
+  const key=phase+':'+Math.round(p*200)+':'+img.src+':'+w+':'+h;if(key===lastKey)return;lastKey=key;
+  for(const [name,list] of Object.entries(groups))for(const g of list)g.visible=name===phase;
+  const row=phase==='carve'?mix(.40,.62,p):phase==='heat'?mix(.43,.59,p):mix(.44,.6,p);
+  const point=contact(img,row),s=phone()?Math.min(1,w/390)*.68:Math.min(1.4,w/1440)*1.1;
+  for(const g of groups[phase])g.scale.setScalar(s);
+  if(phase==='carve'){
+   const a=-.62,stroke=p*14,part=stroke-Math.floor(stroke);
+   const lift=1-smooth((part-.33)/.24)*(1-smooth((part-.6)/.34));
+   chisel.position.set(point.x-3,point.y,3);chisel.rotation.z=a;
+   const bx=point.x+Math.sin(-a)*130*s,by=point.y+Math.cos(a)*130*s;
+   hammer.position.set(bx+lift*18*s,by+lift*35*s,12);hammer.rotation.z=-.10-lift*.29;
+  }else if(phase==='heat'){
+   torch.position.set(point.x+51*s,point.y,6);torch.rotation.z=.08*Math.sin(p*7);
+   flameMat.uniforms.u.value=p;
+  }else{
+   const g=groups[phase][0];g.position.set(point.x-13*s,point.y+Math.sin(p*32)*5*s,8);g.rotation.z=-.2+Math.sin(p*27)*.13;
+  }
+  renderer.render(scene,camera);drawCount++;
+ }
+ resize();hide();
+ canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();state='context-lost';canvas.style.visibility='hidden';});
+ canvas.addEventListener('webglcontextrestored',()=>{state='ready';canvas.style.visibility='visible';lastKey='';queue();});
+ return {update,resize,hide,get state(){return state},stats:()=>({state,draws:drawCount,triangles:renderer.info.render.triangles,visible:!['hidden',''].includes(lastKey)})};
+}

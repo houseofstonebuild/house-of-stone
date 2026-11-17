@@ -1,0 +1,46 @@
+name: Mabwe introduction rebuild review
+on:
+  push:
+    branches: ['rebuild/mabwe-introduction-2026-11-16']
+  pull_request:
+    paths:
+      - 'public/prototypes/making-atelier.*'
+      - 'public/prototypes/scroll-frame-stream.js'
+      - 'qa/welcome-scroll-acceptance.mjs'
+      - '.github/workflows/mabwe-introduction-rebuild.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mabwe-introduction-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm run check && npm test
+      - run: npm install --prefix qa --no-audit --no-fund
+      - name: Check story modules
+        run: |
+          node --check public/prototypes/making-atelier.js
+          node --check public/prototypes/scroll-frame-stream.js
+          node --check qa/welcome-scroll-acceptance.mjs
+      - name: Reversible process and five responsive browser layouts
+        run: sh scripts/run-browser-qa.sh qa/welcome-scroll-acceptance.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mabwe-introduction-visual-review
+          path: test-results/browser/welcome-rebuild/
+          retention-days: 14
+          if-no-files-found: warn
