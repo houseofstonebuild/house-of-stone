@@ -79,6 +79,22 @@ try{
    assert.equal(await page.evaluate(()=>window.__mabweMaking.step),steps[index]);
    if(index<5)assert.equal(await page.locator('#approvedHost').evaluate(el=>Number(getComputedStyle(el).opacity)),0);
   }
+  let scrollTiming=null;
+  if(device.engine===chromium){
+   await go(page,'process',.2);await settles(page,'process');
+   scrollTiming=await page.evaluate(async()=>{
+    const el=document.querySelector('#process'),top=el.getBoundingClientRect().top+scrollY,span=el.offsetHeight-innerHeight;
+    const intervals=[];let previous=performance.now();
+    for(let i=0;i<60;i++){
+     await new Promise(requestAnimationFrame);const now=performance.now();intervals.push(now-previous);previous=now;
+     const p=i<30?.19+i*.005:.34-(i-30)*.005;scrollTo(0,top+span*p);
+    }
+    return {frames:intervals.length,p95:intervals.sort((a,b)=>a-b)[Math.floor(intervals.length*.95)],max:Math.max(...intervals)};
+   });
+   await settles(page,'process');
+   assert(scrollTiming.max<300,'Severe main-thread stall during warmed forward/reverse scroll: '+scrollTiming.max);
+   console.log('SCROLL TIMING',device.name,JSON.stringify(scrollTiming));
+  }
   const steady=await page.evaluate(()=>window.__mabwePerformance());
   await page.waitForTimeout(350);
   const idle=await page.evaluate(()=>window.__mabwePerformance());
@@ -102,7 +118,7 @@ try{
   assert.equal(await page.locator('.process-art').isVisible(),false,'Reduced motion should use readable stills');
   const reducedOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);assert(reducedOverflow<=2);
   await page.screenshot({path:new URL(device.name+'-reduced-motion.png',out).pathname,fullPage:true});
-  results.push({device:device.name,filmSamples,captures,idle,errors,failures});
+  results.push({device:device.name,filmSamples,captures,idle,scrollTiming,errors,failures});
   await page.close();await browser.close();browser=null;
  }
  writeFileSync(new URL('acceptance.json',out),JSON.stringify(results,null,2));

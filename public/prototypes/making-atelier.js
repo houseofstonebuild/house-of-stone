@@ -17,7 +17,7 @@ const steps=[
 ];
 let readings=[],dirty=true,raf=0,currentScene='',currentStep='',lastInput=0;
 let processProgress=0,tools=null,toolsLoading=false,toolsError=false,approved=null,approvedLoading=false;
-let approvedProfile=null;
+let approvedProfile=null,viewportWidth=innerWidth;
 let approvedTimer=0,toolTimer=0,active=false,filmActive=false,toolFrame=0;
 let frameImage=null,displayedFrame=-1;
 const art=$('#processArt'),workshop=$('#workshopMedia'),host=$('#approvedHost');
@@ -92,11 +92,11 @@ function renderProcess(p,visible){
  if(visible){idleNearProcess('tools');if(p>.48)idleNearProcess('approved');}
  // The exact approved sculpture occupies the same stage. Reverse scrolling
  // always restores the source-derived frame, even while the GLB is loading.
- const finalAlpha=index===5?smooth((local-.12)/.43):0;
+ const finalAlpha=index===5?smooth((local-.03)/.32):0;
  const exactReady=host.dataset.approvedModelState==='ready';
  host.style.opacity=String(exactReady?finalAlpha:0);
  host.setAttribute('aria-hidden',String(!(exactReady&&finalAlpha>.5)));
- processStream.canvas.style.opacity=String(1-(exactReady?finalAlpha:0));
+ processStream.canvas.style.opacity=displayedFrame>=0?'1':'0';
  paintTools();
 }
 function renderOrigin(p){
@@ -144,7 +144,10 @@ function alignApproved(){
  }
 }
 function resize(){
+ const keepProgress=active&&!reduced.matches&&viewportWidth!==innerWidth;viewportWidth=innerWidth;
+ const previousProgress=processProgress;
  dirty=true;processStream.resize();filmStream.resize();tools?.resize();
+ if(keepProgress){layout();const r=readings.find(r=>r.name==='process');scrollTo({top:Math.round(r.top+r.span*previousProgress),behavior:'instant'});}
  const next=phone()?'portrait':'landscape';
  if(approvedProfile&&approvedProfile!==next){
   approved?.dispose?.();host.querySelector('.approved-coil-reveal')?.remove();
@@ -240,11 +243,18 @@ async function createWorkshopTools(stage){
  let w=0,h=0,drawCount=0,state='ready',lastKey='';
  const sample=document.createElement('canvas');sample.width=128;sample.height=128;
  const sc=sample.getContext('2d',{willReadFrequently:true});
- let sourceImage=null,pixels=null;
- function contact(img,row){
+ let sourceImage=null,pixels=null,finishPixels=null,maskProfile='';
+ async function loadFinishMask(){
+  const profile=phone()?'mobile':'desktop',reference=new Image();reference.decoding='async';
+  reference.src='/assets/making-v7/'+profile+'/frame_108.webp';await reference.decode();
+  sc.drawImage(reference,0,0,128,128);finishPixels=sc.getImageData(0,0,128,128).data;
+  maskProfile=profile;sourceImage=null;lastKey='';queue();
+ }
+ function contact(img,row,phase){
   if(sourceImage!==img){sc.drawImage(img,0,0,128,128);pixels=sc.getImageData(0,0,128,128).data;sourceImage=img;}
+  const data=phase!=='carve'&&maskProfile===(phone()?'mobile':'desktop')?finishPixels:pixels;
   const sy=Math.max(0,Math.min(127,Math.round(row*127)));let x=84;
-  for(let sx=124;sx>=12;sx--){const i=(sy*128+sx)*4;if(Math.abs(pixels[i]-23)+Math.abs(pixels[i+1]-31)+Math.abs(pixels[i+2]-25)>65){x=sx;break;}}
+  for(let sx=124;sx>=12;sx--){const i=(sy*128+sx)*4;if(Math.abs(data[i]-23)+Math.abs(data[i+1]-31)+Math.abs(data[i+2]-25)>65){x=sx;break;}}
   const scale=Math.max(w/img.naturalWidth,h/img.naturalHeight),dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;
   return {x:(w-dw)*.5+x/128*dw,y:h-((h-dh)*.5+row*dh)};
  }
@@ -253,6 +263,7 @@ async function createWorkshopTools(stage){
   renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.25));renderer.setSize(w,h,false);
   canvas.width=surface.width;canvas.height=surface.height;
   camera.left=0;camera.right=w;camera.top=h;camera.bottom=0;camera.updateProjectionMatrix();lastKey='';
+  if(maskProfile&&maskProfile!==(phone()?'mobile':'desktop'))loadFinishMask().catch(()=>{});
  }
  function hide(){for(const list of Object.values(groups))for(const g of list)g.visible=false;if(lastKey!=='hidden'){renderer.clear();paint.clearRect(0,0,canvas.width,canvas.height);lastKey='hidden';}}
  function update(phase,p,img){
@@ -261,15 +272,16 @@ async function createWorkshopTools(stage){
   const key=phase+':'+Math.round(p*200)+':'+img.src+':'+w+':'+h;if(key===lastKey)return;lastKey=key;
   for(const [name,list] of Object.entries(groups))for(const g of list)g.visible=name===phase;
   const row=phase==='carve'?mix(.40,.62,p):phase==='heat'?mix(.43,.59,p):mix(.44,.6,p);
-  const point=contact(img,row),s=phone()?Math.min(1,w/390)*.68:Math.min(1.4,w/1440)*1.1;
-  if(phase==='carve')point.x-=s*35;
-  for(const g of groups[phase])g.scale.setScalar(s);
+  const point=contact(img,row,phase),s=phone()?Math.min(1,w/390)*.68:Math.min(1.4,w/1440)*1.1;
+  if(phase==='carve')point.x-=s*15;
+  const toolScale=phase==='carve'?s*1.35:s;
+  for(const g of groups[phase])g.scale.setScalar(toolScale);
   if(phase==='carve'){
-   const a=-.62,stroke=p*14,part=stroke-Math.floor(stroke);
+   const a=.62,stroke=p*14,part=stroke-Math.floor(stroke);
    const lift=1-smooth((part-.33)/.24)*(1-smooth((part-.6)/.34));
    chisel.position.set(point.x-3,point.y,3);chisel.rotation.z=a;
-   const bx=point.x+Math.sin(-a)*130*s,by=point.y+Math.cos(a)*130*s;
-   hammer.position.set(bx+lift*18*s,by+lift*35*s,12);hammer.rotation.z=-.10-lift*.29;
+   const bx=point.x+Math.sin(-a)*130*toolScale,by=point.y+Math.cos(a)*130*toolScale;
+   hammer.position.set(bx-lift*12*toolScale,by+lift*35*toolScale,12);hammer.rotation.z=-.10-lift*.29;
   }else if(phase==='heat'){
    torch.position.set(point.x+51*s,point.y,6);torch.rotation.z=.08*Math.sin(p*7);
    flameMat.uniforms.u.value=p;
@@ -281,7 +293,7 @@ async function createWorkshopTools(stage){
   // WebGL layer. Copy only a changed tool pose; no hidden animation loop.
   paint.clearRect(0,0,canvas.width,canvas.height);paint.drawImage(surface,0,0);drawCount++;
  }
- resize();hide();
+ await loadFinishMask();resize();hide();
  surface.addEventListener('webglcontextlost',event=>{event.preventDefault();state='context-lost';canvas.style.visibility='hidden';});
  surface.addEventListener('webglcontextrestored',()=>{state='ready';canvas.style.visibility='visible';lastKey='';queue();});
  return {update,resize,hide,get state(){return state},stats:()=>({state,draws:drawCount,triangles:renderer.info.render.triangles,visible:!['hidden',''].includes(lastKey)})};
