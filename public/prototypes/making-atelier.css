@@ -47,3 +47,7 @@ html:not(.js) .process-art{display:none}.endmatter a{text-decoration:underline;t
 .prologue{background:#fff}.opening-photo{top:92px;height:calc(100% - 140px);object-fit:contain}.opening-credit{right:6vw;bottom:24px;color:#71776d;text-shadow:none;font-size:9px}
 @media(max-width:700px), (max-width:1100px) and (orientation:portrait){.opening-photo{top:76px;height:46svh;object-fit:contain}.opening-credit{top:calc(76px + 46svh + 9px);bottom:auto;right:var(--gutter);font-size:7px;color:#6e7469}.opening-copy{bottom:100px}}
 @media(max-width:700px) and (max-height:740px){.opening-photo{top:72px;height:43svh}.opening-credit{top:calc(72px + 43svh + 7px)}.process-art>.process-poster,.process-art>.scroll-frame-canvas,.process-art>#approvedHost{transform:translateY(8px) scale(.87);transform-origin:50% 50%}}
+
+@media(min-width:1101px), (min-width:701px) and (orientation:landscape){.workshop-media{inset:50% 0 auto 39%;height:auto;aspect-ratio:16/9;transform:translateY(-50%)}}
+
+.masthead[data-photo="true"]{background:linear-gradient(180deg,#101710c7,#10171059 78%,transparent)}

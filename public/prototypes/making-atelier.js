@@ -46,7 +46,7 @@ function update(){
  for(const r of readings){
   if(y+view*.5>=r.top)next=r.name;if(y+45>=r.top)header=r.name;
   const visible=y+view>r.top&&y<r.top+r.height,near=y+view*2>r.top&&y<r.top+r.height+view*.2;
-  const p=clamp((y-r.top)/r.span);
+  const p=clamp((y-r.top)/r.span);r.el.dataset.progress=String(p);
   if(r.name==='process'){
    if(near&&!reduced.matches)renderProcess(Math.max(0,y-r.top),visible||y<r.top);
    else if(active){active=false;form.suspend();}
@@ -55,7 +55,7 @@ function update(){
   if(r.name==='carving'){
    filmActive=visible;
    // Readable still at entry and exit; the working passage occupies the middle.
-   if(near&&!reduced.matches)film.request(Math.round(clamp((p-.16)/.62)*199),true);else film.suspend();
+   if(near&&!reduced.matches)film.request(Math.round(clamp((p-.16)/.62)*57),true);else film.suspend();
   }
   if(!near)continue;
   if(r.name==='origin'){
@@ -63,7 +63,8 @@ function update(){
   }
  }
  scene=next;document.body.dataset.currentScene=scene;
- const tone=['introduction','origin','carving','house'].includes(header)?'light':'dark';$('.masthead').dataset.tone=tone;
+ const photo=phone()&&['carving','material'].includes(header);
+ const tone=!photo&&['introduction','origin','carving','house'].includes(header)?'light':'dark';$('.masthead').dataset.tone=tone;$('.masthead').dataset.photo=String(photo);
 }
 function queue(){if(!raf&&!document.hidden)raf=requestAnimationFrame(update)}
 function resize(){
