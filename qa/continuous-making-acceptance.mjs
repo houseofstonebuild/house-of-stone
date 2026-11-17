@@ -17,14 +17,18 @@ try{
   await page.goto(base+(process.env.MABWE_STUDY_PATH||'/prototypes/making-continuous.html'),{waitUntil:'load'});await page.bringToFront();await page.waitForFunction(()=>document.documentElement.dataset.storyLayout==='ready');
   assert.match(await page.locator('.opening-photo').getAttribute('src'),/making-artist-and-block/);assert.equal(await page.locator('video,#toolStage,.step-buttons').count(),0);
   await page.screenshot({path:dest+'/'+name+'-opening.png'});
+  const cold=await page.evaluate(()=>window.__mabweContinuous.stats());for(const player of [cold.form,cold.film,cold.artist]){assert.equal(player.started,false,'Opening must not start below-fold sequences');assert.equal(player.requests,0);assert.equal(player.decodeCount,0);}
+
   async function chapter(name,progress=.5){
    await page.evaluate(({name,progress})=>{const section=document.querySelector('[data-scene="'+name+'"]'),pin=section.querySelector(':scope>.pin');scrollTo(0,section.getBoundingClientRect().top+scrollY+Math.max(1,section.offsetHeight-(pin?.clientHeight||innerHeight))*progress)},{name,progress});
    await page.waitForFunction(({name,progress})=>document.body.dataset.currentScene===name&&(name==='house'||Math.abs(Number(document.querySelector('[data-scene="'+name+'"]').dataset.progress)-progress)<.003),{name,progress});
   }
   for(const name of ['origin','material','carving']){
-   await chapter(name);if(name==='carving')await page.waitForFunction(()=>{const s=window.__mabweContinuous.stats().film;return s&&Math.abs(s.current-s.target)<.03&&document.querySelector('#workshopCanvas').dataset.frameStatus==='ready'});
+   await chapter(name);if(name==='material')await page.waitForFunction(()=>{const s=window.__mabweContinuous.stats().artist;return s&&Math.abs(s.current-s.target)<.03&&document.querySelector('#artistCanvas').dataset.frameStatus==='ready'});if(name==='carving')await page.waitForFunction(()=>{const s=window.__mabweContinuous.stats().film;return s&&Math.abs(s.current-s.target)<.03&&document.querySelector('#workshopCanvas').dataset.frameStatus==='ready'});
    await page.screenshot({path:dest+'/'+name+'-'+width+'.png'});
   }
+  const zooms=[];for(const p of [.2,.8,.2]){await chapter('origin',p);zooms.push(await page.locator('#mapJourney').evaluate(el=>el.transform.baseVal.consolidate().matrix.a));}assert(zooms[1]>zooms[0]*1.8);assert(Math.abs(zooms[2]-zooms[0])<.01,'Map zoom reverses with scroll');
+  const artist=[];for(const p of [.75,.25,.6]){await chapter('material',p);await page.waitForFunction(()=>{const s=window.__mabweContinuous.stats().artist;return Math.abs(s.current-s.target)<.03});artist.push(await page.evaluate(()=>window.__mabweContinuous.stats().artist.current));}assert(artist[0]>artist[1]&&artist[2]>artist[1]);
   const workshop=[];for(const progress of [.75,.25,.6]){await chapter('carving',progress);await page.waitForFunction(()=>{const s=window.__mabweContinuous.stats().film;return s&&Math.abs(s.current-s.target)<.03});workshop.push(await page.evaluate(()=>Number(document.querySelector('#workshopCanvas').dataset.displayedFrame)))}assert(workshop[0]>workshop[1]&&workshop[2]>workshop[1],'Workshop must reverse with the scroll on '+name+': '+JSON.stringify(workshop));
   const stages=await page.evaluate(()=>window.__mabweContinuous.stages());assert.equal(stages.length,6);assert(stages[1].length>=2600);assert(stages.slice(2).every(s=>s.length>=1000));
   async function phase(index,local=.5){
@@ -51,7 +55,7 @@ try{
   const state=await page.evaluate(()=>window.__mabweContinuous.stats());assert(state.form.decodedBytes<90*1024*1024);assert.equal(state.form.fetchErrors,0);assert.equal(state.form.decodeErrors,0);await page.waitForFunction(()=>{const s=window.__mabweContinuous.stats().form;return s.inflightDecodes===0&&s.current===s.target},undefined,{timeout:5000});const settled=await page.evaluate(()=>window.__mabweContinuous.stats().form);await page.waitForTimeout(350);const idle=await page.evaluate(()=>window.__mabweContinuous.stats().form);assert.equal(idle.draws,settled.draws,'Settled scene must stop drawing');assert.equal(idle.decodeCount,settled.decodeCount,'Settled scene must stop decoding');
   await chapter('house',0);await page.screenshot({path:dest+'/'+name+'-house.png'});
   await page.emulateMedia({reducedMotion:'reduce'});await page.waitForTimeout(200);assert.equal(await page.locator('[data-step][aria-hidden="true"]').count(),0);assert.equal(await page.locator('.static-process-image:visible').count(),6);await page.screenshot({path:dest+'/'+name+'-reduced.png',fullPage:true});
-  assert.deepEqual(errors,[]);assert.deepEqual(failures,[]);reports.push({name,errors,failures,workshop,state,motion});await page.close();await browser.close();
+  assert.deepEqual(errors,[]);assert.deepEqual(failures,[]);reports.push({name,errors,failures,cold,zooms,artist,workshop,state,motion});await page.close();await browser.close();
  }
  writeFileSync(dest+'/acceptance.json',JSON.stringify(reports,null,2));console.log('PASS: unchanged model, complete process, exact finished image, six layouts, real wheel motion, reversals, bounded decoding and reduced motion.');
 }finally{await new Promise(r=>app.server.close(r));rmSync(dir,{recursive:true,force:true})}

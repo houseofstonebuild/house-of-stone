@@ -33,7 +33,7 @@ for(const path of ['/assets/making-v7/mobile/frame_045.webp','/assets/making-v7/
  const actual=new Uint8Array(await response.arrayBuffer()),expected=readFileSync(new URL('../public'+path,import.meta.url));
  assert.equal(hash(actual),hash(expected),path+' source asset differs');console.log('SOURCE VERIFIED',path);
 }
-for(const kind of ['form','workshop']){
+for(const kind of ['form','workshop','artist']){
  const path='/assets/continuous-making-v1/'+kind;
  const response=await fetch(root+path+'/manifest.json?verify='+Date.now(),{signal:AbortSignal.timeout(25000)});assert(response.ok,path);
  const manifest=await response.json(),expected=JSON.parse(readFileSync(new URL('../public'+path+'/manifest.json',import.meta.url),'utf8'));assert.deepEqual(manifest,expected);

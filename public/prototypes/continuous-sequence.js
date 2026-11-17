@@ -119,11 +119,11 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   for(const [index,img] of images){if(Math.abs(index-current)<=1)continue;bytes-=img.width*img.height*4;img.close?.();images.delete(index);}
  }
  function warm(value=0){warmTarget=value;start();if(!config||active)return;needed=value;needImage(Math.floor(value),-100);needImage(Math.floor(value)+1,-99);needPack(Math.floor(value),0);pumpFetch();pumpDecode();}
- function resize(){dimensions();drawn=-1;wake()}
+ function resize(){if(!config)return;dimensions();drawn=-1;wake()}
  function suspend(){active=false;if(raf)cancelAnimationFrame(raf);raf=0;previous=0;}
  function start(){if(started||disposed)return;started=true;fetch(root+'/manifest.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Continuous sequence missing');return r.json()}).then(async m=>{
   if(m.version!==1||!m.profiles?.[profile])throw Error('Invalid continuous sequence');meta=m;config=m.profiles[profile];if(config.plate){plate=new Image();plate.src=root+'/'+profile+'/'+config.plate;await plate.decode()}dimensions();if(active){plan();wake()}else warm(warmTarget);onReady(m);resolveReady(m);
  }).catch(error=>{canvas.dataset.frameStatus='unavailable';console.warn(error);resolveReady(null)});}
  const stats=()=>({target,current,started,pixelScale,images:images.size,decodedBytes:bytes+plateBytes(),peakDecodedBytes:peakBytes,compressedBytes:[...packs.values()].reduce((n,p)=>n+(p.data?.byteLength||0),0),inflightFetches:fetches,inflightDecodes:decodes,...measures});
- return {request,warm,resize,suspend,ready,stats,destroy(){disposed=true;epoch++;suspend();for(const img of images.values())img.close?.();images.clear();packs.clear();plate=null;}};
+ return {request,warm,resize,suspend,get ready(){start();return ready},stats,destroy(){disposed=true;epoch++;suspend();for(const img of images.values())img.close?.();images.clear();packs.clear();plate=null;}};
 }
