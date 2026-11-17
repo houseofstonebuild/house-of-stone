@@ -10,7 +10,7 @@ The owner requires a continuous, reversible scroll experience showing the comple
 - Fetch compressed media packs ahead of interaction. Decode only a bounded working window, keep compressed data for reversals, and smooth the playhead by elapsed time. Slow movement uses adjacent-frame blending; faster movement draws a sharp source frame without demanding two new decoded images for every paint.
 - Give each stage its own scroll distance and endpoint rests. Drive captions from the displayed sequence rather than advancing the text while the image waits for media.
 - Use content-hashed pack and background filenames and revalidate manifests, preventing old cached bytes from being interpreted using new offsets.
-- Retain native source detail while cropping unchanged image margins from the working frames. A static plate restores the full composition. Full sources are 1440 × 810 on desktop and 960 × 2080 on phones.
+- Retain native source detail while cropping unchanged image margins from the working frames. Geometry-identical foreground passes and captured empty lighting plates preserve the rendered object and contact shadows on a continuous gallery background. Phone framing reserves space for navigation and captions; desktop action remains clear of the reading column. Full sources are 1440 × 810 on desktop and 960 × 2080 on phones.
 - Keep the existing invitation disabled. Review at the standalone prototype only; preserve the homepage, catalogue, enquiries and production database.
 
 ## Visual sources

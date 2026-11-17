@@ -7,7 +7,9 @@ const root=process.env.MABWE_ORIGIN||'https://houseofmabwe.com';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 for(const path of ['/prototypes/making-atelier.html','/prototypes/making-atelier.css',
  '/prototypes/making-atelier.js','/prototypes/scroll-frame-stream.js','/prototypes/approved-coil-reveal.js',
- '/prototypes/coil-formation.js','/prototypes/story-film-atlas.js']){
+ '/prototypes/coil-formation.js','/prototypes/story-film-atlas.js',
+ '/prototypes/making-continuous.html','/prototypes/making-continuous.css',
+ '/prototypes/making-continuous.js','/prototypes/continuous-sequence.js']){
  const response=await fetch(root+path+'?mabwe-rebuild-verification='+Date.now(),{headers:{'cache-control':'no-cache'},signal:AbortSignal.timeout(25000)});
  assert.equal(response.status,200,path);
  const actual=new Uint8Array(await response.arrayBuffer());
@@ -30,6 +32,19 @@ for(const path of ['/assets/making-v7/mobile/frame_045.webp','/assets/making-v7/
  const response=await fetch(root+path,{signal:AbortSignal.timeout(25000)});assert(response.ok,path);
  const actual=new Uint8Array(await response.arrayBuffer()),expected=readFileSync(new URL('../public'+path,import.meta.url));
  assert.equal(hash(actual),hash(expected),path+' source asset differs');console.log('SOURCE VERIFIED',path);
+}
+for(const kind of ['form','workshop']){
+ const path='/assets/continuous-making-v1/'+kind;
+ const response=await fetch(root+path+'/manifest.json?verify='+Date.now(),{signal:AbortSignal.timeout(25000)});assert(response.ok,path);
+ const manifest=await response.json(),expected=JSON.parse(readFileSync(new URL('../public'+path+'/manifest.json',import.meta.url),'utf8'));assert.deepEqual(manifest,expected);
+ for(const [profile,data] of Object.entries(manifest.profiles)){
+  for(const item of [...data.packs.map(p=>({file:p.url,sha256:p.sha256})),...(data.plate?[{file:data.plate}]:[])]){
+   const asset=path+'/'+profile+'/'+item.file,r=await fetch(root+asset,{signal:AbortSignal.timeout(25000)});assert(r.ok,asset);const bytes=new Uint8Array(await r.arrayBuffer());assert.equal(hash(bytes),hash(readFileSync(new URL('../public'+asset,import.meta.url))),asset);if(item.sha256)assert.equal(hash(bytes),item.sha256);console.log('CONTINUOUS MEDIA VERIFIED',asset);
+  }
+ }
+}
+for(const profile of ['desktop','mobile']){
+ const path='/assets/continuous-making-v1/approved/'+profile+'.png';const r=await fetch(root+path,{signal:AbortSignal.timeout(25000)});assert(r.ok,path);assert.equal(hash(new Uint8Array(await r.arrayBuffer())),hash(readFileSync(new URL('../public'+path,import.meta.url))));
 }
 const homepage=await fetch(root+'/',{signal:AbortSignal.timeout(25000)});assert(homepage.ok);
 assert.doesNotMatch(await homepage.text(),/data-open-story|hos-story-invite|hos-story-dialog|story-invitation\.css/);

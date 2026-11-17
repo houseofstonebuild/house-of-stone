@@ -1,7 +1,7 @@
 import {createContinuousSequence} from './continuous-sequence.js';
 const $=s=>document.querySelector(s),clamp=x=>Math.max(0,Math.min(1,x));
 const reduced=matchMedia('(prefers-reduced-motion:reduce)'),mobile=()=>innerWidth<=700||(innerWidth<=1100&&innerHeight>innerWidth);
-const definitions=[['mark',0,39,1.1,650],['carve',40,247,4.3,2600],['sand',248,327,2.1,1400],['heat',328,399,1.8,1200],['wax',400,463,2.1,1400],['work',464,479,1.5,1000]];
+const definitions=[['mark',0,39,1.1,650,.1,.12],['carve',40,247,4.3,2600,.03,.06],['sand',248,327,2.1,1400,.05,.1],['heat',328,399,1.8,1200,.05,.1],['wax',400,463,2.1,1400,.04,.1],['work',464,479,1.5,1000,.05,.28]];
 const articles=[...document.querySelectorAll('[data-step]')],sections=[...document.querySelectorAll('[data-scene]')];
 let form,film,profile='',stages=[],layout=[],dirty=true,raf=0,lastWidth=innerWidth,total=0,phase='',chapter='introduction';
 function copy(frame){
@@ -26,11 +26,11 @@ function frameMedia(){
 }
 function measure(){
  const view=$('.process-pin').clientHeight||document.documentElement.clientHeight;let start=0;
- stages=definitions.map(([name,first,last,views,min])=>{const length=Math.max(min,view*views),s={name,first,last,start,end:start+length,length};start+=length;return s});total=start;
+ stages=definitions.map(([name,first,last,views,min,lead,tail])=>{const length=Math.max(min,view*views),s={name,first,last,start,end:start+length,length,lead,tail};start+=length;return s});total=start;
  $('#process').style.height=reduced.matches?'auto':Math.round(start+view)+'px';
  layout=sections.map(el=>({el,name:el.dataset.scene,top:el.getBoundingClientRect().top+scrollY,height:el.offsetHeight,pin:el.querySelector(':scope>.pin')?.clientHeight||view}));frameMedia();form?.resize();film?.resize();dirty=false;
 }
-function frameAt(distance){const s=stages.find(s=>distance<s.end)||stages.at(-1),p=clamp((distance-s.start)/s.length),motion=clamp((p-.10)/.76);return s.first+(s.last-s.first)*motion;}
+function frameAt(distance){const s=stages.find(s=>distance<s.end)||stages.at(-1),p=clamp((distance-s.start)/s.length),motion=clamp((p-s.lead)/(1-s.lead-s.tail));return s.first+(s.last-s.first)*motion;}
 const route=$('#mapRoute'),routeLength=route.getTotalLength();route.style.strokeDasharray=String(routeLength);
 function update(){
  raf=0;if(document.hidden)return;if(dirty)measure();const y=scrollY,view=innerHeight;let next='introduction',header='introduction';
