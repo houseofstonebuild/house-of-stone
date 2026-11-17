@@ -107,10 +107,11 @@ function renderOrigin(p){
 }
 function update(){
  raf=0;if(document.hidden)return;if(dirty)layout();
- const y=scrollY,view=innerHeight;let scene='introduction',processNear=false;
+ const y=scrollY,view=innerHeight;let scene='introduction',headerScene='introduction',processNear=false;
  $('#readingProgress').style.transform='scaleX('+clamp(y/Math.max(1,document.documentElement.scrollHeight-view)).toFixed(5)+')';
  for(const r of readings){
   if(y+view*.5>=r.top)scene=r.name;
+  if(y+40>=r.top)headerScene=r.name;
   const visible=y+view>r.top&&y<r.top+r.height;
   const near=y+view*1.8>r.top&&y<r.top+r.height+view*.2;
   const p=clamp((y-r.top)/r.span);
@@ -127,6 +128,8 @@ function update(){
  }
  if(processNear)idleNearProcess('tools');
  if(scene!==currentScene){currentScene=scene;document.body.dataset.currentScene=scene;}
+ const tone=['origin','carving','house'].includes(headerScene)?'light':'dark';
+ if($('.masthead').dataset.tone!==tone)$('.masthead').dataset.tone=tone;
 }
 function queue(){if(!raf&&!document.hidden)raf=requestAnimationFrame(update);}
 function scrollInput(){lastInput=performance.now();queue();}
