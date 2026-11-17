@@ -64,7 +64,7 @@ function update(){
  }
  scene=next;document.body.dataset.currentScene=scene;
  const photo=phone()&&['carving','material'].includes(header);
- const tone=!photo&&['introduction','origin','carving','house'].includes(header)?'light':'dark';$('.masthead').dataset.tone=tone;$('.masthead').dataset.photo=String(photo);
+ const tone=!photo&&['introduction','origin','carving','house'].includes(header)?'light':'dark';$('.masthead').dataset.tone=tone;$('.masthead').dataset.photo=String(photo);document.documentElement.dataset.storyLayout='ready';
 }
 function queue(){if(!raf&&!document.hidden)raf=requestAnimationFrame(update)}
 function resize(){
