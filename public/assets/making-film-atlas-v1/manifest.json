@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "source": "making-cinema-frames-v4",
+  "source_manifest_sha256": "a1a12881fd72666dac48a03612aca5b13f2b86318c105baf5b9b3877454bfc8a",
+  "frames": 200,
+  "frames_per_sheet": 25,
+  "columns": 5,
+  "rows": 5,
+  "profiles": {
+    "desktop": {
+      "tile_width": 480,
+      "tile_height": 270
+    },
+    "mobile": {
+      "tile_width": 384,
+      "tile_height": 216
+    }
+  },
+  "purpose": "responsive progressive scroll scrub; high-resolution originals always retained"
+}
