@@ -42,3 +42,7 @@
 /* Reserve the stills' space before lazy images arrive in the static story. */
 .continuous-story .static-process-image img{aspect-ratio:1440/810}
 @media(max-width:700px), (max-width:1100px) and (orientation:portrait){.continuous-story .static-process-image img{aspect-ratio:960/2080}}
+
+.continuous-story .masthead[data-photo="true"]{color:#f2f1e9}
+.continuous-story .masthead[data-photo="true"] .face-mark{filter:invert(1)}
+.continuous-story .masthead[data-photo="true"] .exit-link{border-color:#ffffff65}
