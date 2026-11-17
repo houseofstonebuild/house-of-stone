@@ -62,6 +62,8 @@ try{
    if(index>=1&&index<=4){
     await page.waitForFunction(()=>window.__mabwePerformance().tools.state==='ready',{timeout:20000});
     assert.equal(await page.evaluate(()=>window.__mabwePerformance().tools.visible),true,'Tool absent at '+steps[index]);
+    const pixels=await page.locator('#toolStage canvas').evaluate(c=>{const data=c.getContext('2d').getImageData(0,0,c.width,c.height).data;let count=0;for(let i=3;i<data.length;i+=4)if(data[i]>25)count++;return count;});
+    assert(pixels>80,'Rendered tool layer is empty at '+steps[index]+': '+pixels);
    }
    if(index===5){await page.waitForFunction(()=>window.__mabwePerformance().approved==='ready',{timeout:30000});}
    await page.screenshot({path:new URL(device.name+'-process-'+steps[index]+'.png',out).pathname});
@@ -72,7 +74,8 @@ try{
   // A direct jump across all finishing stages must not leave a polished image
   // over a carving frame. The exact displayed source must reach its target.
   for(const index of [1,4,0,3,5,1]){
-   await page.locator('[data-go="'+steps[index]+'"]').click();await settles(page,'process');
+   await page.locator('[data-go="'+steps[index]+'"]').click();
+   await page.waitForFunction(expected=>window.__mabweMaking.step===expected,steps[index]);await settles(page,'process');
    assert.equal(await page.evaluate(()=>window.__mabweMaking.step),steps[index]);
    if(index<5)assert.equal(await page.locator('#approvedHost').evaluate(el=>Number(getComputedStyle(el).opacity)),0);
   }

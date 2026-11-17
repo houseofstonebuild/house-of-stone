@@ -14,7 +14,7 @@ export function createFrameStream({stage,image,mobile,src,onDisplay,position=()=
  function resize(){
   width=Math.max(1,stage.clientWidth);height=Math.max(1,stage.clientHeight);
   const next=mobile()?'mobile':'desktop';
-  if(next!==profile){profile=next;epoch++;cache.clear();queue.clear();attempts.clear();displayed=-1;lastFrame=null;}
+  if(next!==profile){profile=next;epoch++;cache.clear();queue.clear();attempts.clear();}
   // Mobile source frames contain enough detail for a retina phone viewport.
   const ratio=Math.min(devicePixelRatio||1,2,Math.sqrt(3000000/(width*height)));
   const w=Math.round(width*ratio),h=Math.round(height*ratio);

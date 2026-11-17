@@ -19,7 +19,7 @@ Evidence: source code, source manifests, and the five-device visual captures fro
 ## Rebuild
 
 - A single fixed sculpture stage now covers the block, carving, sanding, heating, wax/polish and the finished Coil. One source-image stream serves all six stages.
-- A small physically lit tool renderer shows a forged steel chisel and wooden-handled hammer, abrasive strip, brass torch and polishing cloth. Its contact position is sampled from the displayed stone image. Poses and flame are determined by scroll, with no independent playback.
+- A small physically lit tool renderer shows a forged steel chisel and wooden-handled hammer, abrasive strip, brass torch and polishing cloth. Its contact position is sampled from the displayed stone image. Poses and flame are determined by scroll, with no independent playback. Changed tool poses are copied to a persistent 2D presentation canvas so WebKit cannot discard an idle transparent WebGL layer. Browser acceptance also checks actual nontransparent tool pixels, rather than a visibility flag alone.
 - The final approved Coil renderer/still shares the process stage. It is initialized near the sequence while scrolling is idle. Reverse scrolling removes the exact final layer immediately and restores the source-derived carving frame.
 - Documentary motion uses the 1600-pixel source frames throughout the gesture. There is no low-resolution motion mode.
 - The image player decodes before drawing, keeps the last good pixels, bounds concurrency and decoded memory, and gives the latest target priority. Offscreen scenes release decoded neighbors. It does not repaint idle frames.
@@ -32,3 +32,10 @@ Evidence: source code, source manifests, and the five-device visual captures fro
 The review workflow runs `npm run check`, `npm test` and the five-layout WebKit/Chromium browser suite. The browser suite requires exact target/displayed frame agreement, reverse documentary movement, four visible tool stages, the approved final presentation, stage-button re-entry, bounded decoding, no idle repainting, text within viewport/navigation boundaries, and readable reduced-motion content. It records screenshots for every chapter and process stage.
 
 Full repository checks and all 119 unit/integration tests passed on the initial review build. Browser findings are corrected on the review branch before publication. Physical iPhone/Android GPU performance, low-bandwidth behavior and subjective tool realism require separate assessment; automated browser success does not establish those results.
+
+## Craft sources
+
+- Agrippa Tirigu, [Sculpting the stone](https://www.zimsculptures.com/sculpting-the-stone/): first-person description of choosing stone, hammer/chisel work, rasps, finer wet sanding and warming before wax.
+- ZimSculpt, [Care and repair](https://zimsculpt.com/care-and-repair/): heating with a hand-held torch and using wax on the warm stone.
+
+The copy describes a representative process, with artist-specific variation. It does not attribute another artist's statements or a documented quarry journey to Douglas Musekiwa or Coil.

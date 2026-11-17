@@ -181,7 +181,9 @@ setStep(0);queue();document.documentElement.dataset.makingAtelier='ready';
 async function createWorkshopTools(stage){
  const T=await import('/vendor/three.module.min.js');
  const canvas=document.createElement('canvas');canvas.setAttribute('aria-hidden','true');stage.append(canvas);
- const renderer=new T.WebGLRenderer({canvas,alpha:true,antialias:false,powerPreference:'low-power'});
+ const surface=document.createElement('canvas');
+ const paint=canvas.getContext('2d',{alpha:true,desynchronized:true});
+ const renderer=new T.WebGLRenderer({canvas:surface,alpha:true,antialias:false,preserveDrawingBuffer:true,powerPreference:'low-power'});
  renderer.setClearColor(0,0);renderer.outputColorSpace=T.SRGBColorSpace;
  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;
  const scene=new T.Scene(),camera=new T.OrthographicCamera(0,1,1,0,-1000,1000);
@@ -249,9 +251,10 @@ async function createWorkshopTools(stage){
  function resize(){
   w=Math.max(1,stage.clientWidth);h=Math.max(1,stage.clientHeight);
   renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.25));renderer.setSize(w,h,false);
+  canvas.width=surface.width;canvas.height=surface.height;
   camera.left=0;camera.right=w;camera.top=h;camera.bottom=0;camera.updateProjectionMatrix();lastKey='';
  }
- function hide(){for(const list of Object.values(groups))for(const g of list)g.visible=false;if(lastKey!=='hidden'){renderer.clear();lastKey='hidden';}}
+ function hide(){for(const list of Object.values(groups))for(const g of list)g.visible=false;if(lastKey!=='hidden'){renderer.clear();paint.clearRect(0,0,canvas.width,canvas.height);lastKey='hidden';}}
  function update(phase,p,img){
   if(!w||!h)resize();
   if(!groups[phase]){hide();return;}
@@ -273,10 +276,13 @@ async function createWorkshopTools(stage){
   }else{
    const g=groups[phase][0];g.position.set(point.x-13*s,point.y+Math.sin(p*32)*5*s,8);g.rotation.z=-.2+Math.sin(p*27)*.13;
   }
-  renderer.render(scene,camera);drawCount++;
+  renderer.render(scene,camera);
+  // A persistent 2D presentation avoids WebKit losing an idle transparent
+  // WebGL layer. Copy only a changed tool pose; no hidden animation loop.
+  paint.clearRect(0,0,canvas.width,canvas.height);paint.drawImage(surface,0,0);drawCount++;
  }
  resize();hide();
- canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();state='context-lost';canvas.style.visibility='hidden';});
- canvas.addEventListener('webglcontextrestored',()=>{state='ready';canvas.style.visibility='visible';lastKey='';queue();});
+ surface.addEventListener('webglcontextlost',event=>{event.preventDefault();state='context-lost';canvas.style.visibility='hidden';});
+ surface.addEventListener('webglcontextrestored',()=>{state='ready';canvas.style.visibility='visible';lastKey='';queue();});
  return {update,resize,hide,get state(){return state},stats:()=>({state,draws:drawCount,triangles:renderer.info.render.triangles,visible:!['hidden',''].includes(lastKey)})};
 }
