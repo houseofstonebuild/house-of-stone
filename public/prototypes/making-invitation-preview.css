@@ -73,3 +73,76 @@ a{color:inherit}p,h1,h2{margin:0}img{display:block}
  .banner-copy,.banner--gallery .banner-copy,.banner--dark .banner-copy{padding-left:15px}
  .banner--gallery .banner-copy,.banner--dark .banner-copy{padding-left:15px}
 }
+
+/* Final mobile editorial treatment: one uninterrupted photo of both Douglas
+   and Coil, followed by a short invitation. No split crops or text over faces. */
+@media(max-width:760px){
+ .preview-wrap{padding:18px 12px 44px}
+ .study{margin:18px 0 26px}
+ .study-head{margin-bottom:8px}
+ .banner,.banner--gallery,.banner--dark{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-rows:178px auto;
+  height:auto;
+  min-height:0;
+ }
+ .banner-photo,.banner--gallery .banner-photo,.banner--dark .banner-photo{
+  display:flex;
+  grid-column:1;
+  grid-row:1;
+  order:initial;
+  min-width:0;
+  width:100%;
+  height:178px;
+  max-height:none;
+  margin:0;
+  background:#fff;
+  overflow:hidden;
+  align-items:center;
+  justify-content:center;
+ }
+ .banner-photo img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center center;
+  transform:none;
+ }
+ .banner-copy,.banner--gallery .banner-copy,.banner--dark .banner-copy{
+  grid-column:1;
+  grid-row:2;
+  order:initial;
+  align-items:flex-start;
+  justify-content:center;
+  padding:11px 18px 16px;
+  gap:9px;
+ }
+ .banner h2{
+  font-size:clamp(23px,6.35vw,27px);
+  line-height:1.1;
+  letter-spacing:-.05em;
+ }
+ .banner .desktop-summary,.banner .mobile-summary{display:none}
+ .banner a.cta{
+  display:inline-flex;
+  font-size:11px;
+  line-height:1.45;
+  min-height:25px;
+  margin:0;
+  padding-bottom:5px;
+  align-items:center;
+  gap:10px;
+ }
+ .banner--gallery .banner-photo,.banner--dark .banner-photo{
+  width:100%;
+  height:178px;
+  margin:0;
+ }
+}
+@media(max-width:385px){
+ .banner,.banner--gallery,.banner--dark{grid-template-rows:166px auto}
+ .banner-photo,.banner--gallery .banner-photo,.banner--dark .banner-photo{height:166px}
+ .banner h2{font-size:23px}
+}
