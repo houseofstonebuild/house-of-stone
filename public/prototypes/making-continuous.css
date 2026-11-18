@@ -96,3 +96,16 @@
 @media(max-width:700px), (max-width:1100px) and (orientation:portrait){
  .continuous-story .scroll-guidance{font-size:8px;letter-spacing:0}
 }
+
+/* On small screens the fixed navigation needs an opaque chapter backdrop:
+   titles pass behind it during sticky transitions, never through its links. */
+@media(max-width:700px), (max-width:1100px) and (orientation:portrait){
+ .continuous-story .masthead[data-header-scene="origin"],
+ .continuous-story .masthead[data-header-scene="interval"],
+ .continuous-story .masthead[data-header-scene="house"],
+ .continuous-story .masthead[data-header-scene="carving"]:not([data-photo="true"]){background:var(--paper)}
+ .continuous-story .masthead[data-header-scene="material"],
+ .continuous-story .masthead[data-header-scene="carving"][data-photo="true"]{background:#232b23}
+ .continuous-story .masthead[data-header-scene="process"],
+ .continuous-story .masthead[data-header-scene="finishing"]{background:#161d19}
+}
