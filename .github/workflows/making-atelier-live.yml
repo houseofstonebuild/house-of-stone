@@ -2,11 +2,14 @@ name: Verify deployed new Making study
 on:
   deployment_status:
   workflow_dispatch:
+  push:
+    branches: ['rebuild/continuous-making-2026-11-17']
+    paths: ['qa/check-making-atelier-live.mjs']
 permissions:
   contents: read
 jobs:
   live:
-    if: github.event_name == 'workflow_dispatch' || github.event.deployment_status.state == 'success'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.deployment_status.state == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 9
     steps:

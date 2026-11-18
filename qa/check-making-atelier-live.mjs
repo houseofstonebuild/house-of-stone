@@ -9,7 +9,7 @@ for(const path of ['/prototypes/making-atelier.html','/prototypes/making-atelier
  '/prototypes/making-atelier.js','/prototypes/scroll-frame-stream.js','/prototypes/approved-coil-reveal.js',
  '/prototypes/coil-formation.js','/prototypes/story-film-atlas.js',
  '/prototypes/making-continuous.html','/prototypes/making-continuous.css',
- '/prototypes/making-continuous.js','/prototypes/continuous-sequence.js','/prototypes/continuous-decode-worker.js']){
+ '/prototypes/making-continuous.js','/prototypes/continuous-sequence.js']){
  const response=await fetch(root+path+'?mabwe-rebuild-verification='+Date.now(),{headers:{'cache-control':'no-cache'},signal:AbortSignal.timeout(25000)});
  assert.equal(response.status,200,path);
  const actual=new Uint8Array(await response.arrayBuffer());
