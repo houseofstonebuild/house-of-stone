@@ -54,7 +54,7 @@ function update(){
  }
  if(!reduced.matches&&!layout.some(s=>['process','finishing'].includes(s.name)&&y+view*1.6>s.top&&y<s.top+s.height+view))form?.request(form.stats().target,false);
  chapter=next;document.body.dataset.currentScene=next;
- $('.masthead').dataset.tone=['origin','carving','interval','house'].includes(header)?'light':'dark';$('.masthead').dataset.photo=String(mobile()&&['carving','material'].includes(header));
+ $('.masthead').dataset.tone=['origin','carving','interval','house'].includes(header)?'light':'dark';$('.masthead').dataset.photo=String(mobile()&&['carving','material'].includes(header));$('.masthead').dataset.headerScene=header;
  $('#readingProgress').style.transform='scaleX('+clamp(y/Math.max(1,document.documentElement.scrollHeight-view))+')';
  document.documentElement.dataset.storyLayout='ready';
 }
