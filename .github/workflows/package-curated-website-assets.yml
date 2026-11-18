@@ -1,0 +1,35 @@
+name: Package approved website photos for sales design
+on:
+  push:
+    branches:
+      - sales/refined-materials-2026-11-17
+    paths:
+      - '.github/workflows/package-curated-website-assets.yml'
+  workflow_dispatch:
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble selected original website assets
+        run: |
+          mkdir -p curated-website-images
+          for asset in \
+            zsa-006-studio-front-v2.webp zsa-006-studio-left-v2.webp zsa-006-space-v1-1536.webp \
+            zsa-029-studio-front-v2.webp zsa-029-studio-left-v2.webp zsa-029-space-v1-1536.webp \
+            zsa-028-studio-front-v2.webp zsa-028-studio-left-v2.webp zsa-028-space-v3-1536.webp \
+            zsa-009-studio-front-v2.webp zsa-009-studio-left-v2.webp zsa-009-space-v1-1536.webp \
+            zsa-014-studio-front-v2.webp zsa-014-studio-left-v2.webp zsa-014-space-v3-1536.webp \
+            hos-inner-beauty-front-v1.webp hos-inner-beauty-left-v1.webp hos-inner-beauty-space-v1-1536.webp \
+            hos-belonging-front-v1.webp hos-belonging-left-v1.webp hos-belonging-space-v3-1536.webp \
+            designers-coil-v2.webp hos-artist-douglas-musekiwa-with-coil-owner-v4.jpg
+          do
+            cp "public/assets/$asset" curated-website-images/
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: curated-website-images-original
+          path: curated-website-images/
+          retention-days: 14
