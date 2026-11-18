@@ -438,6 +438,11 @@ export function createApp(options = {}) {
         res.writeHead(308,{'Location':'/artists/spencer-chigombe'+url.search,'Cache-Control':'public, max-age=3600'});
         return res.end();
       }
+      // Keep old links working after Charles's artist-supplied name correction.
+      if(path==='/artists/charles-manyaure' && catalog.artists.some(a=>a.slug==='charles-manyaura')){
+        res.writeHead(308,{'Location':'/artists/charles-manyaura'+url.search,'Cache-Control':'public, max-age=3600'});
+        return res.end();
+      }
       const preview = path === '/admin/preview' || path.startsWith('/admin/preview/');
       const pagePath = preview ? path.slice('/admin/preview'.length) || '/' : path;
       const meta = pageMeta(pagePath, preview ? publicCatalog(collectionState().draft, {preview:true}) : catalog);
@@ -631,6 +636,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         const result=await publishVerifiedArtistBiographies({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
         console.log('Three owner-supplied verified artist biographies:',JSON.stringify(result));
       } catch(error) { console.error('Verified artist biographies publication did not complete:',error.message); }
+      try {
+        const {publishArtistSourcedBiographiesRoundThree}=await import('./scripts/publish-artist-sourced-biographies-round-three.mjs');
+        const result=await publishArtistSourcedBiographiesRoundThree({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
+        console.log('Bernard and Charles sourced artist biographies:',JSON.stringify(result));
+      } catch(error) { console.error('Bernard and Charles biography publication did not complete:',error.message); }
       try {
         const {publishSoldAndArchiveTallAttention}=await import('./scripts/publish-owner-sold-and-archive-tall-attention.mjs');
         const result=await publishSoldAndArchiveTallAttention({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
