@@ -38,3 +38,38 @@ a{color:inherit}p,h1,h2{margin:0}img{display:block}
 }
 @media(max-width:385px){.banner-photo,.banner--gallery .banner-photo,.banner--dark .banner-photo{height:170px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Compact phone-only invitations: editorial copy and authentic photograph share
+   a single shallow row rather than stacking into a second hero. */
+.mobile-summary{display:none}
+@media(max-width:760px){
+ .banner,.banner--gallery,.banner--dark{
+  display:grid;grid-template-columns:minmax(0,59%) minmax(0,41%);
+  grid-template-rows:1fr;height:280px;min-height:280px;
+ }
+ .banner-copy,.banner--gallery .banner-copy,.banner--dark .banner-copy{
+  grid-column:1;grid-row:1;order:initial;
+  padding:19px 7px 19px 19px;gap:13px;
+  min-width:0;justify-content:center;
+ }
+ .banner h2{font-size:clamp(21px,5.8vw,27px);line-height:1.12;letter-spacing:-.045em}
+ .banner .desktop-summary{display:none}
+ .banner .mobile-summary{display:block;font-size:10.5px;line-height:1.6}
+ .banner a.cta{font-size:10.5px;line-height:1.4;gap:7px;margin:0;white-space:nowrap}
+ .banner-photo,.banner--gallery .banner-photo,.banner--dark .banner-photo{
+  grid-column:2;grid-row:1;order:initial;
+  position:relative;min-width:0;width:100%;height:100%;max-height:none;
+  margin:0;background:#fff;overflow:hidden;
+ }
+ .banner-photo img{height:100%;width:100%;object-fit:cover;object-position:56% center}
+ .banner--gallery .banner-copy{grid-column:1;grid-row:1;padding-left:19px}
+ .banner--gallery .banner-photo{grid-column:2;grid-row:1;margin:0}
+ .banner--dark .banner-copy{padding-left:19px}
+ .banner--dark .banner-photo{margin:0;width:100%}
+}
+@media(max-width:385px){
+ .banner,.banner--gallery,.banner--dark{height:270px;min-height:270px}
+ .banner h2{font-size:21px}
+ .banner-copy,.banner--gallery .banner-copy,.banner--dark .banner-copy{padding-left:15px}
+ .banner--gallery .banner-copy,.banner--dark .banner-copy{padding-left:15px}
+}
