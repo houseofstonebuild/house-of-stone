@@ -69,7 +69,7 @@ function resize(){
 let guidanceTimer=0;
 function scrollGuidance(){
  clearTimeout(guidanceTimer);
- for(const el of document.querySelectorAll('.process-footer'))el.dataset.guidance='false';
+ for(const el of document.querySelectorAll('.process-footer'))if(el.dataset.guidance==='true')el.dataset.guidance='false';
  if(reduced.matches||document.hidden)return;
  guidanceTimer=setTimeout(()=>{
   const section=layout.find(s=>['process','finishing'].includes(s.name)&&scrollY>=s.top&&scrollY<s.top+s.height-s.pin);
