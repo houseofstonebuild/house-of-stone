@@ -1,0 +1,24 @@
+name: Package site storytelling images for sales brochure
+on:
+  push:
+    branches: [sales/refined-materials-2026-11-17]
+    paths: ['.github/workflows/package-mabwe-story-images.yml']
+  workflow_dispatch:
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p story-images
+          for f in making-rough-stone.webp making-artist-and-block.webp making-texture-closeup.webp making-carving-scene.webp making-chisel-at-work.webp; do
+            cp "public/assets/$f" story-images/
+          done
+          cp public/story.json story-images/site-story.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: house-of-mabwe-storytelling-photos
+          path: story-images/
+          retention-days: 14
