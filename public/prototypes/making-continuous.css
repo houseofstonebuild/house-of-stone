@@ -88,3 +88,11 @@
 .continuous-story .process-rule i{display:block;height:100%;background:#c8cfbd;transform-origin:left}
 @media(max-width:700px){.continuous-story .process-break{padding:90px var(--gutter)}.continuous-story .process-break h2{font-size:clamp(43px,11vw,60px)}.continuous-story .process-break p:not(.eyebrow){font-size:13px}}
 @media(prefers-reduced-motion:reduce){.continuous-story .process-break{min-height:0;padding:65px var(--gutter)}}
+
+/* Text-only scroll orientation. The story timing and media remain untouched. */
+.continuous-story .process-caption{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.continuous-story .scroll-guidance{font-size:9px;line-height:1.45;letter-spacing:.012em;text-transform:none;color:#b7bead;opacity:.73;white-space:nowrap}
+.continuous-story .scroll-guidance .down-arrow{display:inline-block;margin-left:4px;font-size:12px;line-height:1}
+@media(max-width:700px), (max-width:1100px) and (orientation:portrait){
+ .continuous-story .scroll-guidance{font-size:8px;letter-spacing:0}
+}
