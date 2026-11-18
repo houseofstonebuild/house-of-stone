@@ -78,3 +78,13 @@
 @media(prefers-reduced-motion:reduce){.continuous-story #artistCanvas{display:none}.js .continuous-story .material,.js .continuous-story .workshop{height:auto}}
 
 @media(min-width:1101px), (min-width:701px) and (orientation:landscape){.continuous-story .origin-map{clip-path:inset(0 0 0 22%)}}
+
+/* Two independent pins with a full viewport of ordinary document flow between them.
+   One native-detail canvas moves between hosts; do not create a second frame cache. */
+.continuous-story .process-break{min-height:100svh;display:flex;align-items:center;background:var(--paper);color:var(--ink);padding:100px var(--gutter)}
+.continuous-story .process-break>div{max-width:880px}
+.continuous-story .process-break h2{font-size:clamp(48px,6.5vw,96px);margin:0 0 32px}
+.continuous-story .process-break p:not(.eyebrow){max-width:430px;opacity:.72}
+.continuous-story .process-rule i{display:block;height:100%;background:#c8cfbd;transform-origin:left}
+@media(max-width:700px){.continuous-story .process-break{padding:90px var(--gutter)}.continuous-story .process-break h2{font-size:clamp(43px,11vw,60px)}.continuous-story .process-break p:not(.eyebrow){font-size:13px}}
+@media(prefers-reduced-motion:reduce){.continuous-story .process-break{min-height:0;padding:65px var(--gutter)}}

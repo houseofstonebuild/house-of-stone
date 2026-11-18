@@ -4,7 +4,7 @@ const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=()=>{},onReady=()=>{}}){
  const ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});
  let started=false,warmTarget=0,resolveReady;const ready=new Promise(resolve=>{resolveReady=resolve});
- let meta,config,plate=null,baseDirty=true,target=0,current=0,active=false,raf=0,previous=0,drawn=-1,drawnMix=-1,disposed=false,needed=0;
+ let density=3;let meta,config,plate=null,baseDirty=true,target=0,current=0,active=false,raf=0,previous=0,drawn=-1,drawnMix=-1,disposed=false,needed=0;
  let fetches=0,decodes=0,direction=1,epoch=0,width=1,height=1,pixelScale=0,bytes=0,peakBytes=0;
  const packs=new Map(),images=new Map(),fetchQueue=new Map(),decodeQueue=new Map();let workingFrames=new Set();
  const measures={requests:0,draws:0,stalls:0,decodeCount:0,workerDecodes:0,decodeMs:[],paintMs:[],fetchErrors:0,decodeErrors:0};
@@ -71,7 +71,7 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   }
  }
  function dimensions(){
-  const rect=canvas.getBoundingClientRect(),ratio=Math.min(devicePixelRatio||1,2,config?config.source_width/rect.width:2,config?config.source_height/rect.height:2);
+  const rect=canvas.getBoundingClientRect(),ratio=Math.min(devicePixelRatio||1,density,config?config.source_width/rect.width:2,config?config.source_height/rect.height:2);
   width=Math.max(1,Math.round(rect.width*ratio));height=Math.max(1,Math.round(rect.height*ratio));
   if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;drawn=-1;baseDirty=true;}
   if(config){
@@ -97,6 +97,7 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   raf=0;if(!active||!config||disposed||document.hidden)return;
   const dt=previous?Math.min(50,now-previous):16.7;previous=now;
   const delta=target-current,settled=Math.abs(delta)<.015;
+  const nextDensity=settled?3:2;if(density!==nextDensity){density=nextDensity;dimensions();}
   // Time-based damping gives wheels, trackpads and touch the same response.
   const proposed=settled?target:current+delta*(1-Math.exp(-dt/95));
   // During a fast gesture, spend the decode budget on one sharp source frame.
