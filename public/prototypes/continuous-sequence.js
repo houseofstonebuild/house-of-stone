@@ -4,7 +4,7 @@ const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=()=>{},onReady=()=>{}}){
  const ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});
  let started=false,warmTarget=0,resolveReady;const ready=new Promise(resolve=>{resolveReady=resolve});
- let density=3;let meta,config,plate=null,baseDirty=true,target=0,current=0,active=false,raf=0,previous=0,drawn=-1,drawnMix=-1,disposed=false,needed=0;
+ let density=2,lastTargetChange=0,detailTimer=0;let meta,config,plate=null,baseDirty=true,target=0,current=0,active=false,raf=0,previous=0,drawn=-1,drawnMix=-1,disposed=false,needed=0;
  let fetches=0,decodes=0,direction=1,epoch=0,width=1,height=1,pixelScale=0,bytes=0,peakBytes=0;
  const packs=new Map(),images=new Map(),fetchQueue=new Map(),decodeQueue=new Map();let workingFrames=new Set();
  const measures={requests:0,draws:0,stalls:0,decodeCount:0,workerDecodes:0,decodeMs:[],paintMs:[],fetchErrors:0,decodeErrors:0};
@@ -97,7 +97,8 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   raf=0;if(!active||!config||disposed||document.hidden)return;
   const dt=previous?Math.min(50,now-previous):16.7;previous=now;
   const delta=target-current,settled=Math.abs(delta)<.015;
-  const nextDensity=settled?3:2;if(density!==nextDensity){density=nextDensity;dimensions();}
+  const nextDensity=settled&&now-lastTargetChange>240?3:2;if(density!==nextDensity){density=nextDensity;dimensions();}
+  if(settled&&density===2&&!detailTimer)detailTimer=setTimeout(()=>{detailTimer=0;wake()},260);
   // Time-based damping gives wheels, trackpads and touch the same response.
   const proposed=settled?target:current+delta*(1-Math.exp(-dt/95));
   // During a fast gesture, spend the decode budget on one sharp source frame.
@@ -110,7 +111,7 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
  }
  function wake(){if(active&&!raf&&!disposed&&!document.hidden)raf=requestAnimationFrame(tick)}
  function request(value,visible=true){
-  if(value!==target)direction=value>target?1:-1;target=clamp(value,0,(meta?.frames||480)-1);
+  if(value!==target){direction=value>target?1:-1;lastTargetChange=performance.now();if(detailTimer){clearTimeout(detailTimer);detailTimer=0;}}target=clamp(value,0,(meta?.frames||480)-1);
   const entering=!active&&visible;active=visible;if(entering){current=target;needed=target;previous=0;}
   if(!visible){if(raf)cancelAnimationFrame(raf);raf=0;previous=0;if(!entering)release();return;}
   start();if(config){plan();wake();}
@@ -121,7 +122,7 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
  }
  function warm(value=0){warmTarget=value;start();if(!config||active)return;needed=value;needImage(Math.floor(value),-100);needImage(Math.floor(value)+1,-99);needPack(Math.floor(value),0);pumpFetch();pumpDecode();}
  function resize(){if(!config)return;dimensions();drawn=-1;wake()}
- function suspend(){active=false;if(raf)cancelAnimationFrame(raf);raf=0;previous=0;}
+ function suspend(){active=false;clearTimeout(detailTimer);detailTimer=0;if(raf)cancelAnimationFrame(raf);raf=0;previous=0;}
  function start(){if(started||disposed)return;started=true;fetch(root+'/manifest.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Continuous sequence missing');return r.json()}).then(async m=>{
   if(disposed)return;if(m.version!==1||!m.profiles?.[profile])throw Error('Invalid continuous sequence');meta=m;config=m.profiles[profile];if(config.plate){plate=new Image();plate.src=root+'/'+profile+'/'+config.plate;await plate.decode()}dimensions();if(active){plan();wake()}else warm(warmTarget);onReady(m);resolveReady(m);
  }).catch(error=>{canvas.dataset.frameStatus='unavailable';console.warn(error);resolveReady(null)});}
