@@ -1,0 +1,20 @@
+{
+  "sourceNote": "Owner-supplied artist biographies received 17 November 2026. Bernard Sakarombe was provided as text, Charles Manyaura as CHARLES_MANYAURA_Biography.docx (pages 1-2). The Charles document spells the name 'Manyaura' in its heading and text; a previous supplier metadata record and catalogue use 'Manyaure'. Treat 'Manyaura' as the updated display spelling while retaining the prior artist ID and redirecting the old profile URL. No private contact details or artist portraits are included.",
+  "profiles": [
+    {
+      "name": "Bernard Sakarombe",
+      "kind": "artist-supplied",
+      "source": "Owner-supplied Bernard Sakarombe biography, 17 November 2026",
+      "introduction": "Bernard Sakarombe is a Zimbabwean stone sculptor whose figures, animals and abstract forms draw on family life, rural experience and stories passed between generations.",
+      "biography": "Bernard Sakarombe was born in Makoni, near Rusape in eastern Zimbabwe. After completing his O-Level studies at Inyati High School in 1992, he worked at Chibaya Farm before moving to Harare. In 1996, he met sculptors Washington Musonza, Jonothan Mhondorohuma, Chrispen June and Lameck Bonjisi, who encouraged him to begin carving stone. His early years were challenging, but working alongside these artists gave him the opportunity to develop his technique and, eventually, a distinctive approach of his own.\n\nSakarombe draws inspiration from both family life and his experiences growing up in the countryside. While herding cattle, he encountered older people who shared stories about past generations, spiritual beliefs and life in the bush. He also observed animals, their bones and the traces they left in the landscape. These memories have informed his interest in figurative, animal and abstract sculpture.\n\nHe works with springstone, serpentine and opal stone. Beyond the workshop, he enjoys hearing stories from elders and visiting places such as Chinhoyi Caves, museums and national parks. In the House of Mabwe collection, his sculpture Massaging offers a more intimate study of the human figure, using the contact between carved forms to suggest touch and care."
+    },
+    {
+      "name": "Charles Manyaura",
+      "legacyName": "Charles Manyaure",
+      "kind": "artist-supplied",
+      "source": "Artist-provided CHARLES_MANYAURA_Biography.docx, pages 1-2, uploaded 17 November 2026",
+      "introduction": "Charles Manyaura is a Zimbabwean stone sculptor specialising in human figures, with a practice shaped by his early apprenticeship to Lameck Bonjisi.",
+      "biography": "Charles Manyaura was born on 26 June 1983 and attended Kafura Primary School. He began working alongside sculptor Lameck Bonjisi in 2001, assisting him in the workshop and gaining practical experience in stone carving. After Bonjisi's death, Manyaura established his own workshop along Airport Road in Harare, continuing to develop his work independently.\n\nHuman figures are central to Manyaura's practice. He favours hard stones, particularly springstone and white opal, and also works with cobalt stone at times. These materials allow him to explore the relationship between carefully shaped surfaces and the character of the original rock. His stated ambition is to share his sculptures with audiences beyond Zimbabwe and exhibit internationally.\n\nIn the House of Mabwe collection, the sculpture Open Flame presents a more abstract side of his work: two rising curves separated by an opening that brings movement into a solid piece of stone. Its composition offers an opportunity to appreciate Manyaura's treatment of form alongside his interest in figurative carving."
+    }
+  ]
+}
