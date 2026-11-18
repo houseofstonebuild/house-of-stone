@@ -71,7 +71,7 @@ export function createContinuousSequence({canvas,root,profile,focus=.5,onSample=
   }
  }
  function dimensions(){
-  const rect=canvas.getBoundingClientRect(),ratio=Math.min(devicePixelRatio||1,2,config?config.source_width/rect.width:2,config?config.source_height/rect.height:2);
+  const rect=canvas.getBoundingClientRect(),ratio=Math.min(devicePixelRatio||1,3,config?config.source_width/rect.width:2,config?config.source_height/rect.height:2);
   width=Math.max(1,Math.round(rect.width*ratio));height=Math.max(1,Math.round(rect.height*ratio));
   if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;drawn=-1;baseDirty=true;}
   if(config){
