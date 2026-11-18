@@ -50,6 +50,13 @@ try{
   await phase(5,.98);await page.waitForFunction(()=>Number(getComputedStyle(document.querySelector('#exactFinish')).opacity)===1,undefined,{timeout:5000});assert.equal(await page.locator('#exactFinish').evaluate(el=>Number(getComputedStyle(el).opacity)),1,'End must show the unchanged approved image');
   for(const index of [4,3,2,1,0]){await phase(index);assert.equal(await page.locator('#exactFinish').evaluate(el=>Number(getComputedStyle(el).opacity)),0,'Final image must leave when scrolling back to earlier stages');}
   await phase(1,.2);
+  await page.waitForFunction(()=>document.querySelector('#process .process-footer').dataset.guidance==='true');
+  const cue=page.locator('#process .scroll-guidance'),cueRect=await cue.boundingBox(),ruleRect=await page.locator('#process .process-rule').boundingBox();
+  assert(cueRect.x>=0&&cueRect.x+cueRect.width<=width&&cueRect.y+cueRect.height<=height,'Scroll cue stays in the footer');
+  assert(cueRect.x+cueRect.width<=ruleRect.x,'Guidance must not overlap progress');
+  await page.screenshot({path:dest+'/'+name+'-scroll-guidance.png'});
+  await page.mouse.wheel(0,1);
+  await page.waitForFunction(()=>document.querySelector('#process .process-footer').dataset.guidance==='false');
   await page.evaluate(()=>{window.motionSamples=[];window.recordMotion=true;let last=performance.now();function record(now){const s=window.__mabweContinuous.stats();window.motionSamples.push({time:now,elapsed:now-last,frame:s.form.current,painted:Number(document.querySelector('#processCanvas').dataset.displayedFrame)});last=now;if(window.recordMotion)requestAnimationFrame(record)}requestAnimationFrame(record)});
   // Measure the moving part of carving at every viewport; fixed pixels crossed the new chapter boundary on short phones.
   const wheelStep=stages[1].length*.6/35;

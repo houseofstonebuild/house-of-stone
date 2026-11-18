@@ -65,7 +65,23 @@ function resize(){
  if(changed&&stage&&!reduced.matches){const next=stages.find(s=>s.name===stage.name),section=layout.find(s=>s.name==='process');scrollTo(0,section.top+next.start+next.length*local);}
  form?.resize();film?.resize();artist?.resize();queue();
 }
-addEventListener('scroll',queue,{passive:true});addEventListener('resize',resize,{passive:true});addEventListener('load',()=>{dirty=true;queue()},{once:true});addEventListener('pageshow',()=>{dirty=true;queue()});document.fonts?.ready.then(()=>{dirty=true;queue()});
+// One quiet timeout after a gesture; no animation loop or layout work.
+let guidanceTimer=0;
+function scrollGuidance(){
+ clearTimeout(guidanceTimer);
+ for(const el of document.querySelectorAll('.process-footer'))el.dataset.guidance='false';
+ if(reduced.matches||document.hidden)return;
+ guidanceTimer=setTimeout(()=>{
+  const section=layout.find(s=>['process','finishing'].includes(s.name)&&scrollY>=s.top&&scrollY<s.top+s.height-s.pin);
+  if(!section||reduced.matches||document.hidden)return;
+  if(section.name==='finishing'&&phase==='work')return;
+  section.el.querySelector('.process-footer').dataset.guidance='true';
+ },1800);
+}
+addEventListener('scroll',()=>{queue();scrollGuidance()},{passive:true});
+document.addEventListener('visibilitychange',scrollGuidance);
+reduced.addEventListener('change',scrollGuidance);
+addEventListener('resize',resize,{passive:true});addEventListener('load',()=>{dirty=true;queue()},{once:true});addEventListener('pageshow',()=>{dirty=true;queue()});document.fonts?.ready.then(()=>{dirty=true;queue()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){form?.suspend();film?.suspend();artist?.suspend();}else{dirty=true;queue()}});
 reduced.addEventListener('change',()=>{dirty=true;players();if(reduced.matches){form?.suspend();film?.suspend();artist?.suspend();for(const a of articles)a.removeAttribute('aria-hidden')}queue()});
 players();copy(0);document.documentElement.classList.add('js');queue();

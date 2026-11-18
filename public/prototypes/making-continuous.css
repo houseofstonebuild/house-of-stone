@@ -88,3 +88,16 @@
 .continuous-story .process-rule i{display:block;height:100%;background:#c8cfbd;transform-origin:left}
 @media(max-width:700px){.continuous-story .process-break{padding:90px var(--gutter)}.continuous-story .process-break h2{font-size:clamp(43px,11vw,60px)}.continuous-story .process-break p:not(.eyebrow){font-size:13px}}
 @media(prefers-reduced-motion:reduce){.continuous-story .process-break{min-height:0;padding:65px var(--gutter)}}
+
+/* Guidance shares the existing footer, never the artwork or reading area. */
+.continuous-story .process-caption{display:grid;min-width:0}
+.continuous-story .process-caption>span{grid-area:1/1;transition:opacity .25s ease}
+.continuous-story .scroll-guidance{opacity:0;font-size:9px;letter-spacing:.025em;pointer-events:none}
+.continuous-story .process-footer[data-guidance="true"] .process-caption>span:first-child{opacity:0}
+.continuous-story .process-footer[data-guidance="true"] .scroll-guidance{opacity:1}
+.continuous-story .process-rule{flex-shrink:0}
+@media(prefers-reduced-motion:no-preference){
+ .continuous-story .opening-footer i{animation:scroll-invitation 2.2s ease-in-out 3}
+ @keyframes scroll-invitation{0%,100%{transform:translateY(-3px);opacity:.45}60%{transform:translateY(3px);opacity:1}}
+}
+@media(prefers-reduced-motion:reduce){.continuous-story .scroll-guidance{display:none}.continuous-story .process-caption>span{transition:none}}
