@@ -309,14 +309,16 @@
  .continuous-story .material-images>img{object-position:48% 18%}
 }
 
-/* Mobile artist chapter: pan toward the sculptor and the stone.
-   A right-anchored crop keeps the artwork visible while shifting the
-   subjects off the far-right edge toward the center. */
+/* Mobile artist chapter: use the wider documentary source without
+   CSS enlargement. The canvas pans right in source pixels; the poster
+   follows the same right-biased framing when frames are not loaded. */
 @media(max-width:700px), (max-width:1100px) and (orientation:portrait){
- .continuous-story .material-images>img,
  .continuous-story .material-images>#artistCanvas{
-  transform:scale(1.3);
-  transform-origin:100% 0%;
+  transform:none;
+ }
+ .continuous-story .material-images>img{
+  transform:none;
+  object-position:86% 18%;
  }
 }
 
