@@ -109,3 +109,24 @@
  .continuous-story .masthead[data-header-scene="process"],
  .continuous-story .masthead[data-header-scene="finishing"]{background:#161d19}
 }
+
+/* Mobile documentary navigation: available at the opening and on upward scroll,
+   but outside the viewport while advancing through pinned chapters. */
+@media(max-width:700px), (max-width:1100px) and (orientation:portrait){
+ .js .continuous-story .masthead{
+  transition:transform .24s ease,opacity .18s ease;
+ }
+ .js .continuous-story .masthead[data-collapsed="true"]:not(:focus-within){
+  transform:translate3d(0,-110%,0);
+  opacity:0;
+  pointer-events:none;
+ }
+ .js .continuous-story .masthead:focus-within{
+  transform:translate3d(0,0,0);
+  opacity:1;
+  pointer-events:auto;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .js .continuous-story .masthead{transition:none}
+}
