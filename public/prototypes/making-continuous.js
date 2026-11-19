@@ -37,6 +37,51 @@ function measure(){
 }
 function frameAt(distance,group){const s=group.find(s=>distance<s.end)||group.at(-1),p=clamp((distance-s.start)/s.length),motion=clamp((p-s.lead)/(1-s.lead-s.tail));return s.first+(s.last-s.first)*motion;}
 const route=$('#mapRoute'),routeLength=route.getTotalLength();route.style.strokeDasharray=String(routeLength);
+
+/* A single quiet guide. Sample headline/footer positions at most seven times
+   per second, never covering editorial copy or the process-progress line. */
+const storyGuide=$('#storyScrollGuide');
+const guideSelectors={
+ introduction:'.opening-copy h1,.opening-copy .intro,.opening-footer',
+ origin:'.origin-copy h2,.origin-copy>p,.edge-note',
+ material:'.material-copy h2,.material-copy>p',
+ carving:'.workshop-copy h2,.workshop-copy>p,.workshop-credit',
+ process:'#process .process-step.is-current h2,#process .process-step.is-current>p,#process .process-caption,#process .process-rule',
+ interval:'.process-break h2,.process-break>div>p',
+ finishing:'#finishing .process-step.is-current h2,#finishing .process-step.is-current>p,#finishing .process-caption,#finishing .process-rule'
+};
+let guideLastCheck=-Infinity,guideLastScene='';
+function positionStoryGuide(scene){
+ if(!storyGuide)return;
+ if(scene==='house'){
+  storyGuide.dataset.hidden='true';
+  guideLastScene=scene;
+  return;
+ }
+ storyGuide.dataset.tone=['origin','carving','interval'].includes(scene)?'light':'dark';
+ const now=performance.now();
+ if(scene===guideLastScene&&now-guideLastCheck<140)return;
+ guideLastCheck=now;guideLastScene=scene;
+ const width=storyGuide.offsetWidth,height=storyGuide.offsetHeight;
+ const center=innerWidth/2;
+ const obstacles=[...document.querySelectorAll(guideSelectors[scene]||'')];
+ const bottoms=scene==='process'||scene==='finishing'?[84,119,156,30]:[30,70,110,153];
+ const pad=12;
+ let selected=null;
+ for(const bottom of bottoms){
+  const target={left:center-width/2,right:center+width/2,top:innerHeight-bottom-height,bottom:innerHeight-bottom};
+  if(target.top<90)continue;
+  const overlaps=obstacles.some(node=>{
+   const rect=node.getBoundingClientRect();
+   return rect.width>0&&rect.height>0&&
+    target.left<rect.right+pad&&target.right>rect.left-pad&&
+    target.top<rect.bottom+pad&&target.bottom>rect.top-pad;
+  });
+  if(!overlaps){selected=bottom;break;}
+ }
+ storyGuide.dataset.hidden=String(selected===null);
+ if(selected!==null)storyGuide.style.setProperty('--story-guide-bottom',selected+'px');
+}
 function update(){
  raf=0;if(document.hidden)return;if(dirty)measure();const y=scrollY,view=innerHeight,headerOffset=mobile()?56:45;
  let next='introduction',header='introduction';
@@ -71,6 +116,7 @@ function update(){
  }
  if(!reduced.matches&&!layout.some(s=>['process','finishing'].includes(s.name)&&y+view*1.6>s.top&&y<s.top+s.height+view))form?.request(form.stats().target,false);
  chapter=next;document.body.dataset.currentScene=next;
+ positionStoryGuide(next);
  $('.masthead').dataset.tone=['origin','carving','interval','house'].includes(header)?'light':'dark';$('.masthead').dataset.photo=String(mobile()&&['carving','material'].includes(header));$('.masthead').dataset.headerScene=header;
  $('#readingProgress').style.transform='scaleX('+clamp(y/Math.max(1,document.documentElement.scrollHeight-view))+')';
  document.documentElement.dataset.storyLayout='ready';
