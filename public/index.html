@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <!-- Direct collection landing: suppress the initial homepage hero until the collection is positioned. -->
+  <script>if(location.pathname==='/'&&new URLSearchParams(location.search).get('collection')==='direct')document.documentElement.dataset.collectionEntry='pending';</script>
+  <style>html[data-collection-entry="pending"] #hos-concept{visibility:hidden}html[data-collection-entry="pending"] body{background:#f6f4ef}</style>
   <title>{{TITLE}}</title>
   <meta name="description" content="{{DESCRIPTION}}">
   <meta name="robots" content="{{ROBOTS}}">
