@@ -381,11 +381,6 @@ html:not(.js) .continuous-story .story-scroll-guide{display:none}
  line-height:15px;
  font-size:17px;
  font-weight:300;
- animation:story-guide-arrow 2.8s ease-in-out infinite;
-}
-@keyframes story-guide-arrow{
- 0%,100%{transform:translateY(0)}
- 50%{transform:translateY(3px)}
 }
 @media(max-width:700px), (max-width:1100px) and (orientation:portrait){
  .js .continuous-story .story-scroll-guide{
@@ -395,8 +390,7 @@ html:not(.js) .continuous-story .story-scroll-guide{display:none}
 }
 @media(prefers-reduced-motion:reduce){
  .js .continuous-story .story-scroll-guide{transition:none}
- .js .continuous-story .story-scroll-guide__arrow{animation:none}
-}
+ }
 
 /* The progress controls sit above the fixed bottom hint rather than
    occupying the same strip of the viewport. */
