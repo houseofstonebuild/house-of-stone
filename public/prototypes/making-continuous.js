@@ -15,7 +15,7 @@ function players(){
  if(reduced.matches){form?.destroy();film?.destroy();artist?.destroy();form=film=artist=null;profile='';return;}
  const next=mobile()?'mobile':'desktop';if(next===profile)return;profile=next;form?.destroy();film?.destroy();artist?.destroy();
  form=createContinuousSequence({canvas:$('#processCanvas'),root:'/assets/continuous-making-v1/form',profile,focus:profile==='desktop'?.65:.5,onSample:copy});
- artist=createContinuousSequence({canvas:$('#artistCanvas'),root:'/assets/continuous-making-v1/artist',profile,sourceProfile:profile==='mobile'?'desktop':profile,focus:profile==='mobile'?.65:.5,focusY:profile==='mobile'?.20:.5,zoom:profile==='mobile'?1.42:1});
+ artist=createContinuousSequence({canvas:$('#artistCanvas'),root:'/assets/continuous-making-v1/artist',profile,sourceProfile:profile==='mobile'?'desktop':profile,focus:profile==='mobile'?.65:.5,focusY:profile==='mobile'?.20:.5,zoom:profile==='mobile'?1.65:1});
  film=createContinuousSequence({canvas:$('#workshopCanvas'),root:'/assets/continuous-making-v1/workshop',profile,focusY:profile==='mobile'?.16:.5});
 }
 function frameMedia(){for(const art of document.querySelectorAll('.process-art')){if(profile!=='mobile'||reduced.matches){art.style.setProperty('--scene-scale','1');art.style.setProperty('--scene-y','0px');continue;}
