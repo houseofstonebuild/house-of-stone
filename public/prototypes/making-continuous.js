@@ -4,6 +4,7 @@ const reduced=matchMedia('(prefers-reduced-motion:reduce)'),mobile=()=>innerWidt
 const definitions=[['mark',0,39,.8,500,.1,.12],['carve',40,247,3.3,2200,.03,.06],['sand',248,327,1.25,800,.05,.1],['heat',328,399,.8,500,.05,.1],['wax',400,463,1.4,900,.04,.1],['work',464,479,1,650,.05,.28]];
 const articles=[...document.querySelectorAll('[data-step]')],sections=[...document.querySelectorAll('[data-scene]')];
 let form,film,artist,profile='',stages=[],layout=[],dirty=true,raf=0,lastWidth=innerWidth,total=0,phase='',chapter='introduction';
+let headerAnchorY=Math.max(0,scrollY),headerVisible=true,headerReady=false;
 function copy(frame){
  $('#exactFinish').style.opacity=String(clamp((frame-474)/5));
  const index=definitions.findIndex((s,i)=>frame<s[2]+.5||i===5),name=definitions[index][0];
@@ -37,8 +38,22 @@ function measure(){
 }
 function frameAt(distance,group){const s=group.find(s=>distance<s.end)||group.at(-1),p=clamp((distance-s.start)/s.length),motion=clamp((p-s.lead)/(1-s.lead-s.tail));return s.first+(s.last-s.first)*motion;}
 const route=$('#mapRoute'),routeLength=route.getTotalLength();route.style.strokeDasharray=String(routeLength);
+function updateMobileHeader(y){
+ const nav=$('.masthead');
+ if(!mobile()){nav.dataset.collapsed='false';headerVisible=true;headerReady=false;headerAnchorY=y;return;}
+ const nearOpening=y<110;
+ if(!headerReady){headerReady=true;headerVisible=nearOpening;headerAnchorY=y;}
+ else if(nearOpening){headerVisible=true;headerAnchorY=y;}
+ else if(Math.abs(y-headerAnchorY)>=18){
+  headerVisible=y<headerAnchorY;
+  headerAnchorY=y;
+ }
+ nav.dataset.collapsed=String(!headerVisible);
+}
 function update(){
- raf=0;if(document.hidden)return;if(dirty)measure();const y=scrollY,view=innerHeight;let next='introduction',header='introduction';
+ raf=0;if(document.hidden)return;if(dirty)measure();const y=scrollY,view=innerHeight;
+ updateMobileHeader(y);
+ let next='introduction',header='introduction';
  for(const s of layout){
   if(y+view*.5>=s.top)next=s.name;if(y+45>=s.top)header=s.name;
   const visible=y+view>s.top&&y<s.top+s.height,near=y+view*1.6>s.top&&y<s.top+s.height+view;const p=clamp((y-s.top)/Math.max(1,s.height-s.pin));s.el.dataset.progress=String(p);
