@@ -179,6 +179,10 @@
   flex:0 0 auto;
   padding:12px var(--gutter) 70px;
  }
+ }
+ .continuous-story .origin-copy>p:not(.eyebrow):last-of-type{
+  display:block;
+ }
 }
 @media(max-width:700px) and (max-height:740px),
        (max-width:1100px) and (orientation:portrait) and (max-height:740px){
