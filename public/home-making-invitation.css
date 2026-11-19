@@ -1,0 +1,72 @@
+/* House of Mabwe — making-story invitation below the homepage introduction.
+   Scoped to this section; other website sections and prototype remain unchanged. */
+#hos-concept .hos-making-invitation{
+ position:relative;isolation:isolate;overflow:hidden;
+ width:calc(100% - var(--hos-gutter) - var(--hos-gutter));
+ max-width:var(--hos-content-width);margin:0 auto 52px;
+ height:310px;background:#1d2b22;color:#f5f3ed;
+}
+#hos-concept .hos-making-invitation__art{
+ position:absolute;z-index:0;inset:0 0 0 39%;
+ background:#879783;overflow:hidden;
+}
+#hos-concept .hos-making-invitation__art img{
+ display:block;width:100%;max-width:none;height:100%;
+ object-fit:cover;object-position:66% 53%;
+ transform:scale(1.12);transform-origin:65% 53%;
+ mix-blend-mode:multiply;
+ filter:contrast(1.04) brightness(1.75) saturate(.88);
+}
+#hos-concept .hos-making-invitation__shade{
+ position:absolute;inset:0;z-index:1;pointer-events:none;
+ background:linear-gradient(90deg,#1d2b22 0%,#1d2b22 35%,#1d2b22ee 43%,#1d2b2275 60%,#1d2b2208 83%,#1d2b2200 100%);
+}
+#hos-concept .hos-making-invitation__copy{
+ position:relative;z-index:2;
+ display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+ gap:0;width:60%;height:100%;padding:35px clamp(25px,5.5vw,78px);
+}
+#hos-concept .hos-making-invitation__copy h2{
+ margin:0;color:#f5f3ed;font-size:clamp(36px,3.45vw,56px);
+ font-weight:300;line-height:1.13;letter-spacing:-.055em;max-width:580px;
+}
+#hos-concept .hos-making-invitation__copy p{
+ margin:20px 0 31px;color:#d2d5cc;font-size:clamp(12px,1.15vw,16px);
+ line-height:1.7;max-width:480px;
+}
+#hos-concept .hos-making-invitation__cta{
+ display:inline-flex;align-items:center;gap:42px;flex-shrink:0;
+ padding:0 0 9px;border-bottom:1px solid #d6ded3;
+ text-decoration:none;color:#f5f3ed;font-size:12px;
+ font-weight:500;line-height:1.5;transition:gap .15s ease;
+}
+#hos-concept .hos-making-invitation__cta:hover{gap:48px}
+#hos-concept .hos-making-invitation__cta:focus-visible{
+ outline:2px solid #f5f3ed;outline-offset:5px;
+}
+#hos-concept .hos-making-invitation__arrow{font-size:24px;font-weight:300;line-height:.8}
+@media(max-width:700px){
+ #hos-concept .hos-making-invitation{height:190px;margin-bottom:30px}
+ #hos-concept .hos-making-invitation__art{inset:0}
+ #hos-concept .hos-making-invitation__art img{
+  object-position:78% 58%;transform:scale(1.55);transform-origin:78% 58%;
+ }
+ #hos-concept .hos-making-invitation__shade{
+  background:linear-gradient(90deg,#1d2b22 0%,#1d2b22f7 21%,#1d2b22d8 42%,#1d2b2275 62%,#1d2b2205 92%,#1d2b2200 100%);
+ }
+ #hos-concept .hos-making-invitation__copy{
+  justify-content:space-between;width:100%;padding:17px 21px;
+ }
+ #hos-concept .hos-making-invitation__copy h2{
+  font-size:clamp(25px,7.1vw,31px);line-height:1.12;
+  letter-spacing:-.045em;max-width:260px;
+ }
+ #hos-concept .hos-making-invitation__copy p{display:none}
+ #hos-concept .hos-making-invitation__cta{
+  font-size:11px;gap:17px;padding-bottom:7px;
+ }
+ #hos-concept .hos-making-invitation__arrow{font-size:20px}
+}
+@media(prefers-reduced-motion:reduce){
+ #hos-concept .hos-making-invitation__cta{transition:none}
+}
