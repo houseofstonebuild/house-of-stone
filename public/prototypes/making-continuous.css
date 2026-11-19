@@ -308,3 +308,33 @@
  .continuous-story .workshop-poster{object-position:48% 16%}
  .continuous-story .material-images>img{object-position:48% 18%}
 }
+
+/* Mobile artist chapter: pan toward the sculptor and the stone.
+   A right-anchored crop keeps the artwork visible while shifting the
+   subjects off the far-right edge toward the center. */
+@media(max-width:700px), (max-width:1100px) and (orientation:portrait){
+ .continuous-story .material-images>img,
+ .continuous-story .material-images>#artistCanvas{
+  transform:scale(1.3);
+  transform-origin:100% 0%;
+ }
+}
+
+/* Use the already computed finishing scroll progress for a very gentle,
+   continuous push-in. Apply the identical transform to the frame canvas,
+   fallback poster and exact approved final sculpture for perfect alignment.
+   Frame decoding, transition timings and the existing smooth playhead
+   are intentionally untouched. */
+.continuous-story #finishing .process-art>.process-poster,
+.continuous-story #finishing .process-art>#processCanvas,
+.continuous-story #finishing .process-art>#exactFinish{
+ transform:translateY(var(--scene-y,0px)) scale(var(--finish-scene-scale,1));
+ transform-origin:50% 50%;
+}
+@media(prefers-reduced-motion:reduce){
+ .continuous-story #finishing .process-art>.process-poster,
+ .continuous-story #finishing .process-art>#processCanvas,
+ .continuous-story #finishing .process-art>#exactFinish{
+  transform:translateY(var(--scene-y,0px)) scale(var(--scene-scale,1));
+ }
+}
