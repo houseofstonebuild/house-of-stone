@@ -15,7 +15,7 @@ function players(){
  if(reduced.matches){form?.destroy();film?.destroy();artist?.destroy();form=film=artist=null;profile='';return;}
  const next=mobile()?'mobile':'desktop';if(next===profile)return;profile=next;form?.destroy();film?.destroy();artist?.destroy();
  form=createContinuousSequence({canvas:$('#processCanvas'),root:'/assets/continuous-making-v1/form',profile,focus:profile==='desktop'?.65:.5,onSample:copy});
- artist=createContinuousSequence({canvas:$('#artistCanvas'),root:'/assets/continuous-making-v1/artist',profile,focusY:profile==='mobile'?.18:.5});
+ artist=createContinuousSequence({canvas:$('#artistCanvas'),root:'/assets/continuous-making-v1/artist',profile,sourceProfile:profile==='mobile'?'desktop':profile,focus:profile==='mobile'?.86:.5,focusY:profile==='mobile'?.18:.5});
  film=createContinuousSequence({canvas:$('#workshopCanvas'),root:'/assets/continuous-making-v1/workshop',profile,focusY:profile==='mobile'?.16:.5});
 }
 function frameMedia(){for(const art of document.querySelectorAll('.process-art')){if(profile!=='mobile'||reduced.matches){art.style.setProperty('--scene-scale','1');art.style.setProperty('--scene-y','0px');continue;}
@@ -47,9 +47,14 @@ function update(){
    const group=stages.filter(stage=>stage.section===s.name),distance=y-layout.find(s=>s.name==='process').top,value=frameAt(distance,group);
    const owns=visible&&(!reduced.matches),art=s.el.querySelector('.process-art');
    if(s.name==='finishing'){
-    const finishStart=group[0].start,colourEnd=group.find(stage=>stage.name==='wax').end;
-    const zoomProgress=clamp((distance-finishStart)/Math.max(1,colourEnd-finishStart));
-    const zoom=reduced.matches?1:1+.14*zoomProgress;
+    const sand=group.find(stage=>stage.name==='sand'),heat=group.find(stage=>stage.name==='heat'),wax=group.find(stage=>stage.name==='wax'),work=group.find(stage=>stage.name==='work');
+    // A small push through sanding and warming; most of the camera movement
+    // accompanies the dark polish. Ease back to the full sculpture on reveal.
+    const early=clamp((distance-sand.start)/Math.max(1,heat.end-sand.start));
+    const polish=clamp((distance-wax.start)/Math.max(1,wax.end-wax.start));
+    const reveal=clamp((distance-work.start)/Math.max(1,work.length));
+    const camera=1+.035*early+.215*polish;
+    const zoom=reduced.matches?1:camera-(camera-1)*reveal;
     const baseScale=parseFloat(art.style.getPropertyValue('--scene-scale'))||1;
     art.style.setProperty('--finish-zoom',String(zoom.toFixed(4)));
     art.style.setProperty('--finish-scene-scale',String((baseScale*zoom).toFixed(4)));
