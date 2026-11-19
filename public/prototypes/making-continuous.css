@@ -179,7 +179,6 @@
   flex:0 0 auto;
   padding:12px var(--gutter) 70px;
  }
- }
  .continuous-story .origin-copy>p:not(.eyebrow):last-of-type{
   display:block;
  }
