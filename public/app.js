@@ -7,6 +7,7 @@ import { initializeRoomPreview, roomPreviewEligible } from './room-preview.js';
 const root = document.getElementById('hos-concept');
 const previewMode = location.pathname === '/admin/preview' || location.pathname.startsWith('/admin/preview/');
 const routePath = () => previewMode ? location.pathname.slice('/admin/preview'.length) || '/' : location.pathname;
+const directCollectionEntry = !previewMode && location.pathname==='/' && new URLSearchParams(location.search).get('collection')==='direct';
 const $ = selector => root.querySelector(selector);
 const uuid = () => crypto.randomUUID();
 const protectedPreference = navigator.doNotTrack === '1' || navigator.globalPrivacyControl === true;
@@ -895,9 +896,26 @@ async function start() {
   }
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   rememberScroll();
-  preferenceUI();route(routePath(),false);scrollToHash();root.dataset.ready='true';
+  preferenceUI();
+  // Direct collection entry must land in place, not visibly scroll down from the hero.
+  if(directCollectionEntry)$('#hos-home-collection-title')?.closest('[data-reveal]')?.setAttribute('data-revealed','true');
+  route(routePath(),false);
+  if(directCollectionEntry){
+    // Wait for the rendered collection layout, while the intermediate hero stays invisible.
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    const heading=$('#hos-home-collection-title');
+    if(heading){
+      heading.scrollIntoView({behavior:'instant',block:'start'});
+      syncHeader();
+    }
+    document.documentElement.removeAttribute('data-collection-entry');
+    heading?.setAttribute('tabindex','-1');
+    heading?.focus({preventScroll:true});
+  }else scrollToHash();
+  root.dataset.ready='true';
 }
 start().catch(error => {
+  document.documentElement.removeAttribute('data-collection-entry');
   const notice = el('p','hos-form-note',error.message || 'The collection could not load. Please refresh the page.'); notice.setAttribute('role','alert'); $('.hos-hero-copy').append(notice);
 });
 
