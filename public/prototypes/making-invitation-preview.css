@@ -146,3 +146,54 @@ a{color:inherit}p,h1,h2{margin:0}img{display:block}
  .banner-photo,.banner--gallery .banner-photo,.banner--dark .banner-photo{height:166px}
  .banner h2{font-size:23px}
 }
+
+/* Final reviewed mobile crop: the original photo is shown twice, focusing
+   on the maker and the finished work without generating new imagery. */
+.mobile-details{display:none}
+@media(max-width:760px){
+ .banner,.banner--gallery,.banner--dark{
+  grid-template-rows:132px auto;
+ }
+ .banner-photo,.banner--gallery .banner-photo,.banner--dark .banner-photo{
+  height:132px;
+ }
+ .banner-photo>img{display:none}
+ .mobile-details{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  width:100%;
+  height:100%;
+  overflow:hidden;
+ }
+ .mobile-details>span{
+  display:block;
+  position:relative;
+  overflow:hidden;
+  background:#fff;
+ }
+ .mobile-details>span img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform:scale(1.8);
+ }
+ .mobile-details>span:first-child img{
+  object-position:26% 13%;
+  transform-origin:25% 10%;
+ }
+ .mobile-details>span:last-child img{
+  object-position:77% 75%;
+  transform-origin:83% 80%;
+ }
+ .banner-copy,.banner--gallery .banner-copy,.banner--dark .banner-copy{
+  padding:13px 17px 15px;
+  gap:8px;
+ }
+ .banner h2{font-size:24px;line-height:1.09}
+}
+@media(max-width:385px){
+ .banner,.banner--gallery,.banner--dark{grid-template-rows:132px auto}
+ .banner-photo,.banner--gallery .banner-photo,.banner--dark .banner-photo{height:132px}
+ .banner h2{font-size:23px}
+}
