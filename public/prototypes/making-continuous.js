@@ -48,13 +48,16 @@ function update(){
    const owns=visible&&(!reduced.matches),art=s.el.querySelector('.process-art');
    if(s.name==='finishing'){
     const sand=group.find(stage=>stage.name==='sand'),heat=group.find(stage=>stage.name==='heat'),wax=group.find(stage=>stage.name==='wax'),work=group.find(stage=>stage.name==='work');
-    // A small push through sanding and warming; most of the camera movement
-    // accompanies the dark polish. Ease back to the full sculpture on reveal.
-    const early=clamp((distance-sand.start)/Math.max(1,heat.end-sand.start));
-    const polish=clamp((distance-wax.start)/Math.max(1,wax.end-wax.start));
-    const reveal=clamp((distance-work.start)/Math.max(1,work.length));
-    const camera=1+.035*early+.215*polish;
-    const zoom=reduced.matches?1:camera-(camera-1)*reveal;
+    // Continuously push in from the first sanding scroll, throughout warming
+    // and polishing. Use independent stages so neither transition stalls.
+    // Retain the approved final work's full framing by easing back on reveal.
+    const sandProgress=clamp((distance-sand.start)/Math.max(1,sand.length));
+    const heatProgress=clamp((distance-heat.start)/Math.max(1,heat.length));
+    const polishProgress=clamp((distance-wax.start)/Math.max(1,wax.length));
+    const revealProgress=clamp((distance-work.start)/Math.max(1,work.length));
+    const camera=1+.12*sandProgress+.10*heatProgress+.14*polishProgress;
+    const revealEase=revealProgress*revealProgress*(3-2*revealProgress);
+    const zoom=reduced.matches?1:camera-(camera-1)*revealEase;
     const baseScale=parseFloat(art.style.getPropertyValue('--scene-scale'))||1;
     art.style.setProperty('--finish-zoom',String(zoom.toFixed(4)));
     art.style.setProperty('--finish-scene-scale',String((baseScale*zoom).toFixed(4)));
