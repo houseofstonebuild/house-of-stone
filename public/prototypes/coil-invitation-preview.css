@@ -1,13 +1,13 @@
-:root{--green:#171f19;--ivory:#f6f4ef;--text:#f5f3ed}*{box-sizing:border-box}
+:root{--green:#1d2b22;--ivory:#f6f4ef;--text:#f5f3ed}*{box-sizing:border-box}
 html,body{margin:0}body{background:#eeeee8;color:#262824;font-family:'Manrope',Arial,sans-serif;-webkit-font-smoothing:antialiased}
 a{color:inherit}.preview-nav{height:76px;padding:0 clamp(24px,5vw,78px);background:#f6f4ef;display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid #222a2114}
 .wordmark{text-decoration:none;font-size:11px;letter-spacing:.14em;font-weight:600}.back-link{text-decoration:none;font-size:11px;border-bottom:1px solid #888e86;padding-bottom:6px}
 .stage{max-width:1560px;margin:0 auto;padding:clamp(25px,5vw,65px) clamp(16px,4vw,60px) 90px}
 .preview-label{font-size:10px;letter-spacing:.15em;color:#777e73;margin:0 0 15px}
 .invitation{position:relative;height:330px;overflow:hidden;background:var(--green);color:var(--text);isolation:isolate}
-.art{position:absolute;inset:0 0 0 39%;z-index:0;background:#253027;overflow:hidden}
-.art img{display:block;width:100%;height:100%;object-fit:cover;object-position:66% 53%;transform:scale(1.12);transform-origin:65% 53%;mix-blend-mode:multiply;filter:contrast(1.14) brightness(1.4) saturate(.7)}
-.art-tone{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,#171f19 0%,#171f19 37%,#171f19e8 43%,#171f1955 65%,#171f1911 100%)}
+.art{position:absolute;inset:0 0 0 39%;z-index:0;background:#879783;overflow:hidden}
+.art img{display:block;width:100%;height:100%;object-fit:cover;object-position:66% 53%;transform:scale(1.12);transform-origin:65% 53%;mix-blend-mode:multiply;filter:contrast(1.04) brightness(1.75) saturate(.88)}
+.art-tone{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,#1d2b22 0%,#1d2b22 35%,#1d2b22ee 43%,#1d2b2275 60%,#1d2b2208 83%,#1d2b2200 100%)}
 .copy{position:relative;z-index:2;padding:42px clamp(25px,5.5vw,78px);width:60%;height:100%;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
 .copy h1{font-size:clamp(36px,3.45vw,56px);line-height:1.13;letter-spacing:-.055em;font-weight:300;max-width:580px;margin:0}
 .description{font-size:clamp(12px,1.15vw,16px);line-height:1.7;color:#d2d5cc;margin:20px 0 31px}
@@ -18,9 +18,9 @@ a{color:inherit}.preview-nav{height:76px;padding:0 clamp(24px,5vw,78px);backgrou
  .preview-nav{height:64px;padding:0 20px}.wordmark{font-size:10px;letter-spacing:.1em}.back-link{font-size:10px}
  .stage{padding:22px 12px 55px}.preview-label{font-size:9px;margin:0 0 12px}
  .invitation{height:190px}
- .art{inset:0;background:#253027}
+ .art{inset:0;background:#879783}
  .art img{width:100%;height:100%;object-fit:cover;object-position:78% 58%;transform:scale(1.55);transform-origin:78% 58%}
- .art-tone{background:linear-gradient(90deg,#171f19 0%,#171f19ed 27%,#171f19bf 47%,#171f1977 64%,#171f1920 100%)}
+ .art-tone{background:linear-gradient(90deg,#1d2b22 0%,#1d2b22f7 21%,#1d2b22d8 42%,#1d2b2275 62%,#1d2b2205 92%,#1d2b2200 100%)}
  .copy{width:100%;padding:17px 21px;justify-content:space-between}
  .copy h1{font-size:clamp(25px,7.1vw,31px);line-height:1.12;letter-spacing:-.045em;max-width:260px}
  .desktop-break{display:none}
