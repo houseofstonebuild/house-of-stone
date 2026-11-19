@@ -30,6 +30,10 @@
  margin:0;color:#f5f3ed;font-size:clamp(36px,3.45vw,56px);
  font-weight:300;line-height:1.13;letter-spacing:-.055em;max-width:580px;
 }
+/* Override the global light-theme h2 rule without affecting other headings. */
+:root[data-theme="light"] #hos-concept .hos-making-invitation__copy h2{
+ color:#f5f3ed;
+}
 #hos-concept .hos-making-invitation__copy p{
  margin:20px 0 31px;color:#d2d5cc;font-size:clamp(12px,1.15vw,16px);
  line-height:1.7;max-width:480px;
