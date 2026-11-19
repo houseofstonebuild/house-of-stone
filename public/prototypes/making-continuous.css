@@ -317,8 +317,9 @@
   transform:none;
  }
  .continuous-story .material-images>img{
-  transform:none;
-  object-position:86% 18%;
+  transform:scale(1.42);
+  transform-origin:65% 20%;
+  object-position:65% 20%;
  }
 }
 
