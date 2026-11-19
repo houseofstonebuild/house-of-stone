@@ -46,6 +46,11 @@ function update(){
   if(['process','finishing'].includes(s.name)){
    const group=stages.filter(stage=>stage.section===s.name),distance=y-layout.find(s=>s.name==='process').top,value=frameAt(distance,group);
    const owns=visible&&(!reduced.matches),art=s.el.querySelector('.process-art');
+   if(s.name==='finishing'){
+    const finishStart=group[0].start,colourEnd=group.find(stage=>stage.name==='wax').end;
+    const zoomProgress=clamp((distance-finishStart)/Math.max(1,colourEnd-finishStart));
+    art.style.setProperty('--finish-zoom',String(reduced.matches?1:(1+.14*zoomProgress).toFixed(4)));
+   }
    if(owns){const canvas=$('#processCanvas');if(canvas.parentElement!==art){art.appendChild(canvas);form?.resize();}form?.request(value,true);}
    else if(near&&!reduced.matches&&!layout.some(other=>['process','finishing'].includes(other.name)&&y+view>other.top&&y<other.top+other.height)){form?.request(value,false);form?.warm(value);}
    s.el.querySelector('.process-rule i').style.transform='scaleX('+clamp((distance-group[0].start)/(group.at(-1).end-group[0].start))+')';
