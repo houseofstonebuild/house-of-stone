@@ -193,3 +193,118 @@
   margin-bottom:17px;
  }
 }
+
+/* Collection finale: artwork visible near the end, disclosure tucked away,
+   and the collection link as the final primary action. */
+.continuous-story .house{
+ grid-template-rows:auto auto auto;
+ align-content:center;
+ column-gap:0;
+ row-gap:0;
+}
+.continuous-story .house-gallery{
+ grid-column:1;
+ grid-row:1/4;
+ align-self:center;
+}
+.continuous-story .house-copy{
+ grid-column:2;
+ grid-row:1;
+ align-self:end;
+}
+.continuous-story .house-notes{
+ grid-column:2;
+ grid-row:2;
+ align-self:start;
+ padding:0 var(--gutter) 0 20px;
+ margin:22px 0 0;
+ font-size:10px;
+ line-height:1.75;
+ letter-spacing:0;
+ color:#74796e;
+}
+.continuous-story .house-notes summary{
+ cursor:pointer;
+ font-size:11px;
+ line-height:1.5;
+ width:max-content;
+ padding:8px 0;
+}
+.continuous-story .house-notes summary:focus-visible{
+ outline:1px solid currentColor;
+ outline-offset:4px;
+}
+.continuous-story .house-notes-body{
+ max-width:560px;
+ padding:8px 0 0;
+}
+.continuous-story .house-notes-body p{margin:0 0 14px;font-size:11px;line-height:1.8}
+.continuous-story .house-notes-meta{
+ font-size:9px!important;
+ letter-spacing:.06em;
+}
+.continuous-story .house-notes a{text-decoration:underline;text-underline-offset:3px}
+.continuous-story .house-cta{
+ grid-column:2;
+ grid-row:3;
+ justify-self:start;
+ align-self:start;
+ margin:14px var(--gutter) 0 20px;
+ width:calc(100% - 20px - var(--gutter));
+ max-width:350px;
+}
+@media(max-width:700px), (max-width:1100px) and (orientation:portrait){
+ .continuous-story .house{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:0;
+  padding:54px 0 45px;
+  min-height:0;
+ }
+ .continuous-story .house-copy{
+  order:1;
+  padding:0 var(--gutter);
+ }
+ .continuous-story .house-copy h2{
+  font-size:clamp(40px,10.5vw,58px);
+  margin-bottom:23px;
+ }
+ .continuous-story .house-gallery{
+  order:2;
+  flex:none;
+  width:100%;
+  height:clamp(205px,60vw,310px);
+  padding:0 var(--gutter);
+  margin:22px 0 6px;
+  gap:8px;
+  align-items:center;
+ }
+ .continuous-story .house-gallery img,
+ .continuous-story .house-gallery img:nth-child(2),
+ .continuous-story .house-gallery img:nth-child(3){
+  height:100%;
+  width:100%;
+  object-fit:contain;
+ }
+ .continuous-story .house-notes{
+  order:3;
+  margin:8px var(--gutter) 0;
+  padding:0;
+ }
+ .continuous-story .house-cta{
+  order:4;
+  align-self:stretch;
+  width:auto;
+  max-width:none;
+  margin:18px var(--gutter) 0;
+  padding:15px 0;
+  font-size:13px;
+ }
+}
+/* Keep the fallback photograph aligned with the mobile documentary's
+   higher crop: more of the sculptor's head and upper body is visible. */
+@media(max-width:700px), (max-width:1100px) and (orientation:portrait){
+ .continuous-story .workshop-poster{object-position:48% 16%}
+ .continuous-story .material-images>img{object-position:48% 18%}
+}
