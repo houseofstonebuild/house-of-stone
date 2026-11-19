@@ -349,7 +349,7 @@ html:not(.js) .continuous-story .story-scroll-guide{display:none}
  position:fixed;
  z-index:18;
  left:50%;
- bottom:var(--story-guide-bottom,30px);
+ bottom:max(14px, calc(env(safe-area-inset-bottom, 0px) + 12px));
  transform:translate3d(-50%,0,0);
  display:flex;
  flex-direction:column;
@@ -396,4 +396,10 @@ html:not(.js) .continuous-story .story-scroll-guide{display:none}
 @media(prefers-reduced-motion:reduce){
  .js .continuous-story .story-scroll-guide{transition:none}
  .js .continuous-story .story-scroll-guide__arrow{animation:none}
+}
+
+/* The progress controls sit above the fixed bottom hint rather than
+   occupying the same strip of the viewport. */
+.js .continuous-story .process-footer{
+ bottom:max(78px, calc(env(safe-area-inset-bottom, 0px) + 74px));
 }
