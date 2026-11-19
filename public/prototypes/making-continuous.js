@@ -41,7 +41,8 @@ const route=$('#mapRoute'),routeLength=route.getTotalLength();route.style.stroke
 function updateMobileHeader(y){
  const nav=$('.masthead');
  if(!mobile()){nav.dataset.collapsed='false';headerVisible=true;headerReady=false;headerAnchorY=y;return;}
- const nearOpening=y<110;
+ const originTop=layout.find(s=>s.name==='origin')?.top??innerHeight;
+ const nearOpening=y<Math.max(0,originTop-40);
  if(!headerReady){headerReady=true;headerVisible=nearOpening;headerAnchorY=y;}
  else if(nearOpening){headerVisible=true;headerAnchorY=y;}
  else if(Math.abs(y-headerAnchorY)>=18){
