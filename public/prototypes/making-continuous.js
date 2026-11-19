@@ -49,7 +49,10 @@ function update(){
    if(s.name==='finishing'){
     const finishStart=group[0].start,colourEnd=group.find(stage=>stage.name==='wax').end;
     const zoomProgress=clamp((distance-finishStart)/Math.max(1,colourEnd-finishStart));
-    art.style.setProperty('--finish-zoom',String(reduced.matches?1:(1+.14*zoomProgress).toFixed(4)));
+    const zoom=reduced.matches?1:1+.14*zoomProgress;
+    const baseScale=parseFloat(art.style.getPropertyValue('--scene-scale'))||1;
+    art.style.setProperty('--finish-zoom',String(zoom.toFixed(4)));
+    art.style.setProperty('--finish-scene-scale',String((baseScale*zoom).toFixed(4)));
    }
    if(owns){const canvas=$('#processCanvas');if(canvas.parentElement!==art){art.appendChild(canvas);form?.resize();}form?.request(value,true);}
    else if(near&&!reduced.matches&&!layout.some(other=>['process','finishing'].includes(other.name)&&y+view>other.top&&y<other.top+other.height)){form?.request(value,false);form?.warm(value);}
