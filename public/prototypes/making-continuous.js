@@ -1,7 +1,7 @@
 import {createContinuousSequence} from './continuous-sequence.js';
 const $=s=>document.querySelector(s),clamp=x=>Math.max(0,Math.min(1,x));
 const reduced=matchMedia('(prefers-reduced-motion:reduce)'),mobile=()=>innerWidth<=700||(innerWidth<=1100&&innerHeight>innerWidth);
-const definitions=[['mark',0,39,.8,500,.1,.12],['carve',40,247,3.3,2200,.03,.06],['sand',248,327,1.25,800,.05,.1],['heat',328,399,.8,500,.05,.1],['wax',400,463,1.4,900,.04,.1],['work',464,479,1,650,.05,.28]];
+const definitions=[['mark',0,39,.8,500,.1,.12],['carve',40,247,3.3,2200,.03,.06],['sand',248,327,1.0,620,.05,.1],['heat',328,399,.6,380,.05,.1],['wax',400,463,1.4,900,.04,.1],['work',464,479,1,650,.05,.28]];
 const articles=[...document.querySelectorAll('[data-step]')],sections=[...document.querySelectorAll('[data-scene]')];
 let form,film,artist,profile='',stages=[],layout=[],dirty=true,raf=0,lastWidth=innerWidth,total=0,phase='',chapter='introduction';
 function copy(frame){
@@ -15,8 +15,8 @@ function players(){
  if(reduced.matches){form?.destroy();film?.destroy();artist?.destroy();form=film=artist=null;profile='';return;}
  const next=mobile()?'mobile':'desktop';if(next===profile)return;profile=next;form?.destroy();film?.destroy();artist?.destroy();
  form=createContinuousSequence({canvas:$('#processCanvas'),root:'/assets/continuous-making-v1/form',profile,focus:profile==='desktop'?.65:.5,onSample:copy});
- artist=createContinuousSequence({canvas:$('#artistCanvas'),root:'/assets/continuous-making-v1/artist',profile});
- film=createContinuousSequence({canvas:$('#workshopCanvas'),root:'/assets/continuous-making-v1/workshop',profile});
+ artist=createContinuousSequence({canvas:$('#artistCanvas'),root:'/assets/continuous-making-v1/artist',profile,focusY:profile==='mobile'?.18:.5});
+ film=createContinuousSequence({canvas:$('#workshopCanvas'),root:'/assets/continuous-making-v1/workshop',profile,focusY:profile==='mobile'?.16:.5});
 }
 function frameMedia(){for(const art of document.querySelectorAll('.process-art')){if(profile!=='mobile'||reduced.matches){art.style.setProperty('--scene-scale','1');art.style.setProperty('--scene-y','0px');continue;}
  const width=art.clientWidth,height=art.clientHeight,sourceScale=Math.max(width/960,height/2080),offset=(height-2080*sourceScale)/2;
