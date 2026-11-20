@@ -707,6 +707,14 @@ function rememberScroll() {
 }
 function navigate(path) {
   if(!inquiry.hidden)saveInquiryDraft();
+  if(document.documentElement.dataset.collectionEntry==='direct'){
+    document.documentElement.removeAttribute('data-collection-entry');
+    if(path==='/'){
+      history.replaceState({...history.state},'', '/');
+      route('/',true);
+      return;
+    }
+  }
   if (path === routePath()) { route(path); return; }
   rememberScroll();
   history.pushState({hosNavigation:{path,previous:routePath(),scrollY:0}}, '', routeURL(path));route(path.split('#')[0]);scrollToHash();
@@ -855,6 +863,7 @@ sendButton.addEventListener('click', async () => {
 });
 window.addEventListener('popstate', () => {
   if (!catalog || submitting) return;
+  document.documentElement.removeAttribute('data-collection-entry');
   if(!inquiry.hidden)saveInquiryDraft();
   route(routePath(), false);
   const returning=privacyReturn && activePage!=='privacy';
@@ -897,20 +906,14 @@ async function start() {
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   rememberScroll();
   preferenceUI();
-  // Direct collection entry must land in place, not visibly scroll down from the hero.
   if(directCollectionEntry)$('#hos-home-collection-title')?.closest('[data-reveal]')?.setAttribute('data-revealed','true');
   route(routePath(),false);
   if(directCollectionEntry){
-    // Wait for the rendered collection layout, while the intermediate hero stays invisible.
-    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    // The collection is already first in document flow; never scroll to reach it.
     const heading=$('#hos-home-collection-title');
-    if(heading){
-      heading.scrollIntoView({behavior:'instant',block:'start'});
-      syncHeader();
-    }
-    document.documentElement.removeAttribute('data-collection-entry');
     heading?.setAttribute('tabindex','-1');
     heading?.focus({preventScroll:true});
+    syncHeader();
   }else scrollToHash();
   root.dataset.ready='true';
 }
