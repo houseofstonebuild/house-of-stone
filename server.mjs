@@ -646,6 +646,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         const result=await publishSoldAndArchiveTallAttention({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
         console.log('Owner-requested sold statuses and Tall Attention archive:',JSON.stringify(result));
       } catch(error) { console.error('Sold statuses and Tall Attention archive did not complete:',error.message); }
+      try {
+        const {publishArtistSourcedBiographiesRoundFour}=await import('./scripts/publish-artist-sourced-biographies-round-four.mjs');
+        const result=await publishArtistSourcedBiographiesRoundFour({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
+        console.log('Batsirai autobiography and Martin memorial:',JSON.stringify(result));
+      } catch(error) { console.error('Batsirai/Martin biography publication did not complete:',error.message); }
     }
   });
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(() => process.exit(0)));
