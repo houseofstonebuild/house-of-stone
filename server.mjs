@@ -651,6 +651,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         const result=await publishArtistSourcedBiographiesRoundFour({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
         console.log('Batsirai autobiography and Martin memorial:',JSON.stringify(result));
       } catch(error) { console.error('Batsirai/Martin biography publication did not complete:',error.message); }
+      try {
+        const {publishDouglasMusekiwaBiography}=await import('./scripts/publish-douglas-musekiwa-biography.mjs');
+        const result=await publishDouglasMusekiwaBiography({db,origin:'http://127.0.0.1:'+port,password:process.env.ADMIN_PASSWORD,publicOrigin:new URL(process.env.SITE_URL).origin});
+        console.log('Douglas Musekiwa sourced biography:',JSON.stringify(result));
+      } catch(error) { console.error('Douglas Musekiwa biography publication did not complete:',error.message); }
     }
   });
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(() => process.exit(0)));
