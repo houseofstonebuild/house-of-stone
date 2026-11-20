@@ -66,6 +66,7 @@ function syncHeader() {
   // The image reaches behind the transparent navigation only on the homepage near the top.
   // Other pages, open menus, and the inquiry form retain the normal opaque header.
   const overlay=activePage==='home' && !compact &&
+    document.documentElement.dataset.collectionEntry!=='direct' &&
     !document.body.classList.contains('hos-menu-open') &&
     $('#hos-inquiry')?.hidden !== false;
   root.dataset.heroHeader=String(overlay);
