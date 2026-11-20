@@ -3,9 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <!-- Direct collection landing: suppress the initial homepage hero until the collection is positioned. -->
-  <script>if(location.pathname==='/'&&new URLSearchParams(location.search).get('collection')==='direct')document.documentElement.dataset.collectionEntry='pending';</script>
-  <style>html[data-collection-entry="pending"] #hos-concept{visibility:hidden}html[data-collection-entry="pending"] body{background:#f6f4ef}</style>
+  <!-- Direct collection entry: the collection is first in document flow, with no scroll animation. -->
+  <script>if(location.pathname==='/'&&new URLSearchParams(location.search).get('collection')==='direct'){document.documentElement.dataset.collectionEntry='direct';if('scrollRestoration' in history)history.scrollRestoration='manual'}</script>
+  <style>
+    html[data-collection-entry="direct"] #hos-concept [data-page="home"] > .hos-hero,
+    html[data-collection-entry="direct"] #hos-concept [data-page="home"] > .hos-home-mission,
+    html[data-collection-entry="direct"] #hos-concept [data-page="home"] > .hos-making-invitation {display:none!important}
+    html[data-collection-entry="direct"] #hos-concept [data-page="home"] > .hos-home-collection {
+      padding-top:calc(var(--hos-header-height,86px) + env(safe-area-inset-top,0px) + 28px)
+    }
+    html[data-collection-entry="direct"] #hos-concept[data-hero-header="true"] .hos-header {background:#fff;color:#252823}
+    html[data-collection-entry="direct"] #hos-concept[data-hero-header="true"] .hos-wordmark {color:#252823}
+    html[data-collection-entry="direct"] #hos-concept[data-hero-header="true"] .hos-brand-mark {filter:none}
+  </style>
   <title>{{TITLE}}</title>
   <meta name="description" content="{{DESCRIPTION}}">
   <meta name="robots" content="{{ROBOTS}}">
