@@ -1,16 +1,9 @@
-/* Collection-first entry for links from the making experience.
-   Unlike anchor navigation, the opening sections take no space. */
-html[data-collection-entry="direct"] #hos-concept [data-page="home"] > .hos-hero,
-html[data-collection-entry="direct"] #hos-concept [data-page="home"] > .hos-home-mission,
-html[data-collection-entry="direct"] #hos-concept [data-page="home"] > .hos-making-invitation {
-  display:none!important;
+/* Keep the complete homepage, including its hero, in normal document flow.
+   Hide only the loading transition while the collection anchor is positioned.
+   The app removes data-collection-entry immediately after its instant jump. */
+html[data-collection-entry="direct"] #hos-concept {
+  visibility:hidden;
 }
-html[data-collection-entry="direct"] #hos-concept [data-page="home"] > .hos-home-collection {
-  padding-top:calc(var(--hos-header-height,86px) + env(safe-area-inset-top,0px) + 28px);
+html[data-collection-entry="direct"] body {
+  background:#f6f4ef;
 }
-html[data-collection-entry="direct"] #hos-concept .hos-header {
-  background:#fff;
-  color:#252823;
-}
-html[data-collection-entry="direct"] #hos-concept .hos-wordmark {color:#252823}
-html[data-collection-entry="direct"] #hos-concept .hos-brand-mark {filter:none}
